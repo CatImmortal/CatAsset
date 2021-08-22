@@ -1,0 +1,27 @@
+ManifestFileVersion: 0
+CRC: 3961846594
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 94144c6ec17f1ed9611bef7b65945dd2
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 722ee27b786faa036f2af40965dacea0
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Res/Model_1/Dir_1/prefab_1.prefab
+- Assets/Res/Model_1/Dir_2/luotianyi3.png
+- Assets/Res/Model_1/Dir_1/luotianyi_1.jpg
+- Assets/Res/Model_1/Dir_1/luotianyi_2.jpg
+- Assets/Res/Model_1/luotianyi_4.png
+Dependencies: []

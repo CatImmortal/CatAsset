@@ -1,0 +1,17 @@
+{
+    "name": "CatAsset.Editor",
+    "references": [
+        "GUID:a9de5ca77979547449abbf74448a888d"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
