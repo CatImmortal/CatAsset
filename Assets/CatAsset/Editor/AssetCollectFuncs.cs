@@ -39,7 +39,7 @@ namespace CatAsset.Editor
 
                 AssetBundleBuild abBuild = default;
                 abBuild.assetNames = assetPaths.ToArray();
-                abBuild.assetBundleName = directory.Replace("/", "_");
+                abBuild.assetBundleName = directory.Replace("/", "_") + ".bundle";
 
                 return new AssetBundleBuild[] { abBuild };
             });

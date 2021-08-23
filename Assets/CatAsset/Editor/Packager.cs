@@ -12,8 +12,16 @@ namespace CatAsset.Editor
     /// </summary>
     public static class Packager
     {
-        [MenuItem("CatAsset/打包AssetBundle")]
-        public static void BuildAssetBundle()
+        [MenuItem("CatAsset/测试打包AssetBundle")]
+        private static void TestBuildAB()
+        {
+            BuildAssetBundle(null, BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.StandaloneWindows);
+        }
+
+        /// <summary>
+        /// 打包AssetBundle
+        /// </summary>
+        public static void BuildAssetBundle(string outputPath, BuildAssetBundleOptions options, BuildTarget targetPlatform)
         {
             PackageRuleConfig config = Util.GetPackageRuleConfig();
 
@@ -38,10 +46,40 @@ namespace CatAsset.Editor
             //    Debug.Log("-------------");
             //}
 
+            outputPath = Directory.GetCurrentDirectory() + "/AssetBundleOutput";
+            targetPlatform = BuildTarget.StandaloneWindows64;
+
+            outputPath += "/" + targetPlatform;
+
+            //打包目录已存在就清空 然后重新创建
+            DirectoryInfo dirInfo;
+
+            if (Directory.Exists(outputPath))
+            {
+                
+                dirInfo = new DirectoryInfo(outputPath);
+                foreach (FileInfo file in dirInfo.GetFiles())
+                {
+                    file.Delete();
+                }
+            }
+            Directory.CreateDirectory(outputPath);
+            dirInfo = new DirectoryInfo(outputPath);
 
 
-            BuildPipeline.BuildAssetBundles(Directory.GetCurrentDirectory() + "/AssetBundleOutput", abBuildList.ToArray(), BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-            
+            BuildPipeline.BuildAssetBundles(outputPath, abBuildList.ToArray(),options,targetPlatform);
+
+            Debug.Log("打包ab完毕");
+
+            foreach (FileInfo file in dirInfo.GetFiles())
+            {
+                if (file.Name == targetPlatform.ToString() || file.Extension == ".manifest")
+                {
+                    //删除manifest文件
+                    file.Delete();
+                }
+            }
+
         }
 
       
