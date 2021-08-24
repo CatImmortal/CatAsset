@@ -12,7 +12,31 @@ namespace CatAsset.Editor
     /// </summary>
     public class PackageWindow : EditorWindow
     {
-        private List<BuildTarget> needDrawPlatforms = new List<BuildTarget>()
+        /// <summary>
+        /// 是否初始化过打包配置界面
+        /// </summary>
+        private bool isInitPackageConfigView;
+
+        /// <summary>
+        /// 是否初始化过资源预览界面
+        /// </summary>
+        private bool isInitAssetsPreviewView;
+
+
+        /// <summary>
+        /// 选择的页签
+        /// </summary>
+        private int selectedTab;
+
+        /// <summary>
+        /// 页签
+        /// </summary>
+        private string[] tabs = { "打包配置", "资源预览" };
+
+        /// <summary>
+        /// 可选打包平台
+        /// </summary>
+        private List<BuildTarget> targetPlatforms = new List<BuildTarget>()
         {
             BuildTarget.StandaloneWindows,
             BuildTarget.StandaloneWindows64,
@@ -20,7 +44,10 @@ namespace CatAsset.Editor
             BuildTarget.iOS,
         };
 
-        private Dictionary<BuildTarget, bool> selectedPlatform = new Dictionary<BuildTarget, bool>()
+        /// <summary>
+        /// 各平台选择状态
+        /// </summary>
+        private Dictionary<BuildTarget, bool> selectedPlatforms = new Dictionary<BuildTarget, bool>()
         {
             {BuildTarget.StandaloneWindows,false },
             {BuildTarget.StandaloneWindows64,false },
@@ -28,20 +55,30 @@ namespace CatAsset.Editor
             {BuildTarget.iOS,false},
         };
 
+        /// <summary>
+        /// 可选打包设置
+        /// </summary>
+        private string[] options = Enum.GetNames(typeof(BuildAssetBundleOptions));
+
+        /// <summary>
+        /// 打包设置选择状态
+        /// </summary>
         private Dictionary<string, bool> selectedOptions = new Dictionary<string, bool>();
 
+        /// <summary>
+        /// 打包输出目录
+        /// </summary>
+        private string outputPath;
+
+        /// <summary>
+        /// 资源预览中的各assetbundle是否已展开
+        /// </summary>
         private Dictionary<string, bool> abFoldOut = new Dictionary<string, bool>();
 
         /// <summary>
-        /// 选择的页签
+        /// 要打包的AssetBundleBuild列表
         /// </summary>
-        private int selectedTab = 0;
-        private string[] tabs = { "打包设置", "资源预览" };
-
-
-        private string[] options = Enum.GetNames(typeof(BuildAssetBundleOptions));
-
-        private string outputPath = Directory.GetCurrentDirectory() + "/AssetBundleOutput";
+        private List<AssetBundleBuild> abBuildList;
 
         [MenuItem("CatAsset/打开打包窗口")]
         private static void OpenWindow()
@@ -51,29 +88,6 @@ namespace CatAsset.Editor
             window.Show();
         }
 
-        private void OnEnable()
-        {
-            for (int i = 1; i < options.Length; i++)
-            {
-                selectedOptions[options[i]] = false;
-            }
-
-            List<AssetBundleBuild> abBuildList = new List<AssetBundleBuild>();
-            PackageRuleConfig config = Util.GetPackageRuleConfig();
-            foreach (PackageRule rule in config.Rules)
-            {
-                Func<string, AssetBundleBuild[]> func = AssetCollectFuncs.FuncDict[rule.Mode];
-                AssetBundleBuild[] abBuilds = func(rule.Directory);
-                abBuildList.AddRange(abBuilds);
-
-            }
-
-
-            foreach (AssetBundleBuild abBuild in abBuildList)
-            {
-                abFoldOut[abBuild.assetBundleName] = false;
-            }
-        }
 
         private void OnGUI()
         {
@@ -96,18 +110,54 @@ namespace CatAsset.Editor
 
         }
    
+
         /// <summary>
-        /// 绘制打包设置界面
+        /// 初始化打包配置界面
+        /// </summary>
+        private void InitPackgeConfigView()
+        {
+            foreach (BuildTarget item in Util.PkgCfg.targetPlatforms)
+            {
+                selectedPlatforms[item] = true;
+            }
+
+
+
+            for (int i = 1; i < options.Length; i++)
+            {
+                BuildAssetBundleOptions option = (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), options[i]);
+
+                if ((Util.PkgCfg.options & option) > 0)
+                {
+                    selectedOptions[options[i]] = true;
+                }
+                else
+                {
+                    selectedOptions[options[i]] = false;
+                }
+            }
+
+            outputPath = Util.PkgCfg.outputPath;
+        }
+
+        /// <summary>
+        /// 绘制打包配置界面
         /// </summary>
         private void DrawPackageConfig()
         {
+            if (!isInitPackageConfigView)
+            {
+                InitPackgeConfigView();
+                isInitPackageConfigView = true;
+            }
+
             EditorGUILayout.LabelField("选择打包平台：");
 
-            for (int i = 0; i < needDrawPlatforms.Count; i++)
+            for (int i = 0; i < targetPlatforms.Count; i++)
             {
-                using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope(needDrawPlatforms[i].ToString(), selectedPlatform[needDrawPlatforms[i]]))
+                using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope(targetPlatforms[i].ToString(), selectedPlatforms[targetPlatforms[i]]))
                 {
-                    selectedPlatform[needDrawPlatforms[i]] = toggle.enabled;
+                    selectedPlatforms[targetPlatforms[i]] = toggle.enabled;
                 }
 
             }
@@ -134,12 +184,36 @@ namespace CatAsset.Editor
                 outputPath = GUILayout.TextField(outputPath);
             }
 
+            if (GUILayout.Button("保存打包配置", GUILayout.Width(200)))
+            {
+                Util.PkgCfg.targetPlatforms.Clear();
+                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
+                {
+                    if (item.Value == true)
+                    {
+                        Util.PkgCfg.targetPlatforms.Add(item.Key);
+                    }
+                }
+
+                Util.PkgCfg.options = BuildAssetBundleOptions.None;
+                foreach (KeyValuePair<string, bool> item in selectedOptions)
+                {
+                    if (item.Value == true)
+                    {
+                        BuildAssetBundleOptions option = (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), item.Key);
+                        Util.PkgCfg.options |= option;
+                    }
+                }
+
+                Util.PkgCfg.outputPath = outputPath;
+                EditorUtility.DisplayDialog("提示", "保存完毕", "确认");
+            }
 
             if (GUILayout.Button("打包AssetBundle", GUILayout.Width(200)))
             {
                 //检查是否选中至少一个平台
                 bool flag = false;
-                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatform)
+                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
                 {
                     if (item.Value == true)
                     {
@@ -165,31 +239,43 @@ namespace CatAsset.Editor
                 }
 
                 //处理多个平台
-                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatform)
+                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
                 {
                     if (item.Value == true)
                     {
-                        Packager.BuildAssetBundle(outputPath, options, item.Key);
+                        Packager.PackageAssetBundle(outputPath, options, item.Key);
                     }
                 }
+
+                EditorUtility.DisplayDialog("提示", "打包AssetBundle结束", "确认");
+             
             }
+        
+            
         }
         
+        /// <summary>
+        /// 初始化资源预览界面
+        /// </summary>
+        private void InitAssetsPreviewView()
+        {
+            abBuildList = Util.GetAssetBundleBuildList();
+            foreach (AssetBundleBuild abBuild in abBuildList)
+            {
+                abFoldOut[abBuild.assetBundleName] = false;
+            }
+        }
+
         /// <summary>
         /// 绘制资源预览界面
         /// </summary>
         private void DrawAssetsPreview()
         {
-            List<AssetBundleBuild> abBuildList = new List<AssetBundleBuild>();
-            PackageRuleConfig config =  Util.GetPackageRuleConfig();
-            foreach (PackageRule rule in config.Rules)
+            if (!isInitAssetsPreviewView)
             {
-                Func<string, AssetBundleBuild[]> func = AssetCollectFuncs.FuncDict[rule.Mode];
-                AssetBundleBuild[] abBuilds = func(rule.Directory);
-                abBuildList.AddRange(abBuilds);
-
+                InitAssetsPreviewView();
+                isInitAssetsPreviewView = true;
             }
-
 
             foreach (AssetBundleBuild abBuild in abBuildList)
             {

@@ -13,8 +13,13 @@ namespace CatAsset.Editor
     {
         public static Dictionary<PackageMode, Func<string, AssetBundleBuild[]>> FuncDict = new Dictionary<PackageMode, Func<string, AssetBundleBuild[]>>();
 
+        private static HashSet<string> excludeExtension = new HashSet<string>();
+
         static AssetCollectFuncs()
         {
+            excludeExtension.Add(".meta");
+            excludeExtension.Add(".cs");
+
             //打包模式1 将指定文件夹下所有Asset打包为一个Bundle
             FuncDict.Add(PackageMode.Model_1, (directory) =>
             {
@@ -26,22 +31,24 @@ namespace CatAsset.Editor
                     FileInfo[] files = dirInfo.GetFiles("*",SearchOption.AllDirectories);  //递归获取所有文件
                     foreach (FileInfo file in files)
                     {
-                        if (file.Extension == ".meta")
+                        if (excludeExtension.Contains(file.Extension))
                         {
-                            //跳过meta文件
+                            //跳过meta和cshape代码文件
                             continue;
                         }
                         int index = file.FullName.IndexOf("Assets\\");
                         string path = file.FullName.Substring(index);
-                        assetPaths.Add(path);
+                        assetPaths.Add(path.Replace('\\','/'));
                     }
+
+                    AssetBundleBuild abBuild = default;
+                    abBuild.assetNames = assetPaths.ToArray();
+                    abBuild.assetBundleName = directory.Replace("/", "_") + ".bundle";
+
+                    return new AssetBundleBuild[] { abBuild };
                 }
 
-                AssetBundleBuild abBuild = default;
-                abBuild.assetNames = assetPaths.ToArray();
-                abBuild.assetBundleName = directory.Replace("/", "_") + ".bundle";
-
-                return new AssetBundleBuild[] { abBuild };
+                return null;
             });
 
 

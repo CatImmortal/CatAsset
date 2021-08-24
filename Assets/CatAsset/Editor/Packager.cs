@@ -12,48 +12,22 @@ namespace CatAsset.Editor
     /// </summary>
     public static class Packager
     {
-        [MenuItem("CatAsset/测试打包AssetBundle")]
+        [MenuItem("CatAsset/测试冗余分析")]
         private static void TestBuildAB()
         {
-            BuildAssetBundle(null, BuildAssetBundleOptions.ChunkBasedCompression, BuildTarget.StandaloneWindows);
+            Util.GetAssetBundleBuildList();
         }
 
         /// <summary>
         /// 打包AssetBundle
         /// </summary>
-        public static void BuildAssetBundle(string outputPath, BuildAssetBundleOptions options, BuildTarget targetPlatform)
+        public static void PackageAssetBundle(string outputPath, BuildAssetBundleOptions options, BuildTarget targetPlatform)
         {
-            PackageRuleConfig config = Util.GetPackageRuleConfig();
-
-            List<AssetBundleBuild> abBuildList = new List<AssetBundleBuild>();
-
-            foreach (PackageRule rule in config.Rules)
-            {
-                Func<string, AssetBundleBuild[]> func = AssetCollectFuncs.FuncDict[rule.Mode];
-                AssetBundleBuild[] abBuilds = func(rule.Directory);
-                abBuildList.AddRange(abBuilds);
-
-            }
-
-            //foreach (var item in abBuildList)
-            //{
-            //    Debug.Log(item.assetBundleName);
-            //    foreach (var item2 in item.assetNames)
-            //    {
-            //        Debug.Log(item2);
-            //    }
-
-            //    Debug.Log("-------------");
-            //}
-
-            outputPath = Directory.GetCurrentDirectory() + "/AssetBundleOutput";
-            targetPlatform = BuildTarget.StandaloneWindows64;
-
+           
             outputPath += "/" + targetPlatform;
 
-            //打包目录已存在就清空 然后重新创建
+            //打包目录已存在就清空
             DirectoryInfo dirInfo;
-
             if (Directory.Exists(outputPath))
             {
                 
@@ -63,13 +37,15 @@ namespace CatAsset.Editor
                     file.Delete();
                 }
             }
-            Directory.CreateDirectory(outputPath);
-            dirInfo = new DirectoryInfo(outputPath);
+            else
+            {
+                Directory.CreateDirectory(outputPath);
+                dirInfo = new DirectoryInfo(outputPath);
+            }
 
 
+            List<AssetBundleBuild> abBuildList = Util.GetAssetBundleBuildList();
             BuildPipeline.BuildAssetBundles(outputPath, abBuildList.ToArray(),options,targetPlatform);
-
-            Debug.Log("打包ab完毕");
 
             foreach (FileInfo file in dirInfo.GetFiles())
             {
