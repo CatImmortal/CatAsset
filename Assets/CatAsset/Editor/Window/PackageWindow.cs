@@ -243,7 +243,7 @@ namespace CatAsset.Editor
                 {
                     if (item.Value == true)
                     {
-                        Packager.PackageAssetBundle(outputPath, options, item.Key);
+                        Packager.ExecutePackagePipeline(outputPath, options, item.Key);
                     }
                 }
 
@@ -259,7 +259,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitAssetsPreviewView()
         {
-            abBuildList = Util.GetAssetBundleBuildList();
+            abBuildList = Util.PkgRuleCfg.GetAssetBundleBuildList();
             foreach (AssetBundleBuild abBuild in abBuildList)
             {
                 abFoldOut[abBuild.assetBundleName] = false;
