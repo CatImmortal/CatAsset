@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f24210f5109c8c2459ccac71fce807da, type: 3}
   m_Name: PackageConfig
   m_EditorClassIdentifier: 
-  targetPlatforms: 05000000
-  options: 256
-  outputPath: E:\GitProjects\CatAsset\AssetBundleOutput
+  TargetPlatforms: 05000000
+  Options: 256
+  OutputPath: E:\GitProjects\CatAsset\AssetBundleOutput
+  ManifestVersion: 2
+  IsCopyToStreamingAssets: 1

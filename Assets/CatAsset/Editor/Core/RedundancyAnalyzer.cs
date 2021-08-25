@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
-
+using UnityEngine;
 namespace CatAsset.Editor
 {
     /// <summary>
@@ -14,16 +14,16 @@ namespace CatAsset.Editor
         /// </summary>
         public static void ExecuteRedundancyAnalyzePipeline(List<AssetBundleBuild> abBuildList)
         {
-            //显式打包的Asset和它的AssetBundle
+            //显式打包的Asset和所属的AssetBundle
             Dictionary<string, string> pakageAssetInfoDict = new Dictionary<string, string>();
 
             //AssetBundle与所属的AssetBundleBuild
             Dictionary<string, AssetBundleBuild> bundleInfoDict = new Dictionary<string, AssetBundleBuild>();
 
-            //AssetBundle与其Asset列表
+            //AssetBundle与其中的Asset列表
             Dictionary<string, List<string>> bundleAssetsDict = new Dictionary<string, List<string>>();
 
-            //初始化分析冗余需要用到的数据
+            //初始化冗余分析需要用到的数据
             InitAnalyzetData(abBuildList, pakageAssetInfoDict, bundleInfoDict, bundleAssetsDict);
 
             //被隐式依赖的Asset和依赖它的AssetBundle
@@ -41,7 +41,7 @@ namespace CatAsset.Editor
             //重建abBuildList信息
             RebuildAssetBundleBuildList(abBuildList, bundleAssetsDict);
 
-            //冗余资源独立打包
+            //追加冗余资源的AssetBundleBuild
             AppendRedundancyBundle(abBuildList, redundancyAssetList);
         }
 
@@ -74,16 +74,10 @@ namespace CatAsset.Editor
                 string assetName = item.Key;
                 string assetBundleName = item.Value;
 
-                string[] dependencies = AssetDatabase.GetDependencies(assetName);
+                string[] dependencies = Util.GetDependencies(assetName);
 
                 foreach (string dependencyName in dependencies)
                 {
-                    if (dependencyName.EndsWith(".cs"))
-                    {
-                        //跳过c#代码
-                        continue;
-                    }
-
                     if (pakageAssetInfoDict.ContainsKey(dependencyName))
                     {
                         //跳过已显式打包的Asset
@@ -139,7 +133,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 冗余资源独立打包
+        /// 追加冗余资源的AssetBundleBuild
         /// </summary>
         private static void AppendRedundancyBundle(List<AssetBundleBuild> abBuildList, List<string> redundancyAssetList)
         {

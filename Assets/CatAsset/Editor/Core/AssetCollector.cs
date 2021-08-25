@@ -33,7 +33,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 根据打包模式获取
+        /// 根据打包模式获取AssetBundleBuild列表
         /// </summary>
         public static AssetBundleBuild[] GetAssetBundleBuilds(PackageMode model,string directory)
         {

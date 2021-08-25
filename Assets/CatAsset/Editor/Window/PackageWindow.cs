@@ -22,6 +22,10 @@ namespace CatAsset.Editor
         /// </summary>
         private bool isInitAssetsPreviewView;
 
+        /// <summary>
+        /// 打包平台只有1个时，打包后是否将资源复制到StreamingAssets目录下
+        /// </summary>
+        private bool isCopyToStreamingAssets;
 
         /// <summary>
         /// 选择的页签
@@ -32,6 +36,8 @@ namespace CatAsset.Editor
         /// 页签
         /// </summary>
         private string[] tabs = { "打包配置", "资源预览" };
+
+        private int manifestVersion;
 
         /// <summary>
         /// 可选打包平台
@@ -103,8 +109,6 @@ namespace CatAsset.Editor
                 case 1:
                     DrawAssetsPreview();
                     break;
-                default:
-                    break;
             }
 
 
@@ -116,7 +120,9 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitPackgeConfigView()
         {
-            foreach (BuildTarget item in Util.PkgCfg.targetPlatforms)
+            manifestVersion = Util.PkgCfg.ManifestVersion;
+            isCopyToStreamingAssets = Util.PkgCfg.IsCopyToStreamingAssets;
+            foreach (BuildTarget item in Util.PkgCfg.TargetPlatforms)
             {
                 selectedPlatforms[item] = true;
             }
@@ -127,7 +133,7 @@ namespace CatAsset.Editor
             {
                 BuildAssetBundleOptions option = (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), options[i]);
 
-                if ((Util.PkgCfg.options & option) > 0)
+                if ((Util.PkgCfg.Options & option) > 0)
                 {
                     selectedOptions[options[i]] = true;
                 }
@@ -137,7 +143,7 @@ namespace CatAsset.Editor
                 }
             }
 
-            outputPath = Util.PkgCfg.outputPath;
+            outputPath = Util.PkgCfg.OutputPath;
         }
 
         /// <summary>
@@ -151,6 +157,11 @@ namespace CatAsset.Editor
                 isInitPackageConfigView = true;
             }
 
+            EditorGUILayout.LabelField("游戏版本号：" + Application.version);
+            manifestVersion = EditorGUILayout.IntField("资源清单版本号：",manifestVersion, GUILayout.Width(200));
+
+          
+
             EditorGUILayout.LabelField("选择打包平台：");
 
             for (int i = 0; i < targetPlatforms.Count; i++)
@@ -161,8 +172,6 @@ namespace CatAsset.Editor
                 }
 
             }
-
-
 
             EditorGUILayout.Space();
 
@@ -184,76 +193,88 @@ namespace CatAsset.Editor
                 outputPath = GUILayout.TextField(outputPath);
             }
 
-            if (GUILayout.Button("保存打包配置", GUILayout.Width(200)))
+            using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("打包平台只选中了1个时，打包后是否复制资源到StreamingAssets下", isCopyToStreamingAssets))
             {
-                Util.PkgCfg.targetPlatforms.Clear();
-                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
-                {
-                    if (item.Value == true)
-                    {
-                        Util.PkgCfg.targetPlatforms.Add(item.Key);
-                    }
-                }
-
-                Util.PkgCfg.options = BuildAssetBundleOptions.None;
-                foreach (KeyValuePair<string, bool> item in selectedOptions)
-                {
-                    if (item.Value == true)
-                    {
-                        BuildAssetBundleOptions option = (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), item.Key);
-                        Util.PkgCfg.options |= option;
-                    }
-                }
-
-                Util.PkgCfg.outputPath = outputPath;
-                EditorUtility.DisplayDialog("提示", "保存完毕", "确认");
+                isCopyToStreamingAssets = toggle.enabled;
             }
 
-            if (GUILayout.Button("打包AssetBundle", GUILayout.Width(200)))
+            using (new EditorGUILayout.HorizontalScope())
             {
-                //检查是否选中至少一个平台
-                bool flag = false;
-                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
+                if (GUILayout.Button("保存打包配置", GUILayout.Width(200)))
                 {
-                    if (item.Value == true)
+                    SavePackageConfig();
+                    EditorUtility.DisplayDialog("提示", "保存完毕", "确认");
+                }
+
+                if (GUILayout.Button("打包AssetBundle", GUILayout.Width(200)))
+                {
+                    //保存打包配置
+                    SavePackageConfig();
+
+                    //检查是否选中至少一个平台
+                    if (Util.PkgCfg.TargetPlatforms.Count == 0)
                     {
-                        flag = true;
-                        break;
+                        EditorUtility.DisplayDialog("提示", "至少要选择一个打包平台", "确认");
+                        return;
                     }
-                }
 
-                if (flag == false)
-                {
-                    EditorUtility.DisplayDialog("提示", "至少要选择一个打包平台", "确认");
-                    return;
-                }
 
-                //处理打包设置
-                BuildAssetBundleOptions options = BuildAssetBundleOptions.None;
-                foreach (KeyValuePair<string, bool> item in selectedOptions)
-                {
-                    if (item.Value == true)
+                    //处理多个平台的打包
+                    foreach (BuildTarget item in Util.PkgCfg.TargetPlatforms)
                     {
-                        options |= (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), item.Key);
+                        if (Util.PkgCfg.TargetPlatforms.Count == 1)
+                        {
+                            Packager.ExecutePackagePipeline(outputPath, Util.PkgCfg.Options, item, Util.PkgCfg.ManifestVersion, isCopyToStreamingAssets);
+                        }
+                        else
+                        {
+                            Packager.ExecutePackagePipeline(outputPath, Util.PkgCfg.Options, item, Util.PkgCfg.ManifestVersion, false);
+                        }
                     }
-                }
 
-                //处理多个平台
-                foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
-                {
-                    if (item.Value == true)
-                    {
-                        Packager.ExecutePackagePipeline(outputPath, options, item.Key);
-                    }
-                }
 
-                EditorUtility.DisplayDialog("提示", "打包AssetBundle结束", "确认");
-             
+                    //修改窗口上显示的资源清单版本号
+                    manifestVersion = Util.PkgCfg.ManifestVersion;
+
+                    EditorUtility.DisplayDialog("提示", "打包AssetBundle结束", "确认");
+
+                }
             }
+
+          
         
             
         }
         
+        /// <summary>
+        /// 保存打包配置
+        /// </summary>
+        private void SavePackageConfig()
+        {
+            Util.PkgCfg.ManifestVersion = manifestVersion;
+
+            Util.PkgCfg.TargetPlatforms.Clear();
+            foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
+            {
+                if (item.Value == true)
+                {
+                    Util.PkgCfg.TargetPlatforms.Add(item.Key);
+                }
+            }
+
+            Util.PkgCfg.Options = BuildAssetBundleOptions.None;
+            foreach (KeyValuePair<string, bool> item in selectedOptions)
+            {
+                if (item.Value == true)
+                {
+                    BuildAssetBundleOptions option = (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), item.Key);
+                    Util.PkgCfg.Options |= option;
+                }
+            }
+
+            Util.PkgCfg.OutputPath = outputPath;
+        }
+
         /// <summary>
         /// 初始化资源预览界面
         /// </summary>

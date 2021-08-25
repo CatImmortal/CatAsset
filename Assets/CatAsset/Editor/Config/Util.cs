@@ -7,13 +7,22 @@ namespace CatAsset.Editor
 {
     public static class Util
     {
+        private static PackageConfig pkgCfg;
+        private static PackageRuleConfig pkgRuleCfg;
+
         /// <summary>
         /// 打包配置
         /// </summary>
         public static PackageConfig PkgCfg
         {
-            get;
-            private set;
+            get
+            {
+                if (pkgCfg == null)
+                {
+                    pkgCfg = GetConfigAsset<PackageConfig>();
+                }
+                return pkgCfg;
+            }
         }
 
         /// <summary>
@@ -21,15 +30,16 @@ namespace CatAsset.Editor
         /// </summary>
         public static PackageRuleConfig PkgRuleCfg
         {
-            get;
-            private set;
+            get
+            {
+                if (pkgRuleCfg == null)
+                {
+                    pkgRuleCfg = GetConfigAsset<PackageRuleConfig>();
+                }
+                return pkgRuleCfg;
+            }
         }
 
-        static Util()
-        {
-            PkgCfg = GetConfigAsset<PackageConfig>();
-            PkgRuleCfg = GetConfigAsset<PackageRuleConfig>();
-        }
 
         /// <summary>
         /// 创建配置
@@ -58,6 +68,7 @@ namespace CatAsset.Editor
         /// </summary>
         private static T GetConfigAsset<T>() where T : ScriptableObject
         {
+
             string typeName = typeof(T).Name;
             string[] paths = AssetDatabase.FindAssets("t:" + typeName);
             if (paths.Length == 0)
@@ -75,12 +86,31 @@ namespace CatAsset.Editor
             return config;
         }
 
-        
+        /// <summary>
+        /// 获取排除了csharp代码文件的依赖资源列表
+        /// </summary>
+        public static string[] GetDependencies(string assetName)
+        {
+            string[] dependencies = AssetDatabase.GetDependencies(assetName);
+            List<string> result = new List<string>();
+            for (int i = 0; i < dependencies.Length; i++)
+            {
+                string dependencyName = dependencies[i];
+                if (dependencyName.EndsWith(".cs"))
+                {
+                    continue;
+                }
 
-       
+                result.Add(dependencyName);
+            }
+
+            return result.ToArray();
+        }
 
 
-       
+
+
+
     }
 
 }

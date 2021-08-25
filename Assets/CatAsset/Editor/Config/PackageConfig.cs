@@ -14,17 +14,27 @@ namespace CatAsset.Editor
         /// <summary>
         /// 要打包的平台
         /// </summary>
-        public List<BuildTarget> targetPlatforms;
+        public List<BuildTarget> TargetPlatforms;
 
         /// <summary>
         /// 打包设置
         /// </summary>
-        public BuildAssetBundleOptions options;
+        public BuildAssetBundleOptions Options;
 
         /// <summary>
         /// 打包输出目录
         /// </summary>
-        public string outputPath;
+        public string OutputPath;
+
+        /// <summary>
+        /// 资源清单版本号
+        /// </summary>
+        public int ManifestVersion;
+
+        /// <summary>
+        /// 打包平台只有1个时，打包后是否将资源复制到StreamingAssets目录下
+        /// </summary>
+        public bool IsCopyToStreamingAssets;
 
         [MenuItem("CatAsset/创建打包配置文件")]
         private static void CreateConfig()
@@ -34,13 +44,16 @@ namespace CatAsset.Editor
 
         private void Awake()
         {
-            targetPlatforms = new List<BuildTarget>();
-            targetPlatforms.Add(BuildTarget.StandaloneWindows);
+            TargetPlatforms = new List<BuildTarget>();
+            TargetPlatforms.Add(BuildTarget.StandaloneWindows);
 
-            options = BuildAssetBundleOptions.ChunkBasedCompression;
+            Options = BuildAssetBundleOptions.ChunkBasedCompression;
 
-            outputPath = Directory.GetCurrentDirectory() + "\\AssetBundleOutput";
+            OutputPath = Directory.GetCurrentDirectory() + "\\AssetBundleOutput";
+            IsCopyToStreamingAssets = true;
         }
+
+        
     }
 }
 
