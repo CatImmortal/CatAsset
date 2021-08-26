@@ -3,58 +3,52 @@
 	"ManifestVersion":1,
 	"AssetBundles":[
 		{
-			"AssetBundleName":"Assets_Res_Analyze_1.bundle",
+			"AssetBundleName":"analyze_1.bundle",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
 					"Dependencies":[
-						"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
 						"Assets/Res/Common/common_1.jpg"
 					]
 				},
 				{
 					"AssetName":"Assets/Res/Analyze_1/AnalyzePrefab_2.prefab",
 					"Dependencies":[
-						"Assets/Res/Common/common_2.jpg",
-						"Assets/Res/Analyze_1/AnalyzePrefab_2.prefab"
+						"Assets/Res/Common/common_2.jpg"
 					]
 				},
 				{
 					"AssetName":"Assets/Res/Analyze_1/AnalyzePrefab_3.prefab",
 					"Dependencies":[
-						"Assets/Res/Common/common_3.png",
-						"Assets/Res/Analyze_1/AnalyzePrefab_3.prefab"
+						"Assets/Res/Common/common_3.png"
 					]
 				},
 				{
 					"AssetName":"Assets/Res/Common/common_3.png",
 					"Dependencies":[
-						"Assets/Res/Common/common_3.png"
 					]
 				}
 			],
-			"Length":990756,
+			"Length":990742,
 			"Hash":"3ae6bde62ddeddd5475cda9ae050e5d3"
 		},
 		{
-			"AssetBundleName":"Assets_Res_Analyze_2.bundle",
+			"AssetBundleName":"analyze_2.bundle",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab",
 					"Dependencies":[
-						"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab",
 						"Assets/Res/Common/common_1.jpg"
 					]
 				},
 				{
 					"AssetName":"Assets/Res/Analyze_2/AnalyzePrefab_3.prefab",
 					"Dependencies":[
-						"Assets/Res/Common/common_2.jpg",
-						"Assets/Res/Analyze_2/AnalyzePrefab_3.prefab"
+						"Assets/Res/Common/common_2.jpg"
 					]
 				}
 			],
-			"Length":3658,
+			"Length":3650,
 			"Hash":"0df811f3a20df067a0d414501ee5979f"
 		},
 		{
@@ -63,13 +57,11 @@
 				{
 					"AssetName":"Assets/Res/Common/common_1.jpg",
 					"Dependencies":[
-						"Assets/Res/Common/common_1.jpg"
 					]
 				},
 				{
 					"AssetName":"Assets/Res/Common/common_2.jpg",
 					"Dependencies":[
-						"Assets/Res/Common/common_2.jpg"
 					]
 				}
 			],

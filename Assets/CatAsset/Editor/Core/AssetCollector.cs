@@ -70,8 +70,8 @@ namespace CatAsset.Editor
 
                 AssetBundleBuild abBuild = default;
                 abBuild.assetNames = assetPaths.ToArray();
-                abBuild.assetBundleName = directory.Replace("/", "_") + ".bundle";
-
+                abBuild.assetBundleName = directory.Replace("Assets/Res/", "") + ".bundle";
+                abBuild.assetBundleName = abBuild.assetBundleName.ToLower();
                 return new AssetBundleBuild[] { abBuild };
             }
 

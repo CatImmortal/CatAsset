@@ -87,7 +87,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 获取排除了csharp代码文件的依赖资源列表
+        /// 获取排除了自身和csharp代码文件的依赖资源列表
         /// </summary>
         public static string[] GetDependencies(string assetName)
         {
@@ -96,7 +96,7 @@ namespace CatAsset.Editor
             for (int i = 0; i < dependencies.Length; i++)
             {
                 string dependencyName = dependencies[i];
-                if (dependencyName.EndsWith(".cs"))
+                if (dependencyName == assetName || dependencyName.EndsWith(".cs"))
                 {
                     continue;
                 }

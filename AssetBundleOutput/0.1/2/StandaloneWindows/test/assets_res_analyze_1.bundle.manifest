@@ -1,0 +1,33 @@
+ManifestFileVersion: 0
+CRC: 1052988762
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 3ae6bde62ddeddd5475cda9ae050e5d3
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: d1c7a5a040668a1b93a63f8b8b56a31d
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Res/Analyze_1/AnalyzePrefab_1.prefab
+- Assets/Res/Common/common_3.png
+- Assets/Res/Analyze_1/AnalyzePrefab_3.prefab
+- Assets/Res/Analyze_1/AnalyzePrefab_2.prefab
+Dependencies:
+- E:/GitProjects/CatAsset/AssetBundleOutput/0.1/2/StandaloneWindows/common.bundle

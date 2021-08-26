@@ -22,6 +22,11 @@ namespace CatAsset
                 CatAssetManager.CheckManifest(manifest);
             };
         }
+
+        private void Update()
+        {
+            CatAssetManager.Update();
+        }
     }
 }
 
