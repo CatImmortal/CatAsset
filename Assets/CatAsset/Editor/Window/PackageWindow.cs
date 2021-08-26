@@ -160,32 +160,39 @@ namespace CatAsset.Editor
             EditorGUILayout.LabelField("游戏版本号：" + Application.version);
             manifestVersion = EditorGUILayout.IntField("资源清单版本号：",manifestVersion, GUILayout.Width(200));
 
-          
-
             EditorGUILayout.LabelField("选择打包平台：");
 
-            for (int i = 0; i < targetPlatforms.Count; i++)
+            using (new EditorGUILayout.HorizontalScope())
             {
-                using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope(targetPlatforms[i].ToString(), selectedPlatforms[targetPlatforms[i]]))
+                for (int i = 0; i < targetPlatforms.Count; i++)
                 {
-                    selectedPlatforms[targetPlatforms[i]] = toggle.enabled;
-                }
+                    using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope(targetPlatforms[i].ToString(), selectedPlatforms[targetPlatforms[i]]))
+                    {
+                        selectedPlatforms[targetPlatforms[i]] = toggle.enabled;
+                    }
 
+                }
             }
 
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("选择打包设置：");
-         
-
-            for (int i = 1; i < options.Length; i++)
+            for (int i = 1; i < options.Length; i+=3)
             {
-                using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope(options[i], selectedOptions[options[i]]))
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    selectedOptions[options[i]] = toggle.enabled;
+                    for (int j = 0; j < 3 && i + j < options.Length; j++)
+                    {
+                        using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope(options[i + j], selectedOptions[options[i + j]]))
+                        {
+                            selectedOptions[options[i + j]] = toggle.enabled;
+                        }
+                    }
+                   
                 }
-
             }
+
+            EditorGUILayout.Space();
 
             using (new EditorGUILayout.HorizontalScope())
             {

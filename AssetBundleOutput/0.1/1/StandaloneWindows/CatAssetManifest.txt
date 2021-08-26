@@ -7,16 +7,13 @@
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
-					"AssetBundleName":"Assets_Res_Analyze_1.bundle",
 					"Dependencies":[
 						"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
-						"Assets/Res/Common/common_1.jpg",
-						"Assets/Res/Common/com_prefab_1.prefab"
+						"Assets/Res/Common/common_1.jpg"
 					]
 				},
 				{
 					"AssetName":"Assets/Res/Analyze_1/AnalyzePrefab_2.prefab",
-					"AssetBundleName":"Assets_Res_Analyze_1.bundle",
 					"Dependencies":[
 						"Assets/Res/Common/common_2.jpg",
 						"Assets/Res/Analyze_1/AnalyzePrefab_2.prefab"
@@ -24,7 +21,6 @@
 				},
 				{
 					"AssetName":"Assets/Res/Analyze_1/AnalyzePrefab_3.prefab",
-					"AssetBundleName":"Assets_Res_Analyze_1.bundle",
 					"Dependencies":[
 						"Assets/Res/Common/common_3.png",
 						"Assets/Res/Analyze_1/AnalyzePrefab_3.prefab"
@@ -32,67 +28,53 @@
 				},
 				{
 					"AssetName":"Assets/Res/Common/common_3.png",
-					"AssetBundleName":"Assets_Res_Analyze_1.bundle",
 					"Dependencies":[
 						"Assets/Res/Common/common_3.png"
 					]
 				}
 			],
-			"Length":990989,
-			"Hash":"be66efe6df8b3657aea6843d5bde6ce1"
+			"Length":990756,
+			"Hash":"3ae6bde62ddeddd5475cda9ae050e5d3"
 		},
 		{
 			"AssetBundleName":"Assets_Res_Analyze_2.bundle",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab",
-					"AssetBundleName":"Assets_Res_Analyze_2.bundle",
 					"Dependencies":[
 						"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab",
-						"Assets/Res/Common/common_1.jpg",
-						"Assets/Res/Common/com_prefab_1.prefab"
+						"Assets/Res/Common/common_1.jpg"
 					]
 				},
 				{
 					"AssetName":"Assets/Res/Analyze_2/AnalyzePrefab_3.prefab",
-					"AssetBundleName":"Assets_Res_Analyze_2.bundle",
 					"Dependencies":[
 						"Assets/Res/Common/common_2.jpg",
 						"Assets/Res/Analyze_2/AnalyzePrefab_3.prefab"
 					]
 				}
 			],
-			"Length":3862,
-			"Hash":"769d79bac5ed1059e3053e8269947bbb"
+			"Length":3658,
+			"Hash":"0df811f3a20df067a0d414501ee5979f"
 		},
 		{
 			"AssetBundleName":"common.bundle",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Common/common_1.jpg",
-					"AssetBundleName":"common.bundle",
 					"Dependencies":[
 						"Assets/Res/Common/common_1.jpg"
 					]
 				},
 				{
-					"AssetName":"Assets/Res/Common/com_prefab_1.prefab",
-					"AssetBundleName":"common.bundle",
-					"Dependencies":[
-						"Assets/Res/Common/common_1.jpg",
-						"Assets/Res/Common/com_prefab_1.prefab"
-					]
-				},
-				{
 					"AssetName":"Assets/Res/Common/common_2.jpg",
-					"AssetBundleName":"common.bundle",
 					"Dependencies":[
 						"Assets/Res/Common/common_2.jpg"
 					]
 				}
 			],
-			"Length":5925694,
-			"Hash":"ad44ae9d0acb71fece031ccc3aaece2a"
+			"Length":5923024,
+			"Hash":"5310df7ba895c94afcb5473623190e3d"
 		}
 	]
 }

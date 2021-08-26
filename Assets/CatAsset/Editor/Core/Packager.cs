@@ -132,7 +132,7 @@ namespace CatAsset.Editor
 
             string json = CatJson.JsonParser.ToJson(manifest);
 
-            using (StreamWriter sw = new StreamWriter(outputPath + "\\CatAssetManifest.txt"))
+            using (StreamWriter sw = new StreamWriter(outputPath + "\\CatAssetManifest.json"))
             {
                 sw.Write(json);
             }
