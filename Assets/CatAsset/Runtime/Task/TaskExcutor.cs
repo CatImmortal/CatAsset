@@ -116,22 +116,22 @@ namespace CatAsset
                     switch (task.State)
                     {
                         case TaskState.Free:
-                            Debug.Log("开始任务：" + task.Name);
+                            //Debug.Log("开始任务：" + task.Name);
                             task.Execute();
                             task.Update();
                             executeCount++;
                             break;
                         case TaskState.WaitOther:
-                            Debug.Log("等待任务：" + task.Name);
+                            //Debug.Log("等待任务：" + task.Name);
                             task.Update();
                             break;
                         case TaskState.Executing:
-                            Debug.Log("执行任务：" + task.Name);
+                            //Debug.Log("执行任务：" + task.Name);
                             task.Update();
                             executeCount++;
                             break;
                         case TaskState.Done:
-                            Debug.Log("完成任务：" + task.Name);
+                            //Debug.Log("完成任务：" + task.Name);
                             needRemoveTasks.Add(task.Name);
                             break;
                     }

@@ -91,6 +91,7 @@ namespace CatAsset
                 State = TaskState.Done;
                 assetInfo.Asset = asyncOp.asset;
                 assetInfo.UseCount++;
+                CatAssetManager.AddAssetToRuntimeInfo(assetInfo);
                 Completed?.Invoke(assetInfo.Asset);
                 Debug.Log("Asset加载完毕：" + Name);
                 return;

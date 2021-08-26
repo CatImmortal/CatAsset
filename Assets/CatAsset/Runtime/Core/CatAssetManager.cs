@@ -55,6 +55,22 @@ namespace CatAsset
         }
 
         /// <summary>
+        /// 添加Asset到Asset运行时信息的映射
+        /// </summary>
+        public static void AddAssetToRuntimeInfo(AssetRuntimeInfo info)
+        {
+            AssetToRuntimeInfo.Add(info.Asset, info);
+        }
+
+        /// <summary>
+        /// 移除Asset到Asset运行时信息的映射
+        /// </summary>
+        public static void RemoveAssetToRuntimeInfo(AssetRuntimeInfo info)
+        {
+            AssetToRuntimeInfo.Remove(info.Asset);
+        }
+
+        /// <summary>
         /// 轮询CatAsset管理器
         /// </summary>
         public static void Update()
@@ -84,6 +100,8 @@ namespace CatAsset
                     assetRuntimeInfo.AssetBundleName = abManifestInfo.AssetBundleName;
                 }
             }
+
+            Debug.Log("资源清单检查完毕，版本号：" + manifest.GameVersion + "." + manifest.ManifestVersion);
         }
 
 
@@ -95,7 +113,7 @@ namespace CatAsset
         {
             if (assetBundleInfoDict.Count == 0)
             {
-                Debug.LogError("Asset加载失败,未检查资源清单");
+                Debug.LogError("Asset加载失败,未调用CheckManifest进行资源清单检查");
                 return;
             }
 
@@ -104,10 +122,12 @@ namespace CatAsset
                 throw new Exception("Asset加载失败，该Asset不在资源清单中：" + assetName);
             }
 
-            if (assetInfo.Asset != null)
+            if (assetInfo.Asset != null) 
             {
-                //Asset已被加载过了
+                //Asset正在被使用中
                 assetInfo.UseCount++;
+                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
+                abInfo.UsedAsset.Add(assetInfo.AssetBundleName);  
                 loadedCallback?.Invoke(assetInfo.Asset);
                 return;
             }
@@ -140,13 +160,17 @@ namespace CatAsset
 
             if (assetInfo.UseCount == 0)
             {
-                //Asset不再被使用了 从AssetBundleRumtimeInfo.UsedAsset中移除
+                //Asset不再被使用了
                 AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
+                RemoveAssetToRuntimeInfo(assetInfo);
                 abInfo.UsedAsset.Remove(assetInfo.ManifestInfo.AssetName);
 
                 if (abInfo.UsedAsset.Count == 0)
                 {
-                    //AssetBundel没有Assset被使用了 加入待卸载列表
+                    //AssetBundel没有Assset被使用了 创建卸载任务
+                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName, 0, null, abInfo);
+                    taskExcutor.AddTask(task);
+                    Debug.Log("创建了卸载AB的任务：" + task.Name);
                 }
             }
         }

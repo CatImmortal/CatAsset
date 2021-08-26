@@ -5,7 +5,8 @@ using CatAsset;
 public class Entry : MonoBehaviour
 {
     public GameObject canvans;
-  
+    private GameObject prefab;
+    private GameObject go;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,10 +19,16 @@ public class Entry : MonoBehaviour
         {
             CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (obj) =>
             {
-                GameObject prefab = (GameObject)obj;
-                GameObject go = Instantiate(prefab, canvans.transform);
+                prefab = (GameObject)obj;
+                go = Instantiate(prefab, canvans.transform);
 
             });
+        }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            Destroy(go);
+            CatAssetManager.UnloadAsset(prefab);
         }
     }
 
