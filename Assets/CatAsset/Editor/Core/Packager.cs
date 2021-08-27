@@ -128,7 +128,7 @@ namespace CatAsset.Editor
                     abInfo.Assets[j] = assetInfo;
 
                     assetInfo.AssetName = abBulid.assetNames[j];
-                    assetInfo.Dependencies = Util.GetDependencies(assetInfo.AssetName);
+                    assetInfo.Dependencies = Util.GetDependencies(assetInfo.AssetName,false);  //依赖列表不进行递归记录 因为加载的时候会对依赖进行递归加载
                 }
 
                

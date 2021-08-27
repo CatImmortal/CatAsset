@@ -1,11 +1,11 @@
 {
 	"GameVersion":"0.1",
-	"ManifestVersion":3,
+	"ManifestVersion":4,
 	"AssetBundles":[
 		{
 			"AssetBundleName":"analyze_1.bundle",
 			"Length":990742,
-			"Hash":"79d32c8b1e15a3f2543afc63fa516ee9",
+			"Hash":"3ae6bde62ddeddd5475cda9ae050e5d3",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
@@ -35,7 +35,7 @@
 		{
 			"AssetBundleName":"analyze_2.bundle",
 			"Length":3650,
-			"Hash":"7e0997899f158d0e5173405c04985c33",
+			"Hash":"0df811f3a20df067a0d414501ee5979f",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab",
@@ -54,15 +54,14 @@
 		{
 			"AssetBundleName":"scene.bundle",
 			"Length":9062,
-			"Hash":"405959e0dfb5a30249df04343feee1ff",
+			"Hash":"52b3f88d48b51e30ee13ef3f60406fe1",
 			"IsScene":true,
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Scene/Scene_1.unity",
 					"Dependencies":[
 						"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
-						"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab",
-						"Assets/Res/Common/common_1.jpg"
+						"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab"
 					]
 				}
 			]
@@ -70,7 +69,7 @@
 		{
 			"AssetBundleName":"common.bundle",
 			"Length":5923024,
-			"Hash":"88406b81112cd8b0be0f4d5b41a4c530",
+			"Hash":"5310df7ba895c94afcb5473623190e3d",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Common/common_1.jpg",

@@ -89,9 +89,9 @@ namespace CatAsset.Editor
         /// <summary>
         /// 获取排除了自身和csharp代码文件的依赖资源列表
         /// </summary>
-        public static string[] GetDependencies(string assetName)
+        public static string[] GetDependencies(string assetName,bool recursive = true)
         {
-            string[] dependencies = AssetDatabase.GetDependencies(assetName);
+            string[] dependencies = AssetDatabase.GetDependencies(assetName,recursive);
 
             if (dependencies.Length == 0)
             {
