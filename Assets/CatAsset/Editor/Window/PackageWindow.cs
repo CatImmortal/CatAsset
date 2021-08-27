@@ -37,6 +37,9 @@ namespace CatAsset.Editor
         /// </summary>
         private string[] tabs = { "打包配置", "资源预览" };
 
+        /// <summary>
+        /// 资源清单版本
+        /// </summary>
         private int manifestVersion;
 
         /// <summary>
@@ -86,7 +89,7 @@ namespace CatAsset.Editor
         /// </summary>
         private List<AssetBundleBuild> abBuildList;
 
-        [MenuItem("CatAsset/打开打包窗口")]
+        [MenuItem("CatAsset/打开打包窗口", priority = 1)]
         private static void OpenWindow()
         {
             PackageWindow window = GetWindow<PackageWindow>(false,"打包窗口");

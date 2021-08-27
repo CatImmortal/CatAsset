@@ -245,6 +245,7 @@ namespace CatAsset
             if (assetInfo.UseCount == 0)
             {
                 Debug.LogError("要卸载的场景未加载过：" + sceneName);
+                return;
             }
 
             //卸载依赖资源

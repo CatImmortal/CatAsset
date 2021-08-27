@@ -17,7 +17,18 @@ namespace CatAsset
         /// </summary>
         private float delayUnloadTime = 5;
 
+        /// <summary>
+        /// 计时器
+        /// </summary>
         private float timer;
+
+        public override float Progress
+        {
+            get
+            {
+                return timer;
+            }
+        }
 
         public UnloadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
         {
