@@ -52,29 +52,18 @@ namespace CatAsset
             }
             else
             {
-                //标记为此AssetBundle中已使用的Asset
+                //标记进所属的 AssetBundle的使用中Asset集合 中
                 abInfo.UsedAsset.Add(Name);
-            }
-
-            if (!CheckDependencies())
-            {
-                //需要加载依赖的Asset
-                for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
-                {
-                    string dependency = assetInfo.ManifestInfo.Dependencies[i];
-                    CatAssetManager.LoadAsset(dependency, null,Priority + 1);
-                }
-                return;
             }
         }
 
-        public override void Update()
+        public override void UpdateState()
         {
             if (asyncOp == null && (!CheckAssetBundle() || !CheckDependencies()))
             {
-                //AssetBundle和依赖的Asset都没加载完
+                //AssetBundle或者依赖的Asset没加载完
                 //等待其他资源加载
-                State = TaskState.WaitOther;
+                State = TaskState.Waiting;
                 return;
             }
 
@@ -87,11 +76,11 @@ namespace CatAsset
 
             if (asyncOp.isDone)
             {
-                //加载完毕了
+                //加载完成了
                 State = TaskState.Done;
                 assetInfo.Asset = asyncOp.asset;
                 assetInfo.UseCount++;
-                CatAssetManager.AddAssetToRuntimeInfo(assetInfo);
+                CatAssetManager.AddAssetToRuntimeInfo(assetInfo);  //添加Asset和AssetRuntimeInfo的关联
                 Completed?.Invoke(assetInfo.Asset);
                 Debug.Log("Asset加载完毕：" + Name);
                 return;

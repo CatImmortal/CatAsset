@@ -38,7 +38,7 @@ namespace CatAsset
             asyncOp.priority = Priority;
         }
 
-        public override void Update()
+        public override void UpdateState()
         {
             if (asyncOp.isDone)
             {

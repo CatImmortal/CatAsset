@@ -32,9 +32,9 @@ namespace CatAsset
         /// <summary>
         /// 是否存在指定任务
         /// </summary>
-        public bool HasTask(string name)
+        public bool HasTask(BaseTask task)
         {
-            return taskDict.ContainsKey(name);
+            return taskDict.ContainsKey(task.Name) && task.GetType() == taskDict[task.Name].GetType() ;
         }
 
         /// <summary>
@@ -72,8 +72,9 @@ namespace CatAsset
         /// </summary>
         private void InternalAddTask(BaseTask task)
         {
-            if (HasTask(task.Name))
+            if (HasTask(task))
             {
+
                 //任务已存在 不需要重复添加
                 AppendTaskCompleted(task.Name, task.Completed);
                 return;
@@ -87,6 +88,8 @@ namespace CatAsset
         /// </summary>
         public void Update()
         {
+           
+
             if (needAddTasks.Count > 0)
             {
                 //添加需要添加的任务
@@ -118,22 +121,25 @@ namespace CatAsset
                         case TaskState.Free:
                             //Debug.Log("开始任务：" + task.Name);
                             task.Execute();
-                            task.Update();
+                            task.UpdateState();
                             executeCount++;
                             break;
-                        case TaskState.WaitOther:
+                        case TaskState.Waiting:
                             //Debug.Log("等待任务：" + task.Name);
-                            task.Update();
+                            task.UpdateState();
                             break;
                         case TaskState.Executing:
                             //Debug.Log("执行任务：" + task.Name);
-                            task.Update();
+                            task.UpdateState();
                             executeCount++;
                             break;
-                        case TaskState.Done:
-                            //Debug.Log("完成任务：" + task.Name);
-                            needRemoveTasks.Add(task.Name);
-                            break;
+                    }
+                   
+                    if (task.State == TaskState.Done)
+                    {
+                        //在task.Update执行过后，State可能会变成Done 这样在当前帧Update后完成的任务就在当前帧移除了
+                        //Debug.Log("完成任务：" + task.Name);
+                        needRemoveTasks.Add(task.Name);
                     }
 
                 }

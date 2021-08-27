@@ -64,9 +64,9 @@ namespace CatAsset
         public abstract void Execute();
 
         /// <summary>
-        /// 刷新任务
+        /// 刷新任务状态
         /// </summary>
-        public abstract void Update();
+        public abstract void UpdateState();
     }
 
 }

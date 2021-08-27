@@ -15,9 +15,9 @@ namespace CatAsset
         Free,
 
         /// <summary>
-        /// 等待其他任务
+        /// 等待中
         /// </summary>
-        WaitOther,
+        Waiting,
 
         /// <summary>
         /// 执行中

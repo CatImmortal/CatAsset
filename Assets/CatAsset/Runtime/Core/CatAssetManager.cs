@@ -22,10 +22,13 @@ namespace CatAsset
         private static Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
-        /// Asset到Asset运行时信息的映射
+        /// Asset和Asset运行时信息的关联
         /// </summary>
         private static Dictionary<Object, AssetRuntimeInfo> AssetToRuntimeInfo = new Dictionary<Object, AssetRuntimeInfo>();
 
+        /// <summary>
+        /// 任务执行器
+        /// </summary>
         private static TaskExcutor taskExcutor = new TaskExcutor();
 
 
@@ -122,17 +125,31 @@ namespace CatAsset
                 throw new Exception("Asset加载失败，该Asset不在资源清单中：" + assetName);
             }
 
+            //加载依赖Asset 已加载的就增加它们的引用计数 未加载的就创建加载任务
+            for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
+            {
+                string dependency = assetInfo.ManifestInfo.Dependencies[i];
+                LoadAsset(dependency, null, priority + 1);
+            }
+
             if (assetInfo.Asset != null) 
             {
-                //Asset正在被使用中
+                //Asset已加载
+                if (assetInfo.UseCount == 0)
+                {
+                    //标记进 所属的AssetBundle的使用中Asset集合 中
+                    AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
+                    abInfo.UsedAsset.Add(assetInfo.ManifestInfo.AssetName);
+                }
+
+                //增加引用计数
                 assetInfo.UseCount++;
-                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-                abInfo.UsedAsset.Add(assetInfo.AssetBundleName);  
+
                 loadedCallback?.Invoke(assetInfo.Asset);
                 return;
             }
 
-            //创建加载Asset的任务
+            //未加载 创建加载Asset的任务
             LoadAssetTask task = new LoadAssetTask(taskExcutor, assetName,priority, loadedCallback, assetInfo);
             taskExcutor.AddTask(task);
         }
@@ -160,14 +177,15 @@ namespace CatAsset
 
             if (assetInfo.UseCount == 0)
             {
-                //Asset不再被使用了
+                //Asset已经没人使用了
                 AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-                RemoveAssetToRuntimeInfo(assetInfo);
+
+                //从 所属的AssetBundle的使用中Asset集合 中移除
                 abInfo.UsedAsset.Remove(assetInfo.ManifestInfo.AssetName);
 
                 if (abInfo.UsedAsset.Count == 0)
                 {
-                    //AssetBundel没有Assset被使用了 创建卸载任务
+                    //AssetBundel已经没人使用了 创建卸载任务 开始卸载倒计时
                     UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName, 0, null, abInfo);
                     taskExcutor.AddTask(task);
                     Debug.Log("创建了卸载AB的任务：" + task.Name);
