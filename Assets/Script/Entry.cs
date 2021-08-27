@@ -30,6 +30,16 @@ public class Entry : MonoBehaviour
             Destroy(go);
             CatAssetManager.UnloadAsset(prefab);
         }
+
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            CatAssetManager.LoadScene("Assets/Res/Scene/Scene_1.unity", null);
+        }
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            CatAssetManager.UnloadScene("Assets/Res/Scene/Scene_1.unity");
+        }
     }
 
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using Object = UnityEngine.Object;
+using UnityEngine.SceneManagement;
 
 namespace CatAsset
 {
@@ -22,7 +23,7 @@ namespace CatAsset
         private static Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
-        /// Asset和Asset运行时信息的关联
+        /// Asset和Asset运行时信息的关联(不包括场景)
         /// </summary>
         private static Dictionary<Object, AssetRuntimeInfo> AssetToRuntimeInfo = new Dictionary<Object, AssetRuntimeInfo>();
 
@@ -132,19 +133,18 @@ namespace CatAsset
                 LoadAsset(dependency, null, priority + 1);
             }
 
+
+            if (assetInfo.UseCount == 0)
+            {
+                //标记进 所属的AssetBundle的使用中Asset集合 中
+                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
+                abInfo.UsedAsset.Add(assetInfo.ManifestInfo.AssetName);
+            }
+            //增加引用计数
+            assetInfo.UseCount++;
+
             if (assetInfo.Asset != null) 
             {
-                //Asset已加载
-                if (assetInfo.UseCount == 0)
-                {
-                    //标记进 所属的AssetBundle的使用中Asset集合 中
-                    AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-                    abInfo.UsedAsset.Add(assetInfo.ManifestInfo.AssetName);
-                }
-
-                //增加引用计数
-                assetInfo.UseCount++;
-
                 loadedCallback?.Invoke(assetInfo.Asset);
                 return;
             }
@@ -161,7 +161,7 @@ namespace CatAsset
         {
             if (!AssetToRuntimeInfo.TryGetValue(asset,out AssetRuntimeInfo assetInfo))
             {
-                Debug.LogError("要卸载的Asset不是从CatAsset加载的");
+                Debug.LogError("要卸载的Asset不是从CatAsset加载的：" + asset.name);
                 return;
             }
 
@@ -193,6 +193,91 @@ namespace CatAsset
             }
         }
  
+        /// <summary>
+        /// 加载场景
+        /// </summary>
+        public static void LoadScene(string sceneName, Action<object> loadedCallback, int priority = 0)
+        {
+            if (assetBundleInfoDict.Count == 0)
+            {
+                Debug.LogError("Asset加载失败,未调用CheckManifest进行资源清单检查");
+                return;
+            }
+
+            if (!assetInfoDict.TryGetValue(sceneName, out AssetRuntimeInfo assetInfo))
+            {
+                throw new Exception("Asset加载失败，该Asset不在资源清单中：" + sceneName);
+            }
+
+            //加载依赖Asset 已加载的就增加它们的引用计数 未加载的就创建加载任务
+            for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
+            {
+                string dependency = assetInfo.ManifestInfo.Dependencies[i];
+                LoadAsset(dependency, null, priority + 1);
+            }
+
+
+            if (assetInfo.UseCount == 0)
+            {
+                //标记进 所属的AssetBundle的使用中Asset集合 中
+                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
+                abInfo.UsedAsset.Add(assetInfo.ManifestInfo.AssetName);
+            }
+            //增加引用计数
+            assetInfo.UseCount++;
+
+            //场景资源实例不能被复用 每次加载都得创建加载场景的任务
+            LoadSceneTask task = new LoadSceneTask(taskExcutor, sceneName, priority, loadedCallback, assetInfo);
+            taskExcutor.AddTask(task);
+        }
+
+        /// <summary>
+        /// 卸载场景
+        /// </summary>
+        public static void UnloadScene(string sceneName)
+        {
+            if (!assetInfoDict.TryGetValue(sceneName,out AssetRuntimeInfo assetInfo))
+            {
+                Debug.LogError("要卸载的Scene不在资源清单中：" + sceneName);
+                return;
+            }
+
+            if (assetInfo.UseCount == 0)
+            {
+                Debug.LogError("要卸载的场景未加载过：" + sceneName);
+            }
+
+            //卸载依赖资源
+            foreach (string dependency in assetInfo.ManifestInfo.Dependencies)
+            {
+                AssetRuntimeInfo dependencyInfo = assetInfoDict[dependency];
+                UnloadAsset(dependencyInfo.Asset);
+            }
+
+            //卸载场景
+            SceneManager.UnloadSceneAsync(sceneName);
+
+            //减少场景的引用计数
+            assetInfo.UseCount--;
+
+            if (assetInfo.UseCount == 0)
+            {
+                //场景Asset已经没人使用了
+                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
+
+                //从 所属的AssetBundle的使用中Asset集合 中移除
+                abInfo.UsedAsset.Remove(assetInfo.ManifestInfo.AssetName);
+
+                if (abInfo.UsedAsset.Count == 0)
+                {
+                    //AssetBundel已经没人使用了 创建卸载任务 开始卸载倒计时
+                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName, 0, null, abInfo);
+                    taskExcutor.AddTask(task);
+                    Debug.Log("创建了卸载AB的任务：" + task.Name);
+                }
+            }
+
+        }
     }
 }
 

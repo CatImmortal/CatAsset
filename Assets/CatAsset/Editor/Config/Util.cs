@@ -92,6 +92,12 @@ namespace CatAsset.Editor
         public static string[] GetDependencies(string assetName)
         {
             string[] dependencies = AssetDatabase.GetDependencies(assetName);
+
+            if (dependencies.Length == 0)
+            {
+                return dependencies;
+            }
+
             List<string> result = new List<string>();
             for (int i = 0; i < dependencies.Length; i++)
             {

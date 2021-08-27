@@ -238,10 +238,12 @@ namespace CatAsset.Editor
                             Packager.ExecutePackagePipeline(outputPath, Util.PkgCfg.Options, item, Util.PkgCfg.ManifestVersion, false);
                         }
                     }
-
+                    EditorUtility.SetDirty(Util.PkgCfg);
+                    AssetDatabase.SaveAssets();
 
                     //修改窗口上显示的资源清单版本号
                     manifestVersion = Util.PkgCfg.ManifestVersion;
+                    
 
                     EditorUtility.DisplayDialog("提示", "打包AssetBundle结束", "确认");
 
@@ -280,6 +282,10 @@ namespace CatAsset.Editor
             }
 
             Util.PkgCfg.OutputPath = outputPath;
+
+            EditorUtility.SetDirty(Util.PkgCfg);
+            AssetDatabase.SaveAssets();
+
         }
 
         /// <summary>

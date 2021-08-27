@@ -39,7 +39,7 @@ namespace CatAsset
             }
 
             timer += Time.deltaTime;
-            Debug.Log("卸载AB计时：" + timer + ",AB名：" + Name);
+            //Debug.Log("卸载AB计时：" + timer + ",AB名：" + Name);
             if (timer >= delayUnloadTime)
             {
                 //时间到了 

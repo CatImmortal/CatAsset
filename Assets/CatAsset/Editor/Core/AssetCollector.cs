@@ -68,6 +68,12 @@ namespace CatAsset.Editor
                     assetPaths.Add(path.Replace('\\', '/'));
                 }
 
+                if (assetPaths.Count == 0)
+                {
+                    //空包不打
+                    return null;
+                }
+
                 AssetBundleBuild abBuild = default;
                 abBuild.assetNames = assetPaths.ToArray();
                 abBuild.assetBundleName = directory.Replace("Assets/Res/", "") + ".bundle";

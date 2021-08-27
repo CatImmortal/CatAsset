@@ -112,8 +112,16 @@ namespace CatAsset.Editor
                 manifest.AssetBundles[i] = abInfo;
 
                 abInfo.AssetBundleName = abBulid.assetBundleName;
-                abInfo.Assets = new AssetManifestInfo[abBulid.assetNames.Length];
 
+                string fullPath = outputPath + "\\" + abInfo.AssetBundleName;
+                FileInfo fileInfo = new FileInfo(fullPath);
+                abInfo.Length = fileInfo.Length;
+
+                abInfo.Hash = unityManifest.GetAssetBundleHash(abInfo.AssetBundleName);
+
+                abInfo.IsScene = abBulid.assetNames[0].EndsWith(".unity");  //判断是否为场景ab
+
+                abInfo.Assets = new AssetManifestInfo[abBulid.assetNames.Length];
                 for (int j = 0; j < abBulid.assetNames.Length; j++)
                 {
                     AssetManifestInfo assetInfo = new AssetManifestInfo();
@@ -123,15 +131,11 @@ namespace CatAsset.Editor
                     assetInfo.Dependencies = Util.GetDependencies(assetInfo.AssetName);
                 }
 
-                string fullPath = outputPath + "\\" + abInfo.AssetBundleName;
-                FileInfo fileInfo = new FileInfo(fullPath);
-                abInfo.Length = fileInfo.Length;
-
-                abInfo.Hash = unityManifest.GetAssetBundleHash(abInfo.AssetBundleName);
+               
             }
 
+            //写入清单文件的json
             string json = CatJson.JsonParser.ToJson(manifest);
-
             using (StreamWriter sw = new StreamWriter(outputPath + "\\CatAssetManifest.json"))
             {
                 sw.Write(json);

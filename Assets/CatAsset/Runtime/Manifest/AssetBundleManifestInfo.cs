@@ -15,11 +15,6 @@ namespace CatAsset
         public string AssetBundleName;
 
         /// <summary>
-        /// AssetBundle中的所有Asset清单信息
-        /// </summary>
-        public AssetManifestInfo[] Assets;
-
-        /// <summary>
         /// 文件长度
         /// </summary>
         public long Length;
@@ -28,6 +23,18 @@ namespace CatAsset
         /// 文件Hash
         /// </summary>
         public Hash128 Hash;
+
+        /// <summary>
+        /// 是否为场景的AssetBundle包
+        /// </summary>
+        public bool IsScene;
+
+        /// <summary>
+        /// AssetBundle中的所有Asset清单信息
+        /// </summary>
+        public AssetManifestInfo[] Assets;
+
+       
     }
 }
 

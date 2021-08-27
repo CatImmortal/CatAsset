@@ -30,7 +30,7 @@
 				}
 			],
 			"Length":990742,
-			"Hash":"3ae6bde62ddeddd5475cda9ae050e5d3"
+			"Hash":"79d32c8b1e15a3f2543afc63fa516ee9"
 		},
 		{
 			"AssetBundleName":"analyze_2.bundle",
@@ -49,7 +49,22 @@
 				}
 			],
 			"Length":3650,
-			"Hash":"0df811f3a20df067a0d414501ee5979f"
+			"Hash":"7e0997899f158d0e5173405c04985c33"
+		},
+		{
+			"AssetBundleName":"scene.bundle",
+			"Assets":[
+				{
+					"AssetName":"Assets/Res/Scene/Scene_1.unity",
+					"Dependencies":[
+						"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
+						"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab",
+						"Assets/Res/Common/common_1.jpg"
+					]
+				}
+			],
+			"Length":9063,
+			"Hash":"f3f700771bf0f5871caa210d1f0cd652"
 		},
 		{
 			"AssetBundleName":"common.bundle",
@@ -66,7 +81,7 @@
 				}
 			],
 			"Length":5923024,
-			"Hash":"5310df7ba895c94afcb5473623190e3d"
+			"Hash":"88406b81112cd8b0be0f4d5b41a4c530"
 		}
 	]
 }

@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TargetPlatforms: 05000000
   Options: 256
-  OutputPath: E:\GitProjects\CatAsset\AssetBundleOutput
-  ManifestVersion: 1
+  OutputPath: D:\GitProjects\CatAsset\AssetBundleOutput
+  ManifestVersion: 4
   IsCopyToStreamingAssets: 1

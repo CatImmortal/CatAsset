@@ -12,8 +12,8 @@ namespace CatAsset
     /// </summary>
     public class LoadAssetTask : BaseTask
     {
-        private AssetRuntimeInfo assetInfo;
-        private AssetBundleRuntimeInfo abInfo;
+        protected AssetRuntimeInfo assetInfo;
+        protected AssetBundleRuntimeInfo abInfo;
 
         private AssetBundleRequest asyncOp;
 
@@ -79,7 +79,6 @@ namespace CatAsset
                 //加载完成了
                 State = TaskState.Done;
                 assetInfo.Asset = asyncOp.asset;
-                assetInfo.UseCount++;
                 CatAssetManager.AddAssetToRuntimeInfo(assetInfo);  //添加Asset和AssetRuntimeInfo的关联
                 Completed?.Invoke(assetInfo.Asset);
                 Debug.Log("Asset加载完毕：" + Name);
@@ -92,7 +91,7 @@ namespace CatAsset
         /// <summary>
         /// 检查所属的AssetBundle是否已加载好
         /// </summary>
-        private bool CheckAssetBundle()
+        protected bool CheckAssetBundle()
         {
             return abInfo.AssetBundle != null;
 
@@ -101,7 +100,7 @@ namespace CatAsset
         /// <summary>
         /// 检查依赖的Asset是否已加载好
         /// </summary>
-        private bool CheckDependencies()
+        protected bool CheckDependencies()
         {
             for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
             {

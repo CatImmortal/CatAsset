@@ -138,7 +138,6 @@ namespace CatAsset
                     if (task.State == TaskState.Done)
                     {
                         //在task.Update执行过后，State可能会变成Done 这样在当前帧Update后完成的任务就在当前帧移除了
-                        //Debug.Log("完成任务：" + task.Name);
                         needRemoveTasks.Add(task.Name);
                     }
 
