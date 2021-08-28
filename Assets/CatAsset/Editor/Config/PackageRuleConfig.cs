@@ -23,9 +23,11 @@ namespace CatAsset.Editor
         /// <summary>
         /// 获取实际进行打包的AssetBundleBuild列表
         /// </summary>
-        public  List<AssetBundleBuild> GetAssetBundleBuildList(bool isAnalyzeRedundancyAssets = true)
+        public  List<AssetBundleBuild> GetAssetBundleBuildList(bool isAnalyzeRedundancy = true)
         {
             List<AssetBundleBuild> abBuildList = new List<AssetBundleBuild>();
+
+            Rules.Sort();
 
             //获取被显式打包的Asset和AssetBundle
             foreach (PackageRule rule in Rules)
@@ -38,7 +40,7 @@ namespace CatAsset.Editor
 
             }
 
-            if (abBuildList.Count > 0 && isAnalyzeRedundancyAssets)
+            if (abBuildList.Count > 0 && isAnalyzeRedundancy)
             {
                 //进行冗余分析
                 RedundancyAnalyzer.ExecuteRedundancyAnalyzePipeline(abBuildList);

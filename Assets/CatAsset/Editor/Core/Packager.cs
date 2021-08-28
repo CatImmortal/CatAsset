@@ -16,7 +16,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 执行打包管线
         /// </summary>
-        public static void ExecutePackagePipeline(string outputPath, BuildAssetBundleOptions options, BuildTarget targetPlatform,int manifestVersion,bool isCopyToStreamingAssets)
+        public static void ExecutePackagePipeline(string outputPath, BuildAssetBundleOptions options, BuildTarget targetPlatform,int manifestVersion,bool isCopyToStreamingAssets,bool isAnalyzeRedundancy)
         {
             //获取最终打包输出目录
             string finalOutputPath = GetFinalOutputPath(outputPath, targetPlatform, manifestVersion);

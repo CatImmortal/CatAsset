@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TargetPlatforms: 05000000
   Options: 256
+  IsAnalyzeRedundancy: 1
   OutputPath: E:\GitProjects\CatAsset\AssetBundleOutput
-  ManifestVersion: 5
+  ManifestVersion: 6
   IsCopyToStreamingAssets: 1

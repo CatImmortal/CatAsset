@@ -9,6 +9,8 @@ namespace CatAsset.Editor
     /// </summary>
     public static class RedundancyAnalyzer
     {
+       
+
         /// <summary>
         /// 执行冗余资源分析管线
         /// </summary>
@@ -74,7 +76,7 @@ namespace CatAsset.Editor
                 string assetName = item.Key;
                 string assetBundleName = item.Value;
 
-                string[] dependencies = Util.GetDependencies(assetName);
+                string[] dependencies = Util.GetDependencies(assetName);  //递归获取依赖列表 因为不会对隐式依赖再进行冗余分析了
 
                 foreach (string dependencyName in dependencies)
                 {

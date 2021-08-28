@@ -22,6 +22,11 @@ namespace CatAsset.Editor
         public BuildAssetBundleOptions Options;
 
         /// <summary>
+        /// 是否进行冗余分析
+        /// </summary>
+        public bool IsAnalyzeRedundancy;
+
+        /// <summary>
         /// 打包输出目录
         /// </summary>
         public string OutputPath;
@@ -46,6 +51,8 @@ namespace CatAsset.Editor
         {
             TargetPlatforms = new List<BuildTarget>();
             TargetPlatforms.Add(BuildTarget.StandaloneWindows);
+
+            IsAnalyzeRedundancy = true;
 
             Options = BuildAssetBundleOptions.ChunkBasedCompression;
 

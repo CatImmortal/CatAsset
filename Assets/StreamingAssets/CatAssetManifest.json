@@ -1,6 +1,6 @@
 {
 	"GameVersion":"0.1",
-	"ManifestVersion":4,
+	"ManifestVersion":5,
 	"AssetBundles":[
 		{
 			"AssetBundleName":"analyze_1.bundle",
@@ -62,6 +62,49 @@
 					"Dependencies":[
 						"Assets/Res/Analyze_1/AnalyzePrefab_1.prefab",
 						"Assets/Res/Analyze_2/AnalyzePrefab_2.prefab"
+					]
+				}
+			]
+		},
+		{
+			"AssetBundleName":"loopdependency_1.bundle",
+			"Length":2447,
+			"Hash":"73d56c99dfc2c8598a5f8edd03bf8f99",
+			"Assets":[
+				{
+					"AssetName":"Assets/Res/LoopDependency_1/LoopRef_1.prefab",
+					"Dependencies":[
+						"Assets/Res/LoopDependency_1/LoopRef_2.prefab"
+					]
+				},
+				{
+					"AssetName":"Assets/Res/LoopDependency_1/LoopRef_2.prefab",
+					"Dependencies":[
+						"Assets/Res/LoopDependency_1/LoopRef_1.prefab"
+					]
+				}
+			]
+		},
+		{
+			"AssetBundleName":"loopdependency_2.bundle",
+			"Length":2553,
+			"Hash":"9c7d6a48fd3c867b690679cfb8444639",
+			"Assets":[
+				{
+					"AssetName":"Assets/Res/LoopDependency_2/LoopRef_3.prefab",
+					"Dependencies":[
+						"Assets/Res/LoopDependency_2/LoopRef_4.prefab"
+					]
+				},
+				{
+					"AssetName":"Assets/Res/LoopDependency_2/LoopRef_4.prefab",
+					"Dependencies":[
+						"Assets/Res/LoopDependency_2/LoopRef_5.prefab"
+					]
+				},
+				{
+					"AssetName":"Assets/Res/LoopDependency_2/LoopRef_5.prefab",
+					"Dependencies":[
 					]
 				}
 			]

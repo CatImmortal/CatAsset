@@ -40,6 +40,15 @@ public class Entry : MonoBehaviour
         {
             CatAssetManager.UnloadScene("Assets/Res/Scene/Scene_1.unity");
         }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            CatAssetManager.LoadAsset("Assets/Res/LoopDependency_1/LoopRef_1.prefab", (obj) =>
+            {
+              
+
+            });
+        }
     }
 
 }

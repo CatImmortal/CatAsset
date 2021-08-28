@@ -8,11 +8,15 @@ namespace CatAsset.Editor
     /// 打包规则
     /// </summary>
     [Serializable]
-    public class PackageRule
+    public class PackageRule:IComparable<PackageRule>
     {
         public string Directory;
         public PackageMode Mode;
 
+        public int CompareTo(PackageRule other)
+        {
+            return Directory.CompareTo(other.Directory);
+        }
     }
 }
 

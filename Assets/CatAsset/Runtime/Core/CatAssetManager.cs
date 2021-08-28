@@ -25,7 +25,7 @@ namespace CatAsset
         /// <summary>
         /// Asset和Asset运行时信息的关联(不包括场景)
         /// </summary>
-        private static Dictionary<Object, AssetRuntimeInfo> AssetToRuntimeInfo = new Dictionary<Object, AssetRuntimeInfo>();
+        private static Dictionary<Object, AssetRuntimeInfo> assetToAssetInfo = new Dictionary<Object, AssetRuntimeInfo>();
 
         /// <summary>
         /// 任务执行器
@@ -63,7 +63,7 @@ namespace CatAsset
         /// </summary>
         public static void AddAssetToRuntimeInfo(AssetRuntimeInfo info)
         {
-            AssetToRuntimeInfo.Add(info.Asset, info);
+            assetToAssetInfo.Add(info.Asset, info);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace CatAsset
         /// </summary>
         public static void RemoveAssetToRuntimeInfo(AssetRuntimeInfo info)
         {
-            AssetToRuntimeInfo.Remove(info.Asset);
+            assetToAssetInfo.Remove(info.Asset);
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace CatAsset
         /// </summary>
         public static void UnloadAsset(Object asset)
         {
-            if (!AssetToRuntimeInfo.TryGetValue(asset,out AssetRuntimeInfo assetInfo))
+            if (!assetToAssetInfo.TryGetValue(asset,out AssetRuntimeInfo assetInfo))
             {
                 Debug.LogError("要卸载的Asset不是从CatAsset加载的：" + asset.name);
                 return;
