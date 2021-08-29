@@ -16,5 +16,5 @@ MonoBehaviour:
   Options: 256
   IsAnalyzeRedundancy: 1
   OutputPath: E:\GitProjects\CatAsset\AssetBundleOutput
-  ManifestVersion: 6
+  ManifestVersion: 7
   IsCopyToStreamingAssets: 1

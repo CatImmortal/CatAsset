@@ -17,6 +17,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawPackageRuleView()
         {
+            EditorGUI.BeginChangeCheck();
 
             EditorGUILayout.Space();
 
@@ -79,8 +80,11 @@ namespace CatAsset.Editor
                 cfg.Rules.Sort();
             }
 
-            EditorUtility.SetDirty(Util.PkgRuleCfg);
 
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(Util.PkgRuleCfg);
+            }
 
         }
     }

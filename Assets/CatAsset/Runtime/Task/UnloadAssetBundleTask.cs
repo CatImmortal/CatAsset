@@ -33,11 +33,12 @@ namespace CatAsset
         public UnloadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
         {
             abInfo = (AssetBundleRuntimeInfo)userData;
+            State = TaskState.Waiting;  //初始状态设置为Waiting 避免占用每帧任务处理次数
         }
 
         public override void Execute()
         {
-            timer = 0;
+           
         }
 
         public override void UpdateState()
@@ -64,7 +65,7 @@ namespace CatAsset
                     if (info.Asset != null)
                     {
                         info.UseCount = 0;  //重置引用计数
-                        CatAssetManager.RemoveAssetToRuntimeInfo(info);
+                        CatAssetManager.RemoveAssetToRuntimeInfo(info);  //删除关联
                     }
                 }
 

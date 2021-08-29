@@ -13,7 +13,5 @@ MonoBehaviour:
   m_Name: PackageRuleConfig
   m_EditorClassIdentifier: 
   Rules:
-  - Directory: Assets/Res/Analyze_1
-    Mode: 0
-  - Directory: Assets/Res/Analyze_2
+  - Directory: Assets/Res/Common
     Mode: 0

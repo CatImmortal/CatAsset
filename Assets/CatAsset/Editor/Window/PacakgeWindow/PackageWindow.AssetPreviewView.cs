@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Editor
 {
@@ -22,6 +25,9 @@ namespace CatAsset.Editor
         /// </summary>
         private List<AssetBundleBuild> abBuildList;
 
+        private MethodInfo FindTextureByTypeMI;
+        private object[] paramObjs = new object[1];
+
         /// <summary>
         /// 初始化资源预览界面
         /// </summary>
@@ -33,6 +39,9 @@ namespace CatAsset.Editor
             {
                 abFoldOut[abBuild.assetBundleName] = false;
             }
+
+            FindTextureByTypeMI = typeof(EditorGUIUtility).GetMethod("FindTextureByType", BindingFlags.NonPublic | BindingFlags.Static);
+
         }
 
         /// <summary>
@@ -50,6 +59,11 @@ namespace CatAsset.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
+                if (GUILayout.Button("刷新", GUILayout.Width(100)))
+                {
+                    InitAssetsPreviewView();
+                }
+
                 if (GUILayout.Button("全部展开", GUILayout.Width(100)))
                 {
                     foreach (AssetBundleBuild abBuild in abBuildList)
@@ -66,12 +80,12 @@ namespace CatAsset.Editor
                     }
                 }
 
-
-
-                if (GUILayout.Button("刷新", GUILayout.Width(100)))
+                if (GUILayout.Button("检测循环依赖",GUILayout.Width(150)))
                 {
-                    InitAssetsPreviewView();
+                    LoopDependencAnalyzer.AnalyzeLoopDependenc(Util.PkgRuleCfg.GetAssetBundleBuildList(isAnalyzeRedundancy));
                 }
+
+               
             }
 
 
@@ -84,10 +98,53 @@ namespace CatAsset.Editor
                 {
                     foreach (string assetName in abBuild.assetNames)
                     {
-                        EditorGUILayout.LabelField("\t" + assetName);
+
+                        DrawAsset(assetName);
+                        
                     }
                 }
             }
+        }
+   
+        /// <summary>
+        /// 根据Asset类型绘制
+        /// </summary>
+        private void DrawAsset(string assetName)
+        {
+            Object asset = AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
+            Type assetType = asset.GetType();
+
+            GUIContent content = new GUIContent();
+
+            if (assetType != typeof(Texture2D))
+            {
+                paramObjs[0] = assetType;
+                content.image = (Texture2D)FindTextureByTypeMI.Invoke(null,paramObjs);
+            }
+            else
+            {
+                content.image = EditorGUIUtility.FindTexture(assetName);
+            }
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (content != null)
+                {
+                    EditorGUILayout.LabelField("", GUILayout.Width(30));
+                    EditorGUILayout.LabelField(content, GUILayout.Width(20));
+                    EditorGUILayout.LabelField(assetName, GUILayout.Width(400));
+                }
+                else
+                {
+                    EditorGUILayout.LabelField("\t   " + assetName, GUILayout.Width(455));
+                }
+
+                if (GUILayout.Button("选中",GUILayout.Width(50)))
+                {
+                    Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetName,typeof(Object));
+                }
+            }
+           
         }
     }
 }

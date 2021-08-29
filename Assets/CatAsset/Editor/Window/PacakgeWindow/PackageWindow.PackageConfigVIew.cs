@@ -128,7 +128,6 @@ namespace CatAsset.Editor
             Util.PkgCfg.OutputPath = outputPath;
 
             EditorUtility.SetDirty(Util.PkgCfg);
-            AssetDatabase.SaveAssets();
 
         }
 
@@ -143,8 +142,18 @@ namespace CatAsset.Editor
                 isInitPackageConfigView = true;
             }
 
-            EditorGUILayout.LabelField("游戏版本号：" + Application.version);
-            manifestVersion = EditorGUILayout.IntField("资源清单版本号：", manifestVersion, GUILayout.Width(200));
+            EditorGUI.BeginChangeCheck();
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("游戏版本号：" + Application.version,GUILayout.Width(200));
+
+                EditorGUILayout.LabelField("资源清单版本号：", GUILayout.Width(100));
+                manifestVersion = EditorGUILayout.IntField(manifestVersion, GUILayout.Width(50));
+
+            }
+
+            EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("选择打包平台：");
 
@@ -203,6 +212,7 @@ namespace CatAsset.Editor
                 isAnalyzeRedundancy = toggle.enabled;
             }
 
+
             EditorGUILayout.Space();
 
             using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("打包平台只选中了1个时，打包后复制资源到StreamingAssets下", isCopyToStreamingAssets))
@@ -214,16 +224,9 @@ namespace CatAsset.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("保存打包配置", GUILayout.Width(200)))
-                {
-                    SavePackageConfig();
-                    EditorUtility.DisplayDialog("提示", "保存完毕", "确认");
-                }
 
                 if (GUILayout.Button("打包AssetBundle", GUILayout.Width(200)))
                 {
-                    //保存打包配置
-                    SavePackageConfig();
 
                     //检查是否选中至少一个平台
                     if (Util.PkgCfg.TargetPlatforms.Count == 0)
@@ -245,8 +248,6 @@ namespace CatAsset.Editor
                             Packager.ExecutePackagePipeline(outputPath, Util.PkgCfg.Options, item, Util.PkgCfg.ManifestVersion, false, isAnalyzeRedundancy);
                         }
                     }
-                    EditorUtility.SetDirty(Util.PkgCfg);
-                    AssetDatabase.SaveAssets();
 
                     //修改窗口上显示的资源清单版本号
                     manifestVersion = Util.PkgCfg.ManifestVersion;
@@ -258,8 +259,10 @@ namespace CatAsset.Editor
             }
 
 
-
-
+            if (EditorGUI.EndChangeCheck())
+            {
+                SavePackageConfig();
+            }
         }
     }
 }

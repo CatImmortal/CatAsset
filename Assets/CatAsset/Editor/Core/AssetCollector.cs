@@ -19,7 +19,7 @@ namespace CatAsset.Editor
         private static Dictionary<PackageMode, Func<string, AssetBundleBuild[]>> collectorFuncDict = new Dictionary<PackageMode, Func<string, AssetBundleBuild[]>>();
 
         /// <summary>
-        /// 要排除的文件后缀名
+        /// 要排除的文件后缀名集合
         /// </summary>
         private static HashSet<string> excludeExtension = new HashSet<string>();
 
@@ -27,9 +27,10 @@ namespace CatAsset.Editor
         {
             excludeExtension.Add(".meta");
             excludeExtension.Add(".cs");
+            excludeExtension.Add(".asmdef");
+            excludeExtension.Add(".giparams");
 
-
-            collectorFuncDict.Add(PackageMode.Model_1, Model_1_CollecteFunc);
+            collectorFuncDict.Add(PackageMode.Mode_1, Model_1_CollecteFunc);
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace CatAsset.Editor
                 {
                     if (excludeExtension.Contains(file.Extension))
                     {
-                        //跳过meta和cshape代码文件
+                        //跳过不该打包的文件
                         continue;
                     }
                     int index = file.FullName.IndexOf("Assets\\");

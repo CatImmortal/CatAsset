@@ -134,7 +134,7 @@ namespace CatAsset.Editor
                
             }
 
-            //写入清单文件的json
+            //写入清单文件json
             string json = CatJson.JsonParser.ToJson(manifest);
             using (StreamWriter sw = new StreamWriter(outputPath + "\\CatAssetManifest.json"))
             {
