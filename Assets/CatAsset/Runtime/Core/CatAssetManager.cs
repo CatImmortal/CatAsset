@@ -16,7 +16,7 @@ namespace CatAsset
         /// AssetBundle运行时信息字典
         /// </summary>
         private static Dictionary<string, AssetBundleRuntimeInfo> assetBundleInfoDict = new Dictionary<string, AssetBundleRuntimeInfo>();
-        
+
         /// <summary>
         /// Asset运行时信息字典
         /// </summary>
@@ -32,7 +32,23 @@ namespace CatAsset
         /// </summary>
         private static TaskExcutor taskExcutor = new TaskExcutor();
 
+        /// <summary>
+        /// 是否开启编辑器资源模式
+        /// </summary>
+        public static bool IsEditorMode
+        {
+            get;
+            set;
+        }
 
+        /// <summary>
+        /// 编辑器资源模式下的最大加载延时
+        /// </summary>
+        public static float EditorModeMaxDelay
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// 设置单帧最大加载数量
@@ -112,15 +128,24 @@ namespace CatAsset
         /// <summary>
         /// 加载Asset
         /// </summary>
-        public static void LoadAsset(string assetName,Action<object> loadedCallback,int priority = 0)
+        public static void LoadAsset(string assetName, Action<object> loadedCallback, int priority = 0)
         {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                LoadEditorAssetTask editorModeTask = new LoadEditorAssetTask(taskExcutor, assetName, 0, loadedCallback, null);
+                taskExcutor.AddTask(editorModeTask);
+                return;
+            }
+#endif
+
             if (assetBundleInfoDict.Count == 0)
             {
                 Debug.LogError("Asset加载失败,未调用CheckManifest进行资源清单检查");
                 return;
             }
 
-            if (!assetInfoDict.TryGetValue(assetName,out AssetRuntimeInfo assetInfo))
+            if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
             {
                 throw new Exception("Asset加载失败，不在资源清单中：" + assetName);
             }
@@ -142,7 +167,7 @@ namespace CatAsset
             //增加引用计数
             assetInfo.UseCount++;
 
-            if (assetInfo.Asset != null) 
+            if (assetInfo.Asset != null)
             {
                 //已加 直接调用回调方法
                 loadedCallback?.Invoke(assetInfo.Asset);
@@ -150,7 +175,7 @@ namespace CatAsset
             }
 
             //未加载 创建加载Asset的任务
-            LoadAssetTask task = new LoadAssetTask(taskExcutor, assetName,priority, loadedCallback, assetInfo);
+            LoadAssetTask task = new LoadAssetTask(taskExcutor, assetName, priority, loadedCallback, assetInfo);
             taskExcutor.AddTask(task);
         }
 
@@ -159,9 +184,21 @@ namespace CatAsset
         /// </summary>
         public static void UnloadAsset(Object asset)
         {
-            if (!assetToAssetInfo.TryGetValue(asset,out AssetRuntimeInfo assetInfo))
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                return;
+            }
+#endif
+
+            if (!assetToAssetInfo.TryGetValue(asset, out AssetRuntimeInfo assetInfo))
             {
                 Debug.LogError("要卸载的Asset不是从CatAsset加载的：" + asset.name);
+                return;
+            }
+
+            if (assetInfo.UseCount == 0)
+            {
                 return;
             }
 
@@ -190,12 +227,27 @@ namespace CatAsset
                 }
             }
         }
- 
+
         /// <summary>
         /// 加载场景
         /// </summary>
         public static void LoadScene(string sceneName, Action<object> loadedCallback, int priority = 0)
         {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                AsyncOperation asyncOp = SceneManager.LoadSceneAsync(sceneName,LoadSceneMode.Additive);
+                asyncOp.completed += (op) =>
+                {
+                    if (op.isDone)
+                    {
+                        loadedCallback?.Invoke(null);
+                    }
+                };
+                return;
+            }
+#endif
+
             if (assetBundleInfoDict.Count == 0)
             {
                 Debug.LogError("场景加载失败,未调用CheckManifest进行资源清单检查");
@@ -234,7 +286,15 @@ namespace CatAsset
         /// </summary>
         public static void UnloadScene(string sceneName)
         {
-            if (!assetInfoDict.TryGetValue(sceneName,out AssetRuntimeInfo assetInfo))
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                SceneManager.UnloadSceneAsync(sceneName);
+                return;
+            }
+#endif
+
+            if (!assetInfoDict.TryGetValue(sceneName, out AssetRuntimeInfo assetInfo))
             {
                 Debug.LogError("要卸载的Scene不在资源清单中：" + sceneName);
                 return;
@@ -242,7 +302,6 @@ namespace CatAsset
 
             if (assetInfo.UseCount == 0)
             {
-                Debug.LogError("要卸载的场景未加载过：" + sceneName);
                 return;
             }
 
@@ -281,6 +340,15 @@ namespace CatAsset
         /// </summary>
         public static void LoadAssets(List<string> assetNames, Action<object> loadedCallback, int priority = 0)
         {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                LoadEditorAssetsTask editorModeTask = new LoadEditorAssetsTask(taskExcutor, nameof(LoadEditorAssetsTask), 0, loadedCallback, assetNames);
+                taskExcutor.AddTask(editorModeTask);
+                return;
+            }
+#endif
+
             if (assetBundleInfoDict.Count == 0)
             {
                 Debug.LogError("Asset加载失败,未调用CheckManifest进行资源清单检查");
@@ -291,6 +359,8 @@ namespace CatAsset
             LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask), priority, loadedCallback, assetNames);
             taskExcutor.AddTask(task);
         }
+
+
     }
 }
 

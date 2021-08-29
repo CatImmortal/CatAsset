@@ -8,19 +8,29 @@ namespace CatAsset
 {
     public class CatAssetComponent : MonoBehaviour
     {
+        public bool IsEditorMode;
+        public float EditorModeMaxDelay;
         private void Awake()
         {
-            UnityWebRequest uwr = UnityWebRequest.Get(Application.streamingAssetsPath + "/CatAssetManifest.json");
+            CatAssetManager.IsEditorMode = IsEditorMode;
+            CatAssetManager.EditorModeMaxDelay = EditorModeMaxDelay;
 
-            UnityWebRequestAsyncOperation result = uwr.SendWebRequest();
-            result.completed += (asyncOp) =>
+            if (!IsEditorMode)
             {
-                string json = result.webRequest.downloadHandler.text;
-                result.webRequest.Dispose();
+                UnityWebRequest uwr = UnityWebRequest.Get(Application.streamingAssetsPath + "/CatAssetManifest.json");
 
-                CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(json);
-                CatAssetManager.CheckManifest(manifest);
-            };
+                UnityWebRequestAsyncOperation result = uwr.SendWebRequest();
+                result.completed += (asyncOp) =>
+                {
+                    string json = result.webRequest.downloadHandler.text;
+                    result.webRequest.Dispose();
+
+                    CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(json);
+                    CatAssetManager.CheckManifest(manifest);
+                };
+            }
+
+          
         }
 
         private void Update()
