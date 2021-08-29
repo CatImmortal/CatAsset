@@ -49,6 +49,24 @@ public class Entry : MonoBehaviour
 
             });
         }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            List<string> assetNames = new List<string>();
+            assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab");
+            assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_2.prefab");
+            assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_3.prefab");
+            assetNames.Add("Assets/Res/Analyze_2/AnalyzePrefab_2.prefab");
+            CatAssetManager.LoadAssets(assetNames, (obj) =>
+            {
+                List<Object> assets = (List<Object>)obj;
+                foreach (Object item in assets)
+                {
+                    GameObject prefab = (GameObject)item;
+                    go = Instantiate(prefab, canvans.transform);
+                }
+            });
+        }
     }
 
 }

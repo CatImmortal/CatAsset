@@ -109,7 +109,6 @@ namespace CatAsset
         }
 
 
-
         /// <summary>
         /// 加载Asset
         /// </summary>
@@ -123,7 +122,7 @@ namespace CatAsset
 
             if (!assetInfoDict.TryGetValue(assetName,out AssetRuntimeInfo assetInfo))
             {
-                throw new Exception("Asset加载失败，该Asset不在资源清单中：" + assetName);
+                throw new Exception("Asset加载失败，不在资源清单中：" + assetName);
             }
 
             //加载依赖Asset 已加载的就增加它们的引用计数 未加载的就创建加载任务
@@ -165,8 +164,6 @@ namespace CatAsset
                 Debug.LogError("要卸载的Asset不是从CatAsset加载的：" + asset.name);
                 return;
             }
-
-           
 
             //卸载依赖资源
             foreach (string dependency in assetInfo.ManifestInfo.Dependencies)
@@ -277,6 +274,22 @@ namespace CatAsset
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 批量加载Asset
+        /// </summary>
+        public static void LoadAssets(List<string> assetNames, Action<object> loadedCallback, int priority = 0)
+        {
+            if (assetBundleInfoDict.Count == 0)
+            {
+                Debug.LogError("Asset加载失败,未调用CheckManifest进行资源清单检查");
+                return;
+            }
+
+            //创建批量加载Asset的任务
+            LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask), priority, loadedCallback, assetNames);
+            taskExcutor.AddTask(task);
         }
     }
 }

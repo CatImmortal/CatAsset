@@ -35,10 +35,6 @@ namespace CatAsset
             assetInfo = (AssetRuntimeInfo)userData;
         }
 
-        public override string ToString()
-        {
-            return Name;
-        }
 
         public override void Execute()
         {

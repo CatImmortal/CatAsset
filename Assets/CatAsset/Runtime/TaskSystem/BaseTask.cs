@@ -67,6 +67,11 @@ namespace CatAsset
         /// 刷新任务状态
         /// </summary>
         public abstract void UpdateState();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
 }
