@@ -20,7 +20,7 @@ namespace CatAsset
         public AssetBundle AssetBundle;
 
         /// <summary>
-        /// AssetBundle加载地址
+        /// AssetBundle物理加载地址
         /// </summary>
         public string LoadPath;
 

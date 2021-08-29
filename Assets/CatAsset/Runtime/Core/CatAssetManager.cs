@@ -145,6 +145,7 @@ namespace CatAsset
 
             if (assetInfo.Asset != null) 
             {
+                //已加 直接调用回调方法
                 loadedCallback?.Invoke(assetInfo.Asset);
                 return;
             }
@@ -165,8 +166,7 @@ namespace CatAsset
                 return;
             }
 
-            //减少Asset的引用计数
-            assetInfo.UseCount--;
+           
 
             //卸载依赖资源
             foreach (string dependency in assetInfo.ManifestInfo.Dependencies)
@@ -175,17 +175,18 @@ namespace CatAsset
                 UnloadAsset(dependencyInfo.Asset);
             }
 
+            //减少Asset的引用计数
+            assetInfo.UseCount--;
             if (assetInfo.UseCount == 0)
             {
                 //Asset已经没人使用了
-                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-
                 //从 所属的AssetBundle的使用中Asset集合 中移除
+                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
                 abInfo.UsedAsset.Remove(assetInfo.ManifestInfo.AssetName);
 
                 if (abInfo.UsedAsset.Count == 0)
                 {
-                    //AssetBundel已经没人使用了 创建卸载任务 开始卸载倒计时
+                    //AssetBundle已经没人使用了 创建卸载任务 开始卸载倒计时
                     UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName, 0, null, abInfo);
                     taskExcutor.AddTask(task);
                     Debug.Log("创建了卸载AB的任务：" + task.Name);
@@ -200,13 +201,13 @@ namespace CatAsset
         {
             if (assetBundleInfoDict.Count == 0)
             {
-                Debug.LogError("Asset加载失败,未调用CheckManifest进行资源清单检查");
+                Debug.LogError("场景加载失败,未调用CheckManifest进行资源清单检查");
                 return;
             }
 
             if (!assetInfoDict.TryGetValue(sceneName, out AssetRuntimeInfo assetInfo))
             {
-                throw new Exception("Asset加载失败，该Asset不在资源清单中：" + sceneName);
+                throw new Exception("场景加载失败，该场景不在资源清单中：" + sceneName);
             }
 
             //加载依赖Asset 已加载的就增加它们的引用计数 未加载的就创建加载任务
@@ -260,13 +261,11 @@ namespace CatAsset
 
             //减少场景的引用计数
             assetInfo.UseCount--;
-
             if (assetInfo.UseCount == 0)
             {
-                //场景Asset已经没人使用了
-                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-
+                //场景已经没人使用了
                 //从 所属的AssetBundle的使用中Asset集合 中移除
+                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
                 abInfo.UsedAsset.Remove(assetInfo.ManifestInfo.AssetName);
 
                 if (abInfo.UsedAsset.Count == 0)

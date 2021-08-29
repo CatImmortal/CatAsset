@@ -50,11 +50,6 @@ namespace CatAsset
                 LoadAssetBundleTask task = new LoadAssetBundleTask(owner, abInfo.ManifestInfo.AssetBundleName, Priority + 1, null, abInfo);
                 owner.AddTask(task);
             }
-            else
-            {
-                //标记进所属的 AssetBundle的使用中Asset集合 中
-                abInfo.UsedAsset.Add(Name);
-            }
         }
 
         public override void UpdateState()
@@ -94,7 +89,6 @@ namespace CatAsset
         protected bool CheckAssetBundle()
         {
             return abInfo.AssetBundle != null;
-
         }
 
         /// <summary>

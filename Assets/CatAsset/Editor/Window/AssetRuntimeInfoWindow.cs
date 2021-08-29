@@ -29,6 +29,8 @@ namespace CatAsset.Editor
         /// 资源信息中的各assetbundle是否已展开
         /// </summary>
         private Dictionary<string, bool> abFoldOut = new Dictionary<string, bool>();
+        
+
 
         private bool isInitTaskInfoView;
         private Dictionary<string, BaseTask> taskDict;
@@ -39,7 +41,39 @@ namespace CatAsset.Editor
             AssetRuntimeInfoWindow window = GetWindow<AssetRuntimeInfoWindow>(false, "资源运行时信息窗口");
             window.minSize = new Vector2(800, 600);
             window.Show();
+            
         }
+
+        private void OnPlayModeChanged(PlayModeStateChange mode)
+        {
+            switch (mode)
+            {
+                case PlayModeStateChange.EnteredEditMode:
+                    break;
+                case PlayModeStateChange.ExitingEditMode:
+                    //窗口打开期间，每次运行游戏都重置下数据
+                    isInitAssetInfoView = false;
+                    isInitTaskInfoView = false;
+                    break;
+                case PlayModeStateChange.EnteredPlayMode:
+                    break;
+                case PlayModeStateChange.ExitingPlayMode:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void OnEnable()
+        {
+            EditorApplication.playModeStateChanged += OnPlayModeChanged;
+        }
+
+        private void OnDisable()
+        {
+            EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+        }
+
 
         private void OnGUI()
         {
@@ -66,11 +100,14 @@ namespace CatAsset.Editor
             
         }
 
+        
+
         /// <summary>
         /// 初始化资源信息界面
         /// </summary>
         private void InitAssetInfoView()
         {
+            isInitAssetInfoView = true;
             assetBundleInfoDict = typeof(CatAssetManager).GetField("assetBundleInfoDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, AssetBundleRuntimeInfo>;
             assetInfoDict = typeof(CatAssetManager).GetField("assetInfoDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, AssetRuntimeInfo>;
 
@@ -83,40 +120,56 @@ namespace CatAsset.Editor
         {
             if (!isInitAssetInfoView)
             {
-                isInitAssetInfoView = true;
                 InitAssetInfoView();
             }
+            bool isAllFoldOutTrue = false;
+            bool isAllFoldOutFalse = false;
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("\tAsset名称");
-                EditorGUILayout.LabelField("\tAsset实例");
-                EditorGUILayout.LabelField("\t引用计数");
+                if (GUILayout.Button("全部展开", GUILayout.Width(100)))
+                {
+                    isAllFoldOutTrue = true;
+                }
+
+                if (GUILayout.Button("全部收起", GUILayout.Width(100)))
+                {
+                    isAllFoldOutFalse = true;
+                }
             }
+
 
             foreach (KeyValuePair<string, AssetBundleRuntimeInfo> item in assetBundleInfoDict)
             {
                 string abName = item.Key;
                 AssetBundleRuntimeInfo abInfo = item.Value;
+
+                //只绘制有Asset在使用中的AssetBundle
                 if (abInfo.UsedAsset.Count > 0)
                 {
-                   
-
-                    //只绘制有Asset在使用中的AssetBundle
+                    
                     if (!abFoldOut.ContainsKey(abName))
                     {
                         abFoldOut.Add(abName, false);
                     }
 
+                    if (isAllFoldOutTrue)
+                    {
+                        //点击过全部展开
+                        abFoldOut[abName] = true;
+                    }
+                    else if (isAllFoldOutFalse)
+                    {
+                        //点击过全部收起
+                        abFoldOut[abName] = false;
+                    }
+
                     abFoldOut[abName] = EditorGUILayout.Foldout(abFoldOut[abName], abName);
+
                     if (abFoldOut[abName] == true)
                     {
-                       
-
                         foreach (AssetManifestInfo assetManifestInfo in abInfo.ManifestInfo.Assets)
                         {
-
-
                             string assetName = assetManifestInfo.AssetName;
                             AssetRuntimeInfo assetInfo = assetInfoDict[assetName];
                             if (assetInfo.UseCount == 0)
@@ -126,17 +179,28 @@ namespace CatAsset.Editor
 
                             using (new EditorGUILayout.HorizontalScope())
                             {
-                                EditorGUILayout.LabelField("\t" + assetName);
+                                //Asset名
+                                EditorGUILayout.LabelField(assetName,GUILayout.Width(350));
+
+                                //Asset名
                                 if (assetInfo.Asset)
                                 {
-                                    EditorGUILayout.LabelField("\t" + assetInfo.Asset.GetType().Name);
+                                    EditorGUILayout.LabelField(assetInfo.Asset.GetType().Name, GUILayout.Width(150));
                                 }
                                 else
                                 {
-                                    EditorGUILayout.LabelField("\tScene");
+                                    EditorGUILayout.LabelField("Scene", GUILayout.Width(150));
                                 }
                                 
-                                EditorGUILayout.LabelField("\t" + assetInfo.UseCount.ToString());
+                                //引用计数
+                                EditorGUILayout.LabelField("引用计数：" + assetInfo.UseCount.ToString(),GUILayout.Width(100));
+
+                                if (GUILayout.Button("选中", GUILayout.Width(50)))
+                                {
+                                    Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
+                                }
+
+
                             }
                         }
 
@@ -151,6 +215,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitTaksInfoView()
         {
+            isInitTaskInfoView = true;
             TaskExcutor taskExcutor = typeof(CatAssetManager).GetField("taskExcutor", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as TaskExcutor;
             taskDict = typeof(TaskExcutor).GetField("taskDict", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(taskExcutor) as Dictionary<string, BaseTask>;
         }
@@ -162,7 +227,6 @@ namespace CatAsset.Editor
         {
             if (!isInitTaskInfoView)
             {
-                isInitTaskInfoView = true;
                 InitTaksInfoView();
             }
 
