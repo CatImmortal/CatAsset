@@ -30,6 +30,11 @@ namespace CatAsset
         public bool IsScene;
 
         /// <summary>
+        /// 资源组
+        /// </summary>
+        public string Group;
+
+        /// <summary>
         /// AssetBundle中的所有Asset清单信息
         /// </summary>
         public AssetManifestInfo[] Assets;

@@ -43,6 +43,10 @@ namespace CatAsset.Editor
                         }
                     }
                     rule.Mode = (PackageMode)EditorGUILayout.EnumPopup(rule.Mode, GUILayout.Width(100));
+
+                    EditorGUILayout.LabelField("资源组：",GUILayout.Width(50));
+                    rule.Group = EditorGUILayout.TextField(rule.Group,GUILayout.Width(100));
+
                     if (GUILayout.Button("X", GUILayout.Width(50)))
                     {
                         needRemoveRule.Add(i);
@@ -61,6 +65,7 @@ namespace CatAsset.Editor
                     PackageRule lastRule = cfg.Rules[cfg.Rules.Count - 1];
                     rule.Directory = lastRule.Directory;
                     rule.Mode = lastRule.Mode;
+                    rule.Group = lastRule.Group;
                 }
                 cfg.Rules.Add(rule);
             }

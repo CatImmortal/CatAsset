@@ -32,7 +32,7 @@ namespace CatAsset.Editor
             //获取被显式打包的Asset和AssetBundle
             foreach (PackageRule rule in Rules)
             {
-                AssetBundleBuild[] abBuilds = AssetCollector.GetAssetBundleBuilds(rule.Mode, rule.Directory);
+                AssetBundleBuild[] abBuilds = AssetCollector.GetAssetBundleBuilds(rule);
                 if (abBuilds != null)
                 {
                     abBuildList.AddRange(abBuilds);

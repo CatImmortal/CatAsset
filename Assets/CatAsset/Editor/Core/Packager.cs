@@ -47,7 +47,7 @@ namespace CatAsset.Editor
         /// </summary>
         private static string GetFinalOutputPath(string outputPath, BuildTarget targetPlatform, int manifestVersion)
         {
-            string result = outputPath += "\\" + Application.version + "\\" + manifestVersion + "\\" + targetPlatform; ;
+            string result = outputPath +=  "\\"+ targetPlatform  + "\\" + Application.version +"_" + manifestVersion; ;
             return result;
         }
 
@@ -81,9 +81,10 @@ namespace CatAsset.Editor
             AssetBundleManifest unityManifest =  BuildPipeline.BuildAssetBundles(outputPath, abBuildList.ToArray(), options, targetPlatform);
 
             DirectoryInfo dirInfo = new DirectoryInfo(outputPath);
+            string directoryName = outputPath.Substring(outputPath.LastIndexOf("\\") + 1);
             foreach (FileInfo file in dirInfo.GetFiles())
             {
-                if (file.Name == targetPlatform.ToString() || file.Extension == ".manifest")
+                if (file.Name == directoryName || file.Extension == ".manifest")
                 {
                     //删除manifest文件
                     file.Delete();
@@ -120,6 +121,8 @@ namespace CatAsset.Editor
                 abInfo.Hash = unityManifest.GetAssetBundleHash(abInfo.AssetBundleName);
 
                 abInfo.IsScene = abBulid.assetNames[0].EndsWith(".unity");  //判断是否为场景ab
+
+                abInfo.Group = AssetCollector.GetAssetBundleGroup(abInfo.AssetBundleName);  //标记资源组
 
                 abInfo.Assets = new AssetManifestInfo[abBulid.assetNames.Length];
                 for (int j = 0; j < abBulid.assetNames.Length; j++)

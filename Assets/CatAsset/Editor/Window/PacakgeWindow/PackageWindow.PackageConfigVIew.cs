@@ -255,6 +255,9 @@ namespace CatAsset.Editor
 
                     EditorUtility.DisplayDialog("提示", "打包AssetBundle结束", "确认");
 
+                    SavePackageConfig();
+
+                    return;
                 }
             }
 

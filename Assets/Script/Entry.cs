@@ -2,15 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CatAsset;
+using UnityEngine.Networking;
+
 public class Entry : MonoBehaviour
 {
     public GameObject canvans;
     private GameObject prefab;
     private GameObject go;
     // Start is called before the first frame update
+
     void Start()
     {
-       
+        UnityWebRequest uwr = UnityWebRequest.Get("http://127.0.0.1/version.txt");
+        UnityWebRequestAsyncOperation op = uwr.SendWebRequest();
+        op.completed += (obj) =>
+        {
+            Debug.Log(op.webRequest.downloadHandler.text);
+        };
     }
 
     private void Update()

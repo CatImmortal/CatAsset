@@ -15,13 +15,19 @@ MonoBehaviour:
   Rules:
   - Directory: Assets/Res/Analyze_1
     Mode: 0
+    Group: Base
   - Directory: Assets/Res/Analyze_2
     Mode: 0
+    Group: Base
   - Directory: Assets/Res/Common
     Mode: 0
+    Group: Base
   - Directory: Assets/Res/LoopDependency_1
     Mode: 0
+    Group: Loop
   - Directory: Assets/Res/LoopDependency_2
     Mode: 0
+    Group: Loop
   - Directory: Assets/Res/Scene
     Mode: 0
+    Group: Base

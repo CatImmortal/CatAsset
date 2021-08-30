@@ -15,6 +15,6 @@ MonoBehaviour:
   TargetPlatforms: 05000000
   Options: 256
   IsAnalyzeRedundancy: 1
-  OutputPath: E:\GitProjects\CatAsset\AssetBundleOutput
-  ManifestVersion: 7
+  OutputPath: E:/GitProjects/CatAsset/WebServer
+  ManifestVersion: 15
   IsCopyToStreamingAssets: 1

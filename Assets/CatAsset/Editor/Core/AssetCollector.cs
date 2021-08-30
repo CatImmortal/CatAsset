@@ -16,12 +16,17 @@ namespace CatAsset.Editor
         /// <summary>
         /// 打包模式与Asset收集方法
         /// </summary>
-        private static Dictionary<PackageMode, Func<string, AssetBundleBuild[]>> collectorFuncDict = new Dictionary<PackageMode, Func<string, AssetBundleBuild[]>>();
+        private static Dictionary<PackageMode, Func<PackageRule, AssetBundleBuild[]>> collectorFuncDict = new Dictionary<PackageMode, Func<PackageRule, AssetBundleBuild[]>>();
 
         /// <summary>
         /// 要排除的文件后缀名集合
         /// </summary>
         private static HashSet<string> excludeExtension = new HashSet<string>();
+
+        /// <summary>
+        /// AssetBundle与其资源组
+        /// </summary>
+        private static Dictionary<string, string> AssetBundleGroupDict = new Dictionary<string, string>();
 
         static AssetCollector()
         {
@@ -36,26 +41,39 @@ namespace CatAsset.Editor
         /// <summary>
         /// 根据打包模式获取AssetBundleBuild列表
         /// </summary>
-        public static AssetBundleBuild[] GetAssetBundleBuilds(PackageMode model,string directory)
+        public static AssetBundleBuild[] GetAssetBundleBuilds(PackageRule rule)
         {
-            if (collectorFuncDict.TryGetValue(model, out Func<string, AssetBundleBuild[]> func))
+            if (collectorFuncDict.TryGetValue(rule.Mode, out Func<PackageRule, AssetBundleBuild[]> func))
             {
-                return func(directory);
+                return func(rule);
             }
 
-            throw new Exception($"未定义打包模式{model}下的Asset收集方法");
+            throw new Exception($"未定义打包模式{rule.Mode}下的Asset收集方法");
+        }
+
+        /// <summary>
+        /// 获取AssetBundle的资源组
+        /// </summary>
+        public static string GetAssetBundleGroup(string assetBundleName)
+        {
+            if (AssetBundleGroupDict.ContainsKey(assetBundleName))
+            {
+                return AssetBundleGroupDict[assetBundleName];
+            }
+
+            return null;
         }
 
         /// <summary>
         /// 打包模式1 将指定文件夹下所有Asset打包为一个Bundle
         /// </summary>
-        private static AssetBundleBuild[] Model_1_CollecteFunc(string directory)
+        private static AssetBundleBuild[] Model_1_CollecteFunc(PackageRule rule)
         {
             List<string> assetPaths = new List<string>();
 
-            if (Directory.Exists(directory))
+            if (Directory.Exists(rule.Directory))
             {
-                DirectoryInfo dirInfo = new DirectoryInfo(directory);
+                DirectoryInfo dirInfo = new DirectoryInfo(rule.Directory);
                 FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);  //递归获取所有文件
                 foreach (FileInfo file in files)
                 {
@@ -77,8 +95,16 @@ namespace CatAsset.Editor
 
                 AssetBundleBuild abBuild = default;
                 abBuild.assetNames = assetPaths.ToArray();
-                abBuild.assetBundleName = directory.Replace("Assets/Res/", "") + ".bundle";
+                abBuild.assetBundleName = rule.Directory.Replace("Assets/Res/", "") + ".bundle";
                 abBuild.assetBundleName = abBuild.assetBundleName.ToLower();
+
+                //if (!AssetBundleGroupDict.ContainsKey(abBuild.assetBundleName))
+                //{
+                //    AssetBundleGroupDict.Add(abBuild.assetBundleName, rule.Group);
+                //}
+
+                AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
+
                 return new AssetBundleBuild[] { abBuild };
             }
 

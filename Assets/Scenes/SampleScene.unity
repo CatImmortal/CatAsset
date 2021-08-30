@@ -344,6 +344,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsEditorMode: 1
+  EditorModeMaxDelay: 1
 --- !u!4 &1436959665
 Transform:
   m_ObjectHideFlags: 0

@@ -92,8 +92,16 @@ namespace CatAsset.Editor
 
             foreach (AssetBundleBuild abBuild in abBuildList)
             {
-                abFoldOut[abBuild.assetBundleName] = EditorGUILayout.Foldout(abFoldOut[abBuild.assetBundleName], abBuild.assetBundleName);
-
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    abFoldOut[abBuild.assetBundleName] = EditorGUILayout.Foldout(abFoldOut[abBuild.assetBundleName], abBuild.assetBundleName);
+                    string group = AssetCollector.GetAssetBundleGroup(abBuild.assetBundleName);
+                    if (group != null)
+                    {
+                        EditorGUILayout.LabelField("资源组：" + group);
+                    }
+                }
+              
                 if (abFoldOut[abBuild.assetBundleName] == true)
                 {
                     foreach (string assetName in abBuild.assetNames)

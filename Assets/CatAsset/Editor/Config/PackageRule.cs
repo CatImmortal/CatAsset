@@ -12,6 +12,7 @@ namespace CatAsset.Editor
     {
         public string Directory;
         public PackageMode Mode;
+        public string Group = "Base";
 
         public int CompareTo(PackageRule other)
         {
