@@ -182,7 +182,7 @@ namespace CatAsset.Editor
                                 //Asset名
                                 EditorGUILayout.LabelField(assetName,GUILayout.Width(350));
 
-                                //Asset名
+                                //Asset类型
                                 if (assetInfo.Asset)
                                 {
                                     EditorGUILayout.LabelField(assetInfo.Asset.GetType().Name, GUILayout.Width(150));

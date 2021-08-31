@@ -46,25 +46,26 @@ namespace CatAsset
             if (abInfo.UsedAsset.Count > 0)
             {
                 //被重新使用了 不进行卸载了
-                State = TaskState.Done;
+                State = TaskState.Finished;
                 return;
             }
 
             timer += Time.deltaTime;
-            //Debug.Log("卸载AB计时：" + timer + ",AB名：" + Name);
             if (timer >= delayUnloadTime)
             {
                 //时间到了 
-                State = TaskState.Done;
+                State = TaskState.Finished;
 
-                //解除此AssetBundle中已加载的资源与AssetRuntimeInfo的关联
+                //解除此AssetBundle中已加载的Asset与AssetRuntimeInfo的关联
                 for (int i = 0; i < abInfo.ManifestInfo.Assets.Length; i++)
                 {
                     string assetName = abInfo.ManifestInfo.Assets[i].AssetName;
+
                     AssetRuntimeInfo info = CatAssetManager.GetAssetInfo(assetName);
+                    info.UseCount = 0;  //重置引用计数
+
                     if (info.Asset != null)
                     {
-                        info.UseCount = 0;  //重置引用计数
                         CatAssetManager.RemoveAssetToRuntimeInfo(info);  //删除关联
                     }
                 }
@@ -72,10 +73,10 @@ namespace CatAsset
                 //卸载AssetBundle
                 abInfo.AssetBundle.Unload(true);
                 Debug.Log("已卸载AB:" + Name);
-
                 return;
             }
 
+            //状态修改为Waiting 这样不占用owner任务执行次数
             State = TaskState.Waiting;
         }
     }

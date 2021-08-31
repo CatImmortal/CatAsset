@@ -49,7 +49,7 @@ namespace CatAsset
                 }
                 Completed?.Invoke(loadedAssets);
 #endif
-                State = TaskState.Done;
+                State = TaskState.Finished;
                 return;
             }
 

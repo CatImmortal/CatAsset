@@ -24,6 +24,10 @@ namespace CatAsset
         /// </summary>
         public string LoadPath;
 
+        /// <summary>
+        /// 是否加载失败
+        /// </summary>
+        public bool IsLoadFailed;
 
         private HashSet<string> usedAsset;
 

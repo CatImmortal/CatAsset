@@ -97,12 +97,6 @@ namespace CatAsset.Editor
                 abBuild.assetNames = assetPaths.ToArray();
                 abBuild.assetBundleName = rule.Directory.Replace("Assets/Res/", "") + ".bundle";
                 abBuild.assetBundleName = abBuild.assetBundleName.ToLower();
-
-                //if (!AssetBundleGroupDict.ContainsKey(abBuild.assetBundleName))
-                //{
-                //    AssetBundleGroupDict.Add(abBuild.assetBundleName, rule.Group);
-                //}
-
                 AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
 
                 return new AssetBundleBuild[] { abBuild };

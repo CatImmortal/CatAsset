@@ -27,7 +27,7 @@ namespace CatAsset
         /// <summary>
         /// 执行完毕
         /// </summary>
-        Done,
+        Finished,
     }
 
 }

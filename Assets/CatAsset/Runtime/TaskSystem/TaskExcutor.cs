@@ -15,19 +15,27 @@ namespace CatAsset
         private Dictionary<string, BaseTask> taskDict = new Dictionary<string, BaseTask>();
 
         /// <summary>
-        /// 需要移除的任务
-        /// </summary>
-        private List<string> needRemoveTasks = new List<string>();
-
-        /// <summary>
         /// 需要添加的任务
         /// </summary>
         private List<BaseTask> needAddTasks = new List<BaseTask>();
 
         /// <summary>
+        /// 需要移除的任务
+        /// </summary>
+        private List<string> needRemoveTasks = new List<string>();
+
+        /// <summary>
         /// 每帧最多执行任务次数
         /// </summary>
         public int MaxExcuteCount = 10;
+
+        /// <summary>
+        /// 是否存在指定任务
+        /// </summary>
+        public bool HasTask(string taskName)
+        {
+            return taskDict.ContainsKey(taskName);
+        }
 
         /// <summary>
         /// 是否存在指定任务
@@ -105,8 +113,8 @@ namespace CatAsset
             if (taskDict.Count > 0)
             {
                 //处理任务
-                int executeCount = 0;
 
+                int executeCount = 0;
                 foreach (KeyValuePair<string, BaseTask> item in taskDict)
                 {
                     if (executeCount >= MaxExcuteCount)
@@ -119,25 +127,24 @@ namespace CatAsset
                     switch (task.State)
                     {
                         case TaskState.Free:
-                            //Debug.Log("开始任务：" + task.Name);
                             task.Execute();
                             task.UpdateState();
                             executeCount++;
                             break;
+
                         case TaskState.Waiting:
-                            //Debug.Log("等待任务：" + task.Name);
                             task.UpdateState();
                             break;
+
                         case TaskState.Executing:
-                            //Debug.Log("执行任务：" + task.Name);
                             task.UpdateState();
                             executeCount++;
                             break;
                     }
                    
-                    if (task.State == TaskState.Done)
+                    if (task.State == TaskState.Finished)
                     {
-                        //在task.Update执行过后，State可能会变成Done 这样在当前帧Update后完成的任务就在当前帧移除了
+                        //在task.UpdateState执行过后，State可能会变成Finished 这样在当前帧UpdateState后完成的任务就在当前帧移除了
                         needRemoveTasks.Add(task.Name);
                     }
 

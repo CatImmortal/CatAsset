@@ -14,6 +14,8 @@ namespace CatAsset
     {
         private List<string> assetNames;
 
+        private bool flag;
+
         public LoadAssetsTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
         {
             assetNames = (List<string>)userData;
@@ -23,16 +25,23 @@ namespace CatAsset
         {
             foreach (string assetName in assetNames)
             {
-                CatAssetManager.LoadAsset(assetName,null);
+                CatAssetManager.LoadAsset(assetName, null);
             }
         }
 
         public override void UpdateState()
         {
-            if (CheckLoadAssets())
+            if (flag == false)
             {
-                State = TaskState.Done;
+                //Execute执行过，要等一帧
+                flag = true;
+                State = TaskState.Waiting;
+                return;
+            }
 
+            if (CheckLoadAssetsFinished())
+            {
+                State = TaskState.Finished;
                 Completed?.Invoke(GetLoadedAssets());
                 return;
             }
@@ -41,14 +50,13 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 检查Asset是否已全部加载完
+        /// 检查所有Asset的加载任务是否已结束
         /// </summary>
-        private bool CheckLoadAssets()
+        private bool CheckLoadAssetsFinished()
         {
             foreach (string assetName in assetNames)
             {
-                AssetRuntimeInfo assetInfo = CatAssetManager.GetAssetInfo(assetName);
-                if (assetInfo.Asset == null)
+                if (owner.HasTask(assetName) && owner.GetTaskState(assetName) != TaskState.Finished)
                 {
                     return false;
                 }
@@ -57,6 +65,9 @@ namespace CatAsset
             return true;
         }
 
+        /// <summary>
+        /// 获得所有已加载的Asset
+        /// </summary>
         private List<Object> GetLoadedAssets()
         {
             List<Object> loadedAssets = new List<Object>(assetNames.Count);

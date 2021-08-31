@@ -13,12 +13,12 @@ public class Entry : MonoBehaviour
 
     void Start()
     {
-        UnityWebRequest uwr = UnityWebRequest.Get("http://127.0.0.1/version.txt");
-        UnityWebRequestAsyncOperation op = uwr.SendWebRequest();
-        op.completed += (obj) =>
-        {
-            Debug.Log(op.webRequest.downloadHandler.text);
-        };
+        //UnityWebRequest uwr = UnityWebRequest.Get("http://127.0.0.1/version.txt");
+        //UnityWebRequestAsyncOperation op = uwr.SendWebRequest();
+        //op.completed += (obj) =>
+        //{
+        //    Debug.Log(op.webRequest.downloadHandler.text);
+        //};
     }
 
     private void Update()
@@ -70,6 +70,11 @@ public class Entry : MonoBehaviour
                 List<Object> assets = (List<Object>)obj;
                 foreach (Object item in assets)
                 {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+
                     GameObject prefab = (GameObject)item;
                     go = Instantiate(prefab, canvans.transform);
                 }

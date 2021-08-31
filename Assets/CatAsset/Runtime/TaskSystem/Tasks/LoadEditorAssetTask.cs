@@ -45,7 +45,7 @@ namespace CatAsset
                 Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(Name, typeof(Object));
                 Completed?.Invoke(asset);
 #endif
-                State = TaskState.Done;
+                State = TaskState.Finished;
                 return;
             }
 

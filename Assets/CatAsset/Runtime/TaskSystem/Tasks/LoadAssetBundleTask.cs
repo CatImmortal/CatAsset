@@ -40,10 +40,21 @@ namespace CatAsset
 
         public override void UpdateState()
         {
+
+
             if (asyncOp.isDone)
             {
+                State = TaskState.Finished;
+
+                if (asyncOp.assetBundle == null)
+                {
+                    //AssetBundle加载失败
+                    abInfo.IsLoadFailed = true;
+                    return;
+                }
+
                 //AssetBundle加载完毕
-                State = TaskState.Done;
+                abInfo.IsLoadFailed = false;
                 abInfo.AssetBundle = asyncOp.assetBundle;
                 Debug.Log("AssetBundle加载完毕：" + Name);
                 return;
