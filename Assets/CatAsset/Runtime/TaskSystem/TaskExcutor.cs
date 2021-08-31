@@ -60,7 +60,6 @@ namespace CatAsset
         {
             if (!taskDict.TryGetValue(name,out BaseTask task))
             {
-                Debug.LogError("AppendTaskCompleted调用失败，此Task不存在：" + name);
                 return;
             }
 

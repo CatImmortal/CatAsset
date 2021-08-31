@@ -38,7 +38,7 @@ namespace CatAsset
         public static bool IsEditorMode
         {
             get;
-            set;
+            internal set;
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace CatAsset
         public static float EditorModeMaxDelay
         {
             get;
-            set;
+            internal set;
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace CatAsset
         /// <summary>
         /// 获取AssetBundle运行时信息
         /// </summary>
-        public static AssetBundleRuntimeInfo GetAssetBundleInfo(string assetBundleName)
+        internal static AssetBundleRuntimeInfo GetAssetBundleInfo(string assetBundleName)
         {
             return assetBundleInfoDict[assetBundleName];
         }
@@ -69,7 +69,7 @@ namespace CatAsset
         /// <summary>
         /// 获取Asset运行时信息
         /// </summary>
-        public static AssetRuntimeInfo GetAssetInfo(string assetName)
+        internal static AssetRuntimeInfo GetAssetInfo(string assetName)
         {
             return assetInfoDict[assetName];
         }
@@ -77,7 +77,7 @@ namespace CatAsset
         /// <summary>
         /// 添加Asset到Asset运行时信息的映射
         /// </summary>
-        public static void AddAssetToRuntimeInfo(AssetRuntimeInfo info)
+        internal static void AddAssetToRuntimeInfo(AssetRuntimeInfo info)
         {
             assetToAssetInfo.Add(info.Asset, info);
         }
@@ -85,7 +85,7 @@ namespace CatAsset
         /// <summary>
         /// 移除Asset到Asset运行时信息的映射
         /// </summary>
-        public static void RemoveAssetToRuntimeInfo(AssetRuntimeInfo info)
+        internal static void RemoveAssetToRuntimeInfo(AssetRuntimeInfo info)
         {
             assetToAssetInfo.Remove(info.Asset);
         }
@@ -101,7 +101,7 @@ namespace CatAsset
         /// <summary>
         /// 使用资源清单初始化资源数据
         /// </summary>
-        public static void CheckManifest(CatAssetManifest manifest)
+        internal static void CheckManifest(CatAssetManifest manifest)
         {
             foreach (AssetBundleManifestInfo abManifestInfo in manifest.AssetBundles)
             {
