@@ -35,7 +35,9 @@ namespace CatAsset.Editor
             excludeExtension.Add(".asmdef");
             excludeExtension.Add(".giparams");
 
-            collectorFuncDict.Add(PackageMode.Mode_1, Model_1_CollecteFunc);
+            collectorFuncDict.Add(PackageMode.NAssetToOneBundle, NAssetToOneBundle);
+            collectorFuncDict.Add(PackageMode.TopDirectoryNAssetToOneBundle, TopDirectoryNAssetToOneBundle);
+            collectorFuncDict.Add(PackageMode.NAssetToNBundle, NAssetToNBundle);
         }
 
         /// <summary>
@@ -65,9 +67,19 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 打包模式1 将指定文件夹下所有Asset打包为一个Bundle
+        /// 获取AsestBundle名
         /// </summary>
-        private static AssetBundleBuild[] Model_1_CollecteFunc(PackageRule rule)
+        private static string GetAssetBundleName(string name)
+        {
+            string assetBundleName = name.Replace("Assets/","").Replace('/','_') + ".bundle";
+            assetBundleName = assetBundleName.ToLower();
+            return assetBundleName;
+        }
+
+        /// <summary>
+        /// 将指定文件夹下所有Asset打包为一个Bundle
+        /// </summary>
+        private static AssetBundleBuild[] NAssetToOneBundle(PackageRule rule)
         {
             List<string> assetPaths = new List<string>();
 
@@ -95,8 +107,7 @@ namespace CatAsset.Editor
 
                 AssetBundleBuild abBuild = default;
                 abBuild.assetNames = assetPaths.ToArray();
-                abBuild.assetBundleName = rule.Directory.Replace("Assets/Res/", "") + ".bundle";
-                abBuild.assetBundleName = abBuild.assetBundleName.ToLower();
+                abBuild.assetBundleName = GetAssetBundleName(rule.Directory);
                 AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
 
                 return new AssetBundleBuild[] { abBuild };
@@ -104,8 +115,111 @@ namespace CatAsset.Editor
 
             return null;
         }
-   
 
+        /// <summary>
+        /// 对指定文件夹下所有一级子目录各自使用NAssetToOneBundle打包为一个bundle
+        /// </summary>
+        private static AssetBundleBuild[] TopDirectoryNAssetToOneBundle(PackageRule rule)
+        {
+            List<string> assetPaths = new List<string>();
+            List<AssetBundleBuild> abBulidList = new List<AssetBundleBuild>();
+
+            if (Directory.Exists(rule.Directory))
+            {
+                DirectoryInfo dirInfo = new DirectoryInfo(rule.Directory);
+
+                //获取所有一级目录
+                DirectoryInfo[] topDirectorys = dirInfo.GetDirectories("*", SearchOption.TopDirectoryOnly);
+
+                foreach (DirectoryInfo topDirInfo in topDirectorys)
+                {
+                    //递归获取所有文件
+                    FileInfo[] files = topDirInfo.GetFiles("*", SearchOption.AllDirectories);  
+                    foreach (FileInfo file in files)
+                    {
+                        if (excludeExtension.Contains(file.Extension))
+                        {
+                            //跳过不该打包的文件
+                            continue;
+                        }
+                        int index = file.FullName.IndexOf("Assets\\");
+                        string path = file.FullName.Substring(index);
+                        assetPaths.Add(path.Replace('\\', '/'));
+                    }
+
+                    if (assetPaths.Count == 0)
+                    {
+                        //空包不打
+                        continue;
+                    }
+
+                    AssetBundleBuild abBuild = default;
+                    abBuild.assetNames = assetPaths.ToArray();
+                    assetPaths.Clear();
+                    abBuild.assetBundleName = GetAssetBundleName(rule.Directory + "/" + topDirInfo.Name);
+                    AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
+
+                    abBulidList.Add(abBuild);
+                }
+
+                if (abBulidList.Count > 0)
+                {
+                    return abBulidList.ToArray();
+                }
+
+                return null;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 对指定文件夹下所有一级子目录各自使用NAssetToOneBundle打包为一个bundle
+        /// </summary>
+        private static AssetBundleBuild[] NAssetToNBundle(PackageRule rule)
+        {
+
+            List<AssetBundleBuild> abBulidList = new List<AssetBundleBuild>();
+
+            if (Directory.Exists(rule.Directory))
+            {
+                DirectoryInfo dirInfo = new DirectoryInfo(rule.Directory);
+
+                //递归获取所有文件
+                FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);
+                foreach (FileInfo file in files)
+                {
+                    if (excludeExtension.Contains(file.Extension))
+                    {
+                        //跳过不该打包的文件
+                        continue;
+                    }
+                 
+
+                    int assetsIndex = file.FullName.IndexOf("Assets\\");
+                    string assetName = file.FullName.Substring(assetsIndex).Replace('\\', '/');
+
+                    int suffixIndex = assetName.LastIndexOf('.');
+                    string abName = assetName.Remove(suffixIndex);  //ab名 不带后缀
+
+                    AssetBundleBuild abBuild = default;
+                    abBuild.assetNames = new string[] { assetName };
+
+                    abBuild.assetBundleName = GetAssetBundleName(abName);
+                    AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
+                    abBulidList.Add(abBuild);
+                }
+
+                if (abBulidList.Count > 0)
+                {
+                    return abBulidList.ToArray();
+                }
+
+                return null;
+            }
+
+            return null;
+        }
     }
 
 }

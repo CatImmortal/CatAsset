@@ -7,10 +7,15 @@ public enum PackageMode
     /// <summary>
     /// 将指定文件夹下的所有asset打包为一个bundle
     /// </summary>
-    Mode_1,
+    NAssetToOneBundle,
 
     /// <summary>
-    /// 对指定文件夹下所有一级子目录各自使用Mode_1打包为一个bundle
+    /// 对指定文件夹下所有一级子目录各自使用NAssetToOneBundle打包为一个bundle
     /// </summary>
-    Mode_2,
+    TopDirectoryNAssetToOneBundle,
+
+    /// <summary>
+    /// 对指定文件夹下的所有asset各自打包为一个bundle
+    /// </summary>
+    NAssetToNBundle,
 }
