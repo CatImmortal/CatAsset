@@ -16,13 +16,13 @@ namespace CatAsset.Editor
         public static void AnalyzeLoopDependenc(List<AssetBundleBuild> abBuildList)
         {
             List<string> loop = new List<string>();
-            foreach (var item in abBuildList)
+            foreach (AssetBundleBuild abBuild in abBuildList)
             {
-                foreach (var item2  in item.assetNames)
+                foreach (string assetName  in abBuild.assetNames)
                 {
                     List<string> depLink = new List<string>();  //记录依赖链的列表
-                    depLink.Add(item2);
-                    if (!GetDependencies(item2,new HashSet<string>(),depLink))
+                    depLink.Add(assetName);
+                    if (!GetDependencies(assetName,new HashSet<string>() { assetName},depLink))
                     {
                         string loopLog = "     ";
                         HashSet<string> depLinkSet = new HashSet<string>();
@@ -71,8 +71,7 @@ namespace CatAsset.Editor
             //获取所有直接依赖
             string[] dependencies = Util.GetDependencies(assetName, false);
 
-            
-            //把直接依赖都放进set中
+            //递归依赖
             foreach (string item in dependencies)
             {
                 if (depSet.Contains(item))
@@ -82,18 +81,14 @@ namespace CatAsset.Editor
                     return false;
                 }
 
-                depSet.Add(item);
-            }
-
-            //递归依赖
-            foreach (string item in dependencies)
-            {
                 depLink.Add(item);
+                depSet.Add(item);
                 if (!GetDependencies(item, depSet,depLink))
                 {
                     return false;
                 }
                 depLink.RemoveAt(depLink.Count - 1);
+                depSet.Remove(item);
             }
 
             //把直接依赖都从set中移除
