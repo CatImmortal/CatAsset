@@ -21,7 +21,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 获取实际进行打包的AssetBundleBuild列表
+        /// 获取最终实际进行打包的AssetBundleBuild列表
         /// </summary>
         public  List<AssetBundleBuild> GetAssetBundleBuildList(bool isAnalyzeRedundancy = true)
         {

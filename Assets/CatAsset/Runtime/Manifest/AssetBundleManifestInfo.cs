@@ -22,7 +22,7 @@ namespace CatAsset
         /// <summary>
         /// 文件Hash
         /// </summary>
-        public Hash128 Hash;
+        public int Hash;
 
         /// <summary>
         /// 是否为场景的AssetBundle包
@@ -39,7 +39,10 @@ namespace CatAsset
         /// </summary>
         public AssetManifestInfo[] Assets;
 
-       
+        public bool Equals(AssetBundleManifestInfo abInfo)
+        {
+            return AssetBundleName == abInfo.AssetBundleName && Length == abInfo.Length && Hash == abInfo.Hash;
+        }
     }
 }
 

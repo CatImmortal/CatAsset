@@ -50,6 +50,7 @@ namespace CatAsset
                 {
                     //AssetBundle加载失败
                     abInfo.IsLoadFailed = true;
+                    Debug.LogError("AssetBundle加载失败：" + Name);
                     return;
                 }
 

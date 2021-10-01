@@ -3,22 +3,64 @@ using System.Collections.Generic;
 using UnityEngine;
 using CatAsset;
 using UnityEngine.Networking;
+using System.IO;
+using CatJson;
 
 public class Entry : MonoBehaviour
 {
     public GameObject canvans;
     private GameObject prefab;
     private GameObject go;
-    // Start is called before the first frame update
+    public string UpdateUriPrefix;
+
 
     void Start()
     {
-        //UnityWebRequest uwr = UnityWebRequest.Get("http://127.0.0.1/version.txt");
-        //UnityWebRequestAsyncOperation op = uwr.SendWebRequest();
-        //op.completed += (obj) =>
-        //{
-        //    Debug.Log(op.webRequest.downloadHandler.text);
-        //};
+        Debug.Log(Application.persistentDataPath);
+
+        string versionTxtUri = UpdateUriPrefix + "/version.txt";
+        Debug.Log(versionTxtUri);
+        UnityWebRequest uwr = UnityWebRequest.Get(versionTxtUri);
+        UnityWebRequestAsyncOperation op = uwr.SendWebRequest();
+        op.completed += (obj) =>
+        {
+            if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
+            {
+                Debug.LogError(op.webRequest.error);
+            }
+            //Debug.Log(op.webRequest.downloadHandler.text);
+
+            JsonObject jo = JsonParser.ParseJson(op.webRequest.downloadHandler.text);
+
+            //清单版本号
+            int manifestVefsion = (int)jo["ManifestVersion"].Number;
+
+            CatAssetUpdater.UpdateUriPrefix = UpdateUriPrefix + "/StandaloneWindows" + "/" + Application.version + "_" + manifestVefsion;
+            Debug.Log(CatAssetUpdater.UpdateUriPrefix);
+
+            CatAssetUpdater.CheckVersion((count,length) =>
+            {
+                Debug.Log("需要更新资源数：" + count);
+                Debug.Log("总大小：" + length);
+
+                foreach (var item in CatAssetUpdater.needUpdateList)
+                {
+                    Debug.Log(item);
+                }
+
+                //if (count > 0)
+                //{
+                //    CatAssetUpdater.UpdateAsset((updatedCount, updatedLength) => {
+                //        Debug.Log("已更新数量：" + updatedCount);
+                //        Debug.Log("已更新大小：" + updatedLength);
+                //    });
+                //}
+            });
+        };
+
+
+
+       
     }
 
     private void Update()

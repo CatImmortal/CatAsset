@@ -1,12 +1,4 @@
 {
-  "GameUpdate": true,
-  "LatestGameVersion": "0.1.0",
-  "InternalGameVersion": 0,
-  "InternalResourceVersion": 43,
-  "GameUpdateUrl": "http://127.0.0.1/Windows",
-  "VersionListLength": 829,
-  "VersionListHashCode": -1237072416,
-  "VersionListZipLength": 584,
-  "VersionListZipHashCode": 1196116502,
-  "END_OF_JSON": ""
+  "GameVersion" : "0.1",
+  "ManifestVersion" : 1
 }

@@ -16,5 +16,5 @@ MonoBehaviour:
   Options: 256
   IsAnalyzeRedundancy: 1
   OutputPath: E:/GitProjects/CatAsset/WebServer
-  ManifestVersion: 15
+  ManifestVersion: 2
   IsCopyToStreamingAssets: 1

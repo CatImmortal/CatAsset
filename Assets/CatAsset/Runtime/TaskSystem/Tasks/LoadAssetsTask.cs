@@ -23,6 +23,7 @@ namespace CatAsset
 
         public override void Execute()
         {
+            flag = false;
             foreach (string assetName in assetNames)
             {
                 CatAssetManager.LoadAsset(assetName, null);

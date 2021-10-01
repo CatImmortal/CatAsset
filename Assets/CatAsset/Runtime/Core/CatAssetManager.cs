@@ -30,7 +30,9 @@ namespace CatAsset
         /// <summary>
         /// 任务执行器
         /// </summary>
-        private static TaskExcutor taskExcutor = new TaskExcutor();
+        internal static TaskExcutor taskExcutor = new TaskExcutor();
+
+      
 
         /// <summary>
         /// 是否开启编辑器资源模式

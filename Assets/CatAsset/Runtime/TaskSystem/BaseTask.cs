@@ -64,7 +64,7 @@ namespace CatAsset
         public abstract void Execute();
 
         /// <summary>
-        /// 刷新任务状态
+        /// 刷新任务状态（对任务状态的修改只在此方法中进行）
         /// </summary>
         public abstract void UpdateState();
 

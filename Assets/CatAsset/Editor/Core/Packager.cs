@@ -24,7 +24,6 @@ namespace CatAsset.Editor
             //创建打包输出目录
             CreateOutputPath(finalOutputPath);
 
-
             //获取AssetBundleBuildList，然后打包AssetBundle
             List<AssetBundleBuild> abBuildList = Util.PkgRuleCfg.GetAssetBundleBuildList();
             AssetBundleManifest unityManifest = PackageAssetBundles(finalOutputPath, abBuildList,options,targetPlatform);
@@ -47,7 +46,7 @@ namespace CatAsset.Editor
         /// </summary>
         private static string GetFinalOutputPath(string outputPath, BuildTarget targetPlatform, int manifestVersion)
         {
-            string result = outputPath +=  "\\"+ targetPlatform  + "\\" + Application.version +"_" + manifestVersion; ;
+            string result = outputPath +=  "\\"+ targetPlatform  + "\\" + Application.version +"_" + manifestVersion;
             return result;
         }
 
@@ -115,10 +114,10 @@ namespace CatAsset.Editor
                 abInfo.AssetBundleName = abBulid.assetBundleName;
 
                 string fullPath = outputPath + "\\" + abInfo.AssetBundleName;
-                FileInfo fileInfo = new FileInfo(fullPath);
-                abInfo.Length = fileInfo.Length;
-
-                abInfo.Hash = unityManifest.GetAssetBundleHash(abInfo.AssetBundleName);
+                
+                byte[] bytes = File.ReadAllBytes(fullPath);
+                abInfo.Length = bytes.Length;
+                abInfo.Hash = CatAsset.Util.GetHash(bytes);
 
                 abInfo.IsScene = abBulid.assetNames[0].EndsWith(".unity");  //判断是否为场景ab
 
