@@ -13,7 +13,7 @@ namespace CatAsset
 
 
 
-        public LoadSceneTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public LoadSceneTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
         }
 
@@ -25,7 +25,7 @@ namespace CatAsset
         protected override void LoadDone()
         {
             //场景加载完毕
-            Completed?.Invoke(null);
+            OnCompleted?.Invoke(null);
             Debug.Log("场景加载完毕：" + Name);
             return;
         }

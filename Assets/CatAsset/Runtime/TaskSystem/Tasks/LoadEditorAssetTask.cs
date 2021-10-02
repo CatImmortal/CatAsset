@@ -23,7 +23,7 @@ namespace CatAsset
             }
         }
 
-        public LoadEditorAssetTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public LoadEditorAssetTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
            
         }
@@ -43,7 +43,7 @@ namespace CatAsset
             {
 #if UNITY_EDITOR
                 Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(Name, typeof(Object));
-                Completed?.Invoke(asset);
+                OnCompleted?.Invoke(asset);
 #endif
                 State = TaskState.Finished;
                 return;

@@ -25,7 +25,7 @@ namespace CatAsset
             }
         }
 
-        public WebRequestTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public WebRequestTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
         }
 
@@ -49,11 +49,11 @@ namespace CatAsset
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
-                Completed?.Invoke(null);
+                OnCompleted?.Invoke(null);
             }
             else
             {
-                Completed?.Invoke(op.webRequest);
+                OnCompleted?.Invoke(op.webRequest);
             }
         }
     }

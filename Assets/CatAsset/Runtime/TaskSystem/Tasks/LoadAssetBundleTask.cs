@@ -10,9 +10,10 @@ namespace CatAsset
     /// </summary>
     public class LoadAssetBundleTask : BaseTask
     {
+        private AssetBundleCreateRequest asyncOp;
+
         private AssetBundleRuntimeInfo abInfo;
 
-        private AssetBundleCreateRequest asyncOp;
 
         public override float Progress
         {
@@ -27,7 +28,7 @@ namespace CatAsset
             }
         }
 
-        public LoadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public LoadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
             abInfo = (AssetBundleRuntimeInfo)userData;
         }

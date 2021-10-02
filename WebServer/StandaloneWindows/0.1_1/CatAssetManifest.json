@@ -5,7 +5,7 @@
 		{
 			"AssetBundleName":"res_analyze_1.bundle",
 			"Length":3775,
-			"Hash":-1728209269,
+			"Hash":"362c31520659441391787cd4b8a4e850",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -31,7 +31,7 @@
 		{
 			"AssetBundleName":"res_analyze_2.bundle",
 			"Length":3658,
-			"Hash":1520315879,
+			"Hash":"d4c1e7245e33babe2cf85c2a58202994",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -51,7 +51,7 @@
 		{
 			"AssetBundleName":"res_common.bundle",
 			"Length":6951965,
-			"Hash":1083812479,
+			"Hash":"27f6ae28fe09250124737e21433b2be1",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -85,7 +85,7 @@
 		{
 			"AssetBundleName":"res_loopdependency_1.bundle",
 			"Length":2535,
-			"Hash":1135269091,
+			"Hash":"fc28931fca26d5aa03c68eab9e0ca8cb",
 			"Group":"Loop",
 			"Assets":[
 				{
@@ -105,7 +105,7 @@
 		{
 			"AssetBundleName":"res_loopdependency_2.bundle",
 			"Length":2546,
-			"Hash":-68025291,
+			"Hash":"544f6bcf960cb8a8f8e1cacd49864eb7",
 			"Group":"Loop",
 			"Assets":[
 				{
@@ -131,7 +131,7 @@
 		{
 			"AssetBundleName":"res_scene.bundle",
 			"Length":9073,
-			"Hash":-1795765420,
+			"Hash":"b663f6bc4b621f502fdcf3c566083f1b",
 			"IsScene":true,
 			"Group":"Base",
 			"Assets":[

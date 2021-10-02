@@ -30,7 +30,7 @@ namespace CatAsset
             }
         }
 
-        public UnloadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public UnloadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
             abInfo = (AssetBundleRuntimeInfo)userData;
             State = TaskState.Waiting;  //初始状态设置为Waiting 避免占用每帧任务处理次数

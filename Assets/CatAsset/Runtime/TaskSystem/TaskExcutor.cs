@@ -25,7 +25,7 @@ namespace CatAsset
         private List<string> needRemoveTasks = new List<string>();
 
         /// <summary>
-        /// 每帧最多执行任务次数
+        /// 单帧最大任务执行次数
         /// </summary>
         public int MaxExcuteCount = 10;
 
@@ -63,7 +63,7 @@ namespace CatAsset
                 return;
             }
 
-            task.Completed += completed;
+            task.OnCompleted += completed;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace CatAsset
             {
 
                 //任务已存在 不需要重复添加
-                AppendTaskCompleted(task.Name, task.Completed);
+                AppendTaskCompleted(task.Name, task.OnCompleted);
                 return;
             }
 

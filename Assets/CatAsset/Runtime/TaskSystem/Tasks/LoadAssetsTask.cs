@@ -16,7 +16,7 @@ namespace CatAsset
 
         private bool flag;
 
-        public LoadAssetsTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public LoadAssetsTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
             assetNames = (List<string>)userData;
         }
@@ -43,7 +43,7 @@ namespace CatAsset
             if (CheckLoadAssetsFinished())
             {
                 State = TaskState.Finished;
-                Completed?.Invoke(GetLoadedAssets());
+                OnCompleted?.Invoke(GetLoadedAssets());
                 return;
             }
 

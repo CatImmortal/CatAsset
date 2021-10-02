@@ -12,8 +12,21 @@ namespace CatAsset
     public class DownloadFileTask : BaseTask
     {
         private UnityWebRequestAsyncOperation op;
-        private string downloadFilePath;
-        private string downloadTempFilePath;
+
+        /// <summary>
+        /// 下载地址
+        /// </summary>
+        private string downloadUri;
+
+        /// <summary>
+        /// 本地文件路径
+        /// </summary>
+        private string localFilePath;
+
+        /// <summary>
+        /// 本地临时文件路径
+        /// </summary>
+        private string localTempFilePath;
 
         public override float Progress
         {
@@ -28,24 +41,24 @@ namespace CatAsset
             }
         }
 
-        public DownloadFileTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public DownloadFileTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted,string localFilePath,string downloadUri, object userData) : base(owner, name, priority, onCompleted, userData)
         {
+            this.localFilePath = localFilePath;
+            this.downloadUri = downloadUri;
         }
 
         public override void Execute()
         {
 
-            downloadFilePath = Util.GetReadWritePath(Name);
-            downloadTempFilePath = downloadFilePath + ".dowloading";
-            string downloadUri = (string)UserData;
+            localTempFilePath = localFilePath + ".dowloading";
 
             //开始位置
             int startLength = 0;
 
             //先检查本地是否已存在下载文件
-            if (File.Exists(downloadTempFilePath))
+            if (File.Exists(localTempFilePath))
             {
-                using (FileStream fs = File.OpenWrite(downloadTempFilePath))
+                using (FileStream fs = File.OpenWrite(localTempFilePath))
                 {
                     //检查已下载的字节数
                     fs.Seek(0, SeekOrigin.End);
@@ -60,7 +73,7 @@ namespace CatAsset
                 //处理断点续传
                 uwr.SetRequestHeader("Range", $"bytes={{{startLength}}}-");
             }
-            uwr.downloadHandler = new DownloadHandlerFile(downloadTempFilePath, startLength > 0);
+            uwr.downloadHandler = new DownloadHandlerFile(localTempFilePath, startLength > 0);
             op = uwr.SendWebRequest();
             op.priority = Priority;
         }
@@ -74,23 +87,24 @@ namespace CatAsset
             }
 
 
-            //下载完毕
             State = TaskState.Finished;
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
+                //下载失败
                 Debug.LogError($"{Name}下载失败：{op.webRequest.error}");
-                Completed?.Invoke(null);
+                OnCompleted?.Invoke(null);
             }
             else
             {
+                //下载成功
                 //将临时下载文件移动到正式文件
-                if (File.Exists(downloadFilePath))
+                if (File.Exists(localFilePath))
                 {
-                    File.Delete(downloadFilePath);
+                    File.Delete(localFilePath);
                 }
-                File.Move(downloadTempFilePath, downloadFilePath);
-                Completed?.Invoke(op.webRequest);
+                File.Move(localTempFilePath, localFilePath);
+                OnCompleted?.Invoke(UserData);
             }
 
 

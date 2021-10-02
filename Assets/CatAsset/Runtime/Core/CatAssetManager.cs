@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using Object = UnityEngine.Object;
 using UnityEngine.SceneManagement;
-
+using UnityEngine.Networking;
 namespace CatAsset
 {
     /// <summary>
@@ -32,7 +32,10 @@ namespace CatAsset
         /// </summary>
         internal static TaskExcutor taskExcutor = new TaskExcutor();
 
-      
+        /// <summary>
+        /// 运行模式
+        /// </summary>
+        public static RunMode RunMode;
 
         /// <summary>
         /// 是否开启编辑器资源模式
@@ -53,9 +56,9 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 设置单帧最大加载数量
+        /// 设置单帧最大任务执行数量
         /// </summary>
-        public static void SetMaxLoadCount(int maxCount)
+        public static void SetMaxTaskExuteCount(int maxCount)
         {
             taskExcutor.MaxExcuteCount = maxCount;
         }
@@ -101,31 +104,61 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 使用资源清单初始化资源数据
+        /// 检查安装包内资源清单
         /// </summary>
-        internal static void CheckManifest(CatAssetManifest manifest)
+        public static void CheckPackageManifest(Action callback)
         {
-            foreach (AssetBundleManifestInfo abManifestInfo in manifest.AssetBundles)
-            {
-                AssetBundleRuntimeInfo abRuntimeInfo = new AssetBundleRuntimeInfo();
-                assetBundleInfoDict.Add(abManifestInfo.AssetBundleName, abRuntimeInfo);
-
-                abRuntimeInfo.ManifestInfo = abManifestInfo;
-                abRuntimeInfo.LoadPath = Application.streamingAssetsPath + "/" + abManifestInfo.AssetBundleName;
-
-                foreach (AssetManifestInfo assetManifestInfo in abManifestInfo.Assets)
+            string path = Util.GetReadOnlyPath(Util.GetManifestFileName());
+            WebRequestTask task = new WebRequestTask(taskExcutor, path, 0, (obj) => {
+                if (obj == null)
                 {
-                    AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
-                    assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
-
-                    assetRuntimeInfo.ManifestInfo = assetManifestInfo;
-                    assetRuntimeInfo.AssetBundleName = abManifestInfo.AssetBundleName;
+                    Debug.Log("单机模式资源清单检查失败");
+                    return;
                 }
-            }
+                UnityWebRequest uwr = (UnityWebRequest)obj;
+                CatAssetManifest manifest = CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+                foreach (AssetBundleManifestInfo abInfo in manifest.AssetBundles)
+                {
+                    AddAssetBundleRuntimeInfo(abInfo, false);
+                }
+                callback?.Invoke();
+            }, null);
 
-            Debug.Log("资源清单检查完毕，版本号：" + manifest.GameVersion + "." + manifest.ManifestVersion);
+            taskExcutor.AddTask(task);
         }
 
+        /// <summary>
+        /// 添加AssetBundle运行时信息
+        /// </summary>
+        internal static void AddAssetBundleRuntimeInfo(AssetBundleManifestInfo abInfo,bool inReadWrite)
+        {
+            AssetBundleRuntimeInfo abRuntimeInfo = new AssetBundleRuntimeInfo();
+            assetBundleInfoDict.Add(abInfo.AssetBundleName, abRuntimeInfo);
+
+            abRuntimeInfo.ManifestInfo = abInfo;
+            abRuntimeInfo.InReadWrite = inReadWrite;
+
+            foreach (AssetManifestInfo assetManifestInfo in abInfo.Assets)
+            {
+                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
+                assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
+
+                assetRuntimeInfo.ManifestInfo = assetManifestInfo;
+                assetRuntimeInfo.AssetBundleName = abInfo.AssetBundleName;
+            }
+        }
+
+        /// <summary>
+        /// 添加Asset运行时信息
+        /// </summary>
+        private static void AddAssetRuntimeInfo(AssetManifestInfo assetInfo,string abName)
+        {
+            AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
+            assetInfoDict.Add(assetInfo.AssetName, assetRuntimeInfo);
+
+            assetRuntimeInfo.ManifestInfo = assetInfo;
+            assetRuntimeInfo.AssetBundleName = abName;
+        }
 
         /// <summary>
         /// 加载Asset

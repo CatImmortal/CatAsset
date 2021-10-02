@@ -20,9 +20,33 @@ namespace CatAsset
         public AssetBundle AssetBundle;
 
         /// <summary>
-        /// AssetBundle物理加载地址
+        /// 是否位于读写区
         /// </summary>
-        public string LoadPath;
+        public bool InReadWrite;
+
+        private string loadPath;
+
+        /// <summary>
+        /// 加载地址
+        /// </summary>
+        public string LoadPath
+        {
+            get
+            {
+                if (loadPath == null)
+                {
+                    if (InReadWrite)
+                    {
+                        loadPath = Util.GetReadWritePath(ManifestInfo.AssetBundleName);
+                    }
+                    else
+                    {
+                        loadPath = Util.GetReadOnlyPath(ManifestInfo.AssetBundleName);
+                    }
+                }
+                return loadPath;
+            }
+        }
 
         /// <summary>
         /// 是否加载失败

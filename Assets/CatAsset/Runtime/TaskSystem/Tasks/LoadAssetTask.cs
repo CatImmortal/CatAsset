@@ -30,7 +30,7 @@ namespace CatAsset
             }
         }
 
-        public LoadAssetTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public LoadAssetTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
             assetInfo = (AssetRuntimeInfo)userData;
         }
@@ -116,7 +116,7 @@ namespace CatAsset
             {
                 assetInfo.Asset = abAsyncOp.asset;
                 CatAssetManager.AddAssetToRuntimeInfo(assetInfo);  //添加Asset和AssetRuntimeInfo的关联
-                Completed?.Invoke(assetInfo.Asset);
+                OnCompleted?.Invoke(assetInfo.Asset);
 
                 Debug.Log("Asset加载完毕：" + Name);
             }

@@ -9,22 +9,11 @@ namespace CatAsset
 {
     public static class Util
     {
-        private static MD5 md5 = MD5.Create();
-        
-        /// <summary>
-        /// 获取哈希值
-        /// </summary>
-        public static int GetHash(byte[] bytes)
-        {
-            byte[] md5Bytes = md5.ComputeHash(bytes);
-            int hash = BitConverter.ToInt32(md5Bytes,0);
-            return hash;
-        }
 
         /// <summary>
         /// 获取资源清单文件名
         /// </summary>
-        public static string GetManifestName()
+        public static string GetManifestFileName()
         {
             string name = "CatAssetManifest.json";
             return name;
@@ -48,7 +37,6 @@ namespace CatAsset
             return result;
         }
 
-        
 
 
     }

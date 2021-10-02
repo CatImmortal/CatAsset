@@ -10,12 +10,12 @@ namespace CatAsset
     /// </summary>
     public abstract class BaseTask
     {
-        protected BaseTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData)
+        protected BaseTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData)
         {
             this.owner = owner;
             Name = name;
             Priority = priority;
-            Completed = completed;
+            OnCompleted = onCompleted;
             UserData = userData;
         }
 
@@ -38,7 +38,7 @@ namespace CatAsset
         /// <summary>
         /// 任务执行完毕回调
         /// </summary>
-        public  Action<object> Completed;
+        public  Action<object> OnCompleted;
 
         /// <summary>
         /// 自定义数据

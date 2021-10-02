@@ -22,7 +22,7 @@ namespace CatAsset
         /// <summary>
         /// 文件Hash
         /// </summary>
-        public int Hash;
+        public Hash128 Hash;
 
         /// <summary>
         /// 是否为场景的AssetBundle包

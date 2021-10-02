@@ -24,7 +24,7 @@ namespace CatAsset
             }
         }
 
-        public LoadEditorAssetsTask(TaskExcutor owner, string name, int priority, Action<object> completed, object userData) : base(owner, name, priority, completed, userData)
+        public LoadEditorAssetsTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
         {
             assetNames = (List<string>)userData;
         }
@@ -47,7 +47,7 @@ namespace CatAsset
                     Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
                     loadedAssets.Add(asset);
                 }
-                Completed?.Invoke(loadedAssets);
+                OnCompleted?.Invoke(loadedAssets);
 #endif
                 State = TaskState.Finished;
                 return;

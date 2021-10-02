@@ -29,7 +29,7 @@ namespace CatAsset.Editor
             AssetBundleManifest unityManifest = PackageAssetBundles(finalOutputPath, abBuildList,options,targetPlatform);
 
             //生成资源清单文件
-            GenerateAssetManifestFile(finalOutputPath, abBuildList,unityManifest,manifestVersion);
+            GenerateManifestFile(finalOutputPath, abBuildList,unityManifest,manifestVersion);
 
             //资源清单版本号自增
             ChangeManifestVersion();
@@ -96,7 +96,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 生成资源清单文件
         /// </summary>
-        private static void GenerateAssetManifestFile(string outputPath, List<AssetBundleBuild> abBuildList, AssetBundleManifest unityManifest,int manifestVersion)
+        private static void GenerateManifestFile(string outputPath, List<AssetBundleBuild> abBuildList, AssetBundleManifest unityManifest,int manifestVersion)
         {
 
             CatAssetManifest manifest = new CatAssetManifest();
@@ -114,10 +114,10 @@ namespace CatAsset.Editor
                 abInfo.AssetBundleName = abBulid.assetBundleName;
 
                 string fullPath = outputPath + "\\" + abInfo.AssetBundleName;
-                
-                byte[] bytes = File.ReadAllBytes(fullPath);
-                abInfo.Length = bytes.Length;
-                abInfo.Hash = CatAsset.Util.GetHash(bytes);
+                FileInfo fi = new FileInfo(fullPath);
+
+                abInfo.Length = fi.Length;
+                abInfo.Hash = unityManifest.GetAssetBundleHash(abInfo.AssetBundleName);
 
                 abInfo.IsScene = abBulid.assetNames[0].EndsWith(".unity");  //判断是否为场景ab
 
