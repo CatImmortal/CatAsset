@@ -17,6 +17,12 @@ public class Entry : MonoBehaviour
 
     void Start()
     {
+        if (CatAssetManager.IsEditorMode)
+        {
+            inited = true;
+            return;
+        }
+
         if (CatAssetManager.RunMode == RunMode.PackageOnly)
         {
             CatAssetManager.CheckPackageManifest((success) =>

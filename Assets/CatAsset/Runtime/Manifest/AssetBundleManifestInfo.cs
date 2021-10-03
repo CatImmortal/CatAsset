@@ -35,7 +35,7 @@ namespace CatAsset
         public string Group;
 
         /// <summary>
-        /// AssetBundle中的所有Asset清单信息
+        /// 所有Asset清单信息
         /// </summary>
         public AssetManifestInfo[] Assets;
 

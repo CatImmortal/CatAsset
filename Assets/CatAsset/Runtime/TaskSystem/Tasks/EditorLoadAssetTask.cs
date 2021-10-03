@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿#if UNITY_EDITOR
+
+using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -10,7 +10,7 @@ namespace CatAsset
     /// <summary>
     /// 编辑器资源模式下加载Asset的任务
     /// </summary>
-    public class LoadEditorAssetTask : BaseTask
+    public class EditorLoadAssetTask : BaseTask
     {
         
 
@@ -40,7 +40,7 @@ namespace CatAsset
             }
         }
 
-        public LoadEditorAssetTask(TaskExcutor owner, string name,Action<bool, Object> onFinished) : base(owner, name)
+        public EditorLoadAssetTask(TaskExcutor owner, string name,Action<bool, Object> onFinished) : base(owner, name)
         {
             this.onFinished = onFinished;
         }
@@ -59,10 +59,10 @@ namespace CatAsset
             if (timer >= delay)
             {
                 State = TaskState.Finished;
-#if UNITY_EDITOR
+
                 Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(Name, typeof(Object));
                 onFinished?.Invoke(true, asset);
-#endif
+
                 
                 return;
             }
@@ -73,4 +73,6 @@ namespace CatAsset
     
     }
 }
+
+#endif
 

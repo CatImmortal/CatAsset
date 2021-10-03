@@ -16,7 +16,7 @@ namespace CatAsset
         /// <summary>
         /// 资源检查信息的字典
         /// </summary>
-        private static Dictionary<string, AssetBundleCheckInfo> checkInfoDict = new Dictionary<string, AssetBundleCheckInfo>();
+        private static Dictionary<string, UpdateCheckInfo> checkInfoDict = new Dictionary<string, UpdateCheckInfo>();
 
         /// <summary>
         /// 读写区资源信息
@@ -111,7 +111,7 @@ namespace CatAsset
 
             foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
             {
-                AssetBundleCheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
+                UpdateCheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
                 checkInfo.ReadOnlyInfo = item;
             }
 
@@ -135,7 +135,7 @@ namespace CatAsset
 
             foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
             {
-                AssetBundleCheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
+                UpdateCheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
                 checkInfo.ReadWriteInfo = item;
 
                 readWriteManifestInfoDict.Add(item.AssetBundleName, item);
@@ -160,7 +160,7 @@ namespace CatAsset
 
             foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
             {
-                AssetBundleCheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
+                UpdateCheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
                 checkInfo.RemoteInfo = item;
             }
 
@@ -171,11 +171,11 @@ namespace CatAsset
         /// <summary>
         /// 获取资源检查信息
         /// </summary>
-        private static AssetBundleCheckInfo GetCheckInfo(string name)
+        private static UpdateCheckInfo GetCheckInfo(string name)
         {
-            if (!checkInfoDict.TryGetValue(name, out AssetBundleCheckInfo checkInfo))
+            if (!checkInfoDict.TryGetValue(name, out UpdateCheckInfo checkInfo))
             {
-                checkInfo = new AssetBundleCheckInfo(name);
+                checkInfo = new UpdateCheckInfo(name);
                 checkInfoDict.Add(name, checkInfo);
                 return checkInfo;
             }
@@ -202,26 +202,26 @@ namespace CatAsset
             //是否需要生成读写区资源清单
             bool needGenerateManifest = false;
 
-            foreach (KeyValuePair<string, AssetBundleCheckInfo> item in checkInfoDict)
+            foreach (KeyValuePair<string, UpdateCheckInfo> item in checkInfoDict)
             {
-                AssetBundleCheckInfo checkInfo = item.Value;
+                UpdateCheckInfo checkInfo = item.Value;
                 checkInfo.RefreshState();
 
                 switch (checkInfo.State)
                 {
-                    case CheckState.NeedUpdate:
+                    case UpdateCheckState.NeedUpdate:
                         //需要更新
                         updateTotalCount++;
                         updateTotalLength += checkInfo.RemoteInfo.Length;
                         needUpdateList.Add(checkInfo.RemoteInfo);
                         break;
 
-                    case CheckState.InReadWrite:
+                    case UpdateCheckState.InReadWrite:
                         //最新版本已存放在读写区
                         CatAssetManager.AddRuntimeInfo(checkInfo.ReadWriteInfo,true);
                         break;
 
-                    case CheckState.InReadOnly:
+                    case UpdateCheckState.InReadOnly:
                         //最新版本已存放在只读区
                         CatAssetManager.AddRuntimeInfo(checkInfo.ReadOnlyInfo, false);
                         break;

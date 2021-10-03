@@ -23,6 +23,7 @@ namespace CatJson
                 return DateTime.Parse(rs.ToString());
             });
 
+            //解析Hash128
             ExtensionParseFuncDict.Add(typeof(Hash128), () =>
             {
                 RangeString rs = Lexer.GetNextTokenByType(TokenType.String);

@@ -6,18 +6,18 @@ using System.IO;
 namespace CatAsset
 {
     /// <summary>
-    /// 资源检查信息
+    /// 资源更新检查信息
     /// </summary>
-    public class AssetBundleCheckInfo
+    public class UpdateCheckInfo
     {
         public string Name;
-        public CheckState State;
+        public UpdateCheckState State;
         public bool NeedRemove;
         public AssetBundleManifestInfo ReadOnlyInfo;
         public AssetBundleManifestInfo ReadWriteInfo;
         public AssetBundleManifestInfo RemoteInfo;
 
-        public AssetBundleCheckInfo(string name)
+        public UpdateCheckInfo(string name)
         {
             Name = name;
         }
@@ -31,7 +31,7 @@ namespace CatAsset
             if (RemoteInfo == null)
             {
                 //该ab不存在于远端 需要删掉读写区的那份
-                State = CheckState.Disuse;
+                State = UpdateCheckState.Disuse;
                 NeedRemove = ReadWriteInfo != null;
                 return;
             }
@@ -39,7 +39,7 @@ namespace CatAsset
             if (ReadOnlyInfo != null && ReadOnlyInfo.Equals(RemoteInfo))
             {
                 //该ab最新版本存在于只读区 需要删掉读写区的那份
-                State = CheckState.InReadOnly;
+                State = UpdateCheckState.InReadOnly;
                 NeedRemove = ReadWriteInfo != null;
                 return;
             }
@@ -47,13 +47,13 @@ namespace CatAsset
             if (ReadWriteInfo != null && ReadWriteInfo.Equals(RemoteInfo))
             {
                 //该ab最新版本存在于读写区
-                State = CheckState.InReadWrite;
+                State = UpdateCheckState.InReadWrite;
                 NeedRemove = false;
                 return;
             }
 
             //该ab存在于远端也存在于本地，但不是最新版本，需要删掉读写区那份，并更新
-            State = CheckState.NeedUpdate;
+            State = UpdateCheckState.NeedUpdate;
             NeedRemove = ReadWriteInfo != null;
         }
     }

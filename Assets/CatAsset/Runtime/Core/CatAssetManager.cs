@@ -204,7 +204,7 @@ namespace CatAsset
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                LoadEditorAssetTask editorModeTask = new LoadEditorAssetTask(taskExcutor, assetName,loadedCallback);
+                EditorLoadAssetTask editorModeTask = new EditorLoadAssetTask(taskExcutor, assetName,loadedCallback);
                 taskExcutor.AddTask(editorModeTask);
                 return;
             }
@@ -422,7 +422,7 @@ namespace CatAsset
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                LoadEditorAssetsTask editorModeTask = new LoadEditorAssetsTask(taskExcutor, nameof(LoadEditorAssetsTask), assetNames,loadedCallback);
+                EditorLoadAssetsTask editorModeTask = new EditorLoadAssetsTask(taskExcutor, nameof(EditorLoadAssetsTask), assetNames,loadedCallback);
                 taskExcutor.AddTask(editorModeTask);
                 return;
             }

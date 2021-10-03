@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -10,7 +10,7 @@ namespace CatAsset
     /// <summary>
     /// 编辑器资源模式下批量加载Asset的任务
     /// </summary>
-    public class LoadEditorAssetsTask : BaseTask
+    public class EditorLoadAssetsTask : BaseTask
     {
         
 
@@ -40,7 +40,7 @@ namespace CatAsset
             }
         }
 
-        public LoadEditorAssetsTask(TaskExcutor owner, string name,List<string> assetNames, Action<List<Object>> onFinished) : base(owner, name)
+        public EditorLoadAssetsTask(TaskExcutor owner, string name,List<string> assetNames, Action<List<Object>> onFinished) : base(owner, name)
         {
             this.assetNames = assetNames;
             this.onFinished = onFinished;
@@ -58,7 +58,7 @@ namespace CatAsset
             if (timer >= delay)
             {
                 State = TaskState.Finished;
-#if UNITY_EDITOR
+
                 List<Object> loadedAssets = new List<Object>();
                 foreach (string assetName in assetNames)
                 {
@@ -66,7 +66,7 @@ namespace CatAsset
                     loadedAssets.Add(asset);
                 }
                 onFinished.Invoke(loadedAssets);
-#endif
+
                 return;
             }
 
@@ -75,4 +75,5 @@ namespace CatAsset
 
     }
 }
+#endif
 

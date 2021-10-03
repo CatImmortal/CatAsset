@@ -20,7 +20,7 @@ namespace CatAsset
         public int ManifestVersion;
 
         /// <summary>
-        /// 所有AssetBundle
+        /// 所有AssetBundle清单信息
         /// </summary>
         public AssetBundleManifestInfo[] AssetBundles;
     }

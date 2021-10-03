@@ -5,9 +5,9 @@ using UnityEngine;
 namespace CatAsset
 {
     /// <summary>
-    /// 资源检查状态
+    /// 资源更新检查状态
     /// </summary>
-    public enum CheckState
+    public enum UpdateCheckState
     {
         None,
 

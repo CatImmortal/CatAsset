@@ -24,7 +24,7 @@ namespace CatAsset
         protected override void LoadDone()
         {
             //场景加载完毕
-            onFinished(true, null);
+            onFinished?.Invoke(true, null);
             return;
         }
 

@@ -66,10 +66,13 @@ namespace CatAsset
         /// </summary>
         private void InternalAddTask(BaseTask task)
         {
-            if (HasTask(task) && task.FinishedCallback != null)
+            if (HasTask(task))
             {
-                //任务已存在 不需要重复添加 合并回调即可
-                taskDict[task.Name].FinishedCallback = Delegate.Combine(taskDict[task.Name].FinishedCallback, task.FinishedCallback);
+                if (task.FinishedCallback != null)
+                {
+                    //任务已存在 不需要重复添加 合并回调即可
+                    taskDict[task.Name].FinishedCallback = Delegate.Combine(taskDict[task.Name].FinishedCallback, task.FinishedCallback);
+                }
                 return;
             }
 
