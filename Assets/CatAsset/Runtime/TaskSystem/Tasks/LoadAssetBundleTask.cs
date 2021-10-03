@@ -28,7 +28,7 @@ namespace CatAsset
             }
         }
 
-        public LoadAssetBundleTask(TaskExcutor owner, string name, int priority) : base(owner, name, priority)
+        public LoadAssetBundleTask(TaskExcutor owner, string name) : base(owner, name)
         {
             abInfo = CatAssetManager.GetAssetBundleInfo(name);
         }
@@ -36,7 +36,6 @@ namespace CatAsset
         public override void Execute()
         {
             asyncOp = AssetBundle.LoadFromFileAsync(abInfo.LoadPath);
-            asyncOp.priority = Priority;
         }
 
         public override void UpdateState()

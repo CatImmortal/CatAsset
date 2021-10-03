@@ -14,6 +14,11 @@ namespace CatAsset
         private UnityWebRequestAsyncOperation op;
 
         /// <summary>
+        /// 用户自定义数据
+        /// </summary>
+        private object userdata;
+
+        /// <summary>
         /// 下载地址
         /// </summary>
         private string downloadUri;
@@ -43,8 +48,9 @@ namespace CatAsset
             }
         }
 
-        public DownloadFileTask(TaskExcutor owner, string name, int priority, object userData, string localFilePath, string downloadUri, Action<bool, string, object> onFinished) : base(owner, name, priority, userData)
+        public DownloadFileTask(TaskExcutor owner, string name,object userdata, string localFilePath, string downloadUri, Action<bool, string, object> onFinished) : base(owner, name)
         {
+            this.userdata = userdata;
             this.localFilePath = localFilePath;
             this.downloadUri = downloadUri;
             this.onFinished = onFinished;
@@ -78,7 +84,6 @@ namespace CatAsset
             }
             uwr.downloadHandler = new DownloadHandlerFile(localTempFilePath, startLength > 0);
             op = uwr.SendWebRequest();
-            op.priority = Priority;
         }
 
         public override void UpdateState()
@@ -95,7 +100,7 @@ namespace CatAsset
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
                 //下载失败
-                onFinished?.Invoke(false, op.webRequest.error , UserData);
+                onFinished?.Invoke(false, op.webRequest.error , userdata);
             }
             else
             {
@@ -108,7 +113,7 @@ namespace CatAsset
 
                 File.Move(localTempFilePath, localFilePath);
 
-                onFinished?.Invoke(true,null, UserData);
+                onFinished?.Invoke(true,null, userdata);
             }
 
 

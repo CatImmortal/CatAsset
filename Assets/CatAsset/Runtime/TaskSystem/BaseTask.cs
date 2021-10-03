@@ -10,12 +10,10 @@ namespace CatAsset
     /// </summary>
     public abstract class BaseTask
     {
-        protected BaseTask(TaskExcutor owner, string name, int priority = 0,object userData = null)
+        protected BaseTask(TaskExcutor owner, string name)
         {
             this.owner = owner;
             Name = name;
-            Priority = priority;
-            UserData = userData;
         }
 
         /// <summary>
@@ -25,6 +23,16 @@ namespace CatAsset
         protected TaskExcutor owner;
 
         /// <summary>
+        /// 任务名称
+        /// </summary>
+        public string Name;
+
+        /// <summary>
+        /// 任务状态
+        /// </summary>
+        public TaskState State;
+
+        /// <summary>
         /// 任务完成回调
         /// </summary>
         internal virtual Delegate FinishedCallback
@@ -32,26 +40,6 @@ namespace CatAsset
             get;
             set;
         }
-
-        /// <summary>
-        /// 任务名称
-        /// </summary>
-        public string Name;
-
-        /// <summary>
-        /// 优先级
-        /// </summary>
-        public int Priority;
-
-        /// <summary>
-        /// 自定义数据
-        /// </summary>
-        public object UserData;
-
-        /// <summary>
-        /// 任务状态
-        /// </summary>
-        public TaskState State;
 
         /// <summary>
         /// 任务进度

@@ -13,7 +13,20 @@ namespace CatAsset
     {
         private UnityWebRequestAsyncOperation op;
         private string uri;
-        private Action<bool,string, UnityWebRequest,object> onFinished;
+        private Action<bool,string, UnityWebRequest> onFinished;
+
+        internal override Delegate FinishedCallback
+        {
+            get
+            {
+                return onFinished;
+            }
+
+            set
+            {
+                onFinished = (Action<bool, string, UnityWebRequest>)value;
+            }
+        }
 
         public override float Progress
         {
@@ -27,7 +40,7 @@ namespace CatAsset
             }
         }
 
-        public WebRequestTask(TaskExcutor owner, string name, int priority,object userData,string uri, Action<bool, string, UnityWebRequest, object> onFinished) : base(owner, name, priority,userData)
+        public WebRequestTask(TaskExcutor owner, string name,string uri, Action<bool, string, UnityWebRequest> onFinished) : base(owner, name)
         {
             this.uri = uri;
             this.onFinished = onFinished;
@@ -37,7 +50,6 @@ namespace CatAsset
         {
             UnityWebRequest uwr = UnityWebRequest.Get(uri);
             op = uwr.SendWebRequest();
-            op.priority = Priority;
         }
 
         public override void UpdateState()
@@ -53,11 +65,11 @@ namespace CatAsset
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
-                onFinished?.Invoke(false, op.webRequest.error, op.webRequest, UserData);
+                onFinished?.Invoke(false, op.webRequest.error, op.webRequest);
             }
             else
             {
-                onFinished?.Invoke(true, null, op.webRequest, UserData);
+                onFinished?.Invoke(true, null, op.webRequest);
             }
         }
     }

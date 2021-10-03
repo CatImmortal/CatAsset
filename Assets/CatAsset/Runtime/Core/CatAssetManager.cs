@@ -162,7 +162,7 @@ namespace CatAsset
 
             string path = Util.GetReadOnlyPath(Util.GetManifestFileName());
 
-            WebRequestTask task = new WebRequestTask(taskExcutor, path, 0,null, path, (success, error, uwr, userdata) => {
+            WebRequestTask task = new WebRequestTask(taskExcutor, path,path, (success, error, uwr) => {
                 if (!success)
                 {
                     Debug.LogError("单机模式资源清单检查失败");
@@ -199,12 +199,12 @@ namespace CatAsset
         /// <summary>
         /// 加载Asset
         /// </summary>
-        public static void LoadAsset(string assetName, Action<bool, Object, object> loadedCallback, int priority = 0,object userdata = null)
+        public static void LoadAsset(string assetName, Action<bool, Object> loadedCallback)
         {
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                LoadEditorAssetTask editorModeTask = new LoadEditorAssetTask(taskExcutor, assetName, 0, loadedCallback, null);
+                LoadEditorAssetTask editorModeTask = new LoadEditorAssetTask(taskExcutor, assetName,loadedCallback);
                 taskExcutor.AddTask(editorModeTask);
                 return;
             }
@@ -218,14 +218,15 @@ namespace CatAsset
 
             if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
             {
-                throw new Exception("Asset加载失败，不在资源清单中：" + assetName);
+                Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
+                return;
             }
 
             //加载依赖的Asset
             for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
             {
                 string dependency = assetInfo.ManifestInfo.Dependencies[i];
-                LoadAsset(dependency, null, priority + 1);
+                LoadAsset(dependency, null);
             }
 
 
@@ -242,12 +243,12 @@ namespace CatAsset
             if (assetInfo.Asset != null)
             {
                 //已加载过 直接调用回调方法
-                loadedCallback?.Invoke(true,assetInfo.Asset,userdata);
+                loadedCallback?.Invoke(true,assetInfo.Asset);
                 return;
             }
 
             //未加载 创建加载Asset的任务
-            LoadAssetTask task = new LoadAssetTask(taskExcutor, assetName, priority,userdata, loadedCallback);
+            LoadAssetTask task = new LoadAssetTask(taskExcutor, assetName, loadedCallback);
             taskExcutor.AddTask(task);
         }
 
@@ -308,7 +309,7 @@ namespace CatAsset
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static void LoadScene(string sceneName, Action<bool, Object, object> loadedCallback, int priority = 0, object userdata = null)
+        public static void LoadScene(string sceneName, Action<bool, Object> loadedCallback)
         {
 #if UNITY_EDITOR
             if (IsEditorMode)
@@ -318,7 +319,7 @@ namespace CatAsset
                 {
                     if (op.isDone)
                     {
-                        loadedCallback?.Invoke(true,null,userdata);
+                        loadedCallback?.Invoke(true,null);
                     }
                 };
                 return;
@@ -341,7 +342,7 @@ namespace CatAsset
             for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
             {
                 string dependency = assetInfo.ManifestInfo.Dependencies[i];
-                LoadAsset(dependency, null, priority + 1);
+                LoadAsset(dependency, null);
             }
 
             if (assetInfo.UseCount == 0)
@@ -355,7 +356,7 @@ namespace CatAsset
             assetInfo.UseCount++;
 
             //场景资源实例不能被复用 每次加载都得创建加载场景的任务
-            LoadSceneTask task = new LoadSceneTask(taskExcutor, sceneName, priority,userdata, loadedCallback);
+            LoadSceneTask task = new LoadSceneTask(taskExcutor, sceneName,loadedCallback);
             taskExcutor.AddTask(task);
         }
 
@@ -416,12 +417,12 @@ namespace CatAsset
         /// <summary>
         /// 批量加载Asset
         /// </summary>
-        public static void LoadAssets(List<string> assetNames, Action<List<Object>, object> loadedCallback, int priority = 0,object userdata = null)
+        public static void LoadAssets(List<string> assetNames, Action<List<Object>> loadedCallback)
         {
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                LoadEditorAssetsTask editorModeTask = new LoadEditorAssetsTask(taskExcutor, nameof(LoadEditorAssetsTask), 0,userdata, assetNames,loadedCallback);
+                LoadEditorAssetsTask editorModeTask = new LoadEditorAssetsTask(taskExcutor, nameof(LoadEditorAssetsTask), assetNames,loadedCallback);
                 taskExcutor.AddTask(editorModeTask);
                 return;
             }
@@ -434,7 +435,7 @@ namespace CatAsset
             }
 
             //创建批量加载Asset的任务
-            LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask), priority,userdata, assetNames, loadedCallback);
+            LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask), assetNames, loadedCallback);
             taskExcutor.AddTask(task);
         }
 

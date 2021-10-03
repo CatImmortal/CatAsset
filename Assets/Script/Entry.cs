@@ -91,18 +91,12 @@ public class Entry : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
-                CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (sucess,obj,userdata) =>
+                CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (sucess,obj) =>
                 {
                     prefab = (GameObject)obj;
                     go = Instantiate(prefab, canvans.transform);
-                    Debug.Log(userdata);
-                },0,0);
-                CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (sucess, obj, userdata) =>
-                {
-                    prefab = (GameObject)obj;
-                    go = Instantiate(prefab, canvans.transform);
-                    Debug.Log(userdata);
-                }, 0, 1);
+
+                });
             }
 
             if (Input.GetKeyDown(KeyCode.S))
@@ -123,7 +117,7 @@ public class Entry : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                CatAssetManager.LoadAsset("Assets/Res/LoopDependency_1/LoopRef_1.prefab", (sucess, obj, userdata) =>
+                CatAssetManager.LoadAsset("Assets/Res/LoopDependency_1/LoopRef_1.prefab", (sucess, obj) =>
                 {
 
 
@@ -137,7 +131,7 @@ public class Entry : MonoBehaviour
                 assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_2.prefab");
                 assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_3.prefab");
                 assetNames.Add("Assets/Res/Analyze_2/AnalyzePrefab_2.prefab");
-                CatAssetManager.LoadAssets(assetNames, (assets, userdata) =>
+                CatAssetManager.LoadAssets(assetNames, (assets) =>
                 {
                     foreach (Object item in assets)
                     {

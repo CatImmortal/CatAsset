@@ -12,13 +12,26 @@ namespace CatAsset
     /// </summary>
     public class LoadAssetsTask : BaseTask
     {
-        private List<string> assetNames;
-
-        private Action<List<Object> ,object> onFinished;
-
         private bool flag;
 
-        public LoadAssetsTask(TaskExcutor owner, string name, int priority, object userData, List<string> assetNames,Action<List<Object>,object> onFinished) : base(owner, name, priority,userData)
+        private List<string> assetNames;
+
+        private Action<List<Object>> onFinished;
+
+        internal override Delegate FinishedCallback
+        {
+            get
+            {
+                return onFinished;
+            }
+
+            set
+            {
+                onFinished = (Action<List<Object>>)value;
+            }
+        }
+
+        public LoadAssetsTask(TaskExcutor owner, string name,List<string> assetNames,Action<List<Object>> onFinished) : base(owner, name)
         {
             this.assetNames = assetNames;
             this.onFinished = onFinished;
@@ -47,7 +60,7 @@ namespace CatAsset
             if (CheckLoadAssetsFinished())
             {
                 State = TaskState.Finished;
-                onFinished?.Invoke(GetLoadedAssets(), UserData);
+                onFinished?.Invoke(GetLoadedAssets());
                 return;
             }
 

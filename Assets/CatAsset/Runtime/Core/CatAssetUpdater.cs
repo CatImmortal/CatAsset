@@ -82,13 +82,13 @@ namespace CatAsset
 
             //进行只读区 读写区 远端三方的资源清单检查
             string readOnlyManifestPath = Util.GetReadOnlyPath(Util.GetManifestFileName());
-            WebRequestTask task1 = new WebRequestTask(CatAssetManager.taskExcutor, readOnlyManifestPath, 0, null, readOnlyManifestPath, CheckReadOnlyManifest);
+            WebRequestTask task1 = new WebRequestTask(CatAssetManager.taskExcutor, readOnlyManifestPath, readOnlyManifestPath, CheckReadOnlyManifest);
             
             string readWriteManifestPath = Util.GetReadWritePath(Util.GetManifestFileName());
-            WebRequestTask task2 = new WebRequestTask(CatAssetManager.taskExcutor, readWriteManifestPath, 0, null, readWriteManifestPath, CheckReadWriteManifest);
+            WebRequestTask task2 = new WebRequestTask(CatAssetManager.taskExcutor, readWriteManifestPath,readWriteManifestPath, CheckReadWriteManifest);
 
             string remoteManifestUri = Path.Combine(UpdateUriPrefix, Util.GetManifestFileName());
-            WebRequestTask task3 = new WebRequestTask(CatAssetManager.taskExcutor, remoteManifestUri, 0,null, remoteManifestUri, CheckRemoteManifest);
+            WebRequestTask task3 = new WebRequestTask(CatAssetManager.taskExcutor, remoteManifestUri, remoteManifestUri, CheckRemoteManifest);
 
             CatAssetManager.taskExcutor.AddTask(task1);
             CatAssetManager.taskExcutor.AddTask(task2);
@@ -98,7 +98,7 @@ namespace CatAsset
         /// <summary>
         /// 检查只读区资源清单
         /// </summary>
-        private static void CheckReadOnlyManifest(bool success,string error,UnityWebRequest uwr,object userdata)
+        private static void CheckReadOnlyManifest(bool success,string error,UnityWebRequest uwr)
         {
             if (!success)
             {
@@ -122,7 +122,7 @@ namespace CatAsset
         /// <summary>
         /// 检查读写区资源清单
         /// </summary>
-        private static void CheckReadWriteManifest(bool success, string error, UnityWebRequest uwr, object userdata)
+        private static void CheckReadWriteManifest(bool success, string error, UnityWebRequest uwr)
         {
             if (!success)
             {
@@ -148,7 +148,7 @@ namespace CatAsset
         /// <summary>
         /// 检查远端资源清单
         /// </summary>
-        private static void CheckRemoteManifest(bool success, string error, UnityWebRequest uwr, object userdata)
+        private static void CheckRemoteManifest(bool success, string error, UnityWebRequest uwr)
         {
             if (!success)
             {
@@ -295,7 +295,7 @@ namespace CatAsset
             {
                 string localFilePath = Util.GetReadWritePath(updateABInfo.AssetBundleName);
                 string downloadUri = Path.Combine(UpdateUriPrefix, updateABInfo.AssetBundleName);
-                DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, downloadUri, 0, updateABInfo, localFilePath, downloadUri, OnDownloadFinished);
+                DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, downloadUri,updateABInfo, localFilePath, downloadUri, OnDownloadFinished);
                 CatAssetManager.taskExcutor.AddTask(task);
             }
         }

@@ -12,10 +12,25 @@ namespace CatAsset
     /// </summary>
     public class LoadEditorAssetTask : BaseTask
     {
-        private Action<bool, Object, object> onFinished;
+        
 
         private float delay;
         private float timer;
+
+        private Action<bool, Object> onFinished;
+
+        internal override Delegate FinishedCallback
+        {
+            get
+            {
+                return onFinished;
+            }
+
+            set
+            {
+                onFinished = (Action<bool, Object>)value;
+            }
+        }
 
         public override float Progress
         {
@@ -25,7 +40,7 @@ namespace CatAsset
             }
         }
 
-        public LoadEditorAssetTask(TaskExcutor owner, string name, int priority ,object userData, Action<bool, Object, object> onFinished) : base(owner, name, priority,userData)
+        public LoadEditorAssetTask(TaskExcutor owner, string name,Action<bool, Object> onFinished) : base(owner, name)
         {
             this.onFinished = onFinished;
         }
@@ -46,7 +61,7 @@ namespace CatAsset
                 State = TaskState.Finished;
 #if UNITY_EDITOR
                 Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(Name, typeof(Object));
-                onFinished?.Invoke(true, asset,UserData);
+                onFinished?.Invoke(true, asset);
 #endif
                 
                 return;

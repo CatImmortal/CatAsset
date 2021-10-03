@@ -12,20 +12,19 @@ namespace CatAsset
     /// </summary>
     public class LoadSceneTask : LoadAssetTask
     {
-        public LoadSceneTask(TaskExcutor owner, string name, int priority, object userData, Action<bool, Object,object> onFinished) : base(owner, name, priority, userData, onFinished)
+        public LoadSceneTask(TaskExcutor owner, string name, Action<bool, Object> onFinished) : base(owner, name, onFinished)
         {
         }
 
         protected override void LoadAsync()
         {
             asyncOp = SceneManager.LoadSceneAsync(Name, LoadSceneMode.Additive);
-            asyncOp.priority = Priority;
         }
 
         protected override void LoadDone()
         {
             //场景加载完毕
-            onFinished(true, null, UserData);
+            onFinished(true, null);
             return;
         }
 

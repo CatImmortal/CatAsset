@@ -17,7 +17,7 @@ namespace CatAsset
         protected AssetRuntimeInfo assetInfo;
         protected AssetBundleRuntimeInfo abInfo;
 
-        protected Action<bool, Object, object> onFinished;
+        protected Action<bool, Object> onFinished;
 
         internal override Delegate FinishedCallback
         {
@@ -28,7 +28,7 @@ namespace CatAsset
 
             set
             {
-                onFinished = (Action<bool, Object, object>)value;
+                onFinished = (Action<bool, Object>)value;
             }
         }
 
@@ -45,7 +45,7 @@ namespace CatAsset
             }
         }
 
-        public LoadAssetTask(TaskExcutor owner, string name, int priority,object userData, Action<bool, Object, object> onFinished) : base(owner, name, priority, userData)
+        public LoadAssetTask(TaskExcutor owner, string name, Action<bool, Object> onFinished) : base(owner, name)
         {
             assetInfo = CatAssetManager.GetAssetInfo(name);
             this.onFinished = onFinished;
@@ -59,7 +59,7 @@ namespace CatAsset
             if (abInfo.AssetBundle == null)
             {
                 //需要加载AssetBundle
-                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, abInfo.ManifestInfo.AssetBundleName, Priority + 1);
+                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, abInfo.ManifestInfo.AssetBundleName);
                 owner.AddTask(task);
             }
         }
@@ -90,7 +90,7 @@ namespace CatAsset
                         abInfo.UsedAssets.Clear();
                         UnloadDependencies();
 
-                        onFinished?.Invoke(false, null,UserData);
+                        onFinished?.Invoke(false, null);
                         return;
                     }
                     else
@@ -105,7 +105,6 @@ namespace CatAsset
 
                 //发起异步加载
                 LoadAsync();
-                asyncOp.priority = Priority;
             }
 
 
@@ -123,7 +122,6 @@ namespace CatAsset
         protected virtual void LoadAsync()
         {
             asyncOp = abInfo.AssetBundle.LoadAssetAsync(Name);
-            asyncOp.priority = Priority;
         }
 
         /// <summary>
@@ -136,7 +134,7 @@ namespace CatAsset
             {
                 assetInfo.Asset = abAsyncOp.asset;
                 CatAssetManager.AddAssetToRuntimeInfo(assetInfo);  //添加Asset和AssetRuntimeInfo的关联
-                onFinished?.Invoke(true,assetInfo.Asset,UserData);
+                onFinished?.Invoke(true,assetInfo.Asset);
             }
             else
             {
@@ -144,7 +142,7 @@ namespace CatAsset
                 assetInfo.UseCount = 0;
                 abInfo.UsedAssets.Remove(Name);
                 UnloadDependencies();
-                onFinished?.Invoke(false, null,UserData);
+                onFinished?.Invoke(false, null);
             }
         }
 
