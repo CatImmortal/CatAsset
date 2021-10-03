@@ -128,7 +128,6 @@ namespace CatAsset.Editor
             Util.PkgCfg.OutputPath = outputPath;
 
             EditorUtility.SetDirty(Util.PkgCfg);
-
         }
 
         /// <summary>

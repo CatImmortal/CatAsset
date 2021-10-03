@@ -50,11 +50,12 @@ namespace CatAsset.Editor
                 return func(rule);
             }
 
-            throw new Exception($"未定义打包模式{rule.Mode}下的Asset收集方法");
+            Debug.LogError($"未定义打包模式{rule.Mode}下的Asset收集方法");
+            return null;
         }
 
         /// <summary>
-        /// 获取AssetBundle的资源组
+        /// 获取AssetBundle所在的资源组
         /// </summary>
         public static string GetAssetBundleGroup(string assetBundleName)
         {
@@ -87,6 +88,7 @@ namespace CatAsset.Editor
             {
                 DirectoryInfo dirInfo = new DirectoryInfo(rule.Directory);
                 FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);  //递归获取所有文件
+
                 foreach (FileInfo file in files)
                 {
                     if (excludeExtension.Contains(file.Extension))
@@ -95,7 +97,7 @@ namespace CatAsset.Editor
                         continue;
                     }
                     int index = file.FullName.IndexOf("Assets\\");
-                    string path = file.FullName.Substring(index);
+                    string path = file.FullName.Substring(index); //获取Asset开头的资源全路径
                     assetPaths.Add(path.Replace('\\', '/'));
                 }
 
@@ -174,7 +176,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 对指定文件夹下所有一级子目录各自使用NAssetToOneBundle打包为一个bundle
+        /// 对指定文件夹下所有asset各自打包为一个bundle
         /// </summary>
         private static AssetBundleBuild[] NAssetToNBundle(PackageRule rule)
         {
@@ -200,12 +202,11 @@ namespace CatAsset.Editor
                     string assetName = file.FullName.Substring(assetsIndex).Replace('\\', '/');
 
                     int suffixIndex = assetName.LastIndexOf('.');
-                    string abName = assetName.Remove(suffixIndex);  //ab名 不带后缀
+                    string abName = GetAssetBundleName(assetName.Remove(suffixIndex));  //ab名 是不带后缀的asset名
 
                     AssetBundleBuild abBuild = default;
                     abBuild.assetNames = new string[] { assetName };
-
-                    abBuild.assetBundleName = GetAssetBundleName(abName);
+                    abBuild.assetBundleName = abName;
                     AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
                     abBulidList.Add(abBuild);
                 }

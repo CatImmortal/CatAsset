@@ -44,24 +44,32 @@ namespace CatAsset.Editor
         [MenuItem("CatAsset/创建打包配置文件")]
         private static void CreateConfig()
         {
-            Util.CreateConfigAsset<PackageConfig>();
+            PackageConfig cfg = Util.CreateConfigAsset<PackageConfig>();
+
+            if (cfg != null)
+            {
+                cfg.TargetPlatforms = new List<BuildTarget>();
+
+                cfg.TargetPlatforms.Add(BuildTarget.StandaloneWindows);
+
+                cfg.IsAnalyzeRedundancy = true;
+
+                cfg.Options = BuildAssetBundleOptions.ChunkBasedCompression
+                    | BuildAssetBundleOptions.DisableWriteTypeTree
+                    | BuildAssetBundleOptions.DisableLoadAssetByFileName
+                    | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
+
+                cfg.OutputPath = Directory.GetCurrentDirectory() + "\\AssetBundleOutput";
+
+                cfg.ManifestVersion = 1;
+
+                cfg.IsCopyToStreamingAssets = true;
+
+                EditorUtility.SetDirty(cfg);
+            }
         }
 
-        private void Awake()
-        {
-            TargetPlatforms = new List<BuildTarget>();
-            TargetPlatforms.Add(BuildTarget.StandaloneWindows);
 
-            IsAnalyzeRedundancy = true;
-
-            Options = BuildAssetBundleOptions.ChunkBasedCompression 
-                | BuildAssetBundleOptions.DisableWriteTypeTree 
-                | BuildAssetBundleOptions.DisableLoadAssetByFileName 
-                | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
-
-            OutputPath = Directory.GetCurrentDirectory() + "\\AssetBundleOutput";
-            IsCopyToStreamingAssets = true;
-        }
 
         
     }

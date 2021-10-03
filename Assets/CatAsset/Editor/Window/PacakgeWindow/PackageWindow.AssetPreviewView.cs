@@ -20,6 +20,8 @@ namespace CatAsset.Editor
         /// </summary>
         private Dictionary<string, bool> abFoldOut = new Dictionary<string, bool>();
 
+        private Vector2 scrollPos;
+
         /// <summary>
         /// 要打包的AssetBundleBuild列表
         /// </summary>
@@ -88,30 +90,34 @@ namespace CatAsset.Editor
                
             }
 
-
-
-            foreach (AssetBundleBuild abBuild in abBuildList)
+            using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(scrollPos))
             {
-                using (new EditorGUILayout.HorizontalScope())
+                scrollPos = sv.scrollPosition;
+                foreach (AssetBundleBuild abBuild in abBuildList)
                 {
-                    abFoldOut[abBuild.assetBundleName] = EditorGUILayout.Foldout(abFoldOut[abBuild.assetBundleName], abBuild.assetBundleName);
-                    string group = AssetCollector.GetAssetBundleGroup(abBuild.assetBundleName);
-                    if (group != null)
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        EditorGUILayout.LabelField("资源组：" + group);
+                        abFoldOut[abBuild.assetBundleName] = EditorGUILayout.Foldout(abFoldOut[abBuild.assetBundleName], abBuild.assetBundleName);
+                        string group = AssetCollector.GetAssetBundleGroup(abBuild.assetBundleName);
+                        if (group != null)
+                        {
+                            EditorGUILayout.LabelField("资源组：" + group);
+                        }
                     }
-                }
-              
-                if (abFoldOut[abBuild.assetBundleName] == true)
-                {
-                    foreach (string assetName in abBuild.assetNames)
-                    {
 
-                        DrawAsset(assetName);
-                        
+                    if (abFoldOut[abBuild.assetBundleName] == true)
+                    {
+                        foreach (string assetName in abBuild.assetNames)
+                        {
+
+                            DrawAsset(assetName);
+
+                        }
                     }
                 }
             }
+
+           
         }
    
         /// <summary>

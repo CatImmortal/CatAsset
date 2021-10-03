@@ -44,7 +44,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 创建配置
         /// </summary>
-        public static void CreateConfigAsset<T>() where T : ScriptableObject
+        public static T CreateConfigAsset<T>() where T : ScriptableObject
         {
             string typeName = typeof(T).Name;
             string[] paths = AssetDatabase.FindAssets("t:" + typeName);
@@ -52,15 +52,17 @@ namespace CatAsset.Editor
             {
                 string path = AssetDatabase.GUIDToAssetPath(paths[0]);
                 EditorUtility.DisplayDialog("警告", $"已存在{typeName}，路径:{path}", "确认");
-                return;
+                return null;
             }
 
-            T config = ScriptableObject.CreateInstance<T>();
-            AssetDatabase.CreateAsset(config, $"Assets/{typeName}.asset");
+            T cfg = ScriptableObject.CreateInstance<T>();
+            AssetDatabase.CreateAsset(cfg, $"Assets/{typeName}.asset");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             EditorUtility.DisplayDialog("提示", $"{typeName}创建完毕，路径:Assets/{typeName}.asset", "确认");
+
+            return cfg;
         }
 
         /// <summary>
@@ -73,11 +75,13 @@ namespace CatAsset.Editor
             string[] paths = AssetDatabase.FindAssets("t:" + typeName);
             if (paths.Length == 0)
             {
-                throw new Exception("不存在" + typeName);
+                Debug.LogError("不存在" + typeName);
+                return null;
             }
             if (paths.Length > 1)
             {
-                throw new Exception(typeName + "数量大于1");
+                Debug.LogError(typeName + "数量大于1");
+                return null;
 
             }
             string path = AssetDatabase.GUIDToAssetPath(paths[0]);

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PackageConfig
   m_EditorClassIdentifier: 
   TargetPlatforms: 05000000
-  Options: 12552
+  Options: 13128
   IsAnalyzeRedundancy: 1
-  OutputPath: E:\GitProjects\CatAsset\AssetBundleOutput
-  ManifestVersion: 2
+  OutputPath: E:/GitProjects/CatAsset/WebServer
+  ManifestVersion: 0
   IsCopyToStreamingAssets: 1
