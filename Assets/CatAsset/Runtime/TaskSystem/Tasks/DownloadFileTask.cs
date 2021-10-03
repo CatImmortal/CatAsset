@@ -28,6 +28,8 @@ namespace CatAsset
         /// </summary>
         private string localTempFilePath;
 
+        private Action<bool, string , object> onFinished;
+
         public override float Progress
         {
             get
@@ -41,21 +43,22 @@ namespace CatAsset
             }
         }
 
-        public DownloadFileTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted,string localFilePath,string downloadUri, object userData) : base(owner, name, priority, onCompleted, userData)
+        public DownloadFileTask(TaskExcutor owner, string name, int priority, object userData, string localFilePath, string downloadUri, Action<bool, string, object> onFinished) : base(owner, name, priority, userData)
         {
             this.localFilePath = localFilePath;
             this.downloadUri = downloadUri;
+            this.onFinished = onFinished;
         }
 
         public override void Execute()
         {
 
-            localTempFilePath = localFilePath + ".dowloading";
+            localTempFilePath = localFilePath + ".downloading";
 
             //开始位置
             int startLength = 0;
 
-            //先检查本地是否已存在下载文件
+            //先检查本地是否已存在临时下载文件
             if (File.Exists(localTempFilePath))
             {
                 using (FileStream fs = File.OpenWrite(localTempFilePath))
@@ -64,7 +67,7 @@ namespace CatAsset
                     fs.Seek(0, SeekOrigin.End);
                     startLength = (int)fs.Length;
                 }
-               
+
             }
 
             UnityWebRequest uwr = new UnityWebRequest(downloadUri);
@@ -92,8 +95,7 @@ namespace CatAsset
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
                 //下载失败
-                Debug.LogError($"{Name}下载失败：{op.webRequest.error}");
-                OnCompleted?.Invoke(null);
+                onFinished?.Invoke(false, op.webRequest.error , UserData);
             }
             else
             {
@@ -103,8 +105,10 @@ namespace CatAsset
                 {
                     File.Delete(localFilePath);
                 }
+
                 File.Move(localTempFilePath, localFilePath);
-                OnCompleted?.Invoke(UserData);
+
+                onFinished?.Invoke(true,null, UserData);
             }
 
 

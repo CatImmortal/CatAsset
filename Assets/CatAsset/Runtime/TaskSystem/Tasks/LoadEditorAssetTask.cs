@@ -12,6 +12,8 @@ namespace CatAsset
     /// </summary>
     public class LoadEditorAssetTask : BaseTask
     {
+        private Action<bool, Object, object> onFinished;
+
         private float delay;
         private float timer;
 
@@ -23,9 +25,9 @@ namespace CatAsset
             }
         }
 
-        public LoadEditorAssetTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
+        public LoadEditorAssetTask(TaskExcutor owner, string name, int priority ,object userData, Action<bool, Object, object> onFinished) : base(owner, name, priority,userData)
         {
-           
+            this.onFinished = onFinished;
         }
 
 
@@ -41,11 +43,12 @@ namespace CatAsset
             timer += Time.deltaTime;
             if (timer >= delay)
             {
+                State = TaskState.Finished;
 #if UNITY_EDITOR
                 Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(Name, typeof(Object));
-                OnCompleted?.Invoke(asset);
+                onFinished?.Invoke(true, asset,UserData);
 #endif
-                State = TaskState.Finished;
+                
                 return;
             }
 

@@ -13,6 +13,8 @@ namespace CatAsset
     public class LoadEditorAssetsTask : BaseTask
     {
         private List<string> assetNames;
+        private Action<List<Object>,object> onFinished;
+
         private float delay;
         private float timer;
 
@@ -24,9 +26,10 @@ namespace CatAsset
             }
         }
 
-        public LoadEditorAssetsTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
+        public LoadEditorAssetsTask(TaskExcutor owner, string name, int priority, object userData, List<string> assetNames, Action<List<Object>, object> onFinished) : base(owner, name, priority,userData)
         {
-            assetNames = (List<string>)userData;
+            this.assetNames = assetNames;
+            this.onFinished = onFinished;
         }
 
         public override void Execute()
@@ -40,6 +43,7 @@ namespace CatAsset
             timer += Time.deltaTime;
             if (timer >= delay)
             {
+                State = TaskState.Finished;
 #if UNITY_EDITOR
                 List<Object> loadedAssets = new List<Object>();
                 foreach (string assetName in assetNames)
@@ -47,9 +51,8 @@ namespace CatAsset
                     Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
                     loadedAssets.Add(asset);
                 }
-                OnCompleted?.Invoke(loadedAssets);
+                onFinished.Invoke(loadedAssets,UserData);
 #endif
-                State = TaskState.Finished;
                 return;
             }
 

@@ -16,9 +16,6 @@ namespace CatAsset
         public AssetBundleManifestInfo ReadOnlyInfo;
         public AssetBundleManifestInfo ReadWriteInfo;
         public AssetBundleManifestInfo RemoteInfo;
-       
-
-       
 
         public AssetBundleCheckInfo(string name)
         {
@@ -55,7 +52,7 @@ namespace CatAsset
                 return;
             }
 
-            //该ab存在于远端也存在于本地，但不是最新版本，需要更新
+            //该ab存在于远端也存在于本地，但不是最新版本，需要删掉读写区那份，并更新
             State = CheckState.NeedUpdate;
             NeedRemove = ReadWriteInfo != null;
         }

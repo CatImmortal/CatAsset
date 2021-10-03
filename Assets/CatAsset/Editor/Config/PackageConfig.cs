@@ -54,7 +54,10 @@ namespace CatAsset.Editor
 
             IsAnalyzeRedundancy = true;
 
-            Options = BuildAssetBundleOptions.ChunkBasedCompression;
+            Options = BuildAssetBundleOptions.ChunkBasedCompression 
+                | BuildAssetBundleOptions.DisableWriteTypeTree 
+                | BuildAssetBundleOptions.DisableLoadAssetByFileName 
+                | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
 
             OutputPath = Directory.GetCurrentDirectory() + "\\AssetBundleOutput";
             IsCopyToStreamingAssets = true;

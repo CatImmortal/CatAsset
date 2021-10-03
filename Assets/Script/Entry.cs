@@ -19,7 +19,7 @@ public class Entry : MonoBehaviour
     {
         if (CatAssetManager.RunMode == RunMode.PackageOnly)
         {
-            CatAssetManager.CheckPackageManifest(() =>
+            CatAssetManager.CheckPackageManifest((success) =>
             {
                 Debug.Log("单机模式资源清单检查完毕");
                 inited = true;
@@ -45,24 +45,19 @@ public class Entry : MonoBehaviour
                 int manifestVefsion = (int)jo["ManifestVersion"].Number;
 
                 //根据平台，整包版本和资源版本设置资源更新uri的前缀
-                CatAssetUpdater.UpdateUriPrefix = UpdateUriPrefix + "/StandaloneWindows/" + Application.version + "_" + manifestVefsion;
-                Debug.Log(CatAssetUpdater.UpdateUriPrefix);
+                CatAssetManager.UpdateUriPrefix = UpdateUriPrefix + "/StandaloneWindows/" + Application.version + "_" + manifestVefsion;
+                Debug.Log(CatAssetManager.UpdateUriPrefix);
 
                 //进行版本检查
-                CatAssetUpdater.CheckVersion((count, length) =>
+                CatAssetManager.CheckVersion((count, length) =>
                 {
                     Debug.Log("需要更新资源数：" + count);
                     Debug.Log("总大小：" + length);
 
-                    foreach (var item in CatAssetUpdater.needUpdateList)
-                    {
-                        Debug.Log(item.AssetBundleName);
-                    }
-
                     if (count > 0)
                     {
                         //更新资源
-                        CatAssetUpdater.UpdateAssets((updatedCount, updatedLength) =>
+                        CatAssetManager.UpdateAssets((updatedCount, updatedLength) =>
                         {
                             Debug.Log("已更新数量：" + updatedCount);
                             Debug.Log("已更新大小：" + updatedLength);
@@ -96,12 +91,18 @@ public class Entry : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
-                CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (obj) =>
+                CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (sucess,obj,userdata) =>
                 {
                     prefab = (GameObject)obj;
                     go = Instantiate(prefab, canvans.transform);
-
-                });
+                    Debug.Log(userdata);
+                },0,0);
+                CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (sucess, obj, userdata) =>
+                {
+                    prefab = (GameObject)obj;
+                    go = Instantiate(prefab, canvans.transform);
+                    Debug.Log(userdata);
+                }, 0, 1);
             }
 
             if (Input.GetKeyDown(KeyCode.S))
@@ -122,7 +123,7 @@ public class Entry : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                CatAssetManager.LoadAsset("Assets/Res/LoopDependency_1/LoopRef_1.prefab", (obj) =>
+                CatAssetManager.LoadAsset("Assets/Res/LoopDependency_1/LoopRef_1.prefab", (sucess, obj, userdata) =>
                 {
 
 
@@ -136,9 +137,8 @@ public class Entry : MonoBehaviour
                 assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_2.prefab");
                 assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_3.prefab");
                 assetNames.Add("Assets/Res/Analyze_2/AnalyzePrefab_2.prefab");
-                CatAssetManager.LoadAssets(assetNames, (obj) =>
+                CatAssetManager.LoadAssets(assetNames, (assets, userdata) =>
                 {
-                    List<Object> assets = (List<Object>)obj;
                     foreach (Object item in assets)
                     {
                         if (item == null)

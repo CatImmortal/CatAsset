@@ -42,7 +42,7 @@ namespace CatAsset
         /// </summary>
         public bool HasTask(BaseTask task)
         {
-            return taskDict.ContainsKey(task.Name) && task.GetType() == taskDict[task.Name].GetType() ;
+            return taskDict.ContainsKey(task.Name);
         }
 
         /// <summary>
@@ -51,19 +51,6 @@ namespace CatAsset
         public TaskState GetTaskState(string name)
         {
             return taskDict[name].State;
-        }
-
-        /// <summary>
-        /// 追加任务执行回调
-        /// </summary>
-        public void AppendTaskCompleted(string name,Action<object> completed)
-        {
-            if (!taskDict.TryGetValue(name,out BaseTask task))
-            {
-                return;
-            }
-
-            task.OnCompleted += completed;
         }
 
         /// <summary>
@@ -81,9 +68,11 @@ namespace CatAsset
         {
             if (HasTask(task))
             {
-
-                //任务已存在 不需要重复添加
-                AppendTaskCompleted(task.Name, task.OnCompleted);
+                //任务已存在 不需要重复添加 把完成回调追加进去就行
+                if (task.FinishedCallback != null)
+                {
+                    taskDict[task.Name].FinishedCallback = Delegate.Combine(taskDict[task.Name].FinishedCallback, task.FinishedCallback);
+                }
                 return;
             }
 
@@ -95,7 +84,6 @@ namespace CatAsset
         /// </summary>
         public void Update()
         {
-           
 
             if (needAddTasks.Count > 0)
             {

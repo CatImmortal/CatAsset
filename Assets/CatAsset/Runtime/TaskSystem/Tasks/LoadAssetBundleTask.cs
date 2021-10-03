@@ -28,9 +28,9 @@ namespace CatAsset
             }
         }
 
-        public LoadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
+        public LoadAssetBundleTask(TaskExcutor owner, string name, int priority) : base(owner, name, priority)
         {
-            abInfo = (AssetBundleRuntimeInfo)userData;
+            abInfo = CatAssetManager.GetAssetBundleInfo(name);
         }
 
         public override void Execute()
@@ -50,15 +50,14 @@ namespace CatAsset
                 if (asyncOp.assetBundle == null)
                 {
                     //AssetBundle加载失败
-                    abInfo.IsLoadFailed = true;
+                    abInfo.LoadFailed = true;
                     Debug.LogError("AssetBundle加载失败：" + Name);
                     return;
                 }
 
                 //AssetBundle加载完毕
-                abInfo.IsLoadFailed = false;
+                abInfo.LoadFailed = false;
                 abInfo.AssetBundle = asyncOp.assetBundle;
-                Debug.Log("AssetBundle加载完毕：" + Name);
                 return;
             }
 

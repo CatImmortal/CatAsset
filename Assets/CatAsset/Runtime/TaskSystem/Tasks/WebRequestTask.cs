@@ -11,7 +11,9 @@ namespace CatAsset
     /// </summary>
     public class WebRequestTask : BaseTask
     {
-        UnityWebRequestAsyncOperation op;
+        private UnityWebRequestAsyncOperation op;
+        private string uri;
+        private Action<bool,string, UnityWebRequest,object> onFinished;
 
         public override float Progress
         {
@@ -25,13 +27,15 @@ namespace CatAsset
             }
         }
 
-        public WebRequestTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
+        public WebRequestTask(TaskExcutor owner, string name, int priority,object userData,string uri, Action<bool, string, UnityWebRequest, object> onFinished) : base(owner, name, priority,userData)
         {
+            this.uri = uri;
+            this.onFinished = onFinished;
         }
 
         public override void Execute()
         {
-            UnityWebRequest uwr = UnityWebRequest.Get(Name);
+            UnityWebRequest uwr = UnityWebRequest.Get(uri);
             op = uwr.SendWebRequest();
             op.priority = Priority;
         }
@@ -49,11 +53,11 @@ namespace CatAsset
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
-                OnCompleted?.Invoke(null);
+                onFinished?.Invoke(false, op.webRequest.error, op.webRequest, UserData);
             }
             else
             {
-                OnCompleted?.Invoke(op.webRequest);
+                onFinished?.Invoke(true, null, op.webRequest, UserData);
             }
         }
     }

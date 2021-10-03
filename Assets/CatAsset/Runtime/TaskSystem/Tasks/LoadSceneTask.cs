@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
+
 namespace CatAsset
 {
     /// <summary>
@@ -10,23 +12,20 @@ namespace CatAsset
     /// </summary>
     public class LoadSceneTask : LoadAssetTask
     {
-
-
-
-        public LoadSceneTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
+        public LoadSceneTask(TaskExcutor owner, string name, int priority, object userData, Action<bool, Object,object> onFinished) : base(owner, name, priority, userData, onFinished)
         {
         }
 
         protected override void LoadAsync()
         {
             asyncOp = SceneManager.LoadSceneAsync(Name, LoadSceneMode.Additive);
+            asyncOp.priority = Priority;
         }
 
         protected override void LoadDone()
         {
             //场景加载完毕
-            OnCompleted?.Invoke(null);
-            Debug.Log("场景加载完毕：" + Name);
+            onFinished(true, null, UserData);
             return;
         }
 

@@ -14,11 +14,14 @@ namespace CatAsset
     {
         private List<string> assetNames;
 
+        private Action<List<Object> ,object> onFinished;
+
         private bool flag;
 
-        public LoadAssetsTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
+        public LoadAssetsTask(TaskExcutor owner, string name, int priority, object userData, List<string> assetNames,Action<List<Object>,object> onFinished) : base(owner, name, priority,userData)
         {
-            assetNames = (List<string>)userData;
+            this.assetNames = assetNames;
+            this.onFinished = onFinished;
         }
 
         public override void Execute()
@@ -34,7 +37,8 @@ namespace CatAsset
         {
             if (flag == false)
             {
-                //Execute执行过，要等一帧
+                //Execute在本帧执行过的话，要等一帧,因为加载Asset的任务要到下一帧才会正式添加
+                //否则CheckLoadAssetsFinished会在第一帧就返回true
                 flag = true;
                 State = TaskState.Waiting;
                 return;
@@ -43,7 +47,7 @@ namespace CatAsset
             if (CheckLoadAssetsFinished())
             {
                 State = TaskState.Finished;
-                OnCompleted?.Invoke(GetLoadedAssets());
+                onFinished?.Invoke(GetLoadedAssets(), UserData);
                 return;
             }
 

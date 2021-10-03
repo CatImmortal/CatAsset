@@ -13,11 +13,6 @@ namespace CatAsset
         private AssetBundleRuntimeInfo abInfo;
 
         /// <summary>
-        /// 延迟卸载时间
-        /// </summary>
-        private float delayUnloadTime = 5;
-
-        /// <summary>
         /// 计时器
         /// </summary>
         private float timer;
@@ -26,13 +21,13 @@ namespace CatAsset
         {
             get
             {
-                return timer / delayUnloadTime;
+                return timer / CatAssetManager.UnloadDelayTime;
             }
         }
 
-        public UnloadAssetBundleTask(TaskExcutor owner, string name, int priority, Action<object> onCompleted, object userData) : base(owner, name, priority, onCompleted, userData)
+        public UnloadAssetBundleTask(TaskExcutor owner, string name) : base(owner, name)
         {
-            abInfo = (AssetBundleRuntimeInfo)userData;
+            abInfo = CatAssetManager.GetAssetBundleInfo(name);
             State = TaskState.Waiting;  //初始状态设置为Waiting 避免占用每帧任务处理次数
         }
 
@@ -43,7 +38,7 @@ namespace CatAsset
 
         public override void UpdateState()
         {
-            if (abInfo.UsedAsset.Count > 0)
+            if (abInfo.UsedAssets.Count > 0)
             {
                 //被重新使用了 不进行卸载了
                 State = TaskState.Finished;
@@ -51,9 +46,9 @@ namespace CatAsset
             }
 
             timer += Time.deltaTime;
-            if (timer >= delayUnloadTime)
+            if (timer >= CatAssetManager.UnloadDelayTime)
             {
-                //时间到了 
+                //卸载时间到了 
                 State = TaskState.Finished;
 
                 //解除此AssetBundle中已加载的Asset与AssetRuntimeInfo的关联
@@ -62,8 +57,6 @@ namespace CatAsset
                     string assetName = abInfo.ManifestInfo.Assets[i].AssetName;
 
                     AssetRuntimeInfo info = CatAssetManager.GetAssetInfo(assetName);
-                    info.UseCount = 0;  //重置引用计数
-
                     if (info.Asset != null)
                     {
                         CatAssetManager.RemoveAssetToRuntimeInfo(info);  //删除关联
@@ -73,6 +66,7 @@ namespace CatAsset
                 //卸载AssetBundle
                 abInfo.AssetBundle.Unload(true);
                 Debug.Log("已卸载AB:" + Name);
+
                 return;
             }
 

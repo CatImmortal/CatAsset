@@ -51,14 +51,14 @@ namespace CatAsset
         /// <summary>
         /// 是否加载失败
         /// </summary>
-        public bool IsLoadFailed;
+        public bool LoadFailed;
 
         private HashSet<string> usedAsset;
 
         /// <summary>
-        /// 当前使用中的Asset
+        /// 当前使用中的Asset，这里面的Asset的UseCount都大于0
         /// </summary>
-        public HashSet<string> UsedAsset
+        public HashSet<string> UsedAssets
         {
             get
             {

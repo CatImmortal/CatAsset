@@ -23,21 +23,45 @@ namespace CatAsset
         /// </summary>
         private static Dictionary<string, AssetBundleManifestInfo> readWriteManifestInfoDict = new Dictionary<string, AssetBundleManifestInfo>();
 
-        private static Action<int, long> checkVersionCompleted;
+        /// <summary>
+        /// 版本信息检查完毕回调
+        /// </summary>
+        private static Action<int, long> onVersionChecked;
 
+        //三方资源清单的检查完毕标记
         private static bool readOnlyChecked;
         private static bool readWriteCheked;
         private static bool remoteChecked;
 
-        private static Action<int, long> updateCallback;
+        /// <summary>
+        /// 需要更新的资源列表
+        /// </summary>
+        private static List<AssetBundleManifestInfo> needUpdateList = new List<AssetBundleManifestInfo>();
+
+        /// <summary>
+        /// 需要删除的资源列表
+        /// </summary>
+        private static List<string> needRemoveList = new List<string>();
+
+        /// <summary>
+        /// 资源文件更新回调，每次下载资源文件后调用
+        /// </summary>
+        private static Action<int, long> onFileDownloaded;
+
+        /// <summary>
+        /// 已更新资源文件数量
+        /// </summary>
         private static int updatedCount;
+
+        /// <summary>
+        /// 已更新资源文件长度
+        /// </summary>
         private static long updatedLength;
 
         /// <summary>
         /// 重新生成一次读写区资源清单所需的下载字节数
         /// </summary>
-        //private static long generateManifestLength = 1024 * 1024 * 10;  //10M
-        private static long generateManifestLength = 0;
+        private static long generateManifestLength = 1024 * 1024 * 10;  //10M
 
         /// <summary>
         /// 从上一次重新生成读写区资源清单到现在下载的字节数
@@ -45,35 +69,26 @@ namespace CatAsset
         private static long deltaUpatedLength;
 
         /// <summary>
-        /// 需要更新的资源列表
+        /// 资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/AssetBundleName 为下载地址
         /// </summary>
-        public static List<AssetBundleManifestInfo> needUpdateList = new List<AssetBundleManifestInfo>();
-
-        /// <summary>
-        /// 资源更新Uri前缀
-        /// </summary>
-        public static string UpdateUriPrefix
-        {
-            get;
-            set;
-        }
+        internal static string UpdateUriPrefix;
 
         /// <summary>
         /// 资源版本信息检查
         /// </summary>
-        public static void CheckVersion(Action<int, long> checkVersionCompleted)
+        internal static void CheckVersion(Action<int, long> onVersionChecked)
         {
-            CatAssetUpdater.checkVersionCompleted = checkVersionCompleted;
+            CatAssetUpdater.onVersionChecked = onVersionChecked;
 
             //进行只读区 读写区 远端三方的资源清单检查
             string readOnlyManifestPath = Util.GetReadOnlyPath(Util.GetManifestFileName());
-            WebRequestTask task1 = new WebRequestTask(CatAssetManager.taskExcutor, readOnlyManifestPath, 0, CheckReadOnlyManifest, null);
-
+            WebRequestTask task1 = new WebRequestTask(CatAssetManager.taskExcutor, readOnlyManifestPath, 0, null, readOnlyManifestPath, CheckReadOnlyManifest);
+            
             string readWriteManifestPath = Util.GetReadWritePath(Util.GetManifestFileName());
-            WebRequestTask task2 = new WebRequestTask(CatAssetManager.taskExcutor, readWriteManifestPath, 0, CheckReadWriteManifest, null);
+            WebRequestTask task2 = new WebRequestTask(CatAssetManager.taskExcutor, readWriteManifestPath, 0, null, readWriteManifestPath, CheckReadWriteManifest);
 
             string remoteManifestUri = Path.Combine(UpdateUriPrefix, Util.GetManifestFileName());
-            WebRequestTask task3 = new WebRequestTask(CatAssetManager.taskExcutor, remoteManifestUri, 0, CheckRemoteManifest, null);
+            WebRequestTask task3 = new WebRequestTask(CatAssetManager.taskExcutor, remoteManifestUri, 0,null, remoteManifestUri, CheckRemoteManifest);
 
             CatAssetManager.taskExcutor.AddTask(task1);
             CatAssetManager.taskExcutor.AddTask(task2);
@@ -83,16 +98,15 @@ namespace CatAsset
         /// <summary>
         /// 检查只读区资源清单
         /// </summary>
-        private static void CheckReadOnlyManifest(object obj)
+        private static void CheckReadOnlyManifest(bool success,string error,UnityWebRequest uwr,object userdata)
         {
-            if (obj == null)
+            if (!success)
             {
                 readOnlyChecked = true;
                 RefershCheckInfos();
                 return;
             }
 
-            UnityWebRequest uwr = (UnityWebRequest)obj;
             CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
             foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
@@ -108,16 +122,15 @@ namespace CatAsset
         /// <summary>
         /// 检查读写区资源清单
         /// </summary>
-        private static void CheckReadWriteManifest(object obj)
+        private static void CheckReadWriteManifest(bool success, string error, UnityWebRequest uwr, object userdata)
         {
-            if (obj == null)
+            if (!success)
             {
                 readWriteCheked = true;
                 RefershCheckInfos();
                 return;
             }
 
-            UnityWebRequest uwr = (UnityWebRequest)obj;
             CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
             foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
@@ -135,15 +148,14 @@ namespace CatAsset
         /// <summary>
         /// 检查远端资源清单
         /// </summary>
-        private static void CheckRemoteManifest(object obj)
+        private static void CheckRemoteManifest(bool success, string error, UnityWebRequest uwr, object userdata)
         {
-            if (obj == null)
+            if (!success)
             {
-                Debug.LogError("远端资源清单检查失败");
+                Debug.LogError("远端资源清单检查失败:" + error);
                 return;
             }
 
-            UnityWebRequest uwr = (UnityWebRequest)obj;
             CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
             foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
@@ -198,47 +210,37 @@ namespace CatAsset
                 switch (checkInfo.State)
                 {
                     case CheckState.NeedUpdate:
-
                         //需要更新
                         updateTotalCount++;
                         updateTotalLength += checkInfo.RemoteInfo.Length;
                         needUpdateList.Add(checkInfo.RemoteInfo);
-
                         break;
 
                     case CheckState.InReadWrite:
-                        CatAssetManager.AddAssetBundleRuntimeInfo(checkInfo.ReadWriteInfo,true);
+                        //最新版本已存放在读写区
+                        CatAssetManager.AddRuntimeInfo(checkInfo.ReadWriteInfo,true);
                         break;
 
                     case CheckState.InReadOnly:
-                        CatAssetManager.AddAssetBundleRuntimeInfo(checkInfo.ReadOnlyInfo, false);
-                        break;
-
-                    case CheckState.Disuse:
-
-                        if (checkInfo.NeedRemove)
-                        {
-                            //需要删除
-                            Debug.Log("删除读写区资源：" + checkInfo.Name);
-                            string path = Util.GetReadWritePath(checkInfo.Name);
-                            File.Delete(path);
-
-                            //从读写区资源信息字典中删除
-                            readWriteManifestInfoDict.Remove(checkInfo.Name);
-
-                            needGenerateManifest = true;
-                        }
-
-                        break;
-
-                    default:
+                        //最新版本已存放在只读区
+                        CatAssetManager.AddRuntimeInfo(checkInfo.ReadOnlyInfo, false);
                         break;
                 }
 
+                if (checkInfo.NeedRemove)
+                {
+                    //需要删除
+                    Debug.Log("删除读写区资源：" + checkInfo.Name);
+                    string path = Util.GetReadWritePath(checkInfo.Name);
+                    File.Delete(path);
 
+                    //从读写区资源信息字典中删除
+                    readWriteManifestInfoDict.Remove(checkInfo.Name);
+
+                    needGenerateManifest = true;
+                }
             }
 
-            
             if (needGenerateManifest)
             {
                 //删除过读写区资源 需要重新生成读写区资源清单
@@ -246,7 +248,8 @@ namespace CatAsset
             }
 
             //调用版本信息检查完毕回调
-            checkVersionCompleted(updateTotalCount, updateTotalLength);
+            onVersionChecked(updateTotalCount, updateTotalLength);
+
         }
 
         /// <summary>
@@ -283,35 +286,35 @@ namespace CatAsset
         /// <summary>
         /// 更新资源
         /// </summary>
-        public static void UpdateAssets(Action<int,long> updateCallback)
+        internal static void UpdateAssets(Action<int,long> onFileDownloaded)
         {
-            if (needUpdateList.Count == 0)
-            {
-                updateCallback(0, 0);
-            }
-
-
-            CatAssetUpdater.updateCallback = updateCallback;
+            
+            CatAssetUpdater.onFileDownloaded = onFileDownloaded;
 
             foreach (AssetBundleManifestInfo updateABInfo in needUpdateList)
             {
                 string localFilePath = Util.GetReadWritePath(updateABInfo.AssetBundleName);
                 string downloadUri = Path.Combine(UpdateUriPrefix, updateABInfo.AssetBundleName);
-                DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, updateABInfo.AssetBundleName, 0, OnDownloadCompleted,localFilePath,downloadUri,updateABInfo);
+                DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, downloadUri, 0, updateABInfo, localFilePath, downloadUri, OnDownloadFinished);
                 CatAssetManager.taskExcutor.AddTask(task);
             }
         }
 
-        private static void OnDownloadCompleted(object userData)
+        /// <summary>
+        /// 资源文件下载回调
+        /// </summary>
+        private static void OnDownloadFinished(bool success, string error,object userData)
         {
-            if (userData == null)
+            AssetBundleManifestInfo abInfo = (AssetBundleManifestInfo)userData;
+
+            if (!success)
             {
+                Debug.LogError($"下载文件{abInfo.AssetBundleName}失败：" + error);
                 return;
             }
 
             //将下载好的ab信息添加到RuntimeInfo中
-            AssetBundleManifestInfo abInfo = (AssetBundleManifestInfo)userData;
-            CatAssetManager.AddAssetBundleRuntimeInfo(abInfo, true);
+            CatAssetManager.AddRuntimeInfo(abInfo, true);
 
             //更新读写区资源信息列表
             readWriteManifestInfoDict[abInfo.AssetBundleName] = abInfo;
@@ -327,7 +330,7 @@ namespace CatAsset
                 GenerateReadWriteManifest();
             }
 
-            updateCallback(updatedCount, updatedLength);
+            onFileDownloaded(updatedCount, updatedLength);
         }
     }
 }
