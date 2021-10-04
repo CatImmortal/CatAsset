@@ -41,7 +41,7 @@ namespace CatAsset
 
         public bool Equals(AssetBundleManifestInfo abInfo)
         {
-            return AssetBundleName == abInfo.AssetBundleName && Length == abInfo.Length && Hash == abInfo.Hash;
+            return AssetBundleName == abInfo.AssetBundleName && Length == abInfo.Length && Hash == abInfo.Hash && Group == abInfo.Group;
         }
     }
 }

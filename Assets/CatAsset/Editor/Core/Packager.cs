@@ -16,7 +16,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 执行打包管线
         /// </summary>
-        public static void ExecutePackagePipeline(string outputPath, BuildAssetBundleOptions options, BuildTarget targetPlatform,int manifestVersion,bool isCopyToStreamingAssets,bool isAnalyzeRedundancy)
+        public static void ExecutePackagePipeline(string outputPath, BuildAssetBundleOptions options, BuildTarget targetPlatform,int manifestVersion, bool isAnalyzeRedundancy, bool isCopyToStreamingAssets,string copyGroup)
         {
             //获取最终打包输出目录
             string finalOutputPath = GetFinalOutputPath(outputPath, targetPlatform, manifestVersion);
@@ -25,7 +25,7 @@ namespace CatAsset.Editor
             CreateOutputPath(finalOutputPath);
 
             //获取AssetBundleBuildList，然后打包AssetBundle
-            List<AssetBundleBuild> abBuildList = Util.PkgRuleCfg.GetAssetBundleBuildList();
+            List<AssetBundleBuild> abBuildList = Util.PkgRuleCfg.GetAssetBundleBuildList(isAnalyzeRedundancy);
             AssetBundleManifest unityManifest = PackageAssetBundles(finalOutputPath, abBuildList,options,targetPlatform);
 
             //生成资源清单文件
@@ -37,7 +37,7 @@ namespace CatAsset.Editor
             //将资源复制到StreamingAssets下
             if (isCopyToStreamingAssets)
             {
-                CopyToStreamingAssets(finalOutputPath);
+                CopyToStreamingAssets(finalOutputPath,copyGroup);
             }
         }
 
@@ -157,8 +157,15 @@ namespace CatAsset.Editor
         /// <summary>
         /// 将资源复制到StreamingAssets下
         /// </summary>
-        private static void CopyToStreamingAssets(string outputPath)
+        private static void CopyToStreamingAssets(string outputPath, string copyGroup)
         {
+            //要复制的资源组的Set
+            HashSet<string> copyGroupSet = null;
+            if (!string.IsNullOrEmpty(copyGroup))
+            {
+                copyGroupSet = new HashSet<string>(copyGroup.Split(';'));
+            }
+
             //StreamingAssets目录已存在就清空
             if (Directory.Exists(Application.streamingAssetsPath))
             {
@@ -179,6 +186,15 @@ namespace CatAsset.Editor
 
             foreach (FileInfo item in outputDirInfo.GetFiles())
             {
+                if (copyGroupSet != null
+                    && item.Name != CatAsset.Util.GetManifestFileName()
+                    && !copyGroup.Contains(AssetCollector.GetAssetBundleGroup(item.Name)) 
+                    )
+                {
+                    //并非资源组的资源，并且不是资源清单文件，就不复制
+                    continue;
+                }
+
                 item.CopyTo(Application.streamingAssetsPath + "/" + item.Name);
             }
 

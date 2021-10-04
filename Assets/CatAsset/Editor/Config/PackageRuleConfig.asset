@@ -13,21 +13,15 @@ MonoBehaviour:
   m_Name: PackageRuleConfig
   m_EditorClassIdentifier: 
   Rules:
-  - Directory: Assets/Res/Analyze_1
-    Mode: 0
+  - Directory: Assets/Res/Base
+    Mode: 1
     Group: Base
-  - Directory: Assets/Res/Analyze_2
-    Mode: 0
-    Group: Base
-  - Directory: Assets/Res/Common
-    Mode: 0
-    Group: Base
-  - Directory: Assets/Res/LoopDependency_1
-    Mode: 0
-    Group: Loop
-  - Directory: Assets/Res/LoopDependency_2
-    Mode: 0
-    Group: Loop
-  - Directory: Assets/Res/Scene
-    Mode: 0
-    Group: Base
+  - Directory: Assets/Res/Chapter_1
+    Mode: 1
+    Group: Chapter1
+  - Directory: Assets/Res/Chapter_2
+    Mode: 1
+    Group: Chapter2
+  - Directory: Assets/Res/Chapter_3
+    Mode: 1
+    Group: Chapter3

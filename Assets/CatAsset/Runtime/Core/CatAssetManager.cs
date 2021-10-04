@@ -51,7 +51,7 @@ namespace CatAsset
         /// <summary>
         /// 资源卸载延迟时间
         /// </summary>
-        internal static int UnloadDelayTime;
+        internal static float UnloadDelayTime;
 
         /// <summary>
         /// 运行模式

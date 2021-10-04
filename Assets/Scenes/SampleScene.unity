@@ -344,11 +344,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31d537ebcfd46f64480c0c046794699a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EditorModeMaxDelay: 1
+  RunMode: 0
   MaxTaskExuteCount: 10
   UnloadDelayTime: 5
-  RunMode: 0
   IsEditorMode: 0
+  EditorModeMaxDelay: 1
 --- !u!4 &1436959665
 Transform:
   m_ObjectHideFlags: 0

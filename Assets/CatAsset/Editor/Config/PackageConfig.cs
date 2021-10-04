@@ -12,6 +12,11 @@ namespace CatAsset.Editor
     public class PackageConfig : ScriptableObject
     {
         /// <summary>
+        /// 资源清单版本号
+        /// </summary>
+        public int ManifestVersion;
+
+        /// <summary>
         /// 要打包的平台
         /// </summary>
         public List<BuildTarget> TargetPlatforms;
@@ -22,24 +27,24 @@ namespace CatAsset.Editor
         public BuildAssetBundleOptions Options;
 
         /// <summary>
-        /// 是否进行冗余分析
-        /// </summary>
-        public bool IsAnalyzeRedundancy;
-
-        /// <summary>
         /// 打包输出目录
         /// </summary>
         public string OutputPath;
 
         /// <summary>
-        /// 资源清单版本号
+        /// 是否进行冗余分析
         /// </summary>
-        public int ManifestVersion;
+        public bool IsAnalyzeRedundancy;
 
         /// <summary>
         /// 打包平台只有1个时，打包后是否将资源复制到StreamingAssets目录下
         /// </summary>
         public bool IsCopyToStreamingAssets;
+
+        /// <summary>
+        /// 要复制到StreamingAssets目录下的资源组，以分号分隔
+        /// </summary>
+        public string CopyGroup;
 
         [MenuItem("CatAsset/创建打包配置文件")]
         private static void CreateConfig()
@@ -64,6 +69,8 @@ namespace CatAsset.Editor
                 cfg.ManifestVersion = 1;
 
                 cfg.IsCopyToStreamingAssets = true;
+
+                cfg.CopyGroup = "Base";
 
                 EditorUtility.SetDirty(cfg);
             }

@@ -13,7 +13,7 @@ namespace CatAsset
     {
         public RunMode RunMode = RunMode.PackageOnly;
         public int MaxTaskExuteCount = 10;
-        public int UnloadDelayTime = 5;
+        public float UnloadDelayTime = 5;
         public bool IsEditorMode = true;
         public float EditorModeMaxDelay = 1;
 
