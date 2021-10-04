@@ -44,17 +44,17 @@ namespace CatAsset
         /// <summary>
         /// 已更新资源文件数量
         /// </summary>
-        private int updatedCount;
+        public int updatedCount;
 
         /// <summary>
         /// 已更新资源文件长度
         /// </summary>
-        private long updatedLength;
+        public long updatedLength;
 
         /// <summary>
         /// 是否被暂停了
         /// </summary>
-        internal bool paused;
+        public bool paused;
 
         /// <summary>
         /// 资源文件更新回调，每次下载资源文件后调用

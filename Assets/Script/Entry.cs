@@ -112,13 +112,7 @@ public class Entry : MonoBehaviour
                 CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter3");
             }
 
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                GroupInfo info0 = CatAssetManager.GetGroupInfo("Base");
-                GroupInfo info1 = CatAssetManager.GetGroupInfo("Chapter1");
-                GroupInfo info2 = CatAssetManager.GetGroupInfo("Chapter2");
-                GroupInfo info3 = CatAssetManager.GetGroupInfo("Chapter3");
-            }
+
         }
 
       
