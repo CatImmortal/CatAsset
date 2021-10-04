@@ -75,7 +75,7 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 资源文件下载回调
+        /// 资源文件下载完毕的回调
         /// </summary>
         private void OnDownloadFinished(bool success, string error, object userData)
         {

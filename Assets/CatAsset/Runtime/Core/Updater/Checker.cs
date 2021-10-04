@@ -34,7 +34,7 @@ namespace CatAsset
         private bool remoteChecked;
 
         /// <summary>
-        /// 资源版本信息检查
+        /// 检查资源版本
         /// </summary>
         public void CheckVersion(Action<int, long, string> onVersionChecked, string checkGroup)
         {
@@ -220,10 +220,10 @@ namespace CatAsset
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
 
-            //有指定资源组的就放进字典里 没指定的就放到字段里
+            //有指定资源组就把Updater放进字典里 没指定就放到字段里
             if (!string.IsNullOrEmpty(checkGroup))
             {
-                CatAssetUpdater.updaterDict[checkGroup] = updater;
+                CatAssetUpdater.groupUpdaterDict[checkGroup] = updater;
             }
             else
             {

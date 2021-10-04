@@ -187,7 +187,7 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 资源版本信息检查,可更新模式与边玩边下模式专用
+        /// 检查资源版本,可更新模式与边玩边下模式专用
         /// </summary>
         public static void CheckVersion(Action<int, long,string> onVersionChecked,string checkGroup = null)
         {

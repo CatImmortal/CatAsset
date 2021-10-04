@@ -26,7 +26,7 @@ namespace CatAsset
         /// <summary>
         /// 资源更新器字典 key为资源组
         /// </summary>
-        internal static Dictionary<string, Updater> updaterDict = new Dictionary<string, Updater>();
+        internal static Dictionary<string, Updater> groupUpdaterDict = new Dictionary<string, Updater>();
 
         /// <summary>
         /// 资源更新器（没指定资源组，更新所有资源）
@@ -40,7 +40,6 @@ namespace CatAsset
         {
             CatAssetManifest manifest = new CatAssetManifest();
             manifest.GameVersion = Application.version;
-            manifest.ManifestVersion = 0;
             AssetBundleManifestInfo[] abInfos = new AssetBundleManifestInfo[readWriteManifestInfoDict.Count];
             int index = 0;
             foreach (KeyValuePair<string, AssetBundleManifestInfo> item in readWriteManifestInfoDict)
@@ -63,10 +62,10 @@ namespace CatAsset
                 sw.Write(json);
             }
         }
-        
+
 
         /// <summary>
-        /// 资源版本信息检查
+        /// 检查资源版本
         /// </summary>
         internal static void CheckVersion(Action<int, long,string> onVersionChecked,string checkGroup)
         {
@@ -87,7 +86,7 @@ namespace CatAsset
                 return;
             }
 
-            if (updaterDict.TryGetValue(updateGroup,out Updater groupUpdater))
+            if (groupUpdaterDict.TryGetValue(updateGroup,out Updater groupUpdater))
             {
                 //更新指定资源组
                 groupUpdater.UpdateAsset(onFileDownloaded);
