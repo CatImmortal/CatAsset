@@ -5,12 +5,12 @@ using CatAsset;
 using UnityEngine.Networking;
 using System.IO;
 using CatJson;
+using System.Text;
 
 public class Entry : MonoBehaviour
 {
     public GameObject canvans;
-    private GameObject prefab;
-    private GameObject go;
+
     public string UpdateUriPrefix;
 
     private bool inited;
@@ -54,33 +54,7 @@ public class Entry : MonoBehaviour
                 CatAssetManager.UpdateUriPrefix = UpdateUriPrefix + "/StandaloneWindows/" + Application.version + "_" + manifestVefsion;
                 Debug.Log(CatAssetManager.UpdateUriPrefix);
 
-                //进行版本检查
-                CatAssetManager.CheckVersion((count, length) =>
-                {
-                    Debug.Log("需要更新资源数：" + count);
-                    Debug.Log("总大小：" + length);
-
-                    if (count > 0)
-                    {
-                        //更新资源
-                        CatAssetManager.UpdateAssets((updatedCount, updatedLength) =>
-                        {
-                            Debug.Log("已更新数量：" + updatedCount);
-                            Debug.Log("已更新大小：" + updatedLength);
-
-                            if (updatedCount >= count)
-                            {
-                                //所有资源下载结束
-                                inited = true;
-                            }
-                        });
-                    }
-                    else
-                    {
-                        //没有资源需要更新
-                        inited = true;
-                    }
-                });
+                inited = true;
             };
         }
 
@@ -91,69 +65,95 @@ public class Entry : MonoBehaviour
        
     }
 
+    
+
     private void Update()
     {
         if (inited)
         {
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+                CatAssetManager.CheckVersion(OnVersionChecked);
+            }
+
             if (Input.GetKeyDown(KeyCode.A))
             {
-                CatAssetManager.LoadAsset("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab", (sucess,obj) =>
-                {
-                    prefab = (GameObject)obj;
-                    go = Instantiate(prefab, canvans.transform);
-
-                });
+                CatAssetManager.CheckVersion(OnVersionChecked,"Chapter1");
             }
 
             if (Input.GetKeyDown(KeyCode.S))
             {
-                Destroy(go);
-                CatAssetManager.UnloadAsset(prefab);
+                CatAssetManager.CheckVersion(OnVersionChecked, "Chapter2");
             }
 
             if (Input.GetKeyDown(KeyCode.D))
             {
-                CatAssetManager.LoadScene("Assets/Res/Scene/Scene_1.unity", null);
+                CatAssetManager.CheckVersion(OnVersionChecked, "Chapter3");
             }
 
-            if (Input.GetKeyDown(KeyCode.F))
+            if (Input.GetKeyDown(KeyCode.X))
             {
-                CatAssetManager.UnloadScene("Assets/Res/Scene/Scene_1.unity");
+                CatAssetManager.UpdateAsset(OnFileDownloaded);
             }
 
             if (Input.GetKeyDown(KeyCode.Q))
             {
-                CatAssetManager.LoadAsset("Assets/Res/LoopDependency_1/LoopRef_1.prefab", (sucess, obj) =>
-                {
-
-
-                });
+                CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter1");
             }
 
-            if (Input.GetKeyDown(KeyCode.Z))
+            if (Input.GetKeyDown(KeyCode.W))
             {
-                List<string> assetNames = new List<string>();
-                assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_1.prefab");
-                assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_2.prefab");
-                assetNames.Add("Assets/Res/Analyze_1/AnalyzePrefab_3.prefab");
-                assetNames.Add("Assets/Res/Analyze_2/AnalyzePrefab_2.prefab");
-                CatAssetManager.LoadAssets(assetNames, (assets) =>
-                {
-                    foreach (Object item in assets)
-                    {
-                        if (item == null)
-                        {
-                            continue;
-                        }
+                CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter2");
+            }
 
-                        GameObject prefab = (GameObject)item;
-                        go = Instantiate(prefab, canvans.transform);
-                    }
-                });
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter3");
             }
         }
 
       
+    }
+
+    private void OnVersionChecked(int count,long length,string group)
+    {
+        if (group == null)
+        {
+            group = "所有";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("需要更新资源数：" + count);
+        sb.AppendLine("总大小：" + length);
+        sb.AppendLine("资源组:" + group);
+
+        Debug.Log(sb.ToString());
+        sb.Clear();
+
+    }
+
+    private void OnFileDownloaded(int updatedCount,long updatedLength,int totalCount,long totalLength,string fileName ,string group)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("已更新数量：" + updatedCount);
+        sb.AppendLine("已更新大小：" + updatedLength);
+        sb.AppendLine("总数量：" + totalCount);
+        sb.AppendLine("总大小：" + totalLength);
+        sb.AppendLine("资源名：" + fileName);
+        sb.AppendLine("资源组：" + group);
+        Debug.Log(sb.ToString());
+        if (updatedCount >= totalCount)
+        {
+            //所有资源下载结束
+            if (string.IsNullOrEmpty(group))
+            {
+                Debug.Log("所有资源下载完毕");
+            }
+            else
+            {
+                Debug.Log(group + "组的所有资源下载完毕");
+            }
+           
+        }
     }
 
 }

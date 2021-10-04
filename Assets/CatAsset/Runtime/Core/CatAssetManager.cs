@@ -109,16 +109,22 @@ namespace CatAsset
         /// </summary>
         internal static void AddRuntimeInfo(AssetBundleManifestInfo abInfo, bool inReadWrite)
         {
-            AssetBundleRuntimeInfo abRuntimeInfo = new AssetBundleRuntimeInfo();
-            assetBundleInfoDict.Add(abInfo.AssetBundleName, abRuntimeInfo);
+            if (!assetBundleInfoDict.TryGetValue(abInfo.AssetBundleName,out AssetBundleRuntimeInfo abRuntimeInfo))
+            {
+                abRuntimeInfo = new AssetBundleRuntimeInfo();
+                assetBundleInfoDict.Add(abInfo.AssetBundleName, abRuntimeInfo);
+            }
 
             abRuntimeInfo.ManifestInfo = abInfo;
             abRuntimeInfo.InReadWrite = inReadWrite;
 
             foreach (AssetManifestInfo assetManifestInfo in abInfo.Assets)
             {
-                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
-                assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
+                if (!assetInfoDict.TryGetValue(assetManifestInfo.AssetName,out AssetRuntimeInfo assetRuntimeInfo))
+                {
+                    assetRuntimeInfo = new AssetRuntimeInfo();
+                    assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
+                }
 
                 assetRuntimeInfo.ManifestInfo = assetManifestInfo;
                 assetRuntimeInfo.AssetBundleName = abInfo.AssetBundleName;
@@ -183,17 +189,17 @@ namespace CatAsset
         /// <summary>
         /// 资源版本信息检查,可更新模式与边玩边下模式专用
         /// </summary>
-        public static void CheckVersion(Action<int, long> checkVersionCompleted)
+        public static void CheckVersion(Action<int, long,string> onVersionChecked,string checkGroup = null)
         {
-            CatAssetUpdater.CheckVersion(checkVersionCompleted);
+            CatAssetUpdater.CheckVersion(onVersionChecked,checkGroup);
         }
 
         /// <summary>
         /// 更新资源
         /// </summary>
-        public static void UpdateAssets(Action<int, long> updateCallback)
+        public static void UpdateAsset(Action<int, long, int, long, string, string> onFileDownloaded,string updateGroup = null)
         {
-            CatAssetUpdater.UpdateAssets(updateCallback);
+            CatAssetUpdater.UpdateAsset(onFileDownloaded,updateGroup);
         }
 
         /// <summary>

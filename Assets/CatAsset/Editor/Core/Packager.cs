@@ -29,7 +29,7 @@ namespace CatAsset.Editor
             AssetBundleManifest unityManifest = PackageAssetBundles(finalOutputPath, abBuildList,options,targetPlatform);
 
             //生成资源清单文件
-            GenerateManifestFile(finalOutputPath, abBuildList,unityManifest,manifestVersion);
+            CatAssetManifest manifest = GenerateManifestFile(finalOutputPath, abBuildList,unityManifest,manifestVersion);
 
             //资源清单版本号自增
             ChangeManifestVersion();
@@ -37,8 +37,10 @@ namespace CatAsset.Editor
             //将资源复制到StreamingAssets下
             if (isCopyToStreamingAssets)
             {
-                CopyToStreamingAssets(finalOutputPath,copyGroup);
+                CopyToStreamingAssets(finalOutputPath,copyGroup,manifest);
             }
+
+            
         }
 
         /// <summary>
@@ -46,7 +48,8 @@ namespace CatAsset.Editor
         /// </summary>
         private static string GetFinalOutputPath(string outputPath, BuildTarget targetPlatform, int manifestVersion)
         {
-            string result = outputPath +=  "\\"+ targetPlatform  + "\\" + Application.version +"_" + manifestVersion;
+            string dir = Application.version + "_" + manifestVersion;
+            string result = Path.Combine(outputPath, targetPlatform.ToString(), dir);
             return result;
         }
 
@@ -96,7 +99,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 生成资源清单文件
         /// </summary>
-        private static void GenerateManifestFile(string outputPath, List<AssetBundleBuild> abBuildList, AssetBundleManifest unityManifest,int manifestVersion)
+        private static CatAssetManifest GenerateManifestFile(string outputPath, List<AssetBundleBuild> abBuildList, AssetBundleManifest unityManifest,int manifestVersion)
         {
 
             CatAssetManifest manifest = new CatAssetManifest();
@@ -113,7 +116,7 @@ namespace CatAsset.Editor
 
                 abInfo.AssetBundleName = abBulid.assetBundleName;
 
-                string fullPath = outputPath + "\\" + abInfo.AssetBundleName;
+                string fullPath = Path.Combine(outputPath, abInfo.AssetBundleName);
                 FileInfo fi = new FileInfo(fullPath);
 
                 abInfo.Length = fi.Length;
@@ -138,10 +141,12 @@ namespace CatAsset.Editor
 
             //写入清单文件json
             string json = CatJson.JsonParser.ToJson(manifest);
-            using (StreamWriter sw = new StreamWriter(outputPath + "\\CatAssetManifest.json"))
+            using (StreamWriter sw = new StreamWriter(Path.Combine(outputPath,CatAsset.Util.GetManifestFileName())))
             {
                 sw.Write(json);
             }
+
+            return manifest;
             
         }
     
@@ -157,7 +162,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 将资源复制到StreamingAssets下
         /// </summary>
-        private static void CopyToStreamingAssets(string outputPath, string copyGroup)
+        private static void CopyToStreamingAssets(string outputPath, string copyGroup,CatAssetManifest manifest)
         {
             //要复制的资源组的Set
             HashSet<string> copyGroupSet = null;
@@ -183,19 +188,48 @@ namespace CatAsset.Editor
 
             DirectoryInfo outputDirInfo = new DirectoryInfo(outputPath);
 
+            string manifestFileName = CatAsset.Util.GetManifestFileName();
 
             foreach (FileInfo item in outputDirInfo.GetFiles())
             {
-                if (copyGroupSet != null
-                    && item.Name != CatAsset.Util.GetManifestFileName()
-                    && !copyGroup.Contains(AssetCollector.GetAssetBundleGroup(item.Name)) 
-                    )
+                if (item.Name == manifestFileName)
                 {
-                    //并非资源组的资源，并且不是资源清单文件，就不复制
+                    //跳过资源清单文件
                     continue;
                 }
 
-                item.CopyTo(Application.streamingAssetsPath + "/" + item.Name);
+                if (copyGroupSet != null
+                    && !copyGroup.Contains(AssetCollector.GetAssetBundleGroup(item.Name)) 
+                    )
+                {
+                    //跳过并非指定要复制的资源组的资源文件
+                    continue;
+                }
+
+                item.CopyTo(CatAsset.Util.GetReadOnlyPath(item.Name));
+            }
+
+           
+
+            if (copyGroupSet != null)
+            {
+                //根据要复制的资源组修改资源清单
+                List<AssetBundleManifestInfo> abInfoList = new List<AssetBundleManifestInfo>();
+                foreach (AssetBundleManifestInfo abInfo in manifest.AssetBundles)
+                {
+                    if (copyGroupSet.Contains(abInfo.Group))
+                    {
+                        abInfoList.Add(abInfo);
+                    }
+                }
+                manifest.AssetBundles = abInfoList.ToArray();
+            }
+
+            //生成仅包含被复制的资源组的资源清单文件到StreamingAssets下
+            string json = CatJson.JsonParser.ToJson(manifest);
+            using (StreamWriter sw = new StreamWriter(CatAsset.Util.GetReadOnlyPath(manifestFileName)))
+            {
+                sw.Write(json);
             }
 
             AssetDatabase.Refresh();

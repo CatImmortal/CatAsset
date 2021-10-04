@@ -18,4 +18,4 @@ MonoBehaviour:
   OutputPath: E:/GitProjects/CatAsset/WebServer
   IsAnalyzeRedundancy: 1
   IsCopyToStreamingAssets: 1
-  CopyGroup: Base;Chapter1
+  CopyGroup: Base

@@ -7,7 +7,7 @@ namespace CatAsset
     /// <summary>
     /// 资源更新检查状态
     /// </summary>
-    public enum UpdateCheckState
+    public enum CheckState
     {
         None,
 
