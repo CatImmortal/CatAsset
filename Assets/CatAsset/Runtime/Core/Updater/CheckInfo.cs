@@ -36,11 +36,27 @@ namespace CatAsset
                 return;
             }
 
+            //添加资源组信息
+            if (!CatAssetManager.groupInfoDict.TryGetValue(RemoteInfo.Group, out GroupInfo groupInfo))
+            {
+                groupInfo = new GroupInfo();
+                groupInfo.GroupName = RemoteInfo.Group;
+                CatAssetManager.groupInfoDict.Add(RemoteInfo.Group, groupInfo);
+            }
+            groupInfo.remoteAssetBunldes.Add(Name);
+            groupInfo.remoteCount++;
+            groupInfo.remoteLength += RemoteInfo.Length;
+
             if (ReadOnlyInfo != null && ReadOnlyInfo.Equals(RemoteInfo))
             {
                 //该ab最新版本存在于只读区 需要删掉读写区的那份
                 State = CheckState.InReadOnly;
                 NeedRemove = ReadWriteInfo != null;
+
+                groupInfo.localAssetBundles.Add(Name);
+                groupInfo.localCount++;
+                groupInfo.localLength += RemoteInfo.Length;
+
                 return;
             }
 
@@ -49,6 +65,11 @@ namespace CatAsset
                 //该ab最新版本存在于读写区
                 State = CheckState.InReadWrite;
                 NeedRemove = false;
+
+                groupInfo.localAssetBundles.Add(Name);
+                groupInfo.localCount++;
+                groupInfo.localLength += RemoteInfo.Length;
+
                 return;
             }
 
@@ -56,6 +77,8 @@ namespace CatAsset
             State = CheckState.NeedUpdate;
             NeedRemove = ReadWriteInfo != null;
         }
+   
+
     }
 }
 

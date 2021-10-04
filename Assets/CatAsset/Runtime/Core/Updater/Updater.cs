@@ -93,6 +93,13 @@ namespace CatAsset
             //更新读写区资源信息列表
             CatAssetUpdater.readWriteManifestInfoDict[abInfo.AssetBundleName] = abInfo;
 
+            //更新资源组本地资源信息
+            GroupInfo groupInfo = CatAssetManager.GetGroupInfo(UpdateGroup);
+            groupInfo.localAssetBundles.Add(abInfo.AssetBundleName);
+            groupInfo.localCount++;
+            groupInfo.localLength += abInfo.Length;
+
+            //更新已下载资源信息
             updatedCount++;
             updatedLength += abInfo.Length;
             deltaUpatedLength += abInfo.Length;

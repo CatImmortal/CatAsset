@@ -180,6 +180,8 @@ namespace CatAsset
                 CheckInfo checkInfo = item.Value;
                 checkInfo.RefreshState();
 
+
+
                 switch (checkInfo.State)
                 {
                     case CheckState.NeedUpdate:

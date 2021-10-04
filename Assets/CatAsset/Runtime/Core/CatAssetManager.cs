@@ -23,6 +23,11 @@ namespace CatAsset
         private static Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
+        /// 资源组信息字典
+        /// </summary>
+        internal static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
+
+        /// <summary>
         /// Asset和Asset运行时信息的关联(不包括场景)
         /// </summary>
         private static Dictionary<Object, AssetRuntimeInfo> assetToAssetInfo = new Dictionary<Object, AssetRuntimeInfo>();
@@ -153,6 +158,14 @@ namespace CatAsset
         public static void Update()
         {
             taskExcutor.Update();
+        }
+
+        /// <summary>
+        /// 获取资源组信息，只能在对应group进行过CheckVersion后使用
+        /// </summary>
+        public static GroupInfo GetGroupInfo(string group)
+        {
+            return groupInfoDict[group];
         }
 
         /// <summary>

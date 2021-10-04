@@ -53,7 +53,7 @@ public class Entry : MonoBehaviour
                 //根据平台，整包版本和资源版本设置资源更新uri的前缀
                 CatAssetManager.UpdateUriPrefix = UpdateUriPrefix + "/StandaloneWindows/" + Application.version + "_" + manifestVefsion;
                 Debug.Log(CatAssetManager.UpdateUriPrefix);
-
+                CatAssetManager.CheckVersion(OnVersionChecked, "Base");
                 inited = true;
             };
         }
@@ -109,6 +109,14 @@ public class Entry : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter3");
+            }
+
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                GroupInfo info0 = CatAssetManager.GetGroupInfo("Base");
+                GroupInfo info1 = CatAssetManager.GetGroupInfo("Chapter1");
+                GroupInfo info2 = CatAssetManager.GetGroupInfo("Chapter2");
+                GroupInfo info3 = CatAssetManager.GetGroupInfo("Chapter3");
             }
         }
 
