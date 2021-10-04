@@ -216,6 +216,22 @@ namespace CatAsset
         }
 
         /// <summary>
+        /// 暂停更新资源
+        /// </summary>
+        public static void PauseUpdateAsset(string group = null)
+        {
+            CatAssetUpdater.PauseUpdater(true, group);
+        }
+
+        /// <summary>
+        /// 恢复更新资源
+        /// </summary>
+        public static void ResumeUpdateAsset(string group = null)
+        {
+            CatAssetUpdater.PauseUpdater(false, group);
+        }
+
+        /// <summary>
         /// 加载Asset
         /// </summary>
         public static void LoadAsset(string assetName, Action<bool, Object> loadedCallback)
@@ -318,7 +334,7 @@ namespace CatAsset
                 if (abInfo.UsedAssets.Count == 0)
                 {
                     //AssetBundle也已经没人使用了 创建卸载任务 开始卸载倒计时
-                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName);
+                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.LoadPath);
                     taskExcutor.AddTask(task);
                     Debug.Log("创建了卸载AB的任务：" + task.Name);
                 }
@@ -425,7 +441,7 @@ namespace CatAsset
                 if (abInfo.UsedAssets.Count == 0)
                 {
                     //AssetBundel也已经没人使用了 创建卸载任务 开始卸载倒计时
-                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName);
+                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.LoadPath);
                     taskExcutor.AddTask(task);
                     Debug.Log("创建了卸载AB的任务：" + task.Name);
                 }

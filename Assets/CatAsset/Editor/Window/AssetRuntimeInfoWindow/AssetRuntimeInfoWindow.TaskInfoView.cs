@@ -34,7 +34,7 @@ namespace CatAsset.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("任务名称");
+                EditorGUILayout.LabelField("任务名称", GUILayout.Width(position.width / 2));
                 EditorGUILayout.LabelField("任务类型");
                 EditorGUILayout.LabelField("任务状态");
                 EditorGUILayout.LabelField("任务进度");
@@ -48,7 +48,7 @@ namespace CatAsset.Editor
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         BaseTask task = item.Value;
-                        EditorGUILayout.LabelField(task.Name);
+                        EditorGUILayout.LabelField(task.Name,GUILayout.Width(position.width / 2));
                         EditorGUILayout.LabelField(task.GetType().Name);
                         EditorGUILayout.LabelField(task.State.ToString());
                         EditorGUILayout.LabelField(task.Progress.ToString("0.00"));

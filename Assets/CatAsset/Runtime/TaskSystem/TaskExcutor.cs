@@ -116,7 +116,14 @@ namespace CatAsset
                         case TaskState.Free:
                             task.Execute();
                             task.UpdateState();
-                            executeCount++;
+
+                            if (task.State != TaskState.Free)
+                            {
+                                //Free状态调用Execute和UpdateState后如果还是Free 就不让它占用执行次数
+                                //主要处理下载暂停的特殊情况
+                                executeCount++;
+                            }
+
                             break;
 
                         case TaskState.Waiting:

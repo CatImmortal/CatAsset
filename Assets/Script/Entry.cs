@@ -6,6 +6,7 @@ using UnityEngine.Networking;
 using System.IO;
 using CatJson;
 using System.Text;
+using System;
 
 public class Entry : MonoBehaviour
 {
@@ -147,8 +148,26 @@ public class Entry : MonoBehaviour
         sb.AppendLine("总数量：" + totalCount);
         sb.AppendLine("总大小：" + totalLength);
         sb.AppendLine("资源名：" + fileName);
-        sb.AppendLine("资源组：" + group);
+        if (string.IsNullOrEmpty(group))
+        {
+            sb.AppendLine("资源组：所有");
+        }
+        else
+        {
+            sb.AppendLine("资源组：" + group);
+        }
+       
         Debug.Log(sb.ToString());
+
+        if (updatedCount >= 1)
+        {
+            CatAssetManager.PauseUpdateAsset(group);
+
+            StartCoroutine(Delay(3, () => {
+                CatAssetManager.ResumeUpdateAsset(group);
+            }));
+        }
+
         if (updatedCount >= totalCount)
         {
             //所有资源下载结束
@@ -164,4 +183,9 @@ public class Entry : MonoBehaviour
         }
     }
 
+    private IEnumerator Delay(float time,Action callback)
+    {
+        yield return new WaitForSeconds(time);
+        callback();
+    }
 }

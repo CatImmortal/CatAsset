@@ -14,9 +14,14 @@ namespace CatAsset
         private UnityWebRequestAsyncOperation op;
 
         /// <summary>
-        /// 用户自定义数据
+        /// AssetBundle清单信息
         /// </summary>
-        private object userdata;
+        private AssetBundleManifestInfo abInfo;
+
+        /// <summary>
+        /// 发起此下载任务的更新器
+        /// </summary>
+        private Updater updater;
 
         /// <summary>
         /// 下载地址
@@ -33,7 +38,7 @@ namespace CatAsset
         /// </summary>
         private string localTempFilePath;
 
-        private Action<bool, string , object> onFinished;
+        private Action<bool, string , AssetBundleManifestInfo> onFinished;
 
         public override float Progress
         {
@@ -48,9 +53,10 @@ namespace CatAsset
             }
         }
 
-        public DownloadFileTask(TaskExcutor owner, string name,object userdata, string localFilePath, string downloadUri, Action<bool, string, object> onFinished) : base(owner, name)
+        public DownloadFileTask(TaskExcutor owner, string name,AssetBundleManifestInfo abInfo,Updater updater, string localFilePath, string downloadUri, Action<bool, string, AssetBundleManifestInfo> onFinished) : base(owner, name)
         {
-            this.userdata = userdata;
+            this.abInfo = abInfo;
+            this.updater = updater;
             this.localFilePath = localFilePath;
             this.downloadUri = downloadUri;
             this.onFinished = onFinished;
@@ -58,6 +64,12 @@ namespace CatAsset
 
         public override void Execute()
         {
+
+            if (updater.paused)
+            {
+                //处理下载暂停
+                return;
+            }
 
             localTempFilePath = localFilePath + ".downloading";
 
@@ -88,6 +100,13 @@ namespace CatAsset
 
         public override void UpdateState()
         {
+            if (op == null)
+            {
+                //被暂停了
+                State = TaskState.Free;
+                return;
+            }
+
             if (!op.webRequest.isDone)
             {
                 State = TaskState.Executing;
@@ -100,7 +119,7 @@ namespace CatAsset
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
                 //下载失败
-                onFinished?.Invoke(false, op.webRequest.error , userdata);
+                onFinished?.Invoke(false, op.webRequest.error , abInfo);
             }
             else
             {
@@ -113,7 +132,7 @@ namespace CatAsset
 
                 File.Move(localTempFilePath, localFilePath);
 
-                onFinished?.Invoke(true,null, userdata);
+                onFinished?.Invoke(true,null, abInfo);
             }
 
 

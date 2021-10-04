@@ -37,7 +37,7 @@ namespace CatAsset
         public int totalCount;
 
         /// <summary>
-        /// 需要更新的资源大小
+        /// 需要更新的资源长度
         /// </summary>
         public long totalLength;
 
@@ -50,6 +50,11 @@ namespace CatAsset
         /// 已更新资源文件长度
         /// </summary>
         private long updatedLength;
+
+        /// <summary>
+        /// 是否被暂停了
+        /// </summary>
+        internal bool paused;
 
         /// <summary>
         /// 资源文件更新回调，每次下载资源文件后调用
@@ -67,7 +72,7 @@ namespace CatAsset
             {
                 string localFilePath = Util.GetReadWritePath(updateABInfo.AssetBundleName);
                 string downloadUri = Path.Combine(CatAssetUpdater.UpdateUriPrefix, updateABInfo.AssetBundleName);
-                DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, downloadUri, updateABInfo, localFilePath, downloadUri, OnDownloadFinished);
+                DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, downloadUri, updateABInfo,this, localFilePath, downloadUri, OnDownloadFinished);
                 CatAssetManager.taskExcutor.AddTask(task);
             }
 
@@ -77,9 +82,8 @@ namespace CatAsset
         /// <summary>
         /// 资源文件下载完毕的回调
         /// </summary>
-        private void OnDownloadFinished(bool success, string error, object userData)
+        private void OnDownloadFinished(bool success, string error, AssetBundleManifestInfo abInfo)
         {
-            AssetBundleManifestInfo abInfo = (AssetBundleManifestInfo)userData;
 
             if (!success)
             {
@@ -94,7 +98,7 @@ namespace CatAsset
             CatAssetUpdater.readWriteManifestInfoDict[abInfo.AssetBundleName] = abInfo;
 
             //更新资源组本地资源信息
-            GroupInfo groupInfo = CatAssetManager.GetGroupInfo(UpdateGroup);
+            GroupInfo groupInfo = CatAssetManager.GetGroupInfo(abInfo.Group);
             groupInfo.localAssetBundles.Add(abInfo.AssetBundleName);
             groupInfo.localCount++;
             groupInfo.localLength += abInfo.Length;

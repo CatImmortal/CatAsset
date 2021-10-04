@@ -11,7 +11,7 @@ namespace CatAsset
     /// <summary>
     /// CatAsset资源更新器
     /// </summary>
-    internal static class CatAssetUpdater
+    public static class CatAssetUpdater
     {
         /// <summary>
         /// 读写区资源信息，用于生成读写区资源清单
@@ -103,6 +103,21 @@ namespace CatAsset
             }
 
            
+        }
+
+        /// <summary>
+        /// 暂停更新器
+        /// </summary>
+        internal static void PauseUpdater(bool isPause ,string group)
+        {
+            if (string.IsNullOrEmpty(group))
+            {
+                updater.paused = isPause;
+            }
+            else
+            {
+                groupUpdaterDict[group].paused = isPause;
+            }
         }
 
     }
