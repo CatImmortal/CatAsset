@@ -47,19 +47,19 @@ namespace CatAsset
 
         public LoadAssetTask(TaskExcutor owner, string name, Action<bool, Object> onFinished) : base(owner, name)
         {
-            assetInfo = CatAssetManager.GetAssetInfo(name);
+            assetInfo = CatAssetManager.GetAssetRuntimeInfo(name);
             this.onFinished = onFinished;
         }
 
 
         public override void Execute()
         {
-            abInfo = CatAssetManager.GetAssetBundleInfo(assetInfo.AssetBundleName);
+            abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(assetInfo.AssetBundleName);
 
             if (abInfo.AssetBundle == null)
             {
                 //需要加载AssetBundle
-                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, abInfo.LoadPath);
+                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, assetInfo.AssetBundleName, abInfo.LoadPath);
                 owner.AddTask(task);
             }
         }
@@ -133,7 +133,7 @@ namespace CatAsset
             if (abAsyncOp.asset)
             {
                 assetInfo.Asset = abAsyncOp.asset;
-                CatAssetManager.AddAssetToRuntimeInfo(assetInfo);  //添加Asset和AssetRuntimeInfo的关联
+                CatAssetManager.AddAssetToRuntimeInfo(assetInfo.Asset,assetInfo);  //添加Asset和AssetRuntimeInfo的关联
                 onFinished?.Invoke(true,assetInfo.Asset);
             }
             else
@@ -181,7 +181,7 @@ namespace CatAsset
             {
                 string dependencyName = assetInfo.ManifestInfo.Dependencies[i];
 
-                AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetInfo(dependencyName);
+                AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
                 if (dependencyInfo.Asset != null)
                 {
                     //将已加载好的依赖都卸载了

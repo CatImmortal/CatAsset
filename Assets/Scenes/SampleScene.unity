@@ -344,7 +344,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31d537ebcfd46f64480c0c046794699a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RunMode: 1
+  RunMode: 2
   MaxTaskExuteCount: 1
   UnloadDelayTime: 5
   IsEditorMode: 0

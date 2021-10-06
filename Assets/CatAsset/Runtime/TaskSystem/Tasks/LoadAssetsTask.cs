@@ -91,7 +91,7 @@ namespace CatAsset
             List<Object> loadedAssets = new List<Object>(assetNames.Count);
             foreach (string assetName in assetNames)
             {
-                AssetRuntimeInfo assetInfo = CatAssetManager.GetAssetInfo(assetName);
+                AssetRuntimeInfo assetInfo = CatAssetManager.GetAssetRuntimeInfo(assetName);
                 loadedAssets.Add(assetInfo.Asset);
             }
             return loadedAssets;

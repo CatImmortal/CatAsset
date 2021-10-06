@@ -37,12 +37,7 @@ namespace CatAsset
             }
 
             //添加资源组信息
-            if (!CatAssetManager.groupInfoDict.TryGetValue(RemoteInfo.Group, out GroupInfo groupInfo))
-            {
-                groupInfo = new GroupInfo();
-                groupInfo.GroupName = RemoteInfo.Group;
-                CatAssetManager.groupInfoDict.Add(RemoteInfo.Group, groupInfo);
-            }
+            GroupInfo groupInfo = CatAssetManager.GetGroupInfo(RemoteInfo.Group);
             groupInfo.remoteAssetBunldes.Add(Name);
             groupInfo.remoteCount++;
             groupInfo.remoteLength += RemoteInfo.Length;

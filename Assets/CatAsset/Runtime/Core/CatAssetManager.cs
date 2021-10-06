@@ -23,14 +23,19 @@ namespace CatAsset
         private static Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 资源组信息字典
+        /// 远端Asset名与对应AssetBundle清单信息的映射字典
         /// </summary>
-        internal static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
+        private static Dictionary<string, AssetBundleManifestInfo> remoteAssetToAssetBundleDict = new Dictionary<string, AssetBundleManifestInfo>();
 
         /// <summary>
         /// Asset和Asset运行时信息的关联(不包括场景)
         /// </summary>
         private static Dictionary<Object, AssetRuntimeInfo> assetToAssetInfo = new Dictionary<Object, AssetRuntimeInfo>();
+
+        /// <summary>
+        /// 资源组信息字典
+        /// </summary>
+        internal static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
 
         /// <summary>
         /// 任务执行器
@@ -93,28 +98,11 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 获取AssetBundle运行时信息
-        /// </summary>
-        internal static AssetBundleRuntimeInfo GetAssetBundleInfo(string assetBundleName)
-        {
-            return assetBundleInfoDict[assetBundleName];
-        }
-
-        /// <summary>
-        /// 获取Asset运行时信息
-        /// </summary>
-        internal static AssetRuntimeInfo GetAssetInfo(string assetName)
-        {
-            return assetInfoDict[assetName];
-        }
-
-
-        /// <summary>
         /// 添加资源运行时信息
         /// </summary>
         internal static void AddRuntimeInfo(AssetBundleManifestInfo abInfo, bool inReadWrite)
         {
-            if (!assetBundleInfoDict.TryGetValue(abInfo.AssetBundleName,out AssetBundleRuntimeInfo abRuntimeInfo))
+            if (!assetBundleInfoDict.TryGetValue(abInfo.AssetBundleName, out AssetBundleRuntimeInfo abRuntimeInfo))
             {
                 abRuntimeInfo = new AssetBundleRuntimeInfo();
                 assetBundleInfoDict.Add(abInfo.AssetBundleName, abRuntimeInfo);
@@ -125,7 +113,7 @@ namespace CatAsset
 
             foreach (AssetManifestInfo assetManifestInfo in abInfo.Assets)
             {
-                if (!assetInfoDict.TryGetValue(assetManifestInfo.AssetName,out AssetRuntimeInfo assetRuntimeInfo))
+                if (!assetInfoDict.TryGetValue(assetManifestInfo.AssetName, out AssetRuntimeInfo assetRuntimeInfo))
                 {
                     assetRuntimeInfo = new AssetRuntimeInfo();
                     assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
@@ -137,19 +125,50 @@ namespace CatAsset
         }
 
         /// <summary>
+        /// 获取AssetBundle运行时信息
+        /// </summary>
+        internal static AssetBundleRuntimeInfo GetAssetBundleRuntimeInfo(string assetBundleName)
+        {
+            return assetBundleInfoDict[assetBundleName];
+        }
+
+        /// <summary>
+        /// 获取Asset运行时信息
+        /// </summary>
+        internal static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
+        {
+            return assetInfoDict[assetName];
+        }
+
+        /// <summary>
+        /// 添加远端Asset清单信息
+        /// </summary>
+        internal static void AddRemoteAssetManifestInfo(CatAssetManifest remoteManifest)
+        {
+            remoteAssetToAssetBundleDict.Clear();
+            foreach (AssetBundleManifestInfo abInfo in remoteManifest.AssetBundles)
+            {
+                foreach (AssetManifestInfo assetInfo in abInfo.Assets)
+                {
+                    remoteAssetToAssetBundleDict.Add(assetInfo.AssetName, abInfo);
+                }
+            }
+        }
+
+        /// <summary>
         /// 添加Asset到Asset运行时信息的映射
         /// </summary>
-        internal static void AddAssetToRuntimeInfo(AssetRuntimeInfo info)
+        internal static void AddAssetToRuntimeInfo(Object asset, AssetRuntimeInfo info)
         {
-            assetToAssetInfo.Add(info.Asset, info);
+            assetToAssetInfo.Add(asset, info);
         }
 
         /// <summary>
         /// 移除Asset到Asset运行时信息的映射
         /// </summary>
-        internal static void RemoveAssetToRuntimeInfo(AssetRuntimeInfo info)
+        internal static void RemoveAssetToRuntimeInfo(Object asset)
         {
-            assetToAssetInfo.Remove(info.Asset);
+            assetToAssetInfo.Remove(asset);
         }
 
         /// <summary>
@@ -161,11 +180,18 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 获取资源组信息，只能在对应group进行过CheckVersion后使用
+        /// 获取资源组信息
         /// </summary>
         public static GroupInfo GetGroupInfo(string group)
         {
-            return groupInfoDict[group];
+            if (!groupInfoDict.TryGetValue(group,out GroupInfo groupInfo))
+            {
+                groupInfo = new GroupInfo();
+                groupInfo.GroupName = group;
+                groupInfoDict.Add(group, groupInfo);
+            }
+
+            return groupInfo;
         }
 
         /// <summary>
@@ -253,7 +279,24 @@ namespace CatAsset
 
             if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
             {
-                Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
+                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetToAssetBundleDict.ContainsKey(assetName))
+                {
+                    Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
+                    return;
+                }
+
+                //开启了边玩边下模式 并且此asset所属ab在远端存在 尝试从远端下载对应ab
+                AssetBundleManifestInfo abInfo = remoteAssetToAssetBundleDict[assetName];
+                Debug.Log("边玩边下，尝试下载：" + abInfo.AssetBundleName);
+                Updater updater = new Updater();
+                updater.UpdateList = new List<AssetBundleManifestInfo>() { abInfo };
+                updater.totalCount = 1;
+                updater.totalLength += abInfo.Length;
+
+                updater.UpdateAsset((count, length, totalCount, totalLength, abName, group) => {
+                    Debug.Log("边玩边下，下载成功：" + abInfo.AssetBundleName);
+                    LoadAsset(assetName, loadedCallback);
+                });
                 return;
             }
 

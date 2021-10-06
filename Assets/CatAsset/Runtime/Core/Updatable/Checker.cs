@@ -140,6 +140,11 @@ namespace CatAsset
                 checkInfo.RemoteInfo = item;
             }
 
+            if (CatAssetManager.RunMode == RunMode.UpdatableWhilePlaying)
+            {
+                CatAssetManager.AddRemoteAssetManifestInfo(manifest);
+            }
+
             remoteChecked = true;
             RefershCheckInfos();
         }
@@ -167,6 +172,19 @@ namespace CatAsset
             if (!readOnlyChecked || !readWriteCheked || !remoteChecked)
             {
                 return;
+            }
+
+            //清理被检查的资源组的已有信息
+            if (string.IsNullOrEmpty(checkGroup))
+            {
+                CatAssetManager.groupInfoDict.Clear();
+            }
+            else
+            {
+                if (CatAssetManager.groupInfoDict.ContainsKey(checkGroup))
+                {
+                    CatAssetManager.groupInfoDict.Remove(checkGroup);
+                }
             }
 
             Updater updater = new Updater();

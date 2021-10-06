@@ -27,7 +27,7 @@ namespace CatAsset
 
         public UnloadAssetBundleTask(TaskExcutor owner, string name) : base(owner, name)
         {
-            abInfo = CatAssetManager.GetAssetBundleInfo(name);
+            abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(name);
             State = TaskState.Waiting;  //初始状态设置为Waiting 避免占用每帧任务处理次数
         }
 
@@ -56,10 +56,10 @@ namespace CatAsset
                 {
                     string assetName = abInfo.ManifestInfo.Assets[i].AssetName;
 
-                    AssetRuntimeInfo info = CatAssetManager.GetAssetInfo(assetName);
+                    AssetRuntimeInfo info = CatAssetManager.GetAssetRuntimeInfo(assetName);
                     if (info.Asset != null)
                     {
-                        CatAssetManager.RemoveAssetToRuntimeInfo(info);  //删除关联
+                        CatAssetManager.RemoveAssetToRuntimeInfo(info.Asset);  //删除关联
                     }
                 }
 

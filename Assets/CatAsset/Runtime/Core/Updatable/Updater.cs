@@ -91,28 +91,35 @@ namespace CatAsset
                 return;
             }
 
-            //将下载好的ab信息添加到RuntimeInfo中
-            CatAssetManager.AddRuntimeInfo(abInfo, true);
-
-            //更新读写区资源信息列表
-            CatAssetUpdater.readWriteManifestInfoDict[abInfo.AssetBundleName] = abInfo;
-
-            //更新资源组本地资源信息
-            GroupInfo groupInfo = CatAssetManager.GetGroupInfo(abInfo.Group);
-            groupInfo.localAssetBundles.Add(abInfo.AssetBundleName);
-            groupInfo.localCount++;
-            groupInfo.localLength += abInfo.Length;
-
             //更新已下载资源信息
             updatedCount++;
             updatedLength += abInfo.Length;
             deltaUpatedLength += abInfo.Length;
 
-            if (updatedCount >= totalCount || deltaUpatedLength >= generateManifestLength)
+           
+            GroupInfo groupInfo = CatAssetManager.GetGroupInfo(abInfo.Group);
+            if (!groupInfo.localAssetBundles.Contains(abInfo.AssetBundleName))
             {
-                //所有资源下载完毕 或者已下载字节数达到要求 就重新生成一次读写区资源清单
-                deltaUpatedLength = 0;
-                CatAssetUpdater.GenerateReadWriteManifest();
+                //没有被另一个Updater下载过
+
+                //将下载好的ab信息添加到RuntimeInfo中
+                CatAssetManager.AddRuntimeInfo(abInfo, true);
+
+                //更新读写区资源信息列表
+                CatAssetUpdater.readWriteManifestInfoDict[abInfo.AssetBundleName] = abInfo;
+
+                //更新资源组本地资源信息
+                groupInfo.localAssetBundles.Add(abInfo.AssetBundleName);
+                groupInfo.localCount++;
+                groupInfo.localLength += abInfo.Length;
+
+
+                if (updatedCount >= totalCount || deltaUpatedLength >= generateManifestLength)
+                {
+                    //所有资源下载完毕 或者已下载字节数达到要求 就重新生成一次读写区资源清单
+                    deltaUpatedLength = 0;
+                    CatAssetUpdater.GenerateReadWriteManifest();
+                }
             }
 
             onFileDownloaded(updatedCount, updatedLength,totalCount,totalLength,abInfo.AssetBundleName,UpdateGroup);

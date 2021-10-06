@@ -33,7 +33,7 @@ namespace CatAsset
         /// <summary>
         /// 此资源组的所有本地AssetBundle名
         /// </summary>
-        public List<string> localAssetBundles = new List<string>();
+        public HashSet<string> localAssetBundles = new HashSet<string>();
 
         /// <summary>
         /// 此资源组的所有本地AssetBundle数量

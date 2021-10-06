@@ -29,7 +29,7 @@ namespace CatAsset
         internal static Dictionary<string, Updater> groupUpdaterDict = new Dictionary<string, Updater>();
 
         /// <summary>
-        /// 资源更新器（没指定资源组，更新所有资源）
+        /// 资源更新器（不指定资源组的，更新所有资源）
         /// </summary>
         internal static Updater updater;
 

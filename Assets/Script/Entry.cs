@@ -112,7 +112,33 @@ public class Entry : MonoBehaviour
                 CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter3");
             }
 
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                CatAssetManager.LoadAsset("Assets/Res/Chapter_1/Prefabs/Image_1.prefab", (success, asset) =>
+                {
+                    if (!success)
+                    {
+                        Debug.Log("加载Image_1.prefab失败");
+                    }
 
+                    Instantiate(asset);
+                    Debug.Log("加载Image_1.prefab成功");
+                });
+            }
+
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                CatAssetManager.LoadAsset("Assets/Res/Chapter_2/Prefabs/Image_1.prefab", (success, asset) =>
+                {
+                    if (!success)
+                    {
+                        Debug.Log("加载Image_1.prefab失败");
+                    }
+
+                    Instantiate(asset);
+                    Debug.Log("加载Image_1.prefab成功");
+                });
+            }
         }
 
       

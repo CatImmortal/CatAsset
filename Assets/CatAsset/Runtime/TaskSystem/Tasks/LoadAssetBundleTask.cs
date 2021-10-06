@@ -28,9 +28,10 @@ namespace CatAsset
             }
         }
 
-        public LoadAssetBundleTask(TaskExcutor owner, string name) : base(owner, name)
+        public LoadAssetBundleTask(TaskExcutor owner, string name,string loadPath) : base(owner, name)
         {
-            abInfo = CatAssetManager.GetAssetBundleInfo(name);
+            abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(name);
+            Name = loadPath;  //这里让LoadAssetBundleTask在编辑器窗口上显示的名称为它的加载路径
         }
 
         public override void Execute()

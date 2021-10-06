@@ -110,7 +110,6 @@ namespace CatAsset
                     }
 
                     BaseTask task = item.Value;
-
                     switch (task.State)
                     {
                         case TaskState.Free:
@@ -135,7 +134,6 @@ namespace CatAsset
                             executeCount++;
                             break;
                     }
-                   
                     if (task.State == TaskState.Finished)
                     {
                         //在task.UpdateState执行过后，State可能会变成Finished 这样在当前帧UpdateState后完成的任务就在当前帧移除了
