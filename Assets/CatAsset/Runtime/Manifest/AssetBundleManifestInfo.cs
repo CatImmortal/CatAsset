@@ -39,9 +39,9 @@ namespace CatAsset
         /// </summary>
         public AssetManifestInfo[] Assets;
 
-        public bool Equals(AssetBundleManifestInfo abInfo)
+        public bool Equals(AssetBundleManifestInfo other)
         {
-            return AssetBundleName == abInfo.AssetBundleName && Length == abInfo.Length && Hash == abInfo.Hash && Group == abInfo.Group;
+            return AssetBundleName == other.AssetBundleName && Length == other.Length && Hash == other.Hash && Group == other.Group;
         }
     }
 }

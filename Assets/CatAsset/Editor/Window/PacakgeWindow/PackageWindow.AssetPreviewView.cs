@@ -36,7 +36,7 @@ namespace CatAsset.Editor
         private void InitAssetsPreviewView()
         {
             abFoldOut.Clear();
-            abBuildList = Util.PkgRuleCfg.GetAssetBundleBuildList(Util.PkgCfg.IsAnalyzeRedundancy);
+            abBuildList = PkgUtil.PkgRuleCfg.GetAssetBundleBuildList(PkgUtil.PkgCfg.IsAnalyzeRedundancy);
             foreach (AssetBundleBuild abBuild in abBuildList)
             {
                 abFoldOut[abBuild.assetBundleName] = false;
@@ -84,7 +84,7 @@ namespace CatAsset.Editor
 
                 if (GUILayout.Button("检测循环依赖",GUILayout.Width(150)))
                 {
-                    LoopDependencAnalyzer.AnalyzeLoopDependenc(Util.PkgRuleCfg.GetAssetBundleBuildList(Util.PkgCfg.IsAnalyzeRedundancy));
+                    LoopDependencAnalyzer.AnalyzeLoopDependenc(PkgUtil.PkgRuleCfg.GetAssetBundleBuildList(PkgUtil.PkgCfg.IsAnalyzeRedundancy));
                 }
 
                

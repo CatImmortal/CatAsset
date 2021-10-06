@@ -21,7 +21,7 @@ namespace CatAsset.Editor
 
             EditorGUILayout.Space();
 
-            PackageRuleConfig cfg = Util.PkgRuleCfg;
+            PackageRuleConfig cfg = PkgUtil.PkgRuleCfg;
             bool isNeedSort = false;
             for (int i = 0; i < cfg.Rules.Count; i++)
             {
@@ -88,7 +88,7 @@ namespace CatAsset.Editor
 
             if (EditorGUI.EndChangeCheck())
             {
-                EditorUtility.SetDirty(Util.PkgRuleCfg);
+                EditorUtility.SetDirty(PkgUtil.PkgRuleCfg);
             }
 
         }

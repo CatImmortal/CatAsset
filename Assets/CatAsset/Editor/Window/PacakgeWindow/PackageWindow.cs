@@ -30,7 +30,7 @@ namespace CatAsset.Editor
         [MenuItem("CatAsset/打开打包窗口", priority = 1)]
         private static void OpenWindow()
         {
-            if (Util.PkgCfg == null || Util.PkgRuleCfg == null)
+            if (PkgUtil.PkgCfg == null || PkgUtil.PkgRuleCfg == null)
             {
                 EditorUtility.DisplayDialog("提示", "需要先创建配置文件", "ok");
                 return;

@@ -17,7 +17,7 @@ namespace CatAsset.Editor
         [MenuItem("CatAsset/创建打包规则配置文件")]
         private static void CreateConfig()
         {
-            Util.CreateConfigAsset<PackageRuleConfig>();
+            PkgUtil.CreateConfigAsset<PackageRuleConfig>();
         }
 
         /// <summary>

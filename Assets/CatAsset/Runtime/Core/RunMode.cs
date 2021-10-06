@@ -20,7 +20,7 @@ namespace CatAsset
         Updatable,
         
         /// <summary>
-        /// 边玩边下
+        /// 加载时若本地不存在会下载的可更新模式
         /// </summary>
         UpdatableWhilePlaying,
     }

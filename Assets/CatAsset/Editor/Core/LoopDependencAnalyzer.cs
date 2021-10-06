@@ -69,7 +69,7 @@ namespace CatAsset.Editor
         private static bool GetDependencies(string assetName,HashSet<string> depSet,List<string> depLink)
         {
             //获取所有直接依赖
-            string[] dependencies = Util.GetDependencies(assetName, false);
+            string[] dependencies = PkgUtil.GetDependencies(assetName, false);
 
             //递归依赖
             foreach (string item in dependencies)

@@ -25,7 +25,7 @@ namespace CatAsset.Editor
             CreateOutputPath(finalOutputPath);
 
             //获取AssetBundleBuildList，然后打包AssetBundle
-            List<AssetBundleBuild> abBuildList = Util.PkgRuleCfg.GetAssetBundleBuildList(isAnalyzeRedundancy);
+            List<AssetBundleBuild> abBuildList = PkgUtil.PkgRuleCfg.GetAssetBundleBuildList(isAnalyzeRedundancy);
             AssetBundleManifest unityManifest = PackageAssetBundles(finalOutputPath, abBuildList,options,targetPlatform);
 
             //生成资源清单文件
@@ -133,7 +133,7 @@ namespace CatAsset.Editor
                     abInfo.Assets[j] = assetInfo;
 
                     assetInfo.AssetName = abBulid.assetNames[j];
-                    assetInfo.Dependencies = Util.GetDependencies(assetInfo.AssetName,false);  //依赖列表不进行递归记录 因为加载的时候会对依赖进行递归加载
+                    assetInfo.Dependencies = PkgUtil.GetDependencies(assetInfo.AssetName,false);  //依赖列表不进行递归记录 因为加载的时候会对依赖进行递归加载
                 }
 
                
@@ -141,7 +141,7 @@ namespace CatAsset.Editor
 
             //写入清单文件json
             string json = CatJson.JsonParser.ToJson(manifest);
-            using (StreamWriter sw = new StreamWriter(Path.Combine(outputPath,CatAsset.Util.GetManifestFileName())))
+            using (StreamWriter sw = new StreamWriter(Path.Combine(outputPath,Util.ManifestFileName)))
             {
                 sw.Write(json);
             }
@@ -156,7 +156,7 @@ namespace CatAsset.Editor
         private static void ChangeManifestVersion()
         {
             //自增
-            Util.PkgCfg.ManifestVersion++;
+            PkgUtil.PkgCfg.ManifestVersion++;
         }
     
         /// <summary>
@@ -188,7 +188,7 @@ namespace CatAsset.Editor
 
             DirectoryInfo outputDirInfo = new DirectoryInfo(outputPath);
 
-            string manifestFileName = CatAsset.Util.GetManifestFileName();
+            string manifestFileName = Util.ManifestFileName;
 
             foreach (FileInfo item in outputDirInfo.GetFiles())
             {
@@ -206,7 +206,7 @@ namespace CatAsset.Editor
                     continue;
                 }
 
-                item.CopyTo(CatAsset.Util.GetReadOnlyPath(item.Name));
+                item.CopyTo(Util.GetReadOnlyPath(item.Name));
             }
 
            
@@ -227,7 +227,7 @@ namespace CatAsset.Editor
 
             //生成仅包含被复制的资源组的资源清单文件到StreamingAssets下
             string json = CatJson.JsonParser.ToJson(manifest);
-            using (StreamWriter sw = new StreamWriter(CatAsset.Util.GetReadOnlyPath(manifestFileName)))
+            using (StreamWriter sw = new StreamWriter(Util.GetReadOnlyPath(manifestFileName)))
             {
                 sw.Write(json);
             }

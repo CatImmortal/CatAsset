@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using CatAsset;
+
 namespace CatAsset.Editor
 {
     /// <summary>
@@ -12,7 +14,7 @@ namespace CatAsset.Editor
     {
         public string Directory;
         public PackageMode Mode;
-        public string Group = "Base";
+        public string Group = Util.DefaultGroup;
 
         public int CompareTo(PackageRule other)
         {

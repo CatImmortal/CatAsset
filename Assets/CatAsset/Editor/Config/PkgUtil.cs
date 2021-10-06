@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 namespace CatAsset.Editor
 {
-    public static class Util
+    public static class PkgUtil
     {
         private static PackageConfig pkgCfg;
         private static PackageRuleConfig pkgRuleCfg;

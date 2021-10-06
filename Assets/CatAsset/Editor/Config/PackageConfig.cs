@@ -49,7 +49,7 @@ namespace CatAsset.Editor
         [MenuItem("CatAsset/创建打包配置文件")]
         private static void CreateConfig()
         {
-            PackageConfig cfg = Util.CreateConfigAsset<PackageConfig>();
+            PackageConfig cfg = PkgUtil.CreateConfigAsset<PackageConfig>();
 
             if (cfg != null)
             {
@@ -64,13 +64,13 @@ namespace CatAsset.Editor
                     | BuildAssetBundleOptions.DisableLoadAssetByFileName
                     | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
 
-                cfg.OutputPath = Directory.GetCurrentDirectory() + "\\AssetBundleOutput";
+                cfg.OutputPath = Path.Combine(Directory.GetCurrentDirectory(), "AssetBundleOutput");
 
                 cfg.ManifestVersion = 1;
 
                 cfg.IsCopyToStreamingAssets = true;
 
-                cfg.CopyGroup = "Base";
+                cfg.CopyGroup = Util.DefaultGroup;
 
                 EditorUtility.SetDirty(cfg);
             }

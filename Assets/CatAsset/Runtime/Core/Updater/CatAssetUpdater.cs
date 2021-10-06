@@ -52,7 +52,7 @@ namespace CatAsset
 
             //写入清单文件json
             string json = JsonParser.ToJson(manifest);
-            string path = Util.GetReadWritePath(Util.GetManifestFileName());
+            string path = Util.GetReadWritePath(Util.ManifestFileName);
             if (File.Exists(path))
             {
                 File.Delete(path);

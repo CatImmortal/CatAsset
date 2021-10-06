@@ -9,15 +9,8 @@ namespace CatAsset
 {
     public static class Util
     {
-
-        /// <summary>
-        /// 获取资源清单文件名
-        /// </summary>
-        public static string GetManifestFileName()
-        {
-            string name = "CatAssetManifest.json";
-            return name;
-        }
+        public const string DefaultGroup = "Base";
+        public const string ManifestFileName = "CatAssetManifest.json";
 
         /// <summary>
         /// 获取在只读区下的完整路径

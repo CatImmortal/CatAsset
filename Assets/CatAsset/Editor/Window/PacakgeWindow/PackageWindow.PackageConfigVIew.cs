@@ -52,7 +52,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitPackgeConfigView()
         {
-            foreach (BuildTarget item in Util.PkgCfg.TargetPlatforms)
+            foreach (BuildTarget item in PkgUtil.PkgCfg.TargetPlatforms)
             {
                 selectedPlatforms[item] = true;
             }
@@ -61,7 +61,7 @@ namespace CatAsset.Editor
             {
                 BuildAssetBundleOptions option = (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), options[i]);
 
-                if ((Util.PkgCfg.Options & option) > 0)
+                if ((PkgUtil.PkgCfg.Options & option) > 0)
                 {
                     selectedOptions[options[i]] = true;
                 }
@@ -78,26 +78,26 @@ namespace CatAsset.Editor
         private void SavePackageConfig()
         {
 
-            Util.PkgCfg.TargetPlatforms.Clear();
+            PkgUtil.PkgCfg.TargetPlatforms.Clear();
             foreach (KeyValuePair<BuildTarget, bool> item in selectedPlatforms)
             {
                 if (item.Value == true)
                 {
-                    Util.PkgCfg.TargetPlatforms.Add(item.Key);
+                    PkgUtil.PkgCfg.TargetPlatforms.Add(item.Key);
                 }
             }
 
-            Util.PkgCfg.Options = BuildAssetBundleOptions.None;
+            PkgUtil.PkgCfg.Options = BuildAssetBundleOptions.None;
             foreach (KeyValuePair<string, bool> item in selectedOptions)
             {
                 if (item.Value == true)
                 {
                     BuildAssetBundleOptions option = (BuildAssetBundleOptions)Enum.Parse(typeof(BuildAssetBundleOptions), item.Key);
-                    Util.PkgCfg.Options |= option;
+                    PkgUtil.PkgCfg.Options |= option;
                 }
             }
 
-            EditorUtility.SetDirty(Util.PkgCfg);
+            EditorUtility.SetDirty(PkgUtil.PkgCfg);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("游戏版本号：" + Application.version,GUILayout.Width(200));
 
                 EditorGUILayout.LabelField("资源清单版本号：", GUILayout.Width(100));
-                Util.PkgCfg.ManifestVersion = EditorGUILayout.IntField(Util.PkgCfg.ManifestVersion, GUILayout.Width(50));
+                PkgUtil.PkgCfg.ManifestVersion = EditorGUILayout.IntField(PkgUtil.PkgCfg.ManifestVersion, GUILayout.Width(50));
 
             }
 
@@ -163,35 +163,35 @@ namespace CatAsset.Editor
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Label("打包输出根目录：", GUILayout.Width(100));
-                Util.PkgCfg.OutputPath = GUILayout.TextField(Util.PkgCfg.OutputPath);
+                PkgUtil.PkgCfg.OutputPath = GUILayout.TextField(PkgUtil.PkgCfg.OutputPath);
                 if (GUILayout.Button("选择目录", GUILayout.Width(100)))
                 {
-                    string folder = EditorUtility.OpenFolderPanel("选择打包输出根目录", Util.PkgCfg.OutputPath, "");
+                    string folder = EditorUtility.OpenFolderPanel("选择打包输出根目录", PkgUtil.PkgCfg.OutputPath, "");
                     if (folder != string.Empty)
                     {
-                        Util.PkgCfg.OutputPath = folder;
+                        PkgUtil.PkgCfg.OutputPath = folder;
                     }
                 }
             }
 
             EditorGUILayout.Space();
 
-            using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("冗余分析", Util.PkgCfg.IsAnalyzeRedundancy))
+            using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("冗余分析", PkgUtil.PkgCfg.IsAnalyzeRedundancy))
             {
-                Util.PkgCfg.IsAnalyzeRedundancy = toggle.enabled;
+                PkgUtil.PkgCfg.IsAnalyzeRedundancy = toggle.enabled;
             }
 
 
             EditorGUILayout.Space();
 
-            using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("打包平台只选中了1个时，打包后复制资源到StreamingAssets下", Util.PkgCfg.IsCopyToStreamingAssets))
+            using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("打包平台只选中了1个时，打包后复制资源到StreamingAssets下", PkgUtil.PkgCfg.IsCopyToStreamingAssets))
             {
-                Util.PkgCfg.IsCopyToStreamingAssets = toggle.enabled;
+                PkgUtil.PkgCfg.IsCopyToStreamingAssets = toggle.enabled;
             }
-            if (Util.PkgCfg.IsCopyToStreamingAssets)
+            if (PkgUtil.PkgCfg.IsCopyToStreamingAssets)
             {
                 EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：");
-                Util.PkgCfg.CopyGroup = EditorGUILayout.TextField(Util.PkgCfg.CopyGroup);
+                PkgUtil.PkgCfg.CopyGroup = EditorGUILayout.TextField(PkgUtil.PkgCfg.CopyGroup);
             }
 
             EditorGUILayout.Space();
@@ -203,7 +203,7 @@ namespace CatAsset.Editor
                 {
 
                     //检查是否选中至少一个平台
-                    if (Util.PkgCfg.TargetPlatforms.Count == 0)
+                    if (PkgUtil.PkgCfg.TargetPlatforms.Count == 0)
                     {
                         EditorUtility.DisplayDialog("提示", "至少要选择一个打包平台", "确认");
                         return;
@@ -211,15 +211,15 @@ namespace CatAsset.Editor
 
 
                     //处理多个平台的打包
-                    foreach (BuildTarget item in Util.PkgCfg.TargetPlatforms)
+                    foreach (BuildTarget item in PkgUtil.PkgCfg.TargetPlatforms)
                     {
-                        if (Util.PkgCfg.TargetPlatforms.Count == 1)
+                        if (PkgUtil.PkgCfg.TargetPlatforms.Count == 1)
                         {
-                            Packager.ExecutePackagePipeline(Util.PkgCfg.OutputPath, Util.PkgCfg.Options, item, Util.PkgCfg.ManifestVersion, Util.PkgCfg.IsAnalyzeRedundancy, Util.PkgCfg.IsCopyToStreamingAssets, Util.PkgCfg.CopyGroup);
+                            Packager.ExecutePackagePipeline(PkgUtil.PkgCfg.OutputPath, PkgUtil.PkgCfg.Options, item, PkgUtil.PkgCfg.ManifestVersion, PkgUtil.PkgCfg.IsAnalyzeRedundancy, PkgUtil.PkgCfg.IsCopyToStreamingAssets, PkgUtil.PkgCfg.CopyGroup);
                         }
                         else
                         {
-                            Packager.ExecutePackagePipeline(Util.PkgCfg.OutputPath, Util.PkgCfg.Options, item, Util.PkgCfg.ManifestVersion, Util.PkgCfg.IsAnalyzeRedundancy, false,null);
+                            Packager.ExecutePackagePipeline(PkgUtil.PkgCfg.OutputPath, PkgUtil.PkgCfg.Options, item, PkgUtil.PkgCfg.ManifestVersion, PkgUtil.PkgCfg.IsAnalyzeRedundancy, false,null);
                         }
                     }
 

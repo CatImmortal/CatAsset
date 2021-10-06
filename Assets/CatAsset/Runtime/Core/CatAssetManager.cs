@@ -179,7 +179,7 @@ namespace CatAsset
                 return;
             }
 
-            string path = Util.GetReadOnlyPath(Util.GetManifestFileName());
+            string path = Util.GetReadOnlyPath(Util.ManifestFileName);
 
             WebRequestTask task = new WebRequestTask(taskExcutor, path,path, (success, error, uwr) => {
                 if (!success)

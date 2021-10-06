@@ -43,13 +43,13 @@ namespace CatAsset
             this.checkGroup = checkGroup;
 
             //进行只读区 读写区 远端三方的资源清单检查
-            string readOnlyManifestPath = Util.GetReadOnlyPath(Util.GetManifestFileName());
+            string readOnlyManifestPath = Util.GetReadOnlyPath(Util.ManifestFileName);
             WebRequestTask task1 = new WebRequestTask(CatAssetManager.taskExcutor, readOnlyManifestPath, readOnlyManifestPath, CheckReadOnlyManifest);
 
-            string readWriteManifestPath = Util.GetReadWritePath(Util.GetManifestFileName());
+            string readWriteManifestPath = Util.GetReadWritePath(Util.ManifestFileName);
             WebRequestTask task2 = new WebRequestTask(CatAssetManager.taskExcutor, readWriteManifestPath, readWriteManifestPath, CheckReadWriteManifest);
 
-            string remoteManifestUri = Path.Combine(CatAssetUpdater.UpdateUriPrefix, Util.GetManifestFileName());
+            string remoteManifestUri = Path.Combine(CatAssetUpdater.UpdateUriPrefix, Util.ManifestFileName);
             WebRequestTask task3 = new WebRequestTask(CatAssetManager.taskExcutor, remoteManifestUri, remoteManifestUri, CheckRemoteManifest);
 
             CatAssetManager.taskExcutor.AddTask(task1);
@@ -179,8 +179,6 @@ namespace CatAsset
             {
                 CheckInfo checkInfo = item.Value;
                 checkInfo.RefreshState();
-
-
 
                 switch (checkInfo.State)
                 {
