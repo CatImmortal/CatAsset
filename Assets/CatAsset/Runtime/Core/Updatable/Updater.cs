@@ -16,11 +16,7 @@ namespace CatAsset
         /// </summary>
         private static long generateManifestLength = 1024 * 1024 * 10;  //10M
 
-        /// <summary>
-        /// 从上一次重新生成读写区资源清单到现在下载的字节数
-        /// </summary>
-        private static long deltaUpatedLength;
-
+   
         /// <summary>
         /// 需要更新的资源列表
         /// </summary>
@@ -34,33 +30,37 @@ namespace CatAsset
         /// <summary>
         /// 需要更新的资源总数
         /// </summary>
-        public int totalCount;
+        public int TotalCount;
 
         /// <summary>
         /// 需要更新的资源长度
         /// </summary>
-        public long totalLength;
+        public long TotalLength;
 
         /// <summary>
         /// 已更新资源文件数量
         /// </summary>
-        public int updatedCount;
+        public int UpdatedCount;
 
         /// <summary>
         /// 已更新资源文件长度
         /// </summary>
-        public long updatedLength;
+        public long UpdatedLength;
 
         /// <summary>
         /// 是否被暂停了
         /// </summary>
-        public bool paused;
+        public bool Paused;
+
+        /// <summary>
+        /// 从上一次重新生成读写区资源清单到现在下载的字节数
+        /// </summary>
+        private long deltaUpatedLength;
 
         /// <summary>
         /// 资源文件更新回调，每次下载资源文件后调用
         /// </summary>
         private Action<int, long, int, long,string, string> onFileDownloaded;
-
 
 
         /// <summary>
@@ -92,37 +92,46 @@ namespace CatAsset
             }
 
             //更新已下载资源信息
-            updatedCount++;
-            updatedLength += abInfo.Length;
+            UpdatedCount++;
+            UpdatedLength += abInfo.Length;
             deltaUpatedLength += abInfo.Length;
 
-           
+            //将下载好的ab信息添加到RuntimeInfo中
+            CatAssetManager.AddRuntimeInfo(abInfo, true);
+
+            //更新读写区资源信息列表
+            CatAssetUpdater.readWriteManifestInfoDict[abInfo.AssetBundleName] = abInfo;
+
+            //更新资源组本地资源信息
             GroupInfo groupInfo = CatAssetManager.GetGroupInfo(abInfo.Group);
-            if (!groupInfo.localAssetBundles.Contains(abInfo.AssetBundleName))
+            groupInfo.localAssetBundles.Add(abInfo.AssetBundleName);
+            groupInfo.localCount++;
+            groupInfo.localLength += abInfo.Length;
+
+            bool allDownloaded = UpdatedCount >= TotalCount;
+
+            if (allDownloaded || deltaUpatedLength >= generateManifestLength)
             {
-                //没有被另一个Updater下载过
+                //所有资源下载完毕 或者已下载字节数达到要求 就重新生成一次读写区资源清单
+                deltaUpatedLength = 0;
+                CatAssetUpdater.GenerateReadWriteManifest();
+            }
 
-                //将下载好的ab信息添加到RuntimeInfo中
-                CatAssetManager.AddRuntimeInfo(abInfo, true);
+            if (allDownloaded)
+            {
+                //所有资源下载完毕 删掉这个updater
 
-                //更新读写区资源信息列表
-                CatAssetUpdater.readWriteManifestInfoDict[abInfo.AssetBundleName] = abInfo;
-
-                //更新资源组本地资源信息
-                groupInfo.localAssetBundles.Add(abInfo.AssetBundleName);
-                groupInfo.localCount++;
-                groupInfo.localLength += abInfo.Length;
-
-
-                if (updatedCount >= totalCount || deltaUpatedLength >= generateManifestLength)
+                if (string.IsNullOrEmpty(UpdateGroup))
                 {
-                    //所有资源下载完毕 或者已下载字节数达到要求 就重新生成一次读写区资源清单
-                    deltaUpatedLength = 0;
-                    CatAssetUpdater.GenerateReadWriteManifest();
+                    CatAssetUpdater.updater = null;
+                }
+                else
+                {
+                    CatAssetUpdater.groupUpdaterDict.Remove(UpdateGroup);
                 }
             }
 
-            onFileDownloaded(updatedCount, updatedLength,totalCount,totalLength,abInfo.AssetBundleName,UpdateGroup);
+            onFileDownloaded?.Invoke(UpdatedCount, UpdatedLength,TotalCount,TotalLength,abInfo.AssetBundleName,UpdateGroup);
         }
     }
 

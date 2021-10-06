@@ -112,11 +112,11 @@ namespace CatAsset
         {
             if (string.IsNullOrEmpty(group))
             {
-                updater.paused = isPause;
+                updater.Paused = isPause;
             }
             else
             {
-                groupUpdaterDict[group].paused = isPause;
+                groupUpdaterDict[group].Paused = isPause;
             }
         }
 

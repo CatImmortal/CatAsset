@@ -187,9 +187,8 @@ namespace CatAsset
                 }
             }
 
-            Updater updater = new Updater();
-            updater.UpdateGroup = checkGroup;
-
+            Updater updater = null;
+            
             //是否需要生成读写区资源清单
             bool needGenerateManifest = false;
 
@@ -202,9 +201,14 @@ namespace CatAsset
                 {
                     case CheckState.NeedUpdate:
                         //需要更新
+                        if (updater == null)
+                        {
+                            updater = new Updater();
+                            updater.UpdateGroup = checkGroup;
+                        }
                         updater.UpdateList.Add(checkInfo.RemoteInfo);
-                        updater.totalCount++;
-                        updater.totalLength += checkInfo.RemoteInfo.Length;
+                        updater.TotalCount++;
+                        updater.TotalLength += checkInfo.RemoteInfo.Length;
                         break;
 
                     case CheckState.InReadWrite:
@@ -238,18 +242,26 @@ namespace CatAsset
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
 
-            //有指定资源组就把Updater放进字典里 没指定就放到字段里
-            if (!string.IsNullOrEmpty(checkGroup))
+           
+            if (updater != null)
             {
-                CatAssetUpdater.groupUpdaterDict[checkGroup] = updater;
+                //有指定资源组就把Updater放进字典里 没指定就放到字段里
+                if (string.IsNullOrEmpty(checkGroup))
+                {
+                    CatAssetUpdater.updater = updater;
+                }
+                else
+                {
+                    CatAssetUpdater.groupUpdaterDict[checkGroup] = updater;
+                }
             }
-            else
-            {
-                CatAssetUpdater.updater = updater;
-            }
+            
+
+            //清理checkInfo字典
+            checkInfoDict.Clear();
 
             //调用版本信息检查完毕回调
-            onVersionChecked(updater.totalCount, updater.totalLength, checkGroup);
+            onVersionChecked?.Invoke(updater.TotalCount, updater.TotalLength, checkGroup);
 
         }
 

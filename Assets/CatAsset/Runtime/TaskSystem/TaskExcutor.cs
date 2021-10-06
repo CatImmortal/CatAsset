@@ -110,35 +110,25 @@ namespace CatAsset
                     }
 
                     BaseTask task = item.Value;
+
+                    if (task.State == TaskState.Free)
+                    {
+                        task.Execute();
+                    }
+
+                    task.RefreshState();
+
                     switch (task.State)
                     {
-                        case TaskState.Free:
-                            task.Execute();
-                            task.UpdateState();
-
-                            if (task.State != TaskState.Free)
-                            {
-                                //Free状态调用Execute和UpdateState后如果还是Free 就不让它占用执行次数
-                                //主要处理下载暂停的特殊情况
-                                executeCount++;
-                            }
-
-                            break;
-
-                        case TaskState.Waiting:
-                            task.UpdateState();
-                            break;
-
                         case TaskState.Executing:
-                            task.UpdateState();
                             executeCount++;
                             break;
+                        case TaskState.Finished:
+                            executeCount++;
+                            needRemoveTasks.Add(task.Name);
+                            break;
                     }
-                    if (task.State == TaskState.Finished)
-                    {
-                        //在task.UpdateState执行过后，State可能会变成Finished 这样在当前帧UpdateState后完成的任务就在当前帧移除了
-                        needRemoveTasks.Add(task.Name);
-                    }
+
 
                 }
             }

@@ -59,12 +59,12 @@ namespace CatAsset
             if (abInfo.AssetBundle == null)
             {
                 //需要加载AssetBundle
-                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, assetInfo.AssetBundleName, abInfo.LoadPath);
+                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, assetInfo.AssetBundleName);
                 owner.AddTask(task);
             }
         }
 
-        public override void UpdateState()
+        public override void RefreshState()
         {
 
             if (asyncOp == null)

@@ -52,7 +52,7 @@ namespace CatAsset
             delay = UnityEngine.Random.Range(0, CatAssetManager.EditorModeMaxDelay);
         }
 
-        public override void UpdateState()
+        public override void RefreshState()
         {
 
             timer += Time.deltaTime;

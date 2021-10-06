@@ -71,7 +71,7 @@ namespace CatAsset.Editor
                     EditorGUILayout.LabelField(updater.UpdateGroup);
                 }
 
-                EditorGUILayout.LabelField(updater.totalCount.ToString());
+                EditorGUILayout.LabelField(updater.TotalCount.ToString());
                 //if (GUILayout.Button("Log"))
                 //{
                 //    string log = string.Empty;
@@ -83,10 +83,10 @@ namespace CatAsset.Editor
                 //    Debug.Log(log);
                 //}
 
-                EditorGUILayout.LabelField(GetByteDesc(updater.totalLength));
-                EditorGUILayout.LabelField(updater.updatedCount.ToString());
-                EditorGUILayout.LabelField(GetByteDesc(updater.updatedLength));
-                EditorGUILayout.LabelField(updater.paused.ToString());
+                EditorGUILayout.LabelField(GetByteDesc(updater.TotalLength));
+                EditorGUILayout.LabelField(updater.UpdatedCount.ToString());
+                EditorGUILayout.LabelField(GetByteDesc(updater.UpdatedLength));
+                EditorGUILayout.LabelField(updater.Paused.ToString());
             }
         }
     }

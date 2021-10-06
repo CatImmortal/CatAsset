@@ -36,7 +36,7 @@ namespace CatAsset
            
         }
 
-        public override void UpdateState()
+        public override void RefreshState()
         {
             if (abInfo.UsedAssets.Count > 0)
             {

@@ -46,7 +46,7 @@ namespace CatAsset
             }
         }
 
-        public override void UpdateState()
+        public override void RefreshState()
         {
             if (flag == false)
             {

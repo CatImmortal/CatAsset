@@ -345,7 +345,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RunMode: 2
-  MaxTaskExuteCount: 1
+  MaxTaskExuteCount: 10
   UnloadDelayTime: 5
   IsEditorMode: 0
   EditorModeMaxDelay: 1

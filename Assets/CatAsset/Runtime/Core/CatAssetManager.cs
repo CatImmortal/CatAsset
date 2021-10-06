@@ -287,14 +287,12 @@ namespace CatAsset
 
                 //开启了边玩边下模式 并且此asset所属ab在远端存在 尝试从远端下载对应ab
                 AssetBundleManifestInfo abInfo = remoteAssetToAssetBundleDict[assetName];
-                Debug.Log("边玩边下，尝试下载：" + abInfo.AssetBundleName);
                 Updater updater = new Updater();
-                updater.UpdateList = new List<AssetBundleManifestInfo>() { abInfo };
-                updater.totalCount = 1;
-                updater.totalLength += abInfo.Length;
+                updater.UpdateList.Add(abInfo);
+                updater.TotalCount = 1;
+                updater.TotalLength += abInfo.Length;
 
                 updater.UpdateAsset((count, length, totalCount, totalLength, abName, group) => {
-                    Debug.Log("边玩边下，下载成功：" + abInfo.AssetBundleName);
                     LoadAsset(assetName, loadedCallback);
                 });
                 return;

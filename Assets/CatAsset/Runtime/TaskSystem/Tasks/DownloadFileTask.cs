@@ -65,7 +65,7 @@ namespace CatAsset
         public override void Execute()
         {
 
-            if (updater.paused)
+            if (updater.Paused)
             {
                 //处理下载暂停
                 return;
@@ -98,7 +98,7 @@ namespace CatAsset
             op = uwr.SendWebRequest();
         }
 
-        public override void UpdateState()
+        public override void RefreshState()
         {
             if (op == null)
             {
