@@ -4,8 +4,8 @@
 	"AssetBundles":[
 		{
 			"AssetBundleName":"res_base_images.bundle",
-			"Length":5991499,
-			"Hash":"f12025ba5471a66446f8d54daab6ab3a",
+			"Length":5995123,
+			"Hash":"805b5d2f75ef9e3efe5a81b733f35219",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -27,8 +27,8 @@
 		},
 		{
 			"AssetBundleName":"res_base_materials.bundle",
-			"Length":30096,
-			"Hash":"6970cdd7a9794e47b599f6c3a3dd0d9e",
+			"Length":42314,
+			"Hash":"babea1f346724e43655b97f41c1a754a",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -50,8 +50,8 @@
 		},
 		{
 			"AssetBundleName":"res_base_prefabs.bundle",
-			"Length":1049,
-			"Hash":"5abfd507822bab18f3d21926fde5123c",
+			"Length":3772,
+			"Hash":"08b0e0aee02d91b61d048025fe2bb851",
 			"Group":"Base",
 			"Assets":[
 				{

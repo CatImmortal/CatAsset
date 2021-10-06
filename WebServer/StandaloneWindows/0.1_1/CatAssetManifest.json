@@ -4,8 +4,8 @@
 	"AssetBundles":[
 		{
 			"AssetBundleName":"res_base_images.bundle",
-			"Length":5991499,
-			"Hash":"f12025ba5471a66446f8d54daab6ab3a",
+			"Length":5995123,
+			"Hash":"805b5d2f75ef9e3efe5a81b733f35219",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -27,8 +27,8 @@
 		},
 		{
 			"AssetBundleName":"res_base_materials.bundle",
-			"Length":30096,
-			"Hash":"6970cdd7a9794e47b599f6c3a3dd0d9e",
+			"Length":42314,
+			"Hash":"babea1f346724e43655b97f41c1a754a",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -50,8 +50,8 @@
 		},
 		{
 			"AssetBundleName":"res_base_prefabs.bundle",
-			"Length":1049,
-			"Hash":"5abfd507822bab18f3d21926fde5123c",
+			"Length":3772,
+			"Hash":"08b0e0aee02d91b61d048025fe2bb851",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -76,8 +76,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_1_images.bundle",
-			"Length":5991597,
-			"Hash":"ff5f885f39833c4d1211b0cbd8a7feaa",
+			"Length":5994882,
+			"Hash":"1109b290f0b356091b5fb00dd87ab4e4",
 			"Group":"Chapter1",
 			"Assets":[
 				{
@@ -99,8 +99,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_1_materials.bundle",
-			"Length":30108,
-			"Hash":"fce0d8d4e4b7b9e1e18ba380d9fcea9c",
+			"Length":42307,
+			"Hash":"0c659341fe266ea65ec8d4270970f5e2",
 			"Group":"Chapter1",
 			"Assets":[
 				{
@@ -122,8 +122,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_1_prefabs.bundle",
-			"Length":1058,
-			"Hash":"a862ffae9858dd17a68134824f8bb88b",
+			"Length":3772,
+			"Hash":"83574515c668f22965a42bdf20f4a9d1",
 			"Group":"Chapter1",
 			"Assets":[
 				{
@@ -148,8 +148,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_2_images.bundle",
-			"Length":5992493,
-			"Hash":"9de05b573503778123ae5782d1a226b7",
+			"Length":5995886,
+			"Hash":"f5130a06f1469daff5297b02808294db",
 			"Group":"Chapter2",
 			"Assets":[
 				{
@@ -171,8 +171,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_2_materials.bundle",
-			"Length":29930,
-			"Hash":"719c585525fc0e9e29ffeb6829a47dfb",
+			"Length":42063,
+			"Hash":"7fb1545eafb96125935c8abac5e3e58d",
 			"Group":"Chapter2",
 			"Assets":[
 				{
@@ -194,8 +194,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_2_prefabs.bundle",
-			"Length":1066,
-			"Hash":"73656b39c0581c43bdc5d23f9fb0f870",
+			"Length":3788,
+			"Hash":"a31c5ba1ad4378a6511a8c6555033a2d",
 			"Group":"Chapter2",
 			"Assets":[
 				{
@@ -220,8 +220,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_3_images.bundle",
-			"Length":5990783,
-			"Hash":"2cc36fa264835a6aaea3b438bd4f24ed",
+			"Length":5994496,
+			"Hash":"67ad277f5c5063f9d01bef7f30f4cabf",
 			"Group":"Chapter3",
 			"Assets":[
 				{
@@ -243,8 +243,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_3_materials.bundle",
-			"Length":29948,
-			"Hash":"bc1c7795d3f2ccf3d072310dd5b15f8b",
+			"Length":42095,
+			"Hash":"d42f206de4d7682c006c05306fdc95d7",
 			"Group":"Chapter3",
 			"Assets":[
 				{
@@ -266,8 +266,8 @@
 		},
 		{
 			"AssetBundleName":"res_chapter_3_prefabs.bundle",
-			"Length":1061,
-			"Hash":"dc62218735a682fb360695ca5feeff66",
+			"Length":3789,
+			"Hash":"1704c8d2d6862a1de41ff28a5d70a8bf",
 			"Group":"Chapter3",
 			"Assets":[
 				{
