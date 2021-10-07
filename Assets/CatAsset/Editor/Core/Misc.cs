@@ -50,7 +50,7 @@ namespace CatAsset.Editor
         private static void CopyAssetPath()
         {
             string path = AssetDatabase.GUIDToAssetPath(Selection.assetGUIDs[0]);
-            GUIUtility.systemCopyBuffer = path;
+            GUIUtility.systemCopyBuffer = "\"" + path + "\"";
         }
 
         [MenuItem("Assets/复制资源路径",true)]

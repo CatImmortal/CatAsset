@@ -38,6 +38,8 @@ namespace CatAsset.Editor
             collectorFuncDict.Add(PackageMode.NAssetToOneBundle, NAssetToOneBundle);
             collectorFuncDict.Add(PackageMode.TopDirectoryNAssetToOneBundle, TopDirectoryNAssetToOneBundle);
             collectorFuncDict.Add(PackageMode.NAssetToNBundle, NAssetToNBundle);
+
+            AssetBundleGroupDict.Add("common.bundle", Util.DefaultGroup);
         }
 
         /// <summary>

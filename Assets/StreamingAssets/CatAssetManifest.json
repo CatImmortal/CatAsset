@@ -3,13 +3,23 @@
 	"ManifestVersion":1,
 	"AssetBundles":[
 		{
-			"AssetBundleName":"res_base_prefabs.bundle",
-			"Length":1672,
-			"Hash":"4c13298507ba929bf9a0f030c74c6584",
+			"AssetBundleName":"res_base.bundle",
+			"Length":46670,
+			"Hash":"41195bdf4f6e78bc012b44f72fd9a9ee",
 			"Group":"Base",
 			"Assets":[
 				{
-					"AssetName":"Assets/Res/Base/Prefabs/Base_Prefab.prefab",
+					"AssetName":"Assets/Res/Base/Materials/Mat.mat",
+					"Dependencies":[
+					]
+				},
+				{
+					"AssetName":"Assets/Res/Base/Prefabs/Cube.prefab",
+					"Dependencies":[
+					]
+				},
+				{
+					"AssetName":"Assets/Res/Base/Textures/Tex.png",
 					"Dependencies":[
 					]
 				}

@@ -10,7 +10,7 @@ namespace CatAsset
     public enum RunMode
     {
         /// <summary>
-        /// 仅使用安装包内资源
+        /// 仅使用安装包内资源（单机模式）
         /// </summary>
         PackageOnly,
 

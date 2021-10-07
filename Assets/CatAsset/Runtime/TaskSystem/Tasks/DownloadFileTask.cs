@@ -40,6 +40,19 @@ namespace CatAsset
 
         private Action<bool, string , AssetBundleManifestInfo> onFinished;
 
+        internal override Delegate FinishedCallback
+        {
+            get
+            {
+                return onFinished;
+            }
+
+            set
+            {
+                onFinished = (Action<bool, string, AssetBundleManifestInfo>)value;
+            }
+        }
+
         public override float Progress
         {
             get

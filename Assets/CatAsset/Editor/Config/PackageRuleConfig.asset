@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Rules:
   - Directory: Assets/Res/Base
-    Mode: 1
+    Mode: 0
     Group: Base
-  - Directory: Assets/Res/Chapter_1
-    Mode: 1
+  - Directory: Assets/Res/Chapter1
+    Mode: 0
     Group: Chapter1
-  - Directory: Assets/Res/Chapter_2
-    Mode: 1
+  - Directory: Assets/Res/Chapter2
+    Mode: 0
     Group: Chapter2
