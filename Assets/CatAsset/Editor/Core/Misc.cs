@@ -11,7 +11,7 @@ namespace CatAsset.Editor
     public static class Misc
     {
 
-        [MenuItem("CatAsset/打开目录/资源输出根目录", priority = 2)]
+        [MenuItem("CatAsset/打开目录/打包输出根目录", priority = 2)]
         private static void OpenAssetBundleOutputPath()
         {
             Open(PkgUtil.PkgCfg.OutputPath);

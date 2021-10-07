@@ -141,6 +141,12 @@ namespace CatAsset.Editor
             EditorGUILayout.Space();
 
             EditorGUILayout.LabelField("选择打包设置：");
+
+            if (selectedOptions.Count == 0)
+            {
+                InitPackgeConfigView();
+            }
+
             for (int i = 1; i < options.Length; i += 3)
             {
                 using (new EditorGUILayout.HorizontalScope())
