@@ -49,7 +49,7 @@ Unity AssetBundle资源管理框架
 
   
 
-- **使用者直接使用Asset，无须关心AssetBundle**
+- **支持自动寻址，使用者直接使用Asset，无须关心AssetBundle**
 
   
 
