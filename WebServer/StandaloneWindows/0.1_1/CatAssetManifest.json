@@ -3,21 +3,37 @@
 	"ManifestVersion":1,
 	"AssetBundles":[
 		{
-			"AssetBundleName":"res_base.bundle",
-			"Length":46670,
-			"Hash":"41195bdf4f6e78bc012b44f72fd9a9ee",
+			"AssetBundleName":"res_base_materials.bundle",
+			"Length":41938,
+			"Hash":"69f26f863d4ad17965b773ced8fcb6ec",
 			"Group":"Base",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Base/Materials/Mat.mat",
 					"Dependencies":[
 					]
-				},
+				}
+			]
+		},
+		{
+			"AssetBundleName":"res_base_prefabs.bundle",
+			"Length":43893,
+			"Hash":"35393654bf6ef058f2a68368162c61fc",
+			"Group":"Base",
+			"Assets":[
 				{
 					"AssetName":"Assets/Res/Base/Prefabs/Cube.prefab",
 					"Dependencies":[
 					]
-				},
+				}
+			]
+		},
+		{
+			"AssetBundleName":"res_base_textures.bundle",
+			"Length":4029,
+			"Hash":"8e7bc0ab908ea6ce0e579e4592f96db9",
+			"Group":"Base",
+			"Assets":[
 				{
 					"AssetName":"Assets/Res/Base/Textures/Tex.png",
 					"Dependencies":[
@@ -26,21 +42,37 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter1.bundle",
-			"Length":46669,
-			"Hash":"d02232db30f6f70049a7c47e534fa802",
+			"AssetBundleName":"res_chapter1_materials.bundle",
+			"Length":41961,
+			"Hash":"ffa31ce6156fbb6ce8c7079c693ba969",
 			"Group":"Chapter1",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Chapter1/Materials/Mat.mat",
 					"Dependencies":[
 					]
-				},
+				}
+			]
+		},
+		{
+			"AssetBundleName":"res_chapter1_prefabs.bundle",
+			"Length":43876,
+			"Hash":"3af94bd5dc6832958a318fb7e94a0fdf",
+			"Group":"Chapter1",
+			"Assets":[
 				{
 					"AssetName":"Assets/Res/Chapter1/Prefabs/Cube.prefab",
 					"Dependencies":[
 					]
-				},
+				}
+			]
+		},
+		{
+			"AssetBundleName":"res_chapter1_textures.bundle",
+			"Length":4033,
+			"Hash":"f43bd5e7e70b468d8e96fced9c009208",
+			"Group":"Chapter1",
+			"Assets":[
 				{
 					"AssetName":"Assets/Res/Chapter1/Textures/Tex.png",
 					"Dependencies":[
@@ -49,21 +81,37 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter2.bundle",
-			"Length":46859,
-			"Hash":"a5123f4821082e96bb0452b73511177c",
+			"AssetBundleName":"res_chapter2_materials.bundle",
+			"Length":41846,
+			"Hash":"0c33425e78429395fc00ec4af6ce57e7",
 			"Group":"Chapter2",
 			"Assets":[
 				{
 					"AssetName":"Assets/Res/Chapter2/Materials/Mat.mat",
 					"Dependencies":[
 					]
-				},
+				}
+			]
+		},
+		{
+			"AssetBundleName":"res_chapter2_prefabs.bundle",
+			"Length":43919,
+			"Hash":"fa74373890027265d723d9afbbf2d20d",
+			"Group":"Chapter2",
+			"Assets":[
 				{
 					"AssetName":"Assets/Res/Chapter2/Prefabs/Cube.prefab",
 					"Dependencies":[
 					]
-				},
+				}
+			]
+		},
+		{
+			"AssetBundleName":"res_chapter2_textures.bundle",
+			"Length":4034,
+			"Hash":"c58d3dae6c721784592207eb0d78faeb",
+			"Group":"Chapter2",
+			"Assets":[
 				{
 					"AssetName":"Assets/Res/Chapter2/Textures/Tex.png",
 					"Dependencies":[

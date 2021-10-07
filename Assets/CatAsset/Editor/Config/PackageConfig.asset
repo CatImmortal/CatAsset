@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f24210f5109c8c2459ccac71fce807da, type: 3}
   m_Name: PackageConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 2
+  ManifestVersion: 1
   TargetPlatforms: 05000000
   Options: 12544
   OutputPath: E:/GitProjects/CatAsset/WebServer
