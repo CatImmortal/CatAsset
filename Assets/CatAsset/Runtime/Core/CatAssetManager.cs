@@ -50,7 +50,7 @@ namespace CatAsset
         /// <summary>
         /// 单帧最大任务执行数量
         /// </summary>
-        internal static int MaxTaskExuteCount
+        internal static int MaxTaskExcuteCount
         {
             set
             {

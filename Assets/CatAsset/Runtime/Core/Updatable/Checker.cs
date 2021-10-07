@@ -242,9 +242,14 @@ namespace CatAsset
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
 
-           
+            int totalCount = 0;
+            long totalLength = 0;
+
             if (updater != null)
             {
+                totalCount = updater.TotalCount;
+                totalLength = updater.TotalLength;
+
                 //有指定资源组就把Updater放进字典里 没指定就放到字段里
                 if (string.IsNullOrEmpty(checkGroup))
                 {
@@ -260,8 +265,10 @@ namespace CatAsset
             //清理checkInfo字典
             checkInfoDict.Clear();
 
+
+
             //调用版本信息检查完毕回调
-            onVersionChecked?.Invoke(updater.TotalCount, updater.TotalLength, checkGroup);
+            onVersionChecked?.Invoke(totalCount, totalLength, checkGroup);
 
         }
 

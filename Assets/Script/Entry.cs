@@ -72,73 +72,23 @@ public class Entry : MonoBehaviour
     {
         if (inited)
         {
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                CatAssetManager.CheckVersion(OnVersionChecked);
-            }
+            
 
             if (Input.GetKeyDown(KeyCode.A))
             {
-                CatAssetManager.CheckVersion(OnVersionChecked,"Chapter1");
-            }
-
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                CatAssetManager.CheckVersion(OnVersionChecked, "Chapter2");
-            }
-
-            if (Input.GetKeyDown(KeyCode.D))
-            {
-                CatAssetManager.CheckVersion(OnVersionChecked, "Chapter3");
-            }
-
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                CatAssetManager.UpdateAsset(OnFileDownloaded);
-            }
-
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter1");
-            }
-
-            if (Input.GetKeyDown(KeyCode.W))
-            {
-                CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter2");
-            }
-
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                CatAssetManager.UpdateAsset(OnFileDownloaded, "Chapter3");
-            }
-
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                CatAssetManager.LoadAsset("Assets/Res/Chapter_1/Prefabs/Image_1.prefab", (success, asset) =>
+                CatAssetManager.LoadAsset("Assets/Res/Chapter_2/Prefabs/Chapter_2_Prefab.prefab", (success, asset) =>
                 {
                     if (!success)
                     {
-                        Debug.Log("加载Image_1.prefab失败");
+                        Debug.Log("加载Chapter_2_Prefab失败");
                     }
 
                     Instantiate(asset);
-                    Debug.Log("加载Image_1.prefab成功");
+                    Debug.Log("加载Chapter_2_Prefab成功");
                 });
             }
 
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                CatAssetManager.LoadAsset("Assets/Res/Chapter_2/Prefabs/Image_1.prefab", (success, asset) =>
-                {
-                    if (!success)
-                    {
-                        Debug.Log("加载Image_1.prefab失败");
-                    }
-
-                    Instantiate(asset);
-                    Debug.Log("加载Image_1.prefab成功");
-                });
-            }
+          
         }
 
       

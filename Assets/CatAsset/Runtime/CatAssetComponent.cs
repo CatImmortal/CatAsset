@@ -12,7 +12,7 @@ namespace CatAsset
     public class CatAssetComponent : MonoBehaviour
     {
         public RunMode RunMode = RunMode.PackageOnly;
-        public int MaxTaskExuteCount = 10;
+        public int MaxTaskExcuteCount = 10;
         public float UnloadDelayTime = 5;
         public bool IsEditorMode = true;
         public float EditorModeMaxDelay = 1;
@@ -22,7 +22,7 @@ namespace CatAsset
         {
             CatAssetManager.RunMode = RunMode;
           
-            CatAssetManager.MaxTaskExuteCount = MaxTaskExuteCount;
+            CatAssetManager.MaxTaskExcuteCount = MaxTaskExcuteCount;
             CatAssetManager.UnloadDelayTime = UnloadDelayTime;
            
             CatAssetManager.IsEditorMode = IsEditorMode;

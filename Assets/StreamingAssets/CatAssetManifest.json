@@ -3,73 +3,14 @@
 	"ManifestVersion":1,
 	"AssetBundles":[
 		{
-			"AssetBundleName":"res_base_images.bundle",
-			"Length":5995123,
-			"Hash":"805b5d2f75ef9e3efe5a81b733f35219",
-			"Group":"Base",
-			"Assets":[
-				{
-					"AssetName":"Assets/Res/Base/Images/luotianyi_1.jpg",
-					"Dependencies":[
-					]
-				},
-				{
-					"AssetName":"Assets/Res/Base/Images/luotianyi_2.png",
-					"Dependencies":[
-					]
-				},
-				{
-					"AssetName":"Assets/Res/Base/Images/luotianyi_3.png",
-					"Dependencies":[
-					]
-				}
-			]
-		},
-		{
-			"AssetBundleName":"res_base_materials.bundle",
-			"Length":42314,
-			"Hash":"babea1f346724e43655b97f41c1a754a",
-			"Group":"Base",
-			"Assets":[
-				{
-					"AssetName":"Assets/Res/Base/Materials/Mat_1.mat",
-					"Dependencies":[
-					]
-				},
-				{
-					"AssetName":"Assets/Res/Base/Materials/Mat_2.mat",
-					"Dependencies":[
-					]
-				},
-				{
-					"AssetName":"Assets/Res/Base/Materials/Mat_3.mat",
-					"Dependencies":[
-					]
-				}
-			]
-		},
-		{
 			"AssetBundleName":"res_base_prefabs.bundle",
-			"Length":3772,
-			"Hash":"08b0e0aee02d91b61d048025fe2bb851",
+			"Length":1672,
+			"Hash":"4c13298507ba929bf9a0f030c74c6584",
 			"Group":"Base",
 			"Assets":[
 				{
-					"AssetName":"Assets/Res/Base/Prefabs/Image_1.prefab",
+					"AssetName":"Assets/Res/Base/Prefabs/Base_Prefab.prefab",
 					"Dependencies":[
-						"Assets/Res/Base/Images/luotianyi_1.jpg"
-					]
-				},
-				{
-					"AssetName":"Assets/Res/Base/Prefabs/Image_2.prefab",
-					"Dependencies":[
-						"Assets/Res/Base/Images/luotianyi_2.png"
-					]
-				},
-				{
-					"AssetName":"Assets/Res/Base/Prefabs/Image_3.prefab",
-					"Dependencies":[
-						"Assets/Res/Base/Images/luotianyi_3.png"
 					]
 				}
 			]

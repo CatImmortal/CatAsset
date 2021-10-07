@@ -22,6 +22,3 @@ MonoBehaviour:
   - Directory: Assets/Res/Chapter_2
     Mode: 1
     Group: Chapter2
-  - Directory: Assets/Res/Chapter_3
-    Mode: 1
-    Group: Chapter3
