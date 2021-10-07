@@ -56,7 +56,7 @@ namespace CatAsset.Editor
         [MenuItem("Assets/复制资源路径",true)]
         private static bool CopyAssetPathValidate()
         {
-            if (Selection.assetGUIDs.Length > 1)
+            if (Selection.assetGUIDs.Length == 0 || Selection.assetGUIDs.Length > 1)
             {
                 //不允许多选
                 return false;
