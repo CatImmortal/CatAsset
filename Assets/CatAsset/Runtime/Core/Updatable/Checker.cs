@@ -165,15 +165,10 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 刷新资源检查信息
+        /// 清理被检查的资源组信息
         /// </summary>
-        private void RefershCheckInfos()
+        private void ClearCheckGroupInfo()
         {
-            if (!readOnlyChecked || !readWriteCheked || !remoteChecked)
-            {
-                return;
-            }
-
             //清理被检查的资源组的已有信息
             if (string.IsNullOrEmpty(checkGroup))
             {
@@ -186,6 +181,35 @@ namespace CatAsset
                     CatAssetManager.groupInfoDict.Remove(checkGroup);
                 }
             }
+        }
+
+        /// <summary>
+        /// 添加资源更新器到CatAssetUpdater中
+        /// </summary>
+        private void AddUpdater(Updater updater)
+        {
+            //有指定资源组就把Updater放进字典里 没指定就放到字段里
+            if (string.IsNullOrEmpty(checkGroup))
+            {
+                CatAssetUpdater.updater = updater;
+            }
+            else
+            {
+                CatAssetUpdater.groupUpdaterDict[checkGroup] = updater;
+            }
+        }
+
+        /// <summary>
+        /// 刷新资源检查信息
+        /// </summary>
+        private void RefershCheckInfos()
+        {
+            if (!readOnlyChecked || !readWriteCheked || !remoteChecked)
+            {
+                return;
+            }
+
+            ClearCheckGroupInfo();
 
             Updater updater = null;
             
@@ -250,22 +274,8 @@ namespace CatAsset
                 totalCount = updater.TotalCount;
                 totalLength = updater.TotalLength;
 
-                //有指定资源组就把Updater放进字典里 没指定就放到字段里
-                if (string.IsNullOrEmpty(checkGroup))
-                {
-                    CatAssetUpdater.updater = updater;
-                }
-                else
-                {
-                    CatAssetUpdater.groupUpdaterDict[checkGroup] = updater;
-                }
+                AddUpdater(updater);
             }
-            
-
-            //清理checkInfo字典
-            checkInfoDict.Clear();
-
-
 
             //调用版本信息检查完毕回调
             onVersionChecked?.Invoke(totalCount, totalLength, checkGroup);

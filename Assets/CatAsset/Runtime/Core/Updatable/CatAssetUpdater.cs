@@ -13,6 +13,7 @@ namespace CatAsset
     /// </summary>
     public static class CatAssetUpdater
     {
+        
         /// <summary>
         /// 读写区资源信息，用于生成读写区资源清单
         /// </summary>

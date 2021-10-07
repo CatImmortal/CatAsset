@@ -34,7 +34,6 @@ public class Entry : MonoBehaviour
         }
         else
         {
-            Debug.Log(Application.persistentDataPath);
 
             //请求最新的资源清单版本号
             string versionTxtUri = UpdateUriPrefix + "/version.txt";
@@ -54,8 +53,11 @@ public class Entry : MonoBehaviour
                 //根据平台，整包版本和资源版本设置资源更新uri的前缀
                 CatAssetManager.UpdateUriPrefix = UpdateUriPrefix + "/StandaloneWindows/" + Application.version + "_" + manifestVefsion;
                 Debug.Log(CatAssetManager.UpdateUriPrefix);
+
+                //检查Base组的资源版本
                 CatAssetManager.CheckVersion(OnVersionChecked, "Base");
-                inited = true;
+
+                
             };
         }
 
@@ -73,20 +75,6 @@ public class Entry : MonoBehaviour
         if (inited)
         {
             
-
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                CatAssetManager.LoadAsset("Assets/Res/Chapter_2/Prefabs/Chapter_2_Prefab.prefab", (success, asset) =>
-                {
-                    if (!success)
-                    {
-                        Debug.Log("加载Chapter_2_Prefab失败");
-                    }
-
-                    Instantiate(asset);
-                    Debug.Log("加载Chapter_2_Prefab成功");
-                });
-            }
 
           
         }
@@ -108,6 +96,19 @@ public class Entry : MonoBehaviour
         Debug.Log(sb.ToString());
         sb.Clear();
 
+        if (count > 0)
+        {
+            //更新group组的资源
+            CatAssetManager.UpdateAsset(OnFileDownloaded, group);
+        }
+        else
+        {
+            inited = true;
+        }
+
+       
+
+
     }
 
     private void OnFileDownloaded(int updatedCount,long updatedLength,int totalCount,long totalLength,string fileName ,string group)
@@ -128,18 +129,12 @@ public class Entry : MonoBehaviour
         }
        
         Debug.Log(sb.ToString());
-
-        if (updatedCount >= 1)
-        {
-            CatAssetManager.PauseUpdateAsset(group);
-
-            StartCoroutine(Delay(3, () => {
-                CatAssetManager.ResumeUpdateAsset(group);
-            }));
-        }
+        sb.Clear();
 
         if (updatedCount >= totalCount)
         {
+            inited = true;
+
             //所有资源下载结束
             if (string.IsNullOrEmpty(group))
             {
@@ -151,11 +146,5 @@ public class Entry : MonoBehaviour
             }
            
         }
-    }
-
-    private IEnumerator Delay(float time,Action callback)
-    {
-        yield return new WaitForSeconds(time);
-        callback();
     }
 }

@@ -106,6 +106,8 @@ namespace CatAsset
                 {
                     if (executeCount >= MaxExcuteCount)
                     {
+                        //当前帧执行的任务数量已达上限
+
                         break;
                     }
 

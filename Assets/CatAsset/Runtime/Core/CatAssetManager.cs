@@ -28,7 +28,7 @@ namespace CatAsset
         private static Dictionary<string, AssetBundleManifestInfo> remoteAssetToAssetBundleDict = new Dictionary<string, AssetBundleManifestInfo>();
 
         /// <summary>
-        /// Asset和Asset运行时信息的关联(不包括场景)
+        /// Asset和Asset运行时信息的映射字典(不包括场景)
         /// </summary>
         private static Dictionary<Object, AssetRuntimeInfo> assetToAssetInfo = new Dictionary<Object, AssetRuntimeInfo>();
 
@@ -48,6 +48,11 @@ namespace CatAsset
         internal static float EditorModeMaxDelay;
 
         /// <summary>
+        /// 资源卸载延迟时间
+        /// </summary>
+        internal static float UnloadDelayTime;
+
+        /// <summary>
         /// 单帧最大任务执行数量
         /// </summary>
         internal static int MaxTaskExcuteCount
@@ -57,11 +62,6 @@ namespace CatAsset
                 taskExcutor.MaxExcuteCount = value;
             }
         }
-        
-        /// <summary>
-        /// 资源卸载延迟时间
-        /// </summary>
-        internal static float UnloadDelayTime;
 
         /// <summary>
         /// 运行模式
