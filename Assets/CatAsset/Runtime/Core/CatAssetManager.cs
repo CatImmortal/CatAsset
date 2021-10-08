@@ -102,23 +102,15 @@ namespace CatAsset
         /// </summary>
         internal static void AddRuntimeInfo(AssetBundleManifestInfo abInfo, bool inReadWrite)
         {
-            if (!assetBundleInfoDict.TryGetValue(abInfo.AssetBundleName, out AssetBundleRuntimeInfo abRuntimeInfo))
-            {
-                abRuntimeInfo = new AssetBundleRuntimeInfo();
-                assetBundleInfoDict.Add(abInfo.AssetBundleName, abRuntimeInfo);
-            }
-
+            AssetBundleRuntimeInfo abRuntimeInfo = new AssetBundleRuntimeInfo();
+            assetBundleInfoDict.Add(abInfo.AssetBundleName, abRuntimeInfo);
             abRuntimeInfo.ManifestInfo = abInfo;
             abRuntimeInfo.InReadWrite = inReadWrite;
 
             foreach (AssetManifestInfo assetManifestInfo in abInfo.Assets)
             {
-                if (!assetInfoDict.TryGetValue(assetManifestInfo.AssetName, out AssetRuntimeInfo assetRuntimeInfo))
-                {
-                    assetRuntimeInfo = new AssetRuntimeInfo();
-                    assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
-                }
-
+                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
+                assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
                 assetRuntimeInfo.ManifestInfo = assetManifestInfo;
                 assetRuntimeInfo.AssetBundleName = abInfo.AssetBundleName;
             }
@@ -230,6 +222,12 @@ namespace CatAsset
         /// </summary>
         public static void CheckVersion(Action<int, long,string> onVersionChecked,string checkGroup = null)
         {
+            if (RunMode == RunMode.PackageOnly)
+            {
+                Debug.LogError("PackageOnly模式下不能调用CheckVersion");
+                return;
+            }
+
             CatAssetUpdater.CheckVersion(onVersionChecked,checkGroup);
         }
 
@@ -238,6 +236,12 @@ namespace CatAsset
         /// </summary>
         public static void UpdateAsset(Action<int, long, int, long, string, string> onFileDownloaded,string updateGroup = null)
         {
+            if (RunMode == RunMode.PackageOnly)
+            {
+                Debug.LogError("PackageOnly模式下不能调用UpdateAsset");
+                return;
+            }
+
             CatAssetUpdater.UpdateAsset(onFileDownloaded,updateGroup);
         }
 
@@ -271,12 +275,6 @@ namespace CatAsset
             }
 #endif
 
-            if (assetBundleInfoDict.Count == 0)
-            {
-                Debug.LogError("Asset加载失败,未进行资源清单检查");
-                return;
-            }
-
             if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
             {
                 if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetToAssetBundleDict.ContainsKey(assetName))
@@ -290,7 +288,7 @@ namespace CatAsset
                 Updater updater = new Updater();
                 updater.UpdateList.Add(abInfo);
                 updater.TotalCount = 1;
-                updater.TotalLength += abInfo.Length;
+                updater.TotalLength = abInfo.Length;
 
                 updater.UpdateAsset((count, length, totalCount, totalLength, abName, group) => {
                     LoadAsset(assetName, loadedCallback);
@@ -402,15 +400,24 @@ namespace CatAsset
             }
 #endif
 
-            if (assetBundleInfoDict.Count == 0)
-            {
-                Debug.LogError("场景加载失败,未进行资源清单检查");
-                return;
-            }
-
             if (!assetInfoDict.TryGetValue(sceneName, out AssetRuntimeInfo assetInfo))
             {
-                Debug.LogError("场景加载失败，该场景不在资源清单中：" + sceneName);
+                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetToAssetBundleDict.ContainsKey(sceneName))
+                {
+                    Debug.LogError("场景加载失败，不在资源清单中：" + sceneName);
+                    return;
+                }
+
+                //开启了边玩边下模式 并且此asset所属ab在远端存在 尝试从远端下载对应ab
+                AssetBundleManifestInfo abInfo = remoteAssetToAssetBundleDict[sceneName];
+                Updater updater = new Updater();
+                updater.UpdateList.Add(abInfo);
+                updater.TotalCount = 1;
+                updater.TotalLength = abInfo.Length;
+
+                updater.UpdateAsset((count, length, totalCount, totalLength, abName, group) => {
+                    LoadAsset(sceneName, loadedCallback);
+                });
                 return;
             }
 
@@ -504,11 +511,6 @@ namespace CatAsset
             }
 #endif
 
-            if (assetBundleInfoDict.Count == 0)
-            {
-                Debug.LogError("Asset加载失败,未进行资源清单检查");
-                return;
-            }
 
             //创建批量加载Asset的任务
             LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask), assetNames, loadedCallback);
