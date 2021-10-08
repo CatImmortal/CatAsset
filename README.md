@@ -19,7 +19,7 @@ Unity AssetBundle资源管理框架
 
   1.将指定目录内所有资源文件打包为一个bundle
 
-  2.对指定目录内放入所有一级目录应用规则1打包为多个bundle
+  2.对指定目录下所有一级目录应用规则1打包为多个bundle
 
   3.将指定目录内所有资源文件各自打包为一个bundle
 
@@ -49,7 +49,7 @@ Unity AssetBundle资源管理框架
 
   
 
-- **使用者直接使用Asset，无须关心AssetBundle**
+- **支持自动寻址，使用者直接使用Asset，无须关心AssetBundle**
 
   
 
