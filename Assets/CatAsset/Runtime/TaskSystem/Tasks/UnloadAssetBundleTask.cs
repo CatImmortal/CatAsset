@@ -46,32 +46,34 @@ namespace CatAsset
             }
 
             timer += Time.deltaTime;
-            if (timer >= CatAssetManager.UnloadDelayTime)
+            if (timer < CatAssetManager.UnloadDelayTime)
             {
-                //卸载时间到了 
-                State = TaskState.Finished;
-
-                //解除此AssetBundle中已加载的Asset与AssetRuntimeInfo的关联
-                for (int i = 0; i < abInfo.ManifestInfo.Assets.Length; i++)
-                {
-                    string assetName = abInfo.ManifestInfo.Assets[i].AssetName;
-
-                    AssetRuntimeInfo info = CatAssetManager.GetAssetRuntimeInfo(assetName);
-                    if (info.Asset != null)
-                    {
-                        CatAssetManager.RemoveAssetToRuntimeInfo(info.Asset);  //删除关联
-                    }
-                }
-
-                //卸载AssetBundle
-                abInfo.AssetBundle.Unload(true);
-                Debug.Log("已卸载AB:" + Name);
-
+                //状态修改为Waiting 这样不占用owner任务执行次数
+                State = TaskState.Waiting;
                 return;
             }
 
-            //状态修改为Waiting 这样不占用owner任务执行次数
-            State = TaskState.Waiting;
+            //卸载时间到了 
+            State = TaskState.Finished;
+
+            //解除此AssetBundle中已加载的Asset与AssetRuntimeInfo的关联
+            for (int i = 0; i < abInfo.ManifestInfo.Assets.Length; i++)
+            {
+                string assetName = abInfo.ManifestInfo.Assets[i].AssetName;
+
+                AssetRuntimeInfo info = CatAssetManager.GetAssetRuntimeInfo(assetName);
+                if (info.Asset != null)
+                {
+                    CatAssetManager.RemoveAssetToRuntimeInfo(info.Asset);  //删除关联
+                    info.Asset = null;
+                }
+            }
+
+            //卸载AssetBundle
+            abInfo.AssetBundle.Unload(true);
+            Debug.Log("已卸载AssetBundle:" + Name);
+
+            
         }
     }
 }

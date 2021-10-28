@@ -93,7 +93,7 @@ namespace CatAsset.Editor
                             {
                                 string assetName = assetManifestInfo.AssetName;
                                 AssetRuntimeInfo assetInfo = assetInfoDict[assetName];
-                                if (assetInfo.UseCount == 0)
+                                if (assetInfo.RefCount == 0)
                                 {
                                     continue;
                                 }
@@ -114,7 +114,7 @@ namespace CatAsset.Editor
                                     }
 
                                     //引用计数
-                                    EditorGUILayout.LabelField("引用计数：" + assetInfo.UseCount.ToString(), GUILayout.Width(100));
+                                    EditorGUILayout.LabelField("引用计数：" + assetInfo.RefCount.ToString(), GUILayout.Width(100));
 
                                     if (GUILayout.Button("选中", GUILayout.Width(50)))
                                     {

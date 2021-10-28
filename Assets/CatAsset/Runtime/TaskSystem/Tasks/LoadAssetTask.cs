@@ -12,12 +12,21 @@ namespace CatAsset
     /// </summary>
     public class LoadAssetTask : BaseTask
     {
+        /// <summary>
+        /// 已加载的依赖数量
+        /// </summary>
+        private int dependencyLoadedCount;
+
+        private Action<bool, Object> onDependencyLoaded;
+        private Action<bool> onAssetBundleLoaded;
+
         protected AsyncOperation asyncOp;
 
         protected AssetRuntimeInfo assetInfo;
         protected AssetBundleRuntimeInfo abInfo;
 
         protected Action<bool, Object> onFinished;
+
 
         internal override Delegate FinishedCallback
         {
@@ -49,18 +58,25 @@ namespace CatAsset
         {
             assetInfo = CatAssetManager.GetAssetRuntimeInfo(name);
             this.onFinished = onFinished;
+            onDependencyLoaded = OnDependencyLoaded;
+            onAssetBundleLoaded = OnAssetBundleLoaded;
         }
 
 
         public override void Execute()
         {
-            abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(assetInfo.AssetBundleName);
-
-            if (abInfo.AssetBundle == null)
+            if (assetInfo.ManifestInfo.Dependencies.Length == 0)
             {
-                //需要加载AssetBundle
-                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, assetInfo.AssetBundleName);
-                owner.AddTask(task);
+                //没有依赖需要加载 尝试加载AssetBundle
+                TryLoadAssetBundle();
+                return;
+            }
+
+            //加载依赖
+            for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
+            {
+                string dependency = assetInfo.ManifestInfo.Dependencies[i];
+                CatAssetManager.LoadAsset(dependency,onDependencyLoaded);
             }
         }
 
@@ -69,50 +85,98 @@ namespace CatAsset
 
             if (asyncOp == null)
             {
-               
-                if (!CheckDependenciesFinished())
-                {
-                    //依赖资源的加载任务未全部结束
-                    State = TaskState.Waiting;
-                    return;
-                }
-
-                if (!CheckAssetBundleLoaded())
-                {
-                    //AssetBundle未加载好
-
-                    if (abInfo.LoadFailed)
-                    {
-                        //AssetBundle加载失败 不进行后续加载 并卸载依赖
-                        State = TaskState.Finished;
-
-                        assetInfo.UseCount = 0;
-                        abInfo.UsedAssets.Clear();
-                        UnloadDependencies();
-
-                        onFinished?.Invoke(false, null);
-                        return;
-                    }
-                    else
-                    {
-                        //AssetBundle加载中...
-                        State = TaskState.Waiting;
-                        return;
-                    }
-                }
-
-                State = TaskState.Executing;
-
-                //发起异步加载
-                LoadAsync();
+                //依赖或者AssetBunlde没加载完
+                State = TaskState.Waiting;
+                return;
             }
 
-
-            if (asyncOp.isDone)
+            if (!asyncOp.isDone)
             {
-                //加载完成了
+                //加载中
+                State = TaskState.Executing;
+                return;
+            }
+
+            //加载完成了
+            State = TaskState.Finished;
+            LoadDone();
+
+
+
+        }
+
+        /// <summary>
+        /// 依赖资源加载完毕的回调
+        /// </summary>
+        private void OnDependencyLoaded(bool success, Object obj)
+        {
+            dependencyLoadedCount++;
+
+            if (dependencyLoadedCount != assetInfo.ManifestInfo.Dependencies.Length)
+            {
+                //依赖资源未全部加载完毕
+                return;
+            }
+
+            //依赖资源全部加载完毕，尝试加载AssetBundle（可能有加载失败的依赖资源，但不因此使得主资源加载失败）
+            TryLoadAssetBundle();
+        }
+
+        /// <summary>
+        /// 尝试加载AssetBundle
+        /// </summary>
+        private void TryLoadAssetBundle()
+        {
+            abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(assetInfo.AssetBundleName);
+            if (abInfo.AssetBundle == null)
+            {
+                //需要加载AssetBundle
+                LoadAssetBundleTask task = new LoadAssetBundleTask(owner, assetInfo.AssetBundleName, onAssetBundleLoaded);
+                owner.AddTask(task);
+            }
+            else
+            {
+                OnAssetBundleLoaded(true);
+            }
+        }
+
+        /// <summary>
+        /// AssetBundle加载完毕的回调
+        /// </summary>
+        private void OnAssetBundleLoaded(bool success)
+        {
+            if (!success )
+            {
+                //AssetBundle加载失败 不进行后续加载 并卸载依赖
                 State = TaskState.Finished;
-                LoadDone();
+
+                assetInfo.RefCount = 0;
+                UnloadDependencies();
+
+                onFinished?.Invoke(false, null);
+                return;
+            }
+
+            //进行异步加载
+            LoadAsync();
+            
+        }
+
+        /// <summary>
+        /// 卸载依赖的Asset
+        /// </summary>
+        protected void UnloadDependencies()
+        {
+            for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
+            {
+                string dependencyName = assetInfo.ManifestInfo.Dependencies[i];
+
+                AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
+                if (dependencyInfo.Asset != null)
+                {
+                    //将已加载好的依赖都卸载了
+                    CatAssetManager.UnloadAsset(dependencyInfo.Asset);
+                }
             }
         }
 
@@ -132,63 +196,41 @@ namespace CatAsset
             AssetBundleRequest abAsyncOp = (AssetBundleRequest)asyncOp;
             if (abAsyncOp.asset)
             {
+                Debug.Log("Asset加载成功：" + Name);
+
                 assetInfo.Asset = abAsyncOp.asset;
-                CatAssetManager.AddAssetToRuntimeInfo(assetInfo.Asset,assetInfo);  //添加Asset和AssetRuntimeInfo的关联
+
+                //添加Asset和AssetRuntimeInfo的关联
+                CatAssetManager.AddAssetToRuntimeInfo(assetInfo.Asset,assetInfo);  
+
                 onFinished?.Invoke(true,assetInfo.Asset);
             }
             else
             {
                 //Asset加载失败
-                assetInfo.UseCount = 0;
+                Debug.LogError("Asset加载失败：" + Name);
+
+                assetInfo.RefCount = 0;
+
                 abInfo.UsedAssets.Remove(Name);
+                if (abInfo.UsedAssets.Count == 0)
+                {
+                    //AssetBundle此时没有Asset在使用了 创建卸载任务 开始卸载倒计时
+                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(owner, abInfo.ManifestInfo.AssetBundleName);
+                    owner.AddTask(task);
+                    Debug.Log("创建了卸载AB的任务：" + task.Name);
+                }
+
                 UnloadDependencies();
+
                 onFinished?.Invoke(false, null);
             }
         }
 
-        /// <summary>
-        /// 检查所属的AssetBundle是否已加载好
-        /// </summary>
-        protected bool CheckAssetBundleLoaded()
-        {
-            return abInfo.AssetBundle != null;
-        }
-
-        /// <summary>
-        /// 检查依赖的Asset的加载任务是否已结束
-        /// </summary>
-        protected bool CheckDependenciesFinished()
-        {
-            for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
-            {
-                string dependencyName = assetInfo.ManifestInfo.Dependencies[i];
-
-                if (owner.HasTask(dependencyName) && owner.GetTaskState(dependencyName) != TaskState.Finished)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     
-        /// <summary>
-        /// 卸载依赖的Asset
-        /// </summary>
-        protected void UnloadDependencies()
-        {
-            for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
-            {
-                string dependencyName = assetInfo.ManifestInfo.Dependencies[i];
 
-                AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
-                if (dependencyInfo.Asset != null)
-                {
-                    //将已加载好的依赖都卸载了
-                    CatAssetManager.UnloadAsset(dependencyInfo.Asset);
-                }
-            }
-        }
+
+
     }
 }
 

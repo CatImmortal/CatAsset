@@ -14,6 +14,21 @@ namespace CatAsset
 
         private AssetBundleRuntimeInfo abInfo;
 
+        private Action<bool> onFinished;
+
+        internal override Delegate FinishedCallback
+        {
+            get
+            {
+                return onFinished;
+            }
+
+            set
+            {
+                onFinished = (Action<bool>)value;
+            }
+        }
+
 
         public override float Progress
         {
@@ -28,9 +43,11 @@ namespace CatAsset
             }
         }
 
-        public LoadAssetBundleTask(TaskExcutor owner, string name) : base(owner, name)
+
+        public LoadAssetBundleTask(TaskExcutor owner, string name,Action<bool> onFinished) : base(owner, name)
         {
             abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(name);
+            this.onFinished = onFinished;
         }
 
         public override void Execute()
@@ -40,25 +57,29 @@ namespace CatAsset
 
         public override void RefreshState()
         {
-            if (asyncOp.isDone)
+            if (!asyncOp.isDone)
             {
-                State = TaskState.Finished;
-
-                if (asyncOp.assetBundle == null)
-                {
-                    //AssetBundle加载失败
-                    abInfo.LoadFailed = true;
-                    Debug.LogError("AssetBundle加载失败：" + Name);
-                    return;
-                }
-
-                //AssetBundle加载完毕
-                abInfo.LoadFailed = false;
-                abInfo.AssetBundle = asyncOp.assetBundle;
+                //AssetBundle加载中
+                State = TaskState.Executing;
                 return;
             }
 
-            State = TaskState.Executing;
+            State = TaskState.Finished;
+
+            if (asyncOp.assetBundle == null)
+            {
+                //AssetBundle加载失败
+                Debug.LogError("AssetBundle加载失败：" + Name);
+                abInfo.UsedAssets.Clear();
+                onFinished?.Invoke(false);
+                return;
+            }
+
+            //AssetBundle加载完毕
+            Debug.Log("AssetBundle加载成功：" + Name);
+            abInfo.AssetBundle = asyncOp.assetBundle;
+            onFinished?.Invoke(true);
+
         }
     }
 }

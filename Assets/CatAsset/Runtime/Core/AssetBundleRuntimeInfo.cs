@@ -9,6 +9,9 @@ namespace CatAsset
     /// </summary>
     public class AssetBundleRuntimeInfo
     {
+        private string loadPath;
+        private HashSet<string> usedAsset;
+
         /// <summary>
         /// AssetBundle清单信息
         /// </summary>
@@ -24,7 +27,6 @@ namespace CatAsset
         /// </summary>
         public bool InReadWrite;
 
-        private string loadPath;
 
         /// <summary>
         /// 加载地址
@@ -47,13 +49,6 @@ namespace CatAsset
                 return loadPath;
             }
         }
-
-        /// <summary>
-        /// 是否加载失败
-        /// </summary>
-        public bool LoadFailed;
-
-        private HashSet<string> usedAsset;
 
         /// <summary>
         /// 当前使用中的Asset，这里面的Asset的UseCount都大于0

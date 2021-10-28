@@ -27,7 +27,7 @@ namespace CatAsset
         /// <summary>
         /// 引用计数
         /// </summary>
-        public int UseCount;
+        public int RefCount;
     }
 }
 

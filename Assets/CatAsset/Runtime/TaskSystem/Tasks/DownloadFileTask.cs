@@ -132,10 +132,12 @@ namespace CatAsset
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
                 //下载失败
+                Debug.LogError("下载失败：" + Name);
                 onFinished?.Invoke(false, op.webRequest.error , abInfo);
             }
             else
             {
+                Debug.Log("下载成功：" + Name);
                 //下载成功
                 //将临时下载文件移动到正式文件
                 if (File.Exists(localFilePath))
