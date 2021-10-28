@@ -60,13 +60,13 @@ namespace CatAsset
         /// <summary>
         /// 资源文件更新回调，每次下载资源文件后调用
         /// </summary>
-        private Action<int, long, int, long,string, string> onFileDownloaded;
+        private Action<bool,int, long, int, long,string, string> onFileDownloaded;
 
 
         /// <summary>
         /// 更新资源
         /// </summary>
-        public void UpdateAsset(Action<int, long, int, long, string, string> onFileDownloaded)
+        public void UpdateAsset(Action<bool,int, long, int, long, string, string> onFileDownloaded)
         {
             foreach (AssetBundleManifestInfo updateABInfo in UpdateList)
             {
@@ -88,6 +88,7 @@ namespace CatAsset
             if (!success)
             {
                 Debug.LogError($"下载文件{abInfo.AssetBundleName}失败：" + error);
+                onFileDownloaded?.Invoke(false, UpdatedCount, UpdatedLength, TotalCount, TotalLength, abInfo.AssetBundleName, UpdateGroup);
                 return;
             }
 
@@ -131,7 +132,7 @@ namespace CatAsset
                 }
             }
 
-            onFileDownloaded?.Invoke(UpdatedCount, UpdatedLength,TotalCount,TotalLength,abInfo.AssetBundleName,UpdateGroup);
+            onFileDownloaded?.Invoke(true, UpdatedCount, UpdatedLength,TotalCount,TotalLength,abInfo.AssetBundleName,UpdateGroup);
         }
     }
 

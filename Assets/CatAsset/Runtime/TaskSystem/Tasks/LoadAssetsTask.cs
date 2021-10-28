@@ -12,9 +12,20 @@ namespace CatAsset
     /// </summary>
     public class LoadAssetsTask : BaseTask
     {
-        private bool flag;
+
 
         private List<string> assetNames;
+
+
+        /// <summary>
+        /// 已加载的资源数量
+        /// </summary>
+        private int loadedAssetCount;
+
+        /// <summary>
+        /// Asset加载完毕的回调
+        /// </summary>
+        private Action<bool, Object> onAssetLoaded;
 
         private Action<List<Object>> onFinished;
 
@@ -35,67 +46,50 @@ namespace CatAsset
         {
             this.assetNames = assetNames;
             this.onFinished = onFinished;
+            onAssetLoaded = OnAssetLoaded;
         }
 
         public override void Execute()
         {
-            flag = false;
+            State = TaskState.Waiting;
             foreach (string assetName in assetNames)
             {
-                CatAssetManager.LoadAsset(assetName, null);
+                CatAssetManager.LoadAsset(assetName, onAssetLoaded);
             }
         }
 
-        public override void RefreshState()
+        public override void Update()
         {
-            if (flag == false)
+
+        }
+
+        /// <summary>
+        /// Asset加载完毕的回调
+        /// </summary>
+        private void OnAssetLoaded(bool success,Object asset)
+        {
+            loadedAssetCount++;
+            if (loadedAssetCount != assetNames.Count)
             {
-                //Execute在本帧执行过的话，要等一帧,因为加载Asset的任务要到下一帧才会正式添加
-                //否则CheckLoadAssetsFinished会在第一帧就返回true
-                flag = true;
+                //还没有全部加载完毕
                 State = TaskState.Waiting;
                 return;
             }
 
-            if (CheckLoadAssetsFinished())
-            {
-                State = TaskState.Finished;
-                onFinished?.Invoke(GetLoadedAssets());
-                return;
-            }
+            //全部加载完毕了
+            State = TaskState.Finished;
 
-            State = TaskState.Waiting;
-        }
-
-        /// <summary>
-        /// 检查所有Asset的加载任务是否已结束
-        /// </summary>
-        private bool CheckLoadAssetsFinished()
-        {
-            foreach (string assetName in assetNames)
-            {
-                if (owner.HasTask(assetName) && owner.GetTaskState(assetName) != TaskState.Finished)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// 获得所有已加载的Asset
-        /// </summary>
-        private List<Object> GetLoadedAssets()
-        {
             List<Object> loadedAssets = new List<Object>(assetNames.Count);
-            foreach (string assetName in assetNames)
+            for (int i = 0; i < assetNames.Count; i++)
             {
+                string assetName = assetNames[i];
                 AssetRuntimeInfo assetInfo = CatAssetManager.GetAssetRuntimeInfo(assetName);
                 loadedAssets.Add(assetInfo.Asset);
             }
-            return loadedAssets;
+
+            onFinished?.Invoke(loadedAssets);
         }
+
     }
 }
 

@@ -15,7 +15,7 @@ namespace CatAsset
         /// <summary>
         /// 已加载的依赖数量
         /// </summary>
-        private int dependencyLoadedCount;
+        private int loadedDependencyCount;
 
         private Action<bool, Object> onDependencyLoaded;
         private Action<bool> onAssetBundleLoaded;
@@ -80,7 +80,7 @@ namespace CatAsset
             }
         }
 
-        public override void RefreshState()
+        public override void Update()
         {
 
             if (asyncOp == null)
@@ -100,19 +100,16 @@ namespace CatAsset
             //加载完成了
             State = TaskState.Finished;
             LoadDone();
-
-
-
         }
 
         /// <summary>
         /// 依赖资源加载完毕的回调
         /// </summary>
-        private void OnDependencyLoaded(bool success, Object obj)
+        private void OnDependencyLoaded(bool success, Object asset)
         {
-            dependencyLoadedCount++;
+            loadedDependencyCount++;
 
-            if (dependencyLoadedCount != assetInfo.ManifestInfo.Dependencies.Length)
+            if (loadedDependencyCount != assetInfo.ManifestInfo.Dependencies.Length)
             {
                 //依赖资源未全部加载完毕
                 return;

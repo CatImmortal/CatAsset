@@ -55,7 +55,7 @@ namespace CatAsset
             asyncOp = AssetBundle.LoadFromFileAsync(abInfo.LoadPath);
         }
 
-        public override void RefreshState()
+        public override void Update()
         {
             if (!asyncOp.isDone)
             {

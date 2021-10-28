@@ -3,6 +3,7 @@
 using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace CatAsset
 {
@@ -49,10 +50,10 @@ namespace CatAsset
         public override void Execute()
         {
             //模拟异步延迟
-            delay = UnityEngine.Random.Range(0, CatAssetManager.EditorModeMaxDelay);
+            delay = Random.Range(0, CatAssetManager.EditorModeMaxDelay);
         }
 
-        public override void RefreshState()
+        public override void Update()
         {
 
             timer += Time.deltaTime;

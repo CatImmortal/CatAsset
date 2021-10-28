@@ -108,8 +108,13 @@ public class UpdatableExample : MonoBehaviour
         }
     }
 
-    private void OnFileDownloaded(int updatedCount, long updatedLength, int totalCount, long totalLength, string fileName, string group)
+    private void OnFileDownloaded(bool success, int updatedCount, long updatedLength, int totalCount, long totalLength, string fileName, string group)
     {
+        if (!success)
+        {
+            return;
+        }
+
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("已更新数量：" + updatedCount);
         sb.AppendLine("已更新大小：" + updatedLength);

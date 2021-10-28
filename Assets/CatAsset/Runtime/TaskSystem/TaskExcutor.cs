@@ -118,7 +118,7 @@ namespace CatAsset
                         task.Execute();
                     }
 
-                    task.RefreshState();
+                    task.Update();
 
                     switch (task.State)
                     {

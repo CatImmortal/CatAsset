@@ -55,9 +55,9 @@ namespace CatAsset
         public abstract void Execute();
 
         /// <summary>
-        /// 刷新任务状态
+        /// 轮询任务
         /// </summary>
-        public abstract void RefreshState();
+        public abstract void Update();
 
         public override string ToString()
         {

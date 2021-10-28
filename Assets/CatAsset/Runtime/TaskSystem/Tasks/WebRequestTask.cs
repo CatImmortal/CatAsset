@@ -52,7 +52,7 @@ namespace CatAsset
             op = uwr.SendWebRequest();
         }
 
-        public override void RefreshState()
+        public override void Update()
         {
             if (!op.isDone)
             {

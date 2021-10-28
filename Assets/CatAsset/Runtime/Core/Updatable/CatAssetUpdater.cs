@@ -78,7 +78,7 @@ namespace CatAsset
         /// <summary>
         /// 更新资源
         /// </summary>
-        internal static void UpdateAsset(Action<int, long, int, long, string, string> onFileDownloaded,string updateGroup)
+        internal static void UpdateAsset(Action<bool,int, long, int, long, string, string> onFileDownloaded,string updateGroup)
         {
             if (string.IsNullOrEmpty(updateGroup) && updater != null)
             {
@@ -107,7 +107,7 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 暂停更新器
+        /// 暂停资源更新器
         /// </summary>
         internal static void PauseUpdater(bool isPause ,string group)
         {

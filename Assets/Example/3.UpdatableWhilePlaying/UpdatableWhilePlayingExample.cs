@@ -51,6 +51,7 @@ public class UpdatableWhilePlayingExample : MonoBehaviour
             Debug.Log("读取远端最新版本号成功");
 
             CatAssetManager.CheckVersion(OnVersionChecked, "Base");
+            CatAssetManager.CheckVersion(OnVersionChecked, "Chapter1");  //检查过的资源组的资源 才能进行边玩边下
         };
     }
 
@@ -95,6 +96,10 @@ public class UpdatableWhilePlayingExample : MonoBehaviour
         Debug.Log(sb.ToString());
         sb.Clear();
 
-        inited = true;
+        if (group == "chapter1")
+        {
+            inited = true;
+        }
+        
     }
 }

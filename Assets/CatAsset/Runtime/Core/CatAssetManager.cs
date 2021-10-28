@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using Object = UnityEngine.Object;
 using UnityEngine.SceneManagement;
-using UnityEngine.Networking;
+
 namespace CatAsset
 {
     /// <summary>
@@ -25,7 +25,7 @@ namespace CatAsset
         /// <summary>
         /// 远端Asset名与对应AssetBundle清单信息的映射字典
         /// </summary>
-        private static Dictionary<string, AssetBundleManifestInfo> remoteAssetToAssetBundleDict = new Dictionary<string, AssetBundleManifestInfo>();
+        private static Dictionary<string, AssetBundleManifestInfo> remoteAssetNameToAssetBundleDict = new Dictionary<string, AssetBundleManifestInfo>();
 
         /// <summary>
         /// Asset和Asset运行时信息的映射字典(不包括场景)
@@ -137,12 +137,12 @@ namespace CatAsset
         /// </summary>
         internal static void AddRemoteAssetManifestInfo(CatAssetManifest remoteManifest)
         {
-            remoteAssetToAssetBundleDict.Clear();
+            remoteAssetNameToAssetBundleDict.Clear();
             foreach (AssetBundleManifestInfo abInfo in remoteManifest.AssetBundles)
             {
                 foreach (AssetManifestInfo assetInfo in abInfo.Assets)
                 {
-                    remoteAssetToAssetBundleDict.Add(assetInfo.AssetName, abInfo);
+                    remoteAssetNameToAssetBundleDict.Add(assetInfo.AssetName, abInfo);
                 }
             }
         }
@@ -234,7 +234,7 @@ namespace CatAsset
         /// <summary>
         /// 更新资源
         /// </summary>
-        public static void UpdateAsset(Action<int, long, int, long, string, string> onFileDownloaded,string updateGroup = null)
+        public static void UpdateAsset(Action<bool,int, long, int, long, string, string> onFileDownloaded,string updateGroup = null)
         {
             if (RunMode == RunMode.PackageOnly)
             {
@@ -277,21 +277,35 @@ namespace CatAsset
 
             if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
             {
-                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetToAssetBundleDict.ContainsKey(assetName))
+                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetNameToAssetBundleDict.ContainsKey(assetName))
                 {
-                    //不是边玩边下模式 或者远端没这个asset的ab文件 就报错
+                    //不是边玩边下模式 或者 远端没这个asset的ab文件 报错
                     Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
+                    loadedCallback?.Invoke(false, null);
                     return;
                 }
 
-                //开启了边玩边下模式 并且此asset所属ab在远端存在 尝试从远端下载对应ab
-                AssetBundleManifestInfo abInfo = remoteAssetToAssetBundleDict[assetName];
+               
+                AssetBundleManifestInfo abInfo = remoteAssetNameToAssetBundleDict[assetName];
+                if (!groupInfoDict.ContainsKey(abInfo.Group))
+                {
+                    //资源组没检查过 报错
+                    Debug.LogError("Asset边玩边下加载失败，资源组未检查：" + abInfo.Group);
+                    loadedCallback?.Invoke(false, null);
+                    return;
+                }
+
+                //开始下载
                 Updater updater = new Updater();
                 updater.UpdateList.Add(abInfo);
                 updater.TotalCount = 1;
                 updater.TotalLength = abInfo.Length;
 
-                updater.UpdateAsset((count, length, totalCount, totalLength, abName, group) => {
+                updater.UpdateAsset((success,count, length, totalCount, totalLength, abName, group) => {
+                    if (!success)
+                    {
+                        loadedCallback?.Invoke(false, null);
+                    }
                     LoadAsset(assetName, loadedCallback);
                 });
                 return;
@@ -381,44 +395,45 @@ namespace CatAsset
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                AsyncOperation asyncOp = SceneManager.LoadSceneAsync(sceneName,LoadSceneMode.Additive);
-                asyncOp.completed += (op) =>
-                {
-                    if (op.isDone)
-                    {
-                        loadedCallback?.Invoke(true,null);
-                    }
-                };
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(sceneName, UnityEditor.SceneManagement.OpenSceneMode.Additive);
+                loadedCallback(true, null);
                 return;
             }
 #endif
 
             if (!assetInfoDict.TryGetValue(sceneName, out AssetRuntimeInfo assetInfo))
             {
-                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetToAssetBundleDict.ContainsKey(sceneName))
+                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetNameToAssetBundleDict.ContainsKey(sceneName))
                 {
+                    //不是边玩边下模式 或者远端没这个场景的ab文件 报错
                     Debug.LogError("场景加载失败，不在资源清单中：" + sceneName);
+                    loadedCallback?.Invoke(false, null);
                     return;
                 }
 
-                //开启了边玩边下模式 并且此asset所属ab在远端存在 尝试从远端下载对应ab
-                AssetBundleManifestInfo abInfo = remoteAssetToAssetBundleDict[sceneName];
+                
+                AssetBundleManifestInfo abInfo = remoteAssetNameToAssetBundleDict[sceneName];
+                if (!groupInfoDict.ContainsKey(abInfo.Group))
+                {
+                    //资源组没检查过 报错
+                    loadedCallback?.Invoke(false, null);
+                    Debug.LogError("场景边玩边下加载失败，资源组未检查：" + abInfo.Group);
+                    return;
+                }
+
                 Updater updater = new Updater();
                 updater.UpdateList.Add(abInfo);
                 updater.TotalCount = 1;
                 updater.TotalLength = abInfo.Length;
 
-                updater.UpdateAsset((count, length, totalCount, totalLength, abName, group) => {
-                    LoadAsset(sceneName, loadedCallback);
+                updater.UpdateAsset((success, count, length, totalCount, totalLength, abName, group) => {
+                    if (!success)
+                    {
+                        loadedCallback?.Invoke(false, null);
+                    }
+                    LoadScene(sceneName, loadedCallback);
                 });
                 return;
-            }
-
-            //加载依赖的Asset
-            for (int i = 0; i < assetInfo.ManifestInfo.Dependencies.Length; i++)
-            {
-                string dependency = assetInfo.ManifestInfo.Dependencies[i];
-                LoadAsset(dependency, null);
             }
 
             if (assetInfo.RefCount == 0)
@@ -481,7 +496,7 @@ namespace CatAsset
 
                 if (abInfo.UsedAssets.Count == 0)
                 {
-                    //AssetBundel也已经没人使用了 创建卸载任务 开始卸载倒计时
+                    //AssetBundle此时没有Asset在使用了 创建卸载任务 开始卸载倒计时
                     UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName);
                     taskExcutor.AddTask(task);
                     Debug.Log("创建了卸载AB的任务：" + task.Name);
@@ -495,6 +510,12 @@ namespace CatAsset
         /// </summary>
         public static void LoadAssets(List<string> assetNames, Action<List<Object>> loadedCallback)
         {
+            if (assetNames == null || assetNames.Count == 0)
+            {
+                Debug.LogError("批量加载Asset失败，assetNames为空或数量为0");
+                return;
+            }
+
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
@@ -506,7 +527,7 @@ namespace CatAsset
 
 
             //创建批量加载Asset的任务
-            LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask), assetNames, loadedCallback);
+            LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask) + Time.time, assetNames, loadedCallback);
             taskExcutor.AddTask(task);
         }
 

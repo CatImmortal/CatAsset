@@ -28,15 +28,15 @@ namespace CatAsset
         public UnloadAssetBundleTask(TaskExcutor owner, string name) : base(owner, name)
         {
             abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(name);
-            State = TaskState.Waiting;  //初始状态设置为Waiting 避免占用每帧任务处理次数
+           
         }
 
         public override void Execute()
         {
-           
+            State = TaskState.Waiting;  //初始状态设置为Waiting 避免占用每帧任务处理次数
         }
 
-        public override void RefreshState()
+        public override void Update()
         {
             if (abInfo.UsedAssets.Count > 0)
             {
@@ -72,8 +72,6 @@ namespace CatAsset
             //卸载AssetBundle
             abInfo.AssetBundle.Unload(true);
             Debug.Log("已卸载AssetBundle:" + Name);
-
-            
         }
     }
 }

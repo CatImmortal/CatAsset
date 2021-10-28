@@ -111,7 +111,7 @@ namespace CatAsset
             op = uwr.SendWebRequest();
         }
 
-        public override void RefreshState()
+        public override void Update()
         {
             if (op == null)
             {
@@ -122,11 +122,12 @@ namespace CatAsset
 
             if (!op.webRequest.isDone)
             {
+                //下载中
                 State = TaskState.Executing;
                 return;
             }
 
-
+            //下载完毕
             State = TaskState.Finished;
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
@@ -134,21 +135,20 @@ namespace CatAsset
                 //下载失败
                 Debug.LogError("下载失败：" + Name);
                 onFinished?.Invoke(false, op.webRequest.error , abInfo);
+                return;
             }
-            else
+
+            Debug.Log("下载成功：" + Name);
+            //下载成功
+            //将临时下载文件移动到正式文件
+            if (File.Exists(localFilePath))
             {
-                Debug.Log("下载成功：" + Name);
-                //下载成功
-                //将临时下载文件移动到正式文件
-                if (File.Exists(localFilePath))
-                {
-                    File.Delete(localFilePath);
-                }
-
-                File.Move(localTempFilePath, localFilePath);
-
-                onFinished?.Invoke(true,null, abInfo);
+                File.Delete(localFilePath);
             }
+
+            File.Move(localTempFilePath, localFilePath);
+
+            onFinished?.Invoke(true, null, abInfo);
 
 
 
