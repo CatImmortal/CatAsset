@@ -65,8 +65,8 @@ namespace CatAsset.Editor
                     string abName = item.Key;
                     AssetBundleRuntimeInfo abInfo = item.Value;
 
-                    //只绘制有Asset在使用中的AssetBundle
-                    if (abInfo.UsedAssets.Count > 0)
+                    //只绘制有Asset或者被其他AssetBundle依赖中的AssetBundle
+                    if (abInfo.UsedAssets.Count > 0 || abInfo.RefCount > 0)
                     {
 
                         if (!abFoldOut.ContainsKey(abName))

@@ -125,6 +125,16 @@ namespace CatAsset
         }
 
         /// <summary>
+        /// 获取AssetBundle运行时信息
+        /// </summary>
+        internal static AssetBundleRuntimeInfo GetAssetBundleRuntimeInfo(Object asset)
+        {
+            AssetRuntimeInfo assetInfo = assetToAssetInfo[asset];
+            AssetBundleRuntimeInfo abInfo = GetAssetBundleRuntimeInfo(assetInfo.AssetBundleName);
+            return abInfo;
+        }
+
+        /// <summary>
         /// 获取Asset运行时信息
         /// </summary>
         internal static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
@@ -162,6 +172,8 @@ namespace CatAsset
         {
             assetToAssetInfo.Remove(asset);
         }
+
+
 
         /// <summary>
         /// 轮询CatAsset管理器
@@ -324,6 +336,11 @@ namespace CatAsset
             if (assetInfo.Asset != null)
             {
                 //已加载过 直接调用回调方法
+                foreach (string dependency in assetInfo.ManifestInfo.Dependencies)
+                {
+                    //给依赖的asset加一遍引用计数
+                    LoadAsset(dependency,null);
+                }
                 loadedCallback?.Invoke(true,assetInfo.Asset);
                 return;
             }
@@ -377,9 +394,9 @@ namespace CatAsset
                 AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
                 abInfo.UsedAssets.Remove(assetInfo.ManifestInfo.AssetName);
 
-                if (abInfo.UsedAssets.Count == 0)
+                if (abInfo.RefCount ==0 && abInfo.UsedAssets.Count == 0)
                 {
-                    //AssetBundle此时没有Asset在使用了 创建卸载任务 开始卸载倒计时
+                    //AssetBundle此时没有Asset在使用了 也没被其他AssetBundle依赖 创建卸载任务 开始卸载倒计时
                     UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName);
                     taskExcutor.AddTask(task);
                     Debug.Log("创建了卸载AB的任务：" + task.Name);
@@ -494,9 +511,9 @@ namespace CatAsset
                 AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
                 abInfo.UsedAssets.Remove(assetInfo.ManifestInfo.AssetName);
 
-                if (abInfo.UsedAssets.Count == 0)
+                if (abInfo.RefCount == 0 && abInfo.UsedAssets.Count == 0)
                 {
-                    //AssetBundle此时没有Asset在使用了 创建卸载任务 开始卸载倒计时
+                    //AssetBundle此时没有Asset在使用了 也没被其他AssetBundle依赖 创建卸载任务 开始卸载倒计时
                     UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName);
                     taskExcutor.AddTask(task);
                     Debug.Log("创建了卸载AB的任务：" + task.Name);

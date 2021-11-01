@@ -11,6 +11,8 @@ namespace CatAsset
     {
         private string loadPath;
         private HashSet<string> usedAsset;
+        private HashSet<string> dependencyAssetBundles;
+
 
         /// <summary>
         /// AssetBundle清单信息
@@ -27,6 +29,10 @@ namespace CatAsset
         /// </summary>
         public bool InReadWrite;
 
+        /// <summary>
+        /// 引用计数（只记录AssetBundle的引用）
+        /// </summary>
+        public int RefCount;
 
         /// <summary>
         /// 加载地址
@@ -63,6 +69,21 @@ namespace CatAsset
                 }
 
                 return usedAsset;
+            }
+        }
+
+        /// <summary>
+        /// 此AssetBundle所依赖的AssetBundle
+        /// </summary>
+        public HashSet<string> DependencyAssetBundles
+        {
+            get
+            {
+                if (dependencyAssetBundles == null)
+                {
+                    dependencyAssetBundles = new HashSet<string>();
+                }
+                return dependencyAssetBundles;
             }
         }
     }

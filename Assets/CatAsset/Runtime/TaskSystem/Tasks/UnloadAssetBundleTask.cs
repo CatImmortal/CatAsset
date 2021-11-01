@@ -69,6 +69,21 @@ namespace CatAsset
                 }
             }
 
+            //减少依赖的AssetBundle的引用计数
+
+            foreach (string abName in abInfo.DependencyAssetBundles)
+            {
+               AssetBundleRuntimeInfo dependencyABInfo = CatAssetManager.GetAssetBundleRuntimeInfo(abName);
+                dependencyABInfo.RefCount--;
+                if (dependencyABInfo.RefCount == 0 && dependencyABInfo.UsedAssets.Count == 0)
+                {
+                    //卸载依赖的AssetBundle
+                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(owner, dependencyABInfo.ManifestInfo.AssetBundleName);
+                    owner.AddTask(task);
+                    Debug.Log("创建了卸载AB的任务：" + task.Name);
+                }
+            }
+
             //卸载AssetBundle
             abInfo.AssetBundle.Unload(true);
             Debug.Log("已卸载AssetBundle:" + Name);

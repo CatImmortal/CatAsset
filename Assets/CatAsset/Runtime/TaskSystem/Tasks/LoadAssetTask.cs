@@ -57,6 +57,7 @@ namespace CatAsset
         public LoadAssetTask(TaskExcutor owner, string name, Action<bool, Object> onFinished) : base(owner, name)
         {
             assetInfo = CatAssetManager.GetAssetRuntimeInfo(name);
+            abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(assetInfo.AssetBundleName);
             this.onFinished = onFinished;
             onDependencyLoaded = OnDependencyLoaded;
             onAssetBundleLoaded = OnAssetBundleLoaded;
@@ -109,6 +110,17 @@ namespace CatAsset
         {
             loadedDependencyCount++;
 
+            if (success)
+            {
+                //记录依赖的AssetBundle 增加其引用计数
+               AssetBundleRuntimeInfo dependencyABInfo = CatAssetManager.GetAssetBundleRuntimeInfo(asset);
+                if (!abInfo.DependencyAssetBundles.Contains(dependencyABInfo.ManifestInfo.AssetBundleName))
+                {
+                    abInfo.DependencyAssetBundles.Add(dependencyABInfo.ManifestInfo.AssetBundleName);
+                    dependencyABInfo.RefCount++;
+                }
+            }
+
             if (loadedDependencyCount != assetInfo.ManifestInfo.Dependencies.Length)
             {
                 //依赖资源未全部加载完毕
@@ -124,7 +136,6 @@ namespace CatAsset
         /// </summary>
         private void TryLoadAssetBundle()
         {
-            abInfo = CatAssetManager.GetAssetBundleRuntimeInfo(assetInfo.AssetBundleName);
             if (abInfo.AssetBundle == null)
             {
                 //需要加载AssetBundle
