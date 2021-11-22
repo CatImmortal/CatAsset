@@ -1,4 +1,4 @@
-﻿using CatJson;
+using CatJson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,12 +21,8 @@ namespace CatAsset
         /// <summary>
         /// 版本信息检查完毕回调
         /// </summary>
-        private Action<int, long, string> onVersionChecked;
+        private Action<int, long> onVersionChecked;
 
-        /// <summary>
-        /// 检查的资源组
-        /// </summary>
-        private string checkGroup;
 
         //三方资源清单的检查完毕标记
         private bool readOnlyChecked;
@@ -36,11 +32,10 @@ namespace CatAsset
         /// <summary>
         /// 检查资源版本
         /// </summary>
-        public void CheckVersion(Action<int, long, string> onVersionChecked, string checkGroup)
+        public void CheckVersion(Action<int, long> onVersionChecked)
         {
 
             this.onVersionChecked = onVersionChecked;
-            this.checkGroup = checkGroup;
 
             //进行只读区 读写区 远端三方的资源清单检查
             string readOnlyManifestPath = Util.GetReadOnlyPath(Util.ManifestFileName);
@@ -71,14 +66,9 @@ namespace CatAsset
 
             CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
-            foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
+            foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                if (!string.IsNullOrEmpty(checkGroup) && item.Group != checkGroup)
-                {
-                    continue;
-                }
-
-                CheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
+                CheckInfo checkInfo = GetCheckInfo(item.BundleName);
                 checkInfo.ReadOnlyInfo = item;
             }
 
@@ -100,16 +90,11 @@ namespace CatAsset
 
             CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
-            foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
+            foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                if (!string.IsNullOrEmpty(checkGroup) && item.Group != checkGroup)
-                {
-                    continue;
-                }
-
-                CheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
+                CheckInfo checkInfo = GetCheckInfo(item.BundleName);
                 checkInfo.ReadWriteInfo = item;
-                CatAssetUpdater.readWriteManifestInfoDict[item.AssetBundleName] = item;
+                CatAssetUpdater.readWriteManifestInfoDict[item.BundleName] = item;
             }
 
             readWriteCheked = true;
@@ -129,20 +114,16 @@ namespace CatAsset
 
             CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
-            foreach (AssetBundleManifestInfo item in manifest.AssetBundles)
+            foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                if (!string.IsNullOrEmpty(checkGroup) && item.Group != checkGroup)
-                {
-                    continue;
-                }
-
-                CheckInfo checkInfo = GetCheckInfo(item.AssetBundleName);
+                CheckInfo checkInfo = GetCheckInfo(item.BundleName);
                 checkInfo.RemoteInfo = item;
             }
 
             if (CatAssetManager.RunMode == RunMode.UpdatableWhilePlaying)
             {
-                CatAssetManager.AddRemoteAssetManifestInfo(manifest);
+                //边玩边下模式 需要初始化远端资源清单信息
+                CatAssetManager.InitRemoteManifestInfo(manifest);
             }
 
             remoteChecked = true;
@@ -164,40 +145,7 @@ namespace CatAsset
             return checkInfo;
         }
 
-        /// <summary>
-        /// 清理被检查的资源组信息
-        /// </summary>
-        private void ClearCheckGroupInfo()
-        {
-            //清理被检查的资源组的已有信息
-            if (string.IsNullOrEmpty(checkGroup))
-            {
-                CatAssetManager.groupInfoDict.Clear();
-            }
-            else
-            {
-                if (CatAssetManager.groupInfoDict.ContainsKey(checkGroup))
-                {
-                    CatAssetManager.groupInfoDict.Remove(checkGroup);
-                }
-            }
-        }
 
-        /// <summary>
-        /// 添加资源更新器到CatAssetUpdater中
-        /// </summary>
-        private void AddUpdater(Updater updater)
-        {
-            //有指定资源组就把Updater放进字典里 没指定就放到字段里
-            if (string.IsNullOrEmpty(checkGroup))
-            {
-                CatAssetUpdater.updater = updater;
-            }
-            else
-            {
-                CatAssetUpdater.groupUpdaterDict[checkGroup] = updater;
-            }
-        }
 
         /// <summary>
         /// 刷新资源检查信息
@@ -209,10 +157,15 @@ namespace CatAsset
                 return;
             }
 
-            ClearCheckGroupInfo();
+            //清理旧的资源组与更新器信息
+            CatAssetManager.groupInfoDict.Clear();
+            CatAssetUpdater.groupUpdaterDict.Clear();
 
-            Updater updater = null;
+            //需要更新的所有资源的数量与长度
+            int totalCount = 0;
+            long totalLength = 0;
             
+
             //是否需要生成读写区资源清单
             bool needGenerateManifest = false;
 
@@ -223,26 +176,27 @@ namespace CatAsset
 
                 switch (checkInfo.State)
                 {
-                    case CheckState.NeedUpdate:
+                    case CheckStatus.NeedUpdate:
                         //需要更新
-                        if (updater == null)
-                        {
-                            updater = new Updater();
-                            updater.UpdateGroup = checkGroup;
-                        }
-                        updater.UpdateList.Add(checkInfo.RemoteInfo);
+
+                        Updater updater = CatAssetUpdater.GetOrCreateGroupUpdater(checkInfo.RemoteInfo.Group);
+                        updater.UpdateBundles.Add(item.Key,checkInfo.RemoteInfo);
                         updater.TotalCount++;
                         updater.TotalLength += checkInfo.RemoteInfo.Length;
+
+                        totalCount++;
+                        totalLength += checkInfo.RemoteInfo.Length;
+
                         break;
 
-                    case CheckState.InReadWrite:
+                    case CheckStatus.InReadWrite:
                         //最新版本已存放在读写区
-                        CatAssetManager.AddRuntimeInfo(checkInfo.ReadWriteInfo, true);
+                        CatAssetManager.InitRuntimeInfo(checkInfo.ReadWriteInfo, true);
                         break;
 
-                    case CheckState.InReadOnly:
+                    case CheckStatus.InReadOnly:
                         //最新版本已存放在只读区
-                        CatAssetManager.AddRuntimeInfo(checkInfo.ReadOnlyInfo, false);
+                        CatAssetManager.InitRuntimeInfo(checkInfo.ReadOnlyInfo, false);
                         break;
                 }
 
@@ -266,19 +220,8 @@ namespace CatAsset
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
 
-            int totalCount = 0;
-            long totalLength = 0;
-
-            if (updater != null)
-            {
-                totalCount = updater.TotalCount;
-                totalLength = updater.TotalLength;
-
-                AddUpdater(updater);
-            }
-
             //调用版本信息检查完毕回调
-            onVersionChecked?.Invoke(totalCount, totalLength, checkGroup);
+            onVersionChecked?.Invoke(totalCount, totalLength);
 
         }
 

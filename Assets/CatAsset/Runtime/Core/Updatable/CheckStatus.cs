@@ -1,13 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 namespace CatAsset
 {
     /// <summary>
     /// 资源更新检查状态
     /// </summary>
-    public enum CheckState
+    public enum CheckStatus
     {
         None,
 
@@ -32,4 +29,3 @@ namespace CatAsset
         Disuse,
     }
 }
-

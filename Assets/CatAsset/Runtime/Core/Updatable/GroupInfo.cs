@@ -15,33 +15,33 @@ namespace CatAsset
         public string GroupName;
 
         /// <summary>
-        /// 此资源组的所有远端AssetBundle名
+        /// 此资源组的所有远端Bundle名
         /// </summary>
-        public List<string> remoteAssetBunldes = new List<string>();
+        public List<string> remoteBunldes = new List<string>();
 
         /// <summary>
-        /// 此资源组的所有远端AssetBundle数量
+        /// 此资源组的所有远端Bundle数量
         /// </summary>
         public int remoteCount;
 
         /// <summary>
-        /// 此资源组的所有远端AssetBundle长度
+        /// 此资源组的所有远端Bundle长度
         /// </summary>
         public long remoteLength;
 
 
         /// <summary>
-        /// 此资源组的所有本地AssetBundle名
+        /// 此资源组的所有本地Bundle名
         /// </summary>
-        public List<string> localAssetBundles = new List<string>();
+        public List<string> localBundles = new List<string>();
 
         /// <summary>
-        /// 此资源组的所有本地AssetBundle数量
+        /// 此资源组的所有本地Bundle数量
         /// </summary>
         public int localCount;
 
         /// <summary>
-        /// 此资源组的所有本地AssetBundle长度
+        /// 此资源组的所有本地Bundle长度
         /// </summary>
         public long localLength;
     }

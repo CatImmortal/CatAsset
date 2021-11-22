@@ -10,9 +10,9 @@ namespace CatAsset
     public class AssetRuntimeInfo
     {
         /// <summary>
-        /// 所属的AssetBundle的名称
+        /// 所属的Bundle的名称
         /// </summary>
-        public string AssetBundleName;
+        public string BundleName;
 
         /// <summary>
         /// Asset清单信息

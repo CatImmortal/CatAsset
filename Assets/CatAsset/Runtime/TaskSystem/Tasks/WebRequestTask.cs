@@ -56,12 +56,12 @@ namespace CatAsset
         {
             if (!op.isDone)
             {
-                State = TaskState.Executing;
+                TaskState = TaskStatus.Executing;
                 return;
             }
 
             //请求完毕
-            State = TaskState.Finished;
+            TaskState = TaskStatus.Finished;
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {

@@ -11,7 +11,6 @@ namespace CatAsset.Editor
     {
         private bool isInitUpdateInfoView;
         private static Dictionary<string, Updater> groupUpdaterDict;
-        private static FieldInfo updaterFi;
 
         /// <summary>
         /// 初始化资源更新信息界面
@@ -21,7 +20,6 @@ namespace CatAsset.Editor
             isInitUpdateInfoView = true;
 
             groupUpdaterDict = typeof(CatAssetUpdater).GetField("groupUpdaterDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, Updater>;
-            updaterFi = typeof(CatAssetUpdater).GetField("updater", BindingFlags.NonPublic | BindingFlags.Static);
         }
 
         /// <summary>
@@ -41,14 +39,8 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("更新资源长度");
                 EditorGUILayout.LabelField("已更新资源数");
                 EditorGUILayout.LabelField("已更新资源长度");
-                EditorGUILayout.LabelField("是否暂停中");
+                EditorGUILayout.LabelField("状态");
             }
-            object value = updaterFi.GetValue(null);
-            if (value != null)
-            {
-                DrawUpdater((Updater)value);
-            }
-
             foreach (KeyValuePair<string, Updater> item in groupUpdaterDict)
             {
                 DrawUpdater(item.Value);
@@ -62,31 +54,13 @@ namespace CatAsset.Editor
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (string.IsNullOrEmpty(updater.UpdateGroup))
-                {
-                    EditorGUILayout.LabelField("无");
-                }
-                else
-                {
-                    EditorGUILayout.LabelField(updater.UpdateGroup);
-                }
+                EditorGUILayout.LabelField(updater.UpdateGroup);
 
                 EditorGUILayout.LabelField(updater.TotalCount.ToString());
-                //if (GUILayout.Button("Log"))
-                //{
-                //    string log = string.Empty;
-                //    foreach (AssetBundleManifestInfo item in updater.UpdateList)
-                //    {
-                //        log += item.AssetBundleName + "\n";
-                //    }
-
-                //    Debug.Log(log);
-                //}
-
                 EditorGUILayout.LabelField(GetByteDesc(updater.TotalLength));
                 EditorGUILayout.LabelField(updater.UpdatedCount.ToString());
                 EditorGUILayout.LabelField(GetByteDesc(updater.UpdatedLength));
-                EditorGUILayout.LabelField(updater.Paused.ToString());
+                EditorGUILayout.LabelField(updater.state.ToString());
             }
         }
     }

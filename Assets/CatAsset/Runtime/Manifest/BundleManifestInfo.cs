@@ -5,14 +5,14 @@ using UnityEngine;
 namespace CatAsset
 {
     /// <summary>
-    /// AssetBundle清单信息
+    /// Bundle清单信息
     /// </summary>
-    public class AssetBundleManifestInfo
+    public class BundleManifestInfo
     {
         /// <summary>
-        /// AssetBundle名
+        /// Bundle名
         /// </summary>
-        public string AssetBundleName;
+        public string BundleName;
 
         /// <summary>
         /// 文件长度
@@ -25,7 +25,7 @@ namespace CatAsset
         public Hash128 Hash;
 
         /// <summary>
-        /// 是否为场景的AssetBundle包
+        /// 是否为场景的Bundle
         /// </summary>
         public bool IsScene;
 
@@ -39,9 +39,9 @@ namespace CatAsset
         /// </summary>
         public AssetManifestInfo[] Assets;
 
-        public bool Equals(AssetBundleManifestInfo other)
+        public bool Equals(BundleManifestInfo other)
         {
-            return AssetBundleName == other.AssetBundleName && Length == other.Length && Hash == other.Hash && Group == other.Group;
+            return BundleName == other.BundleName && Length == other.Length && Hash == other.Hash && Group == other.Group;
         }
     }
 }

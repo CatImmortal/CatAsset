@@ -51,7 +51,7 @@ namespace CatAsset
 
         public override void Execute()
         {
-            State = TaskState.Waiting;
+            TaskState = TaskStatus.Waiting;
             foreach (string assetName in assetNames)
             {
                 CatAssetManager.LoadAsset(assetName, onAssetLoaded);
@@ -72,18 +72,19 @@ namespace CatAsset
             if (loadedAssetCount != assetNames.Count)
             {
                 //还没有全部加载完毕
-                State = TaskState.Waiting;
+                TaskState = TaskStatus.Waiting;
                 return;
             }
 
             //全部加载完毕了
-            State = TaskState.Finished;
+            TaskState = TaskStatus.Finished;
 
+            //要保证资源顺序和传入的名字顺序一致
             List<Object> loadedAssets = new List<Object>(assetNames.Count);
             for (int i = 0; i < assetNames.Count; i++)
             {
                 string assetName = assetNames[i];
-                AssetRuntimeInfo assetInfo = CatAssetManager.GetAssetRuntimeInfo(assetName);
+                CatAssetManager.assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo);
                 loadedAssets.Add(assetInfo.Asset);
             }
 

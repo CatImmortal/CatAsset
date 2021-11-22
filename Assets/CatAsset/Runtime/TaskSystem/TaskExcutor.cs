@@ -48,9 +48,9 @@ namespace CatAsset
         /// <summary>
         /// 获取指定任务的状态
         /// </summary>
-        public TaskState GetTaskState(string name)
+        public TaskStatus GetTaskState(string name)
         {
-            return taskDict[name].State;
+            return taskDict[name].TaskState;
         }
 
         /// <summary>
@@ -113,19 +113,19 @@ namespace CatAsset
 
                     BaseTask task = item.Value;
 
-                    if (task.State == TaskState.Free)
+                    if (task.TaskState == TaskStatus.Free)
                     {
                         task.Execute();
                     }
 
                     task.Update();
 
-                    switch (task.State)
+                    switch (task.TaskState)
                     {
-                        case TaskState.Executing:
+                        case TaskStatus.Executing:
                             executeCount++;
                             break;
-                        case TaskState.Finished:
+                        case TaskStatus.Finished:
                             executeCount++;
                             needRemoveTasks.Add(task.Name);
                             break;

@@ -5,24 +5,23 @@ using UnityEngine;
 namespace CatAsset
 {
     /// <summary>
-    /// AssetBundle运行时信息
+    /// Bundle运行时信息
     /// </summary>
-    public class AssetBundleRuntimeInfo
+    public class BundleRuntimeInfo
     {
         private string loadPath;
         private HashSet<string> usedAsset;
-        private HashSet<string> dependencyAssetBundles;
-
-
-        /// <summary>
-        /// AssetBundle清单信息
-        /// </summary>
-        public AssetBundleManifestInfo ManifestInfo;
+        private HashSet<string> dependencyBundles;
 
         /// <summary>
-        /// 已加载的AssetBundle实例
+        /// Bundle清单信息
         /// </summary>
-        public AssetBundle AssetBundle;
+        public BundleManifestInfo ManifestInfo;
+
+        /// <summary>
+        /// Bundle实例
+        /// </summary>
+        public AssetBundle Bundle;
 
         /// <summary>
         /// 是否位于读写区
@@ -30,9 +29,9 @@ namespace CatAsset
         public bool InReadWrite;
 
         /// <summary>
-        /// 引用计数（只记录AssetBundle的引用）
+        /// 依赖计数（表示有多少个Bundle依赖此Bundle，每个依赖Bundle只计数1次）
         /// </summary>
-        public int RefCount;
+        public int DependencyCount;
 
         /// <summary>
         /// 加载地址
@@ -45,11 +44,11 @@ namespace CatAsset
                 {
                     if (InReadWrite)
                     {
-                        loadPath = Util.GetReadWritePath(ManifestInfo.AssetBundleName);
+                        loadPath = Util.GetReadWritePath(ManifestInfo.BundleName);
                     }
                     else
                     {
-                        loadPath = Util.GetReadOnlyPath(ManifestInfo.AssetBundleName);
+                        loadPath = Util.GetReadOnlyPath(ManifestInfo.BundleName);
                     }
                 }
                 return loadPath;
@@ -73,17 +72,17 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 此AssetBundle所依赖的AssetBundle
+        /// 此Bundle所依赖的Bundle（在卸载Bundle时要把依赖的Bundle的依赖计数-1）
         /// </summary>
-        public HashSet<string> DependencyAssetBundles
+        public HashSet<string> DependencyBundles
         {
             get
             {
-                if (dependencyAssetBundles == null)
+                if (dependencyBundles == null)
                 {
-                    dependencyAssetBundles = new HashSet<string>();
+                    dependencyBundles = new HashSet<string>();
                 }
-                return dependencyAssetBundles;
+                return dependencyBundles;
             }
         }
     }

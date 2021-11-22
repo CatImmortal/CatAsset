@@ -16,7 +16,7 @@ namespace CatAsset
         /// <summary>
         /// AssetBundle清单信息
         /// </summary>
-        private AssetBundleManifestInfo abInfo;
+        private BundleManifestInfo bundleInfo;
 
         /// <summary>
         /// 发起此下载任务的更新器
@@ -38,7 +38,7 @@ namespace CatAsset
         /// </summary>
         private string localTempFilePath;
 
-        private Action<bool, string , AssetBundleManifestInfo> onFinished;
+        private Action<bool,BundleManifestInfo> onFinished;
 
         internal override Delegate FinishedCallback
         {
@@ -49,7 +49,7 @@ namespace CatAsset
 
             set
             {
-                onFinished = (Action<bool, string, AssetBundleManifestInfo>)value;
+                onFinished = (Action<bool, BundleManifestInfo>)value;
             }
         }
 
@@ -66,9 +66,9 @@ namespace CatAsset
             }
         }
 
-        public DownloadFileTask(TaskExcutor owner, string name,AssetBundleManifestInfo abInfo,Updater updater, string localFilePath, string downloadUri, Action<bool, string, AssetBundleManifestInfo> onFinished) : base(owner, name)
+        public DownloadFileTask(TaskExcutor owner, string name,BundleManifestInfo bundleInfo,Updater updater, string localFilePath, string downloadUri, Action<bool,BundleManifestInfo> onFinished) : base(owner, name)
         {
-            this.abInfo = abInfo;
+            this.bundleInfo = bundleInfo;
             this.updater = updater;
             this.localFilePath = localFilePath;
             this.downloadUri = downloadUri;
@@ -78,9 +78,9 @@ namespace CatAsset
         public override void Execute()
         {
 
-            if (updater.Paused)
+            if (updater.state == UpdaterStatus.Paused)
             {
-                //处理下载暂停
+                //处理下载暂停 暂停只对还未开始执行的下载任务有效
                 return;
             }
 
@@ -116,30 +116,35 @@ namespace CatAsset
             if (op == null)
             {
                 //被暂停了
-                State = TaskState.Free;
+                TaskState = TaskStatus.Free;
                 return;
             }
 
             if (!op.webRequest.isDone)
             {
                 //下载中
-                State = TaskState.Executing;
+                TaskState = TaskStatus.Executing;
                 return;
             }
 
             //下载完毕
-            State = TaskState.Finished;
+            TaskState = TaskStatus.Finished;
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
                 //下载失败
-                Debug.LogError("下载失败：" + Name);
-                onFinished?.Invoke(false, op.webRequest.error , abInfo);
+                Debug.LogError($"下载失败：{Name},错误信息：{op.webRequest.error}");
+                onFinished?.Invoke(false , bundleInfo);
                 return;
             }
 
             Debug.Log("下载成功：" + Name);
+
             //下载成功
+
+            //TODO:文件校验
+
+
             //将临时下载文件移动到正式文件
             if (File.Exists(localFilePath))
             {
@@ -148,7 +153,7 @@ namespace CatAsset
 
             File.Move(localTempFilePath, localFilePath);
 
-            onFinished?.Invoke(true, null, abInfo);
+            onFinished?.Invoke(true,bundleInfo);
 
 
 

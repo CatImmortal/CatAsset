@@ -59,16 +59,14 @@ namespace CatAsset
             timer += Time.deltaTime;
             if (timer >= delay)
             {
-                State = TaskState.Finished;
+                TaskState = TaskStatus.Finished;
 
                 Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(Name, typeof(Object));
                 onFinished?.Invoke(true, asset);
-
-                
                 return;
             }
 
-            State = TaskState.Waiting;
+            TaskState = TaskStatus.Waiting;
         }
 
     

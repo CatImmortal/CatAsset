@@ -106,25 +106,25 @@ namespace CatAsset.Editor
             manifest.GameVersion = Application.version;
             manifest.ManifestVersion = manifestVersion;
 
-            manifest.AssetBundles = new AssetBundleManifestInfo[abBuildList.Count];
+            manifest.Bundles = new BundleManifestInfo[abBuildList.Count];
             for (int i = 0; i < abBuildList.Count; i++)
             {
                 AssetBundleBuild abBulid = abBuildList[i];
 
-                AssetBundleManifestInfo abInfo = new AssetBundleManifestInfo();
-                manifest.AssetBundles[i] = abInfo;
+                BundleManifestInfo abInfo = new BundleManifestInfo();
+                manifest.Bundles[i] = abInfo;
 
-                abInfo.AssetBundleName = abBulid.assetBundleName;
+                abInfo.BundleName = abBulid.assetBundleName;
 
-                string fullPath = Path.Combine(outputPath, abInfo.AssetBundleName);
+                string fullPath = Path.Combine(outputPath, abInfo.BundleName);
                 FileInfo fi = new FileInfo(fullPath);
 
                 abInfo.Length = fi.Length;
-                abInfo.Hash = unityManifest.GetAssetBundleHash(abInfo.AssetBundleName);
+                abInfo.Hash = unityManifest.GetAssetBundleHash(abInfo.BundleName);
 
                 abInfo.IsScene = abBulid.assetNames[0].EndsWith(".unity");  //判断是否为场景ab
 
-                abInfo.Group = AssetCollector.GetAssetBundleGroup(abInfo.AssetBundleName);  //标记资源组
+                abInfo.Group = AssetCollector.GetAssetBundleGroup(abInfo.BundleName);  //标记资源组
 
                 abInfo.Assets = new AssetManifestInfo[abBulid.assetNames.Length];
                 for (int j = 0; j < abBulid.assetNames.Length; j++)
@@ -214,15 +214,15 @@ namespace CatAsset.Editor
             if (copyGroupSet != null)
             {
                 //根据要复制的资源组修改资源清单
-                List<AssetBundleManifestInfo> abInfoList = new List<AssetBundleManifestInfo>();
-                foreach (AssetBundleManifestInfo abInfo in manifest.AssetBundles)
+                List<BundleManifestInfo> abInfoList = new List<BundleManifestInfo>();
+                foreach (BundleManifestInfo abInfo in manifest.Bundles)
                 {
                     if (copyGroupSet.Contains(abInfo.Group))
                     {
                         abInfoList.Add(abInfo);
                     }
                 }
-                manifest.AssetBundles = abInfoList.ToArray();
+                manifest.Bundles = abInfoList.ToArray();
             }
 
             //生成仅包含被复制的资源组的资源清单文件到StreamingAssets下

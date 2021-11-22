@@ -1,4 +1,4 @@
-﻿using CatAsset;
+using CatAsset;
 using CatJson;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ public class UpdatableWhilePlayingExample : MonoBehaviour
         //然后打开读写区目录删除所有文件
 
         //边玩边下模式
-        //此模式会在加载资源时，如果资源ab不在本地但是在远端存在，会从远端下载(需要至少checkVersion过一次，但checkGroup不必是被加载的资源的group)
+        //此模式会在加载资源时，如果资源ab不在本地但是在远端存在，会从远端下载(需要checkVersion过)
         
         //1.先请求最新的资源版本号
         //2.根据平台，整包版本和资源版本设置资源更新uri的前缀
@@ -50,8 +50,8 @@ public class UpdatableWhilePlayingExample : MonoBehaviour
             Debug.Log(CatAssetManager.UpdateUriPrefix);
             Debug.Log("读取远端最新版本号成功");
 
-            CatAssetManager.CheckVersion(OnVersionChecked, "Base");
-            CatAssetManager.CheckVersion(OnVersionChecked, "Chapter1");  //检查过的资源组的资源 才能进行边玩边下
+
+            CatAssetManager.CheckVersion(OnVersionChecked);  //检查过资源清单 才能进行边玩边下
         };
     }
 
@@ -77,29 +77,28 @@ public class UpdatableWhilePlayingExample : MonoBehaviour
                 });
             }
 
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+
+            }
+
         }
 
 
     }
 
-    private void OnVersionChecked(int count, long length, string group)
+    private void OnVersionChecked(int count, long length)
     {
-        if (group == null)
-        {
-            group = "所有";
-        }
+
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("需要更新资源数：" + count);
         sb.AppendLine("总大小：" + length);
-        sb.AppendLine("资源组:" + group);
+
 
         Debug.Log(sb.ToString());
         sb.Clear();
 
-        if (group == "chapter1")
-        {
-            inited = true;
-        }
-        
+        inited = true;
+
     }
 }

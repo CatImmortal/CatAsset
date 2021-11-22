@@ -1,11 +1,11 @@
 {
 	"GameVersion":"0.1",
 	"ManifestVersion":1,
-	"AssetBundles":[
+	"Bundles":[
 		{
-			"AssetBundleName":"res_base_materials.bundle",
+			"BundleName":"res_base_materials.bundle",
 			"Length":41938,
-			"Hash":"69f26f863d4ad17965b773ced8fcb6ec",
+			"Hash":"fc6cb98f44c9080fb5c408db7caf0f7d",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -16,9 +16,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_base_prefabs.bundle",
+			"BundleName":"res_base_prefabs.bundle",
 			"Length":43893,
-			"Hash":"35393654bf6ef058f2a68368162c61fc",
+			"Hash":"cc874d51953aa0963793bb1b2c60399d",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -29,9 +29,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_base_textures.bundle",
+			"BundleName":"res_base_textures.bundle",
 			"Length":4029,
-			"Hash":"8e7bc0ab908ea6ce0e579e4592f96db9",
+			"Hash":"58b43f9e2af3ca2e51408f942ba23ad6",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -42,9 +42,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter1_materials.bundle",
+			"BundleName":"res_chapter1_materials.bundle",
 			"Length":41961,
-			"Hash":"ffa31ce6156fbb6ce8c7079c693ba969",
+			"Hash":"0705e00caea50ed86f93ed69acd08789",
 			"Group":"Chapter1",
 			"Assets":[
 				{
@@ -55,9 +55,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter1_prefabs.bundle",
+			"BundleName":"res_chapter1_prefabs.bundle",
 			"Length":43876,
-			"Hash":"3af94bd5dc6832958a318fb7e94a0fdf",
+			"Hash":"fa6e3a82cda80fdefa71ab1b7d7e8855",
 			"Group":"Chapter1",
 			"Assets":[
 				{
@@ -68,9 +68,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter1_textures.bundle",
+			"BundleName":"res_chapter1_textures.bundle",
 			"Length":4033,
-			"Hash":"f43bd5e7e70b468d8e96fced9c009208",
+			"Hash":"d57691c3d98ec09f2062e810a93ebee3",
 			"Group":"Chapter1",
 			"Assets":[
 				{
@@ -81,9 +81,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter2_materials.bundle",
+			"BundleName":"res_chapter2_materials.bundle",
 			"Length":41846,
-			"Hash":"0c33425e78429395fc00ec4af6ce57e7",
+			"Hash":"e1dcb68766979c55ba2f2b293e681c2a",
 			"Group":"Chapter2",
 			"Assets":[
 				{
@@ -94,9 +94,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter2_prefabs.bundle",
+			"BundleName":"res_chapter2_prefabs.bundle",
 			"Length":43919,
-			"Hash":"fa74373890027265d723d9afbbf2d20d",
+			"Hash":"244f7d8eaff31a043113cf28e6fe3a9c",
 			"Group":"Chapter2",
 			"Assets":[
 				{
@@ -107,9 +107,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_chapter2_textures.bundle",
+			"BundleName":"res_chapter2_textures.bundle",
 			"Length":4034,
-			"Hash":"c58d3dae6c721784592207eb0d78faeb",
+			"Hash":"89a1000fa4f9bbea0aab52d8916e5027",
 			"Group":"Chapter2",
 			"Assets":[
 				{

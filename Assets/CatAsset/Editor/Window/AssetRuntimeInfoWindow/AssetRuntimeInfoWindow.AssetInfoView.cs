@@ -10,7 +10,7 @@ namespace CatAsset.Editor
     {
         private bool isInitAssetInfoView;
 
-        private Dictionary<string, AssetBundleRuntimeInfo> assetBundleInfoDict;
+        private Dictionary<string, BundleRuntimeInfo> bundleInfoDict;
         private Dictionary<string, AssetRuntimeInfo> assetInfoDict;
 
         private Vector2 assetInfoScrollPos;
@@ -26,7 +26,7 @@ namespace CatAsset.Editor
         private void InitAssetInfoView()
         {
             isInitAssetInfoView = true;
-            assetBundleInfoDict = typeof(CatAssetManager).GetField("assetBundleInfoDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, AssetBundleRuntimeInfo>;
+            bundleInfoDict = typeof(CatAssetManager).GetField("bundleInfoDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, BundleRuntimeInfo>;
             assetInfoDict = typeof(CatAssetManager).GetField("assetInfoDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, AssetRuntimeInfo>;
 
         }
@@ -60,13 +60,13 @@ namespace CatAsset.Editor
             {
                 assetInfoScrollPos = sv.scrollPosition;
 
-                foreach (KeyValuePair<string, AssetBundleRuntimeInfo> item in assetBundleInfoDict)
+                foreach (KeyValuePair<string, BundleRuntimeInfo> item in bundleInfoDict)
                 {
                     string abName = item.Key;
-                    AssetBundleRuntimeInfo abInfo = item.Value;
+                    BundleRuntimeInfo bundleInfo = item.Value;
 
-                    //只绘制有Asset或者被其他AssetBundle依赖中的AssetBundle
-                    if (abInfo.UsedAssets.Count > 0 || abInfo.RefCount > 0)
+                    //只绘制有Asset在使用中或者被其他Bundle依赖中的Bundle
+                    if (bundleInfo.UsedAssets.Count > 0 || bundleInfo.DependencyCount > 0)
                     {
 
                         if (!abFoldOut.ContainsKey(abName))
@@ -89,7 +89,11 @@ namespace CatAsset.Editor
 
                         if (abFoldOut[abName] == true)
                         {
-                            foreach (AssetManifestInfo assetManifestInfo in abInfo.ManifestInfo.Assets)
+                            //Bundle引用计数
+                            EditorGUILayout.LabelField("依赖此Bundle的Bundle数量：" + bundleInfo.DependencyCount.ToString());
+                            EditorGUILayout.LabelField("此Bundle依赖的Bundle数量：" + bundleInfo.DependencyBundles.Count.ToString());
+
+                            foreach (AssetManifestInfo assetManifestInfo in bundleInfo.ManifestInfo.Assets)
                             {
                                 string assetName = assetManifestInfo.AssetName;
                                 AssetRuntimeInfo assetInfo = assetInfoDict[assetName];

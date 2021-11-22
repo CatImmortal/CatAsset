@@ -57,7 +57,7 @@ namespace CatAsset
             timer += Time.deltaTime;
             if (timer >= delay)
             {
-                State = TaskState.Finished;
+                TaskState = TaskStatus.Finished;
 
                 List<Object> loadedAssets = new List<Object>();
                 foreach (string assetName in assetNames)
@@ -70,7 +70,7 @@ namespace CatAsset
                 return;
             }
 
-            State = TaskState.Waiting;
+            TaskState = TaskStatus.Waiting;
         }
 
     }

@@ -30,7 +30,7 @@ namespace CatAsset
         /// <summary>
         /// 任务状态
         /// </summary>
-        public TaskState State;
+        public TaskStatus TaskState;
 
         /// <summary>
         /// 任务完成回调

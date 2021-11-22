@@ -1,11 +1,11 @@
 {
 	"GameVersion":"0.1",
 	"ManifestVersion":1,
-	"AssetBundles":[
+	"Bundles":[
 		{
-			"AssetBundleName":"res_base_materials.bundle",
+			"BundleName":"res_base_materials.bundle",
 			"Length":41938,
-			"Hash":"69f26f863d4ad17965b773ced8fcb6ec",
+			"Hash":"fc6cb98f44c9080fb5c408db7caf0f7d",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -16,9 +16,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_base_prefabs.bundle",
+			"BundleName":"res_base_prefabs.bundle",
 			"Length":43893,
-			"Hash":"35393654bf6ef058f2a68368162c61fc",
+			"Hash":"cc874d51953aa0963793bb1b2c60399d",
 			"Group":"Base",
 			"Assets":[
 				{
@@ -29,9 +29,9 @@
 			]
 		},
 		{
-			"AssetBundleName":"res_base_textures.bundle",
+			"BundleName":"res_base_textures.bundle",
 			"Length":4029,
-			"Hash":"8e7bc0ab908ea6ce0e579e4592f96db9",
+			"Hash":"58b43f9e2af3ca2e51408f942ba23ad6",
 			"Group":"Base",
 			"Assets":[
 				{

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -17,7 +17,7 @@ namespace CatAsset
         /// <summary>
         /// 读写区资源信息，用于生成读写区资源清单
         /// </summary>
-        internal static Dictionary<string, AssetBundleManifestInfo> readWriteManifestInfoDict = new Dictionary<string, AssetBundleManifestInfo>();
+        internal static Dictionary<string, BundleManifestInfo> readWriteManifestInfoDict = new Dictionary<string, BundleManifestInfo>();
 
         /// <summary>
         /// 资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/AssetBundleName 为下载地址
@@ -30,26 +30,21 @@ namespace CatAsset
         internal static Dictionary<string, Updater> groupUpdaterDict = new Dictionary<string, Updater>();
 
         /// <summary>
-        /// 资源更新器（不指定资源组的，更新所有资源）
-        /// </summary>
-        internal static Updater updater;
-
-        /// <summary>
         /// 生成读写区资源清单
         /// </summary>
         internal static void GenerateReadWriteManifest()
         {
             CatAssetManifest manifest = new CatAssetManifest();
             manifest.GameVersion = Application.version;
-            AssetBundleManifestInfo[] abInfos = new AssetBundleManifestInfo[readWriteManifestInfoDict.Count];
+            BundleManifestInfo[] bundleInfos = new BundleManifestInfo[readWriteManifestInfoDict.Count];
             int index = 0;
-            foreach (KeyValuePair<string, AssetBundleManifestInfo> item in readWriteManifestInfoDict)
+            foreach (KeyValuePair<string, BundleManifestInfo> item in readWriteManifestInfoDict)
             {
-                abInfos[index] = item.Value;
+                bundleInfos[index] = item.Value;
                 index++;
             }
 
-            manifest.AssetBundles = abInfos;
+            manifest.Bundles = bundleInfos;
 
             //写入清单文件json
             string json = JsonParser.ToJson(manifest);
@@ -68,42 +63,46 @@ namespace CatAsset
         /// <summary>
         /// 检查资源版本
         /// </summary>
-        internal static void CheckVersion(Action<int, long,string> onVersionChecked,string checkGroup)
+        internal static void CheckVersion(Action<int, long> onVersionChecked)
         {
             Checker checker = new Checker();
-            checker.CheckVersion(onVersionChecked, checkGroup);
+            checker.CheckVersion(onVersionChecked);
         }
 
+        /// <summary>
+        /// 获取指定资源组的更新器，若不存在则创建
+        /// </summary>
+        internal static Updater GetOrCreateGroupUpdater(string group)
+        {
+            if (!groupUpdaterDict.TryGetValue(group,out Updater updater))
+            {
+                updater = new Updater();
+                updater.UpdateGroup = group;
+                groupUpdaterDict.Add(group, updater);
+            }
+            return updater;
+        }
 
         /// <summary>
         /// 更新资源
         /// </summary>
-        internal static void UpdateAsset(Action<bool,int, long, int, long, string, string> onFileDownloaded,string updateGroup)
+        internal static void UpdateAssets(Action<bool,int, long, int, long, string, string> onUpdated,string updateGroup)
         {
-            if (string.IsNullOrEmpty(updateGroup) && updater != null)
+            if (!groupUpdaterDict.TryGetValue(updateGroup,out Updater groupUpdater))
             {
-                //更新所有资源
-                updater.UpdateAsset(onFileDownloaded);
+                Debug.LogError("更新失败，没有找到该资源组的资源更新器：" + updateGroup);
                 return;
             }
 
-            if (groupUpdaterDict.TryGetValue(updateGroup,out Updater groupUpdater))
+            //更新指定资源组
+            if (groupUpdater.state != UpdaterStatus.Free)
             {
-                //更新指定资源组
-                groupUpdater.UpdateAsset(onFileDownloaded);
-                return;
-            }
-
-            if (updateGroup == null)
-            {
-                Debug.LogError("没有找到资源更新器");
+                Debug.LogError("此资源组已在更新中：" + updateGroup);
             }
             else
             {
-                Debug.LogError("没有找到该资源组的资源更新器：" + updateGroup);
+                groupUpdater.UpdateAssets(onUpdated);
             }
-
-           
         }
 
         /// <summary>
@@ -111,14 +110,19 @@ namespace CatAsset
         /// </summary>
         internal static void PauseUpdater(bool isPause ,string group)
         {
-            if (string.IsNullOrEmpty(group))
+            if (!groupUpdaterDict.TryGetValue(group, out Updater groupUpdater))
             {
-                updater.Paused = isPause;
+                Debug.LogError("暂停失败，没有找到该资源组的资源更新器：" + group);
+                return;
             }
-            else
+
+            //暂停指定资源组的更新器
+            if (groupUpdater.state == UpdaterStatus.Runing)
             {
-                groupUpdaterDict[group].Paused = isPause;
+                groupUpdater.state = UpdaterStatus.Paused;
             }
+
+          
         }
 
     }

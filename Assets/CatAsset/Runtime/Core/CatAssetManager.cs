@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -13,24 +13,24 @@ namespace CatAsset
     public class CatAssetManager
     {
         /// <summary>
-        /// AssetBundle运行时信息字典
+        /// Bundle运行时信息字典（只有在这个字典里的才是在本地可加载的）
         /// </summary>
-        private static Dictionary<string, AssetBundleRuntimeInfo> assetBundleInfoDict = new Dictionary<string, AssetBundleRuntimeInfo>();
+        internal static Dictionary<string, BundleRuntimeInfo> bundleInfoDict = new Dictionary<string, BundleRuntimeInfo>();
 
         /// <summary>
-        /// Asset运行时信息字典
+        /// Asset运行时信息字典（只有在这个字典里的才是在本地可加载的）
         /// </summary>
-        private static Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
+        internal static Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 远端Asset名与对应AssetBundle清单信息的映射字典
+        /// 远端Asset名与Bundle清单信息字典（只有在这个字典里才是可边玩边下的）
         /// </summary>
-        private static Dictionary<string, AssetBundleManifestInfo> remoteAssetNameToAssetBundleDict = new Dictionary<string, AssetBundleManifestInfo>();
+        internal static Dictionary<string, BundleManifestInfo> remoteManifestInfoDict = new Dictionary<string, BundleManifestInfo>();
 
         /// <summary>
         /// Asset和Asset运行时信息的映射字典(不包括场景)
         /// </summary>
-        private static Dictionary<Object, AssetRuntimeInfo> assetToAssetInfo = new Dictionary<Object, AssetRuntimeInfo>();
+        internal static Dictionary<Object, AssetRuntimeInfo> assetToAssetInfoDict = new Dictionary<Object, AssetRuntimeInfo>();
 
         /// <summary>
         /// 资源组信息字典
@@ -82,7 +82,7 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/AssetBundleName 为下载地址
+        /// 资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/BundleName 为下载地址
         /// </summary>
         public static string UpdateUriPrefix
         {
@@ -97,83 +97,6 @@ namespace CatAsset
             }
         }
 
-        /// <summary>
-        /// 添加资源运行时信息
-        /// </summary>
-        internal static void AddRuntimeInfo(AssetBundleManifestInfo abInfo, bool inReadWrite)
-        {
-            AssetBundleRuntimeInfo abRuntimeInfo = new AssetBundleRuntimeInfo();
-            assetBundleInfoDict.Add(abInfo.AssetBundleName, abRuntimeInfo);
-            abRuntimeInfo.ManifestInfo = abInfo;
-            abRuntimeInfo.InReadWrite = inReadWrite;
-
-            foreach (AssetManifestInfo assetManifestInfo in abInfo.Assets)
-            {
-                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
-                assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
-                assetRuntimeInfo.ManifestInfo = assetManifestInfo;
-                assetRuntimeInfo.AssetBundleName = abInfo.AssetBundleName;
-            }
-        }
-
-        /// <summary>
-        /// 获取AssetBundle运行时信息
-        /// </summary>
-        internal static AssetBundleRuntimeInfo GetAssetBundleRuntimeInfo(string assetBundleName)
-        {
-            return assetBundleInfoDict[assetBundleName];
-        }
-
-        /// <summary>
-        /// 获取AssetBundle运行时信息
-        /// </summary>
-        internal static AssetBundleRuntimeInfo GetAssetBundleRuntimeInfo(Object asset)
-        {
-            AssetRuntimeInfo assetInfo = assetToAssetInfo[asset];
-            AssetBundleRuntimeInfo abInfo = GetAssetBundleRuntimeInfo(assetInfo.AssetBundleName);
-            return abInfo;
-        }
-
-        /// <summary>
-        /// 获取Asset运行时信息
-        /// </summary>
-        internal static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
-        {
-            return assetInfoDict[assetName];
-        }
-
-        /// <summary>
-        /// 添加远端Asset清单信息
-        /// </summary>
-        internal static void AddRemoteAssetManifestInfo(CatAssetManifest remoteManifest)
-        {
-            remoteAssetNameToAssetBundleDict.Clear();
-            foreach (AssetBundleManifestInfo abInfo in remoteManifest.AssetBundles)
-            {
-                foreach (AssetManifestInfo assetInfo in abInfo.Assets)
-                {
-                    remoteAssetNameToAssetBundleDict.Add(assetInfo.AssetName, abInfo);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 添加Asset到Asset运行时信息的映射
-        /// </summary>
-        internal static void AddAssetToRuntimeInfo(Object asset, AssetRuntimeInfo info)
-        {
-            assetToAssetInfo.Add(asset, info);
-        }
-
-        /// <summary>
-        /// 移除Asset到Asset运行时信息的映射
-        /// </summary>
-        internal static void RemoveAssetToRuntimeInfo(Object asset)
-        {
-            assetToAssetInfo.Remove(asset);
-        }
-
-
 
         /// <summary>
         /// 轮询CatAsset管理器
@@ -183,20 +106,7 @@ namespace CatAsset
             taskExcutor.Update();
         }
 
-        /// <summary>
-        /// 获取资源组信息
-        /// </summary>
-        public static GroupInfo GetGroupInfo(string group)
-        {
-            if (!groupInfoDict.TryGetValue(group,out GroupInfo groupInfo))
-            {
-                groupInfo = new GroupInfo();
-                groupInfo.GroupName = group;
-                groupInfoDict.Add(group, groupInfo);
-            }
-
-            return groupInfo;
-        }
+        #region 资源清单检查
 
         /// <summary>
         /// 检查安装包内资源清单,仅使用安装包内资源模式下专用
@@ -211,7 +121,7 @@ namespace CatAsset
 
             string path = Util.GetReadOnlyPath(Util.ManifestFileName);
 
-            WebRequestTask task = new WebRequestTask(taskExcutor, path,path, (success, error, uwr) => {
+            WebRequestTask task = new WebRequestTask(taskExcutor, path, path, (success, error, uwr) => {
                 if (!success)
                 {
                     Debug.LogError("单机模式资源清单检查失败");
@@ -219,9 +129,9 @@ namespace CatAsset
                     return;
                 }
                 CatAssetManifest manifest = CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
-                foreach (AssetBundleManifestInfo abInfo in manifest.AssetBundles)
+                foreach (BundleManifestInfo abInfo in manifest.Bundles)
                 {
-                    AddRuntimeInfo(abInfo, false);
+                    InitRuntimeInfo(abInfo, false);
                 }
                 callback?.Invoke(true);
             });
@@ -232,7 +142,7 @@ namespace CatAsset
         /// <summary>
         /// 检查资源版本,可更新模式与边玩边下模式专用
         /// </summary>
-        public static void CheckVersion(Action<int, long,string> onVersionChecked,string checkGroup = null)
+        public static void CheckVersion(Action<int, long> onVersionChecked)
         {
             if (RunMode == RunMode.PackageOnly)
             {
@@ -240,13 +150,92 @@ namespace CatAsset
                 return;
             }
 
-            CatAssetUpdater.CheckVersion(onVersionChecked,checkGroup);
+            CatAssetUpdater.CheckVersion(onVersionChecked);
         }
+
+
+        /// <summary>
+        /// 根据资源清单信息初始化运行时信息
+        /// </summary>
+        internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
+        {
+            BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
+            bundleInfoDict.Add(bundleManifestInfo.BundleName, bundleRuntimeInfo);
+            bundleRuntimeInfo.ManifestInfo = bundleManifestInfo;
+            bundleRuntimeInfo.InReadWrite = inReadWrite;
+
+            foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
+            {
+                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
+                assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
+                assetRuntimeInfo.ManifestInfo = assetManifestInfo;
+                assetRuntimeInfo.BundleName = bundleManifestInfo.BundleName;
+            }
+        }
+
+        /// <summary>
+        /// 初始化远端清单信息，边玩边下模式用到
+        /// </summary>
+        internal static void InitRemoteManifestInfo(CatAssetManifest remoteManifest)
+        {
+            remoteManifestInfoDict.Clear();
+            foreach (BundleManifestInfo abInfo in remoteManifest.Bundles)
+            {
+                foreach (AssetManifestInfo assetInfo in abInfo.Assets)
+                {
+                    remoteManifestInfoDict.Add(assetInfo.AssetName, abInfo);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 获取资源组信息，若不存在则添加
+        /// </summary>
+        internal static GroupInfo GetOrCreateGroupInfo(string group)
+        {
+            if (!groupInfoDict.TryGetValue(group, out GroupInfo groupInfo))
+            {
+                groupInfo = new GroupInfo();
+                groupInfo.GroupName = group;
+                groupInfoDict.Add(group, groupInfo);
+            }
+
+            return groupInfo;
+        }
+
+        /// <summary>
+        /// 获取指定资源组
+        /// </summary>
+        public static GroupInfo GetGroupInfo(string group)
+        {
+            if (!groupInfoDict.TryGetValue(group, out GroupInfo groupInfo))
+            {
+                Debug.LogError("不存在此资源组：" + group);
+            }
+            return groupInfo;
+        }
+
+        /// <summary>
+        /// 获取所有资源组信息
+        /// </summary>
+        public static List<GroupInfo> GetAllGroup()
+        {
+            List<GroupInfo> result = new List<GroupInfo>();
+            foreach (KeyValuePair<string, GroupInfo> item in groupInfoDict)
+            {
+                result.Add(item.Value);
+            }
+            return result;
+        }
+
+        #endregion
+
+        #region 资源更新
 
         /// <summary>
         /// 更新资源
         /// </summary>
-        public static void UpdateAsset(Action<bool,int, long, int, long, string, string> onFileDownloaded,string updateGroup = null)
+        public static void UpdateAssets(Action<bool, int, long, int, long, string, string> onUpdated, string updateGroup)
         {
             if (RunMode == RunMode.PackageOnly)
             {
@@ -254,13 +243,13 @@ namespace CatAsset
                 return;
             }
 
-            CatAssetUpdater.UpdateAsset(onFileDownloaded,updateGroup);
+            CatAssetUpdater.UpdateAssets(onUpdated, updateGroup);
         }
 
         /// <summary>
         /// 暂停更新资源
         /// </summary>
-        public static void PauseUpdateAsset(string group = null)
+        public static void PauseUpdateAsset(string group)
         {
             CatAssetUpdater.PauseUpdater(true, group);
         }
@@ -268,10 +257,33 @@ namespace CatAsset
         /// <summary>
         /// 恢复更新资源
         /// </summary>
-        public static void ResumeUpdateAsset(string group = null)
+        public static void ResumeUpdateAsset(string group)
         {
             CatAssetUpdater.PauseUpdater(false, group);
         }
+
+        /// <summary>
+        /// 获取指定组的更新器
+        /// </summary>
+        public static Updater GetUpdater(string group)
+        {
+            CatAssetUpdater.groupUpdaterDict.TryGetValue(group, out Updater result);
+            return result;
+        }
+
+        /// <summary>
+        /// 获取所有更新器
+        /// </summary>
+        /// <returns></returns>
+        public static List<Updater> GetAllUpdater()
+        {
+            List<Updater> result = new List<Updater>(CatAssetUpdater.groupUpdaterDict.Values);
+            return result;
+        }
+
+        #endregion
+
+        #region 资源加载
 
         /// <summary>
         /// 加载Asset
@@ -281,74 +293,111 @@ namespace CatAsset
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                EditorLoadAssetTask editorModeTask = new EditorLoadAssetTask(taskExcutor, assetName,loadedCallback);
+                EditorLoadAssetTask editorModeTask = new EditorLoadAssetTask(taskExcutor, assetName, loadedCallback);
                 taskExcutor.AddTask(editorModeTask);
                 return;
             }
 #endif
-
-            if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
+            //检查Asset是否已在本地准备好
+            if (!CheckAssetReady(assetName, loadedCallback))
             {
-                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetNameToAssetBundleDict.ContainsKey(assetName))
-                {
-                    //不是边玩边下模式 或者 远端没这个asset的ab文件 报错
-                    Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
-                    loadedCallback?.Invoke(false, null);
-                    return;
-                }
-
-               
-                AssetBundleManifestInfo abInfo = remoteAssetNameToAssetBundleDict[assetName];
-                if (!groupInfoDict.ContainsKey(abInfo.Group))
-                {
-                    //资源组没检查过 报错
-                    Debug.LogError("Asset边玩边下加载失败，资源组未检查：" + abInfo.Group);
-                    loadedCallback?.Invoke(false, null);
-                    return;
-                }
-
-                //开始下载
-                Updater updater = new Updater();
-                updater.UpdateList.Add(abInfo);
-                updater.TotalCount = 1;
-                updater.TotalLength = abInfo.Length;
-
-                updater.UpdateAsset((success,count, length, totalCount, totalLength, abName, group) => {
-                    if (!success)
-                    {
-                        loadedCallback?.Invoke(false, null);
-                    }
-                    LoadAsset(assetName, loadedCallback);
-                });
                 return;
             }
 
-            if (assetInfo.RefCount == 0)
-            {
-                //标记进所属的AssetBundle的 使用中Asset集合 
-                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-                abInfo.UsedAssets.Add(assetInfo.ManifestInfo.AssetName);
-            }
-
-            //增加引用计数
-            assetInfo.RefCount++;
-
-            if (assetInfo.Asset != null)
-            {
-                //已加载过 直接调用回调方法
-                foreach (string dependency in assetInfo.ManifestInfo.Dependencies)
-                {
-                    //给依赖的asset加一遍引用计数
-                    LoadAsset(dependency,null);
-                }
-                loadedCallback?.Invoke(true,assetInfo.Asset);
-                return;
-            }
-
-            //未加载 创建加载Asset的任务
+            //创建加载Asset的任务
             LoadAssetTask task = new LoadAssetTask(taskExcutor, assetName, loadedCallback);
             taskExcutor.AddTask(task);
         }
+
+
+        /// <summary>
+        /// 加载场景
+        /// </summary>
+        public static void LoadScene(string sceneName, Action<bool, Object> loadedCallback)
+        {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(sceneName, UnityEditor.SceneManagement.OpenSceneMode.Additive);
+                loadedCallback(true, null);
+                return;
+            }
+#endif
+            if (!CheckAssetReady(sceneName, loadedCallback))
+            {
+                return;
+            }
+
+            //创建加载场景的任务
+            LoadSceneTask task = new LoadSceneTask(taskExcutor, sceneName, loadedCallback);
+            taskExcutor.AddTask(task);
+        }
+
+        /// <summary>
+        /// 批量加载Asset
+        /// </summary>
+        public static void LoadAssets(List<string> assetNames, Action<List<Object>> loadedCallback)
+        {
+            if (assetNames == null || assetNames.Count == 0)
+            {
+                Debug.LogError("批量加载Asset失败，assetNames为空或数量为0");
+                return;
+            }
+
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                EditorLoadAssetsTask editorModeTask = new EditorLoadAssetsTask(taskExcutor, nameof(EditorLoadAssetsTask), assetNames, loadedCallback);
+                taskExcutor.AddTask(editorModeTask);
+                return;
+            }
+#endif
+            //创建批量加载Asset的任务
+            LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask) + Time.frameCount + UnityEngine.Random.Range(0f, 100f), assetNames, loadedCallback);
+            taskExcutor.AddTask(task);
+        }
+
+        /// <summary>
+        /// 检查Asset是否已准备好
+        /// </summary>
+        private static bool CheckAssetReady(string assetName, Action<bool, Object> loadedCallback)
+        {
+            if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
+            {
+                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteManifestInfoDict.ContainsKey(assetName))
+                {
+                    //不是边玩边下模式 或者 远端没这个asset的bundle文件
+                    //加载失败，报错
+
+                    Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
+                    return false;
+                }
+
+                //边玩边下模式 下载bundle文件
+                BundleManifestInfo bundleManifestInfo = remoteManifestInfoDict[assetName];
+
+                Updater updater = GetUpdater(bundleManifestInfo.Group);
+
+                Action<bool, int, long, int, long, string, string> onUpdated = null;
+                onUpdated = (bool success, int count, long length, int totalCount, long totalLength, string bundleName, string group) =>
+                {
+                    if (success && bundleName == bundleManifestInfo.BundleName)
+                    {
+                        updater.RemoveBundleUpdatedCallback(onUpdated);  //移除回调
+                        LoadAsset(assetName, loadedCallback);
+                    }
+                };
+
+                updater.UpdateAsset(bundleManifestInfo.BundleName,onUpdated);
+
+                return false;
+            }
+
+            return true;
+        }
+        #endregion
+
+        #region 资源卸载
 
         /// <summary>
         /// 卸载Asset
@@ -366,106 +415,13 @@ namespace CatAsset
                 return;
             }
 
-            if (!assetToAssetInfo.TryGetValue(asset, out AssetRuntimeInfo assetInfo))
+            if (!assetToAssetInfoDict.TryGetValue(asset, out AssetRuntimeInfo assetInfo))
             {
                 Debug.LogError("要卸载的Asset未加载过：" + asset.name);
                 return;
             }
 
-            if (assetInfo.RefCount == 0)
-            {
-                return;
-            }
-
-            //卸载依赖资源
-            foreach (string dependency in assetInfo.ManifestInfo.Dependencies)
-            {
-                AssetRuntimeInfo dependencyInfo = assetInfoDict[dependency];
-                UnloadAsset(dependencyInfo.Asset);
-            }
-
-            //减少Asset的引用计数
-            assetInfo.RefCount--;
-
-            if (assetInfo.RefCount == 0)
-            {
-                //Asset已经没人使用了
-                //从所属的AssetBundle的 UsedAsset 中移除
-                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-                abInfo.UsedAssets.Remove(assetInfo.ManifestInfo.AssetName);
-
-                if (abInfo.RefCount ==0 && abInfo.UsedAssets.Count == 0)
-                {
-                    //AssetBundle此时没有Asset在使用了 也没被其他AssetBundle依赖 创建卸载任务 开始卸载倒计时
-                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName);
-                    taskExcutor.AddTask(task);
-                    Debug.Log("创建了卸载AB的任务：" + task.Name);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 加载场景
-        /// </summary>
-        public static void LoadScene(string sceneName, Action<bool, Object> loadedCallback)
-        {
-#if UNITY_EDITOR
-            if (IsEditorMode)
-            {
-                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(sceneName, UnityEditor.SceneManagement.OpenSceneMode.Additive);
-                loadedCallback(true, null);
-                return;
-            }
-#endif
-
-            if (!assetInfoDict.TryGetValue(sceneName, out AssetRuntimeInfo assetInfo))
-            {
-                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteAssetNameToAssetBundleDict.ContainsKey(sceneName))
-                {
-                    //不是边玩边下模式 或者远端没这个场景的ab文件 报错
-                    Debug.LogError("场景加载失败，不在资源清单中：" + sceneName);
-                    loadedCallback?.Invoke(false, null);
-                    return;
-                }
-
-                
-                AssetBundleManifestInfo abInfo = remoteAssetNameToAssetBundleDict[sceneName];
-                if (!groupInfoDict.ContainsKey(abInfo.Group))
-                {
-                    //资源组没检查过 报错
-                    loadedCallback?.Invoke(false, null);
-                    Debug.LogError("场景边玩边下加载失败，资源组未检查：" + abInfo.Group);
-                    return;
-                }
-
-                Updater updater = new Updater();
-                updater.UpdateList.Add(abInfo);
-                updater.TotalCount = 1;
-                updater.TotalLength = abInfo.Length;
-
-                updater.UpdateAsset((success, count, length, totalCount, totalLength, abName, group) => {
-                    if (!success)
-                    {
-                        loadedCallback?.Invoke(false, null);
-                    }
-                    LoadScene(sceneName, loadedCallback);
-                });
-                return;
-            }
-
-            if (assetInfo.RefCount == 0)
-            {
-                //标记进所属的AssetBundle的 使用中Asset集合
-                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-                abInfo.UsedAssets.Add(assetInfo.ManifestInfo.AssetName);
-            }
-
-            //增加引用计数
-            assetInfo.RefCount++;
-
-            //场景资源实例不能被复用 每次加载都得创建加载场景的任务
-            LoadSceneTask task = new LoadSceneTask(taskExcutor, sceneName,loadedCallback);
-            taskExcutor.AddTask(task);
+            InternalUnloadAsset(assetInfo);
         }
 
         /// <summary>
@@ -487,6 +443,16 @@ namespace CatAsset
                 return;
             }
 
+            InternalUnloadAsset(assetInfo);
+        }
+
+
+        /// <summary>
+        /// 卸载Asset
+        /// </summary>
+        private static void InternalUnloadAsset(AssetRuntimeInfo assetInfo)
+        {
+
             if (assetInfo.RefCount == 0)
             {
                 return;
@@ -495,58 +461,62 @@ namespace CatAsset
             //卸载依赖资源
             foreach (string dependency in assetInfo.ManifestInfo.Dependencies)
             {
-                AssetRuntimeInfo dependencyInfo = assetInfoDict[dependency];
-                UnloadAsset(dependencyInfo.Asset);
-            }
-
-            //卸载场景
-            SceneManager.UnloadSceneAsync(sceneName);
-
-            //减少场景的引用计数
-            assetInfo.RefCount--;
-            if (assetInfo.RefCount == 0)
-            {
-                //场景已经没人使用了
-                //从所属的AssetBundle的 UsedAsset 中移除
-                AssetBundleRuntimeInfo abInfo = assetBundleInfoDict[assetInfo.AssetBundleName];
-                abInfo.UsedAssets.Remove(assetInfo.ManifestInfo.AssetName);
-
-                if (abInfo.RefCount == 0 && abInfo.UsedAssets.Count == 0)
+                if (assetInfoDict.TryGetValue(dependency, out AssetRuntimeInfo dependencyInfo) && dependencyInfo.Asset != null)
                 {
-                    //AssetBundle此时没有Asset在使用了 也没被其他AssetBundle依赖 创建卸载任务 开始卸载倒计时
-                    UnloadAssetBundleTask task = new UnloadAssetBundleTask(taskExcutor, abInfo.ManifestInfo.AssetBundleName);
-                    taskExcutor.AddTask(task);
-                    Debug.Log("创建了卸载AB的任务：" + task.Name);
+                    UnloadAsset(dependencyInfo.Asset);
                 }
             }
 
+            BundleRuntimeInfo bundleInfo = bundleInfoDict[assetInfo.BundleName];
+            if (bundleInfo.ManifestInfo.IsScene)
+            {
+                //卸载场景
+                SceneManager.UnloadSceneAsync(assetInfo.ManifestInfo.AssetName);
+            }
+
+            //减少引用计数
+            assetInfo.RefCount--;
+
+            if (assetInfo.RefCount == 0)
+            {
+                //已经没人在使用这个Asset了
+                //从Bundle的 UsedAsset 中移除
+                bundleInfo.UsedAssets.Remove(assetInfo.ManifestInfo.AssetName);
+                CheckBundleLifeCycle(bundleInfo);
+            }
         }
 
         /// <summary>
-        /// 批量加载Asset
+        /// 检查Bundle是否可以卸载，若可以则卸载
         /// </summary>
-        public static void LoadAssets(List<string> assetNames, Action<List<Object>> loadedCallback)
+        internal static void CheckBundleLifeCycle(BundleRuntimeInfo bundleInfo)
         {
-            if (assetNames == null || assetNames.Count == 0)
+            if (bundleInfo.UsedAssets.Count == 0 && bundleInfo.DependencyCount == 0)
             {
-                Debug.LogError("批量加载Asset失败，assetNames为空或数量为0");
-                return;
+                UnloadBundleTask task = new UnloadBundleTask(taskExcutor, bundleInfo.ManifestInfo.BundleName);
+                taskExcutor.AddTask(task);
             }
-
-#if UNITY_EDITOR
-            if (IsEditorMode)
-            {
-                EditorLoadAssetsTask editorModeTask = new EditorLoadAssetsTask(taskExcutor, nameof(EditorLoadAssetsTask), assetNames,loadedCallback);
-                taskExcutor.AddTask(editorModeTask);
-                return;
-            }
-#endif
-
-
-            //创建批量加载Asset的任务
-            LoadAssetsTask task = new LoadAssetsTask(taskExcutor, nameof(LoadAssetsTask) + Time.time, assetNames, loadedCallback);
-            taskExcutor.AddTask(task);
         }
+
+        #endregion
+
+
+
+
+       
+
+
+
+       
+
+
+      
+
+
+     
+
+
+       
 
 
     }

@@ -50,7 +50,7 @@ namespace CatAsset.Editor
                         BaseTask task = item.Value;
                         EditorGUILayout.LabelField(task.Name,GUILayout.Width(position.width / 2));
                         EditorGUILayout.LabelField(task.GetType().Name);
-                        EditorGUILayout.LabelField(task.State.ToString());
+                        EditorGUILayout.LabelField(task.TaskState.ToString());
                         EditorGUILayout.LabelField(task.Progress.ToString("0.00"));
                     }
 

@@ -7,7 +7,7 @@ namespace CatAsset
     /// <summary>
     /// 任务状态
     /// </summary>
-    public enum TaskState
+    public enum TaskStatus
     {
         /// <summary>
         /// 空闲
