@@ -33,10 +33,6 @@ namespace CatAsset
         /// </summary>
         private Action<bool, BundleManifestInfo> onDownloadFinished;
 
-        /// <summary>
-        /// 正在更新中的资源
-        /// </summary>
-        private HashSet<string> UpdatingBundles = new HashSet<string>();
 
         /// <summary>
         /// 更新器状态
@@ -46,7 +42,7 @@ namespace CatAsset
         /// <summary>
         /// 需要更新的资源
         /// </summary>
-        public Dictionary<string,BundleManifestInfo> UpdateBundles = new Dictionary<string, BundleManifestInfo>();
+        public List<BundleManifestInfo> UpdateBundles = new List<BundleManifestInfo>();
 
         /// <summary>
         /// 需要更新的资源组
@@ -87,18 +83,7 @@ namespace CatAsset
             this.onUpdated -= onUpdated;
         }
 
-        /// <summary>
-        /// 更新指定资源，主要给边玩边下模式调用
-        /// </summary>
-        internal void UpdateAsset(string name, Action<bool, int, long, int, long, string, string> onUpdated)
-        {
-            BundleManifestInfo updateBundleInfo = UpdateBundles[name];
-
-            AddUpdateTask(updateBundleInfo);
-
-            this.onUpdated += onUpdated;
-        }
-
+    
         /// <summary>
         /// 更新所有需要更新的资源文件
         /// </summary>
@@ -106,43 +91,24 @@ namespace CatAsset
         {
             state = UpdaterStatus.Runing;
 
-            foreach (KeyValuePair<string, BundleManifestInfo> item in UpdateBundles)
+            foreach (BundleManifestInfo updateBundleInfo in UpdateBundles)
             {
                 //创建下载文件的任务
-                AddUpdateTask(item.Value);
+                string localFilePath = Util.GetReadWritePath(updateBundleInfo.BundleName);
+                string downloadUri = Path.Combine(CatAssetUpdater.UpdateUriPrefix, updateBundleInfo.BundleName);
+                DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, downloadUri, updateBundleInfo, this, localFilePath, downloadUri, onDownloadFinished);
+                CatAssetManager.taskExcutor.AddTask(task);
             }
 
             this.onUpdated += onUpdated;
         }
 
-        /// <summary>
-        /// 添加更新任务，已在更新中就不添加了
-        /// </summary>
-        private void AddUpdateTask(BundleManifestInfo updateBundleInfo)
-        {
-            if (UpdatingBundles.Contains(updateBundleInfo.BundleName))
-            {
-                //已在更新中，不处理了
-                return;
-            }
-
-            string localFilePath = Util.GetReadWritePath(updateBundleInfo.BundleName);
-            string downloadUri = Path.Combine(CatAssetUpdater.UpdateUriPrefix, updateBundleInfo.BundleName);
-            DownloadFileTask task = new DownloadFileTask(CatAssetManager.taskExcutor, downloadUri, updateBundleInfo, this, localFilePath, downloadUri, onDownloadFinished);
-            CatAssetManager.taskExcutor.AddTask(task);
-
-            //记录下来
-            UpdatingBundles.Add(updateBundleInfo.BundleName);
-        }
 
         /// <summary>
         /// 资源文件下载完毕的回调
         /// </summary>
         private void OnDownloadFinished(bool success, BundleManifestInfo bundleInfo)
         {
-
-            UpdatingBundles.Remove(bundleInfo.BundleName); //从正在更新中的资源集合中移除
-
             if (!success)
             {
                 Debug.LogError($"更新{bundleInfo.BundleName}失败");
@@ -152,7 +118,6 @@ namespace CatAsset
 
 
             //刷新已下载资源信息
-            UpdateBundles.Remove(bundleInfo.BundleName);  //从需要更新的资源集合中移除
             UpdatedCount++;
             UpdatedLength += bundleInfo.Length;
             deltaUpatedLength += bundleInfo.Length;

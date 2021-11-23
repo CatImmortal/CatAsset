@@ -23,11 +23,6 @@ namespace CatAsset
         internal static Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 远端Asset名与Bundle清单信息字典（只有在这个字典里才是可边玩边下的）
-        /// </summary>
-        internal static Dictionary<string, BundleManifestInfo> remoteManifestInfoDict = new Dictionary<string, BundleManifestInfo>();
-
-        /// <summary>
         /// Asset和Asset运行时信息的映射字典(不包括场景)
         /// </summary>
         internal static Dictionary<Object, AssetRuntimeInfo> assetToAssetInfoDict = new Dictionary<Object, AssetRuntimeInfo>();
@@ -174,21 +169,6 @@ namespace CatAsset
         }
 
         /// <summary>
-        /// 初始化远端清单信息，边玩边下模式用到
-        /// </summary>
-        internal static void InitRemoteManifestInfo(CatAssetManifest remoteManifest)
-        {
-            remoteManifestInfoDict.Clear();
-            foreach (BundleManifestInfo abInfo in remoteManifest.Bundles)
-            {
-                foreach (AssetManifestInfo assetInfo in abInfo.Assets)
-                {
-                    remoteManifestInfoDict.Add(assetInfo.AssetName, abInfo);
-                }
-            }
-        }
-
-        /// <summary>
         /// 获取资源组信息，若不存在则添加
         /// </summary>
         internal static GroupInfo GetOrCreateGroupInfo(string group)
@@ -299,7 +279,7 @@ namespace CatAsset
             }
 #endif
             //检查Asset是否已在本地准备好
-            if (!CheckAssetReady(assetName, loadedCallback))
+            if (!CheckAssetReady(assetName))
             {
                 return;
             }
@@ -323,7 +303,7 @@ namespace CatAsset
                 return;
             }
 #endif
-            if (!CheckAssetReady(sceneName, loadedCallback))
+            if (!CheckAssetReady(sceneName))
             {
                 return;
             }
@@ -360,36 +340,11 @@ namespace CatAsset
         /// <summary>
         /// 检查Asset是否已准备好
         /// </summary>
-        private static bool CheckAssetReady(string assetName, Action<bool, Object> loadedCallback)
+        private static bool CheckAssetReady(string assetName)
         {
-            if (!assetInfoDict.TryGetValue(assetName, out AssetRuntimeInfo assetInfo))
+            if (!assetInfoDict.ContainsKey(assetName))
             {
-                if (RunMode != RunMode.UpdatableWhilePlaying || !remoteManifestInfoDict.ContainsKey(assetName))
-                {
-                    //不是边玩边下模式 或者 远端没这个asset的bundle文件
-                    //加载失败，报错
-
-                    Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
-                    return false;
-                }
-
-                //边玩边下模式 下载bundle文件
-                BundleManifestInfo bundleManifestInfo = remoteManifestInfoDict[assetName];
-
-                Updater updater = GetUpdater(bundleManifestInfo.Group);
-
-                Action<bool, int, long, int, long, string, string> onUpdated = null;
-                onUpdated = (bool success, int count, long length, int totalCount, long totalLength, string bundleName, string group) =>
-                {
-                    if (success && bundleName == bundleManifestInfo.BundleName)
-                    {
-                        updater.RemoveBundleUpdatedCallback(onUpdated);  //移除回调
-                        LoadAsset(assetName, loadedCallback);
-                    }
-                };
-
-                updater.UpdateAsset(bundleManifestInfo.BundleName,onUpdated);
-
+                Debug.LogError("Asset加载失败，不在资源清单中：" + assetName);
                 return false;
             }
 

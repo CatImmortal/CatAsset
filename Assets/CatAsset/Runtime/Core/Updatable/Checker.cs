@@ -120,12 +120,6 @@ namespace CatAsset
                 checkInfo.RemoteInfo = item;
             }
 
-            if (CatAssetManager.RunMode == RunMode.UpdatableWhilePlaying)
-            {
-                //边玩边下模式 需要初始化远端资源清单信息
-                CatAssetManager.InitRemoteManifestInfo(manifest);
-            }
-
             remoteChecked = true;
             RefershCheckInfos();
         }
@@ -180,7 +174,7 @@ namespace CatAsset
                         //需要更新
 
                         Updater updater = CatAssetUpdater.GetOrCreateGroupUpdater(checkInfo.RemoteInfo.Group);
-                        updater.UpdateBundles.Add(item.Key,checkInfo.RemoteInfo);
+                        updater.UpdateBundles.Add(checkInfo.RemoteInfo);
                         updater.TotalCount++;
                         updater.TotalLength += checkInfo.RemoteInfo.Length;
 

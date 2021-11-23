@@ -117,9 +117,13 @@ namespace CatAsset
             }
 
             //暂停指定资源组的更新器
-            if (groupUpdater.state == UpdaterStatus.Runing)
+            if (isPause)
             {
                 groupUpdater.state = UpdaterStatus.Paused;
+            }
+            else
+            {
+                groupUpdater.state = UpdaterStatus.Runing;
             }
 
           

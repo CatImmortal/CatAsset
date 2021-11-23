@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,11 +18,6 @@ namespace CatAsset
         /// 可更新模式
         /// </summary>
         Updatable,
-        
-        /// <summary>
-        /// 加载时若本地不存在会下载的可更新模式（边玩边下）
-        /// </summary>
-        UpdatableWhilePlaying,
     }
 }
 
