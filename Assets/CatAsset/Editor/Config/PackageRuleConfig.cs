@@ -45,8 +45,76 @@ namespace CatAsset.Editor
                 //进行冗余分析
                 RedundancyAnalyzer.ExecuteRedundancyAnalyzePipeline(abBuildList);
             }
+            
+            //拆分场景和非场景资源混在一起的包
+            List<AssetBundleBuild> reuslt = new List<AssetBundleBuild>();
+            for (int i = 0; i < abBuildList.Count; i++)
+            {
+                AssetBundleBuild abBulid = abBuildList[i];
+                if (SplitSceneBundleAsset(abBulid,out AssetBundleBuild sceneBundle,out AssetBundleBuild notSceneBundle))
+                {
+                    //将场景和非场景混在一起的包拆开打包
+                    reuslt.Add(sceneBundle);
+                    
+                    reuslt.Add(notSceneBundle);
+                    AssetCollector.AddAssetBundleGroup(notSceneBundle.assetBundleName);
+                }
+                else
+                {
+                    reuslt.Add(abBulid);
+                }
+            }
+            
+            //排序所有Asset
+            for (int i = 0; i < reuslt.Count; i++)
+            {
+                AssetBundleBuild abBulid = reuslt[i];
+                Array.Sort(abBulid.assetNames);
+            }
+            
+            
+            return reuslt;
+        }
+        
+        
+        /// <summary>
+        /// 拆分场景包和其依赖的非场景资源
+        /// </summary>
+        private static bool SplitSceneBundleAsset(AssetBundleBuild abBuild,out AssetBundleBuild sceneBundle,out AssetBundleBuild notSceneBundle)
+        {
+            sceneBundle = default;
+            notSceneBundle = default;
+            
+            List<string> sceneNames = new List<string>();
+            List<string> assetNames = new List<string>();
 
-            return abBuildList;
+            for (int i = 0; i < abBuild.assetNames.Length; i++)
+            {
+                string assetName = abBuild.assetNames[i];
+                if (assetName.EndsWith(".unity"))
+                {
+                    sceneNames.Add(assetName);
+                }
+                else
+                {
+                    assetNames.Add(assetName);
+                }
+            }
+
+            if (sceneNames.Count > 0 && assetNames.Count > 0)
+            {
+                sceneBundle.assetBundleName = abBuild.assetBundleName;
+                sceneBundle.assetNames = sceneNames.ToArray();
+
+                string[] splitNames = abBuild.assetBundleName.Split('.');
+
+                notSceneBundle.assetBundleName = $"{splitNames[0]}_res.{splitNames[1]}";
+                notSceneBundle.assetNames = assetNames.ToArray();
+                
+                return true;
+            }
+
+            return false;
         }
     }
 }

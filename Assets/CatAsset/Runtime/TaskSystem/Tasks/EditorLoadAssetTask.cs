@@ -62,7 +62,16 @@ namespace CatAsset
                 TaskState = TaskStatus.Finished;
 
                 Object asset = UnityEditor.AssetDatabase.LoadAssetAtPath(Name, typeof(Object));
-                onFinished?.Invoke(true, asset);
+                if (asset)
+                {
+                    onFinished?.Invoke(true, asset);
+                }
+                else
+                {
+                    Debug.LogError($"Asset加载失败:{Name}");
+                    onFinished?.Invoke(false, null);
+                }
+               
                 return;
             }
 

@@ -26,7 +26,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// AssetBundle与其资源组
         /// </summary>
-        private static Dictionary<string, string> AssetBundleGroupDict = new Dictionary<string, string>();
+        private static Dictionary<string, string> assetBundleGroupDict = new Dictionary<string, string>();
 
         static AssetCollector()
         {
@@ -39,7 +39,7 @@ namespace CatAsset.Editor
             collectorFuncDict.Add(PackageMode.TopDirectoryNAssetToOneBundle, TopDirectoryNAssetToOneBundle);
             collectorFuncDict.Add(PackageMode.NAssetToNBundle, NAssetToNBundle);
 
-            AssetBundleGroupDict.Add("common.bundle", Util.DefaultGroup);
+            assetBundleGroupDict.Add("common.bundle", Util.DefaultGroup);
         }
 
         /// <summary>
@@ -57,13 +57,22 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
+        /// 添加AssetBundle所在的资源组
+        /// </summary>
+        public static void AddAssetBundleGroup(string assetBundleName,string groupName = Util.DefaultGroup)
+        {
+            assetBundleGroupDict[assetBundleName] = groupName;
+        }
+        
+
+        /// <summary>
         /// 获取AssetBundle所在的资源组
         /// </summary>
         public static string GetAssetBundleGroup(string assetBundleName)
         {
-            if (AssetBundleGroupDict.ContainsKey(assetBundleName))
+            if (assetBundleGroupDict.ContainsKey(assetBundleName))
             {
-                return AssetBundleGroupDict[assetBundleName];
+                return assetBundleGroupDict[assetBundleName];
             }
 
             return null;
@@ -112,7 +121,7 @@ namespace CatAsset.Editor
                 AssetBundleBuild abBuild = default;
                 abBuild.assetNames = assetPaths.ToArray();
                 abBuild.assetBundleName = GetAssetBundleName(rule.Directory);
-                AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
+                assetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
 
                 return new AssetBundleBuild[] { abBuild };
             }
@@ -161,7 +170,7 @@ namespace CatAsset.Editor
                     abBuild.assetNames = assetPaths.ToArray();
                     assetPaths.Clear();
                     abBuild.assetBundleName = GetAssetBundleName(rule.Directory + "/" + topDirInfo.Name);
-                    AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
+                    assetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
 
                     abBulidList.Add(abBuild);
                 }
@@ -209,7 +218,7 @@ namespace CatAsset.Editor
                     AssetBundleBuild abBuild = default;
                     abBuild.assetNames = new string[] { assetName };
                     abBuild.assetBundleName = abName;
-                    AssetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
+                    assetBundleGroupDict[abBuild.assetBundleName] = rule.Group;
                     abBulidList.Add(abBuild);
                 }
 

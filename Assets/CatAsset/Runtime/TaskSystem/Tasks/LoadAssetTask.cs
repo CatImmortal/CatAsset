@@ -234,10 +234,6 @@ namespace CatAsset
                     Debug.Log("Asset加载成功：" + Name);
                     onFinished?.Invoke(true, assetInfo.Asset);
                 }
-
-               
-
-               
             }
 
         }
@@ -270,9 +266,9 @@ namespace CatAsset
                 AssetRuntimeInfo dependencyAssetInfo = CatAssetManager.assetToAssetInfoDict[asset];
                 BundleRuntimeInfo dependencyBundleInfo = CatAssetManager.bundleInfoDict[dependencyAssetInfo.BundleName];
 
-                if (!bundleInfo.DependencyBundles.Contains(dependencyAssetInfo.BundleName))
+                if (dependencyAssetInfo.BundleName!= bundleInfo.ManifestInfo.BundleName && !bundleInfo.DependencyBundles.Contains(dependencyAssetInfo.BundleName))
                 {
-                    //记录依赖的Bundle 增加其引用计数
+                    //记录依赖到的其他Bundle 增加其引用计数
                     bundleInfo.DependencyBundles.Add(dependencyAssetInfo.BundleName);
                     dependencyBundleInfo.DependencyCount++;
                 }

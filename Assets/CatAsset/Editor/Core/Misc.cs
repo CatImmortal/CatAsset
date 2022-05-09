@@ -46,25 +46,26 @@ namespace CatAsset.Editor
             }
         }
 
-        [MenuItem("Assets/复制资源路径",false)]
-        private static void CopyAssetPath()
-        {
-            string path = AssetDatabase.GUIDToAssetPath(Selection.assetGUIDs[0]);
-            GUIUtility.systemCopyBuffer = "\"" + path + "\"";
-        }
-
-        [MenuItem("Assets/复制资源路径",true)]
-        private static bool CopyAssetPathValidate()
-        {
-            if (Selection.assetGUIDs.Length == 0 || Selection.assetGUIDs.Length > 1)
-            {
-                //不允许多选
-                return false;
-            }
-
-            string path = AssetDatabase.GUIDToAssetPath(Selection.assetGUIDs[0]);
-            return File.Exists(path);
-        }
+        // [MenuItem("Assets/复制资源路径",false)]
+        // private static void CopyAssetPath()
+        // {
+        //     string path = AssetDatabase.GUIDToAssetPath(Selection.assetGUIDs[0]);
+        //     //GUIUtility.systemCopyBuffer = "\"" + path + "\"";
+        //     GUIUtility.systemCopyBuffer = path;
+        // }
+        //
+        // [MenuItem("Assets/复制资源路径",true)]
+        // private static bool CopyAssetPathValidate()
+        // {
+        //     if (Selection.assetGUIDs.Length == 0 || Selection.assetGUIDs.Length > 1)
+        //     {
+        //         //不允许多选
+        //         return false;
+        //     }
+        //
+        //     string path = AssetDatabase.GUIDToAssetPath(Selection.assetGUIDs[0]);
+        //     return File.Exists(path);
+        // }
 
 
         [MenuItem("Assets/添加为打包规则目录（可多选）", false)]
@@ -82,6 +83,8 @@ namespace CatAsset.Editor
             }
 
             PkgUtil.PkgRuleCfg.Rules.Sort();
+            EditorUtility.SetDirty(PkgUtil.PkgRuleCfg);
+            AssetDatabase.SaveAssets();
         }
 
         [MenuItem("Assets/添加为打包规则目录（可多选）", true)]

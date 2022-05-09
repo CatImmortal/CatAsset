@@ -89,6 +89,7 @@ namespace CatAsset.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 EditorUtility.SetDirty(PkgUtil.PkgRuleCfg);
+                AssetDatabase.SaveAssets();
             }
 
         }

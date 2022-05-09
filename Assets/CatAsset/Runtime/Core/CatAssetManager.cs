@@ -298,8 +298,10 @@ namespace CatAsset
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(sceneName, UnityEditor.SceneManagement.OpenSceneMode.Additive);
-                loadedCallback(true, null);
+                SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).completed += (op) =>
+                {
+                    loadedCallback?.Invoke(true,null);
+                };
                 return;
             }
 #endif
@@ -307,7 +309,6 @@ namespace CatAsset
             {
                 return;
             }
-
             //创建加载场景的任务
             LoadSceneTask task = new LoadSceneTask(taskExcutor, sceneName, loadedCallback);
             taskExcutor.AddTask(task);

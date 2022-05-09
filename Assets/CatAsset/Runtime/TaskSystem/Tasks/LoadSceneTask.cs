@@ -23,9 +23,8 @@ namespace CatAsset
 
         protected override void LoadDone()
         {
-            //场景加载完毕
-            onFinished?.Invoke(true, null);
-            return;
+            //不能在这里调用回调，否则会导致回调被调用两次
+            //onFinished?.Invoke(true, null);
         }
 
      
