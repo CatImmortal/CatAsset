@@ -5,9 +5,11 @@
 
 # My configurations:
 /.vs
+.idea/
 /Library
 /obj
 /Temp
 /*.csproj
 /*.sln
-Logs/Packages-Update.log
+Logs/
+UserSettings/
