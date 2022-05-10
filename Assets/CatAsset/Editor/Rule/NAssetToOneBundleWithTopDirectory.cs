@@ -1,15 +1,40 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace CatAsset.Editor
 {
     /// <summary>
     /// 将指定目录下所有一级子目录各自使用NAssetToOneBundle规则进行构建
     /// </summary>
-    public class NAssetToOneBundleWithTopDirectory : IBundleBuildRule
+    public class NAssetToOneBundleWithTopDirectory : NAssetToOneBundle
     {
         public List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
-            throw new System.NotImplementedException();
+            
+            
+           
+            List<BundleBuildInfo> result = new List<BundleBuildInfo>();
+
+            if (Directory.Exists(bundleBuildDirectory.DirectoryName))
+            {
+  
+                
+                DirectoryInfo dirInfo = new DirectoryInfo(bundleBuildDirectory.DirectoryName);
+
+                //获取所有一级目录
+                DirectoryInfo[] topDirectories = dirInfo.GetDirectories("*", SearchOption.TopDirectoryOnly);
+
+                foreach (DirectoryInfo topDirInfo in topDirectories)
+                {
+                    //每个一级目录构建成一个资源包
+                    BundleBuildInfo info = GetNAssetToOneBundle(topDirInfo.Name, bundleBuildDirectory.Group);
+                    result.Add(info);
+                }
+
+               
+            }
+
+            return result;
         }
     }
 }

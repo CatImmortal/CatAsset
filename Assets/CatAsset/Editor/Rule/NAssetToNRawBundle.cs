@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace CatAsset.Editor
 {
@@ -9,7 +10,11 @@ namespace CatAsset.Editor
     {
         public List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
-            throw new System.NotImplementedException();
+            List<BundleBuildInfo> result = new List<BundleBuildInfo>();
+            
+
+
+            return result;
         }
     }
 }

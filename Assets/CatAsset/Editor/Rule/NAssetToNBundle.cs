@@ -25,19 +25,24 @@ namespace CatAsset.Editor
                         //跳过不该打包的文件
                         continue;
                     }
-                 
 
-                    int assetsIndex = file.FullName.IndexOf("Assets\\");
-                    string assetName = file.FullName.Substring(assetsIndex).Replace('\\', '/');
-
-                    int suffixIndex = assetName.LastIndexOf('.');
-
-                    //资源包名是不带后缀的资源名
-                    string bundleName = Util.GetBundleName(assetName.Remove(suffixIndex));
+                    //
+                    // int suffixIndex = assetName.LastIndexOf('.');
+                    //
+                    // //资源包名是不带后缀的资源名
+                    // string bundleName = Util.GetBundleName(assetName.Remove(suffixIndex));
+                    
+                    int firstIndex = bundleBuildDirectory.DirectoryName.IndexOf("/");
+                    int lastIndex = bundleBuildDirectory.DirectoryName.LastIndexOf("/");
+                    string directoryName = bundleBuildDirectory.DirectoryName.Substring(firstIndex + 1, lastIndex - firstIndex - 1);
+                    string bundleName = file.Name.Replace('.','_').ToLower() + ".bundle";  //以文件名作为资源包名
 
                     BundleBuildInfo bundleBuildInfo =
-                        new BundleBuildInfo(bundleName, bundleBuildDirectory.Group, false);
+                        new BundleBuildInfo(directoryName,bundleName, bundleBuildDirectory.Group, false);
 
+                    //获取Asset开头的资源全路径
+                    int assetsIndex = file.FullName.IndexOf("Assets\\");
+                    string assetName = file.FullName.Substring(assetsIndex).Replace('\\', '/');
                     bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName));
                     
                     result.Add(bundleBuildInfo);
@@ -49,5 +54,10 @@ namespace CatAsset.Editor
 
             return result;
         }
+
+        // protected List<BundleBuildInfo> GetNAssetToNBundle(string directory, bool isRaw)
+        // {
+        //     
+        // }
     }
 }

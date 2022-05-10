@@ -12,15 +12,11 @@ namespace CatAsset.Editor
     /// </summary>
     public partial class BundleBuildWindow : EditorWindow
     {
-
-
-
         /// <summary>
         /// 页签
         /// </summary>
         private readonly string[] tabs = {"构建配置", "构建目录", "资源包预览"};
-
-
+        
         /// <summary>
         /// 选择的页签
         /// </summary>
@@ -31,7 +27,7 @@ namespace CatAsset.Editor
         [MenuItem("CatAsset/打开资源包构建窗口", priority = 1)]
         private static void OpenWindow()
         {
-            BundleBuildWindow window = GetWindow<BundleBuildWindow>(false, "打包窗口");
+            BundleBuildWindow window = GetWindow<BundleBuildWindow>(false, "资源包构建窗口");
             window.minSize = new Vector2(800, 600);
             window.bundleBuildConfg = Util.GetConfigAsset<BundleBuildConfigSO>();
             if (window.bundleBuildConfg == null)

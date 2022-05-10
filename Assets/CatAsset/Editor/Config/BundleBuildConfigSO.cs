@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Codice.Client.BaseCommands;
+using UnityEditor;
 using UnityEngine;
 
 namespace CatAsset.Editor
@@ -41,6 +43,9 @@ namespace CatAsset.Editor
                 List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
                 Bundles.AddRange(bundles);
             }
+            
+            EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
         }
 
         /// <summary>
@@ -57,6 +62,25 @@ namespace CatAsset.Editor
                     ruleDict.Add(type.Name,rule);
                 }
             }
+        }
+
+        /// <summary>
+        /// 检查资源包构建目录是否可被添加
+        /// </summary>
+        public bool CanAddDirectory(string directoryName)
+        {
+            for (int i = 0; i < Directories.Count; i++)
+            {
+                BundleBuildDirectory bundleBuildDirectory = Directories[i];
+
+                if (directoryName == bundleBuildDirectory.DirectoryName)
+                {
+                    //不能重复添加
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

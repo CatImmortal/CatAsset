@@ -14,9 +14,65 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Directories:
   - DirectoryName: Assets/BundleRes/Prefab1
-    BuildRuleName: NAssetToOneBundle
-    Group: Base
-  - DirectoryName: Assets/BundleRes/Prefab2
     BuildRuleName: NAssetToNBundle
     Group: Base
-  Bundles: []
+  - DirectoryName: Assets/BundleRes/Prefab2
+    BuildRuleName: NAssetToOneBundle
+    Group: Base
+  - DirectoryName: Assets/BundleRes/Prefab3
+    BuildRuleName: NAssetToOneBundleWithTopDirectory
+    Group: Base
+  Bundles:
+  - DirectoryName: BundleRes
+    BundleName: testgo 1_prefab.bundle
+    RelativePath: BundleRes/testgo 1_prefab.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/Prefab1/TestGO 1.prefab
+  - DirectoryName: BundleRes
+    BundleName: testgo 2_prefab.bundle
+    RelativePath: BundleRes/testgo 2_prefab.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/Prefab1/TestGO 2.prefab
+  - DirectoryName: BundleRes
+    BundleName: testgo 3_prefab.bundle
+    RelativePath: BundleRes/testgo 3_prefab.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/Prefab1/TestGO 3.prefab
+  - DirectoryName: BundleRes
+    BundleName: testgo_prefab.bundle
+    RelativePath: BundleRes/testgo_prefab.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/Prefab1/TestGO.prefab
+  - DirectoryName: BundleRes
+    BundleName: prefab2.bundle
+    RelativePath: BundleRes/prefab2.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/Prefab2/TestGO 1.prefab
+    - AssetName: Assets/BundleRes/Prefab2/TestGO 2.prefab
+    - AssetName: Assets/BundleRes/Prefab2/TestGO 3.prefab
+    - AssetName: Assets/BundleRes/Prefab2/TestGO.prefab
+  - DirectoryName: BundleRes
+    BundleName: prefab3.bundle
+    RelativePath: BundleRes/prefab3.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO 1.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO 2.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO 1.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO 2.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 1.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 2.prefab
+    - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO.prefab

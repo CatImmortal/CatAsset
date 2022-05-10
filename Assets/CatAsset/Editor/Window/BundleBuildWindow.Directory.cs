@@ -52,6 +52,7 @@ namespace CatAsset.Editor
                         }
                     }
                     
+                    
                     //绘制构建规则名
                     string[] ruleNames = GetRuleNames();
                     ruleNameDict.TryGetValue(directory.BuildRuleName, out int index);
@@ -96,7 +97,7 @@ namespace CatAsset.Editor
         /// <returns></returns>
         private string[] GetRuleNames()
         {
-            if (ruleNames == null)
+            if (ruleNames == null || ruleNameDict.Count == 0)
             {
                 List<string> list = new List<string>();
                 Type[] types = typeof(BundleBuildConfigSO).Assembly.GetTypes();
@@ -108,7 +109,6 @@ namespace CatAsset.Editor
                     }
                 }
                 ruleNames = list.ToArray();
-
                 ruleNameDict.Clear();
                 for (int i = 0; i < ruleNames.Length; i++)
                 {
