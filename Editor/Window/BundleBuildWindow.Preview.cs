@@ -10,7 +10,7 @@ namespace CatAsset.Editor
     public partial class BundleBuildWindow
     {
         /// <summary>
-        /// 资源包名->是否展开
+        /// 资源包相对路径->是否展开
         /// </summary>
         private Dictionary<string, bool> FoldOutDict = new Dictionary<string, bool>();
 
@@ -36,7 +36,7 @@ namespace CatAsset.Editor
                 {
                     foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfg.Bundles)
                     {
-                        FoldOutDict[bundleBuildInfo.BundleName] = true;
+                        FoldOutDict[bundleBuildInfo.RelativePath] = true;
                     }
                 }
 
@@ -44,7 +44,7 @@ namespace CatAsset.Editor
                 {
                     foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfg.Bundles)
                     {
-                        FoldOutDict[bundleBuildInfo.BundleName] = false;
+                        FoldOutDict[bundleBuildInfo.RelativePath] = false;
                     }
                 }
 
@@ -66,8 +66,8 @@ namespace CatAsset.Editor
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         //绘制展开箭头
-                        FoldOutDict.TryGetValue(bundleBuildInfo.BundleName, out bool foldOut);
-                        FoldOutDict[bundleBuildInfo.BundleName] = EditorGUILayout.Foldout(foldOut, bundleBuildInfo.BundleName);
+                        FoldOutDict.TryGetValue(bundleBuildInfo.RelativePath, out bool foldOut);
+                        FoldOutDict[bundleBuildInfo.RelativePath] = EditorGUILayout.Foldout(foldOut, bundleBuildInfo.RelativePath);
 
                         //绘制资源组
                         string group = bundleBuildInfo.Group;
@@ -78,7 +78,7 @@ namespace CatAsset.Editor
                     }
 
                     
-                    if (FoldOutDict[bundleBuildInfo.BundleName] == true)
+                    if (FoldOutDict[bundleBuildInfo.RelativePath] == true)
                     {
                         //展开状态下 绘制资源包中的所有资源
                         foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)

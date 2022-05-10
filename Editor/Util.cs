@@ -37,11 +37,10 @@ namespace CatAsset.Editor
             foreach (string guid in Selection.assetGUIDs)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (Directory.Exists(path))
+                if (Directory.Exists(path) && config.CanAddDirectory(path))
                 {
                     BundleBuildDirectory directory = new BundleBuildDirectory(path,nameof(NAssetToOneBundle),DefaultGroup);
                     config.Directories.Add(directory);
-
                 }
             }
             config.Directories.Sort();
