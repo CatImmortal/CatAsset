@@ -8,17 +8,12 @@ namespace CatAsset.Editor
     /// </summary>
     public class NAssetToOneBundleWithTopDirectory : NAssetToOneBundle
     {
-        public List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
+        public override List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
-            
-            
-           
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();
 
             if (Directory.Exists(bundleBuildDirectory.DirectoryName))
             {
-  
-                
                 DirectoryInfo dirInfo = new DirectoryInfo(bundleBuildDirectory.DirectoryName);
 
                 //获取所有一级目录
@@ -27,11 +22,11 @@ namespace CatAsset.Editor
                 foreach (DirectoryInfo topDirInfo in topDirectories)
                 {
                     //每个一级目录构建成一个资源包
-                    BundleBuildInfo info = GetNAssetToOneBundle(topDirInfo.Name, bundleBuildDirectory.Group);
+                    int assetsIndex = topDirInfo.FullName.IndexOf("Assets\\");
+                    string directory = topDirInfo.FullName.Substring(assetsIndex).Replace('\\', '/');
+                    BundleBuildInfo info = GetNAssetToOneBundle(directory, bundleBuildDirectory.Group);
                     result.Add(info);
                 }
-
-               
             }
 
             return result;

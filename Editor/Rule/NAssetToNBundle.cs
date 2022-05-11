@@ -8,13 +8,24 @@ namespace CatAsset.Editor
     /// </summary>
     public class NAssetToNBundle : IBundleBuildRule
     {
-        public List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
+        public virtual List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
+            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory.DirectoryName,bundleBuildDirectory.Group,false);
+            return result;
+        }
+
+        /// <summary>
+        /// 将指定目录下所有资源分别构建为一个资源包
+        /// </summary>
+        protected List<BundleBuildInfo> GetNAssetToNBundle(string targetDirectory,string group, bool isRaw)
+        {
+            //注意：targetDirectory在这里被假设为一个形如Assets/xxx/yyy....格式的目录
+            
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();
             
-            if (Directory.Exists(bundleBuildDirectory.DirectoryName))
+            if (Directory.Exists(targetDirectory))
             {
-                DirectoryInfo dirInfo = new DirectoryInfo(bundleBuildDirectory.DirectoryName);
+                DirectoryInfo dirInfo = new DirectoryInfo(targetDirectory);
                 FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);//递归获取所有文件
              
                 
@@ -22,23 +33,29 @@ namespace CatAsset.Editor
                 {
                     if (Util.ExcludeSet.Contains(file.Extension))
                     {
-                        //跳过不该打包的文件
                         continue;
                     }
-
-                    //
-                    // int suffixIndex = assetName.LastIndexOf('.');
-                    //
-                    // //资源包名是不带后缀的资源名
-                    // string bundleName = Util.GetBundleName(assetName.Remove(suffixIndex));
                     
-                    int firstIndex = bundleBuildDirectory.DirectoryName.IndexOf("/");
-                    int lastIndex = bundleBuildDirectory.DirectoryName.LastIndexOf("/");
-                    string directoryName = bundleBuildDirectory.DirectoryName.Substring(firstIndex + 1, lastIndex - firstIndex - 1);
-                    string bundleName = file.Name.Replace('.','_').ToLower() + ".bundle";  //以文件名作为资源包名
+                    int firstIndex = targetDirectory.IndexOf("/");
+                    int lastIndex = targetDirectory.LastIndexOf("/");
+                    string directoryName;
+                    string bundleName;
+                    if (!isRaw)
+                    {
+                        directoryName = targetDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);
+                        bundleName = file.Name.Replace('.','_').ToLower() + ".bundle"; 
+                    }
+                    else
+                    {
+                        //原生资源包的bundleName和assetName要特殊处理下
+                        directoryName = targetDirectory.Substring(firstIndex + 1);
+                        bundleName = file.Name;  //以文件名作为原生资源包名
+                    }
+                    
+               
 
                     BundleBuildInfo bundleBuildInfo =
-                        new BundleBuildInfo(directoryName,bundleName, bundleBuildDirectory.Group, false);
+                        new BundleBuildInfo(directoryName,bundleName, group, isRaw);
 
                     //获取Asset开头的资源全路径
                     int assetsIndex = file.FullName.IndexOf("Assets\\");
@@ -49,15 +66,10 @@ namespace CatAsset.Editor
                     
                 }
 
-                
+               
             }
-
+            
             return result;
         }
-
-        // protected List<BundleBuildInfo> GetNAssetToNBundle(string directory, bool isRaw)
-        // {
-        //     
-        // }
     }
 }
