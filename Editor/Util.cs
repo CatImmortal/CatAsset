@@ -101,11 +101,38 @@ namespace CatAsset.Editor
         /// <summary>
         /// 将完整目录/文件名转换为Assets开头的目录/文件名
         /// </summary>
-        public static string FullName2AssetName(string fullName)
+        public static string FullNameToAssetName(string fullName)
         {
             int assetsIndex = fullName.IndexOf("Assets\\");
             string assetsDir = fullName.Substring(assetsIndex).Replace('\\', '/');
             return assetsDir;
+        }
+        
+        /// <summary>
+        /// 获取排除了自身和csharp代码文件的依赖资源列表
+        /// </summary>
+        public static string[] GetDependencies(string assetName,bool recursive = true)
+        {
+            string[] dependencies = AssetDatabase.GetDependencies(assetName,recursive);
+
+            if (dependencies.Length == 0)
+            {
+                return dependencies;
+            }
+
+            List<string> result = new List<string>();
+            for (int i = 0; i < dependencies.Length; i++)
+            {
+                string dependencyName = dependencies[i];
+                if (dependencyName == assetName || dependencyName.EndsWith(".cs"))
+                {
+                    continue;
+                }
+
+                result.Add(dependencyName);
+            }
+
+            return result.ToArray();
         }
 
 

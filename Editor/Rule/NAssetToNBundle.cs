@@ -36,7 +36,7 @@ namespace CatAsset.Editor
                         continue;
                     }
 
-                    string assetsDir = Util.FullName2AssetName(file.Directory.FullName);
+                    string assetsDir = Util.FullNameToAssetName(file.Directory.FullName);
                     string directoryName = assetsDir.Substring(assetsDir.IndexOf("/") + 1); //去掉Assets/
                     string bundleName;
                     if (!isRaw)
@@ -52,7 +52,7 @@ namespace CatAsset.Editor
                     BundleBuildInfo bundleBuildInfo =
                         new BundleBuildInfo(directoryName,bundleName, group, isRaw);
                     
-                     string assetName = Util.FullName2AssetName(file.FullName);
+                     string assetName = Util.FullNameToAssetName(file.FullName);
                      bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName));
                     
                     result.Add(bundleBuildInfo);
