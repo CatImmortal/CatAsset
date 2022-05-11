@@ -22,7 +22,7 @@ namespace CatAsset.Editor
                 foreach (DirectoryInfo topDirInfo in topDirectories)
                 {
                     //每个一级目录构建成一个资源包
-                    string assetsDir = Util.FullName2AssetName(topDirInfo.FullName);
+                    string assetsDir = Util.FullNameToAssetName(topDirInfo.FullName);
                     BundleBuildInfo info = GetNAssetToOneBundle(assetsDir, bundleBuildDirectory.Group);
                     result.Add(info);
                 }

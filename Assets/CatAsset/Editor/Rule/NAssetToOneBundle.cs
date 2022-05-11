@@ -43,7 +43,7 @@ namespace CatAsset.Editor
                     continue;
                 }
                 
-                string assetName = Util.FullName2AssetName(file.FullName);
+                string assetName = Util.FullNameToAssetName(file.FullName);
                 assetNames.Add(assetName);
             }
 

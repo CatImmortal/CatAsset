@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5466672007423258405}
+  - component: {fileID: 1154866680298912946}
   m_Layer: 0
   m_Name: TestGO 1
   m_TagString: Untagged
@@ -31,3 +32,17 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1154866680298912946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6999827141972751999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61e235af204f4a844b9727bff07ed8a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RefList:
+  - {fileID: 2800000, guid: f87eaed83ee73aa44aef7b76fd7e28cf, type: 3}
