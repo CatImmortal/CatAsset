@@ -12,10 +12,10 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包相对路径->是否展开
         /// </summary>
-        private Dictionary<string, bool> FoldOutDict = new Dictionary<string, bool>();
+        private Dictionary<string, bool> foldOutDict = new Dictionary<string, bool>();
 
         private Vector2 scrollPos;
-        private MethodInfo FindTextureByTypeMI = typeof(EditorGUIUtility).GetMethod("FindTextureByType", BindingFlags.NonPublic | BindingFlags.Static);
+        private MethodInfo findTextureByTypeMI = typeof(EditorGUIUtility).GetMethod("FindTextureByType", BindingFlags.NonPublic | BindingFlags.Static);
         private object[] paramObjs = new object[1];
         
         /// <summary>
@@ -36,7 +36,7 @@ namespace CatAsset.Editor
                 {
                     foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfg.Bundles)
                     {
-                        FoldOutDict[bundleBuildInfo.RelativePath] = true;
+                        foldOutDict[bundleBuildInfo.RelativePath] = true;
                     }
                 }
 
@@ -44,7 +44,7 @@ namespace CatAsset.Editor
                 {
                     foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfg.Bundles)
                     {
-                        FoldOutDict[bundleBuildInfo.RelativePath] = false;
+                        foldOutDict[bundleBuildInfo.RelativePath] = false;
                     }
                 }
 
@@ -66,8 +66,8 @@ namespace CatAsset.Editor
                     using (new EditorGUILayout.HorizontalScope())
                     {
                         //绘制展开箭头
-                        FoldOutDict.TryGetValue(bundleBuildInfo.RelativePath, out bool foldOut);
-                        FoldOutDict[bundleBuildInfo.RelativePath] = EditorGUILayout.Foldout(foldOut, bundleBuildInfo.RelativePath);
+                        foldOutDict.TryGetValue(bundleBuildInfo.RelativePath, out bool foldOut);
+                        foldOutDict[bundleBuildInfo.RelativePath] = EditorGUILayout.Foldout(foldOut, bundleBuildInfo.RelativePath);
 
                         //绘制资源组
                         string group = bundleBuildInfo.Group;
@@ -76,9 +76,8 @@ namespace CatAsset.Editor
                             EditorGUILayout.LabelField("资源组：" + group);
                         }
                     }
-
                     
-                    if (FoldOutDict[bundleBuildInfo.RelativePath] == true)
+                    if (foldOutDict[bundleBuildInfo.RelativePath])
                     {
                         //展开状态下 绘制资源包中的所有资源
                         foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
@@ -103,7 +102,7 @@ namespace CatAsset.Editor
             if (assetType != typeof(Texture2D))
             {
                 paramObjs[0] = assetType;
-                content.image = (Texture2D)FindTextureByTypeMI.Invoke(null,paramObjs);
+                content.image = (Texture2D)findTextureByTypeMI.Invoke(null,paramObjs);
             }
             else
             {

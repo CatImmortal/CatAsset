@@ -35,32 +35,25 @@ namespace CatAsset.Editor
                     {
                         continue;
                     }
-                    
-                    int firstIndex = targetDirectory.IndexOf("/");
-                    int lastIndex = targetDirectory.LastIndexOf("/");
-                    string directoryName;
+
+                    string assetsDir = Util.FullName2AssetName(file.Directory.FullName);
+                    string directoryName = assetsDir.Substring(assetsDir.IndexOf("/") + 1); //去掉Assets/
                     string bundleName;
                     if (!isRaw)
-                    {
-                        directoryName = targetDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);
+                    { 
                         bundleName = file.Name.Replace('.','_').ToLower() + ".bundle"; 
                     }
                     else
                     {
-                        //原生资源包的bundleName和assetName要特殊处理下
-                        directoryName = targetDirectory.Substring(firstIndex + 1);
-                        bundleName = file.Name;  //以文件名作为原生资源包名
+                        //直接以文件名作为原生资源包名
+                        bundleName = file.Name;
                     }
                     
-               
-
                     BundleBuildInfo bundleBuildInfo =
                         new BundleBuildInfo(directoryName,bundleName, group, isRaw);
-
-                    //获取Asset开头的资源全路径
-                    int assetsIndex = file.FullName.IndexOf("Assets\\");
-                    string assetName = file.FullName.Substring(assetsIndex).Replace('\\', '/');
-                    bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName));
+                    
+                     string assetName = Util.FullName2AssetName(file.FullName);
+                     bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName));
                     
                     result.Add(bundleBuildInfo);
                     

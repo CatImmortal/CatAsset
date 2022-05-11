@@ -13,95 +13,25 @@ MonoBehaviour:
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
   Directories:
-  - DirectoryName: Assets/BundleRes/Prefab1
-    BuildRuleName: NAssetToNBundle
-    Group: Base
-  - DirectoryName: Assets/BundleRes/Prefab2
+  - DirectoryName: Assets/BundleRes/Prefab3
     BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/Prefab3
-    BuildRuleName: NAssetToOneBundleWithTopDirectory
-    Group: Base
-  - DirectoryName: Assets/BundleRes/RawAsset
-    BuildRuleName: NAssetToNRawBundle
+  - DirectoryName: Assets/BundleRes/Prefab3/Prefab33/New Folder
+    BuildRuleName: NAssetToOneBundle
     Group: Base
   Bundles:
-  - RelativePath: BundleRes/testgo 1_prefab.bundle
+  - RelativePath: BundleRes/prefab3.bundle
     DirectoryName: BundleRes
-    BundleName: testgo 1_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO 1.prefab
-  - RelativePath: BundleRes/testgo 2_prefab.bundle
-    DirectoryName: BundleRes
-    BundleName: testgo 2_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO 2.prefab
-  - RelativePath: BundleRes/testgo 3_prefab.bundle
-    DirectoryName: BundleRes
-    BundleName: testgo 3_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO 3.prefab
-  - RelativePath: BundleRes/testgo_prefab.bundle
-    DirectoryName: BundleRes
-    BundleName: testgo_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO.prefab
-  - RelativePath: BundleRes/prefab2.bundle
-    DirectoryName: BundleRes
-    BundleName: prefab2.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 1.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 2.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 3.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO.prefab
-  - RelativePath: BundleRes/Prefab3/prefab31.bundle
-    DirectoryName: BundleRes/Prefab3
-    BundleName: prefab31.bundle
+    BundleName: prefab3.bundle
     Group: Base
     IsRaw: 0
     Assets:
     - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO 1.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO 2.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO.prefab
-  - RelativePath: BundleRes/Prefab3/prefab32.bundle
-    DirectoryName: BundleRes/Prefab3
-    BundleName: prefab32.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
     - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO 1.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO 2.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO.prefab
-  - RelativePath: BundleRes/Prefab3/prefab33.bundle
-    DirectoryName: BundleRes/Prefab3
-    BundleName: prefab33.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
     - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 1.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 2.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO.prefab
-  - RelativePath: BundleRes/RawAsset/RawImage.jpg
-    DirectoryName: BundleRes/RawAsset
-    BundleName: RawImage.jpg
-    Group: Base
-    IsRaw: 1
-    Assets:
-    - AssetName: Assets/BundleRes/RawAsset/RawImage.jpg
-  - RelativePath: BundleRes/RawAsset/rawText.txt
-    DirectoryName: BundleRes/RawAsset
-    BundleName: rawText.txt
-    Group: Base
-    IsRaw: 1
-    Assets:
-    - AssetName: Assets/BundleRes/RawAsset/rawText.txt

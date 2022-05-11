@@ -22,7 +22,7 @@ namespace CatAsset.Editor
         /// 资源包构建信息列表
         /// </summary>
         public List<BundleBuildInfo> Bundles;
-        
+
         /// <summary>
         /// 资源包构建规则名->资源包构建规则接口实例
         /// </summary>
@@ -36,9 +36,11 @@ namespace CatAsset.Editor
             Bundles.Clear();
             
             InitRuleDict();
+            
             for (int i = 0; i < Directories.Count; i++)
             {
                 BundleBuildDirectory bundleBuildDirectory = Directories[i];
+                
                 IBundleBuildRule rule = ruleDict[bundleBuildDirectory.BuildRuleName];
                 List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
                 Bundles.AddRange(bundles);
@@ -75,7 +77,7 @@ namespace CatAsset.Editor
 
                 if (directoryName == bundleBuildDirectory.DirectoryName)
                 {
-                    //不能重复添加
+                    //同名目录不能重复添加
                     return false;
                 }
             }
