@@ -6,14 +6,11 @@ namespace CatAsset.Editor
     /// <summary>
     /// 将指定目录下所有资源分别构建为一个原生资源包
     /// </summary>
-    public class NAssetToNRawBundle : IBundleBuildRule
+    public class NAssetToNRawBundle : NAssetToNBundle
     {
-        public List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
+        public override List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
-            List<BundleBuildInfo> result = new List<BundleBuildInfo>();
-            
-
-
+            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory.DirectoryName,bundleBuildDirectory.Group,true);
             return result;
         }
     }

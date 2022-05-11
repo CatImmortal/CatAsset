@@ -14,6 +14,11 @@ namespace CatAsset.Editor
     public class BundleBuildInfo
     {
         /// <summary>
+        /// 相对路径
+        /// </summary>
+        public string RelativePath;
+        
+        /// <summary>
         /// 目录名
         /// </summary>
         public string DirectoryName;
@@ -23,11 +28,6 @@ namespace CatAsset.Editor
         /// </summary>
         public string BundleName;
 
-        /// <summary>
-        /// 相对路径
-        /// </summary>
-        public string RelativePath;
-        
         /// <summary>
         /// 资源组
         /// </summary>
