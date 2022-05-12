@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 
@@ -25,7 +27,7 @@ namespace CatAsset.Editor
         /// 是否进行冗余资源分析
         /// </summary>
         public bool IsRedundancyAnalyze = true;
-        
+
         /// <summary>
         /// 资源包构建规则名->资源包构建规则接口实例
         /// </summary>
@@ -34,31 +36,33 @@ namespace CatAsset.Editor
         /// <summary>
         /// 刷新资源包构建信息
         /// </summary>
-        public void RefreshBundleBuildInfo()
+        public void RefreshBundleBuildInfos()
         {
             //初始化资源包构建规则
             InitRuleDict();
-            
-            //根据构建规则初始化初资源包构建信息
+
+            //根据构建规则初始化资源包构建信息
             InitBundleBuildInfo();
 
             //将隐式依赖都转换为显式构建资源
             ImplicitDependencyToExplicitBuildAsset();
-            
+
             //上一步执行后可能出现同一个隐式依赖被转换为了不同资源包的显式构建资源
             //因此可能出现了资源冗余的情况
-            
+
             if (IsRedundancyAnalyze)
             {
                 //进行冗余资源分析
-                RedundancyAnalyze();
+                RedundancyAssetAnalyze();
             }
-            
+
             //在将隐式依赖转换为显式构建资源后，可能出现场景资源和非场景资源被放进了同一个资源包的情况
             //而这是Unity不允许的，会在BuildBundle时报错，所以需要在这一步将其拆开
             SplitSceneBundle();
-           
-            
+
+            //最后给资源包列表排下序
+            Bundles.Sort();
+
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
         }
@@ -71,10 +75,11 @@ namespace CatAsset.Editor
             Type[] types = typeof(BundleBuildConfigSO).Assembly.GetTypes();
             foreach (Type type in types)
             {
-                if (!type.IsInterface && typeof(IBundleBuildRule).IsAssignableFrom(type) && !ruleDict.ContainsKey(type.Name))
+                if (!type.IsInterface && typeof(IBundleBuildRule).IsAssignableFrom(type) &&
+                    !ruleDict.ContainsKey(type.Name))
                 {
-                    IBundleBuildRule rule = (IBundleBuildRule)Activator.CreateInstance(type);
-                    ruleDict.Add(type.Name,rule);
+                    IBundleBuildRule rule = (IBundleBuildRule) Activator.CreateInstance(type);
+                    ruleDict.Add(type.Name, rule);
                 }
             }
         }
@@ -88,13 +93,13 @@ namespace CatAsset.Editor
             for (int i = 0; i < Directories.Count; i++)
             {
                 BundleBuildDirectory bundleBuildDirectory = Directories[i];
-                
+
                 IBundleBuildRule rule = ruleDict[bundleBuildDirectory.BuildRuleName];
                 List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
                 Bundles.AddRange(bundles);
             }
         }
-        
+
         /// <summary>
         /// 将隐式依赖转为显式构建资源
         /// </summary>
@@ -110,8 +115,8 @@ namespace CatAsset.Editor
                     explicitBuildAssetSet.Add(assetName);
                 }
             }
-            
-            
+
+
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
                 if (bundleBuildInfo.IsRaw)
@@ -120,13 +125,13 @@ namespace CatAsset.Editor
                     //因为原生资源包本质是个虚拟资源包，所以bundleBuildInfo.Assets列表里只能有1个原生资源存在
                     continue;
                 }
-                
+
                 List<string> implicitDependencies = new List<string>();
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
                     string assetName = assetBuildInfo.AssetName;
-                    
+
                     //检查依赖列表
                     List<string> dependencies = Util.GetDependencies(assetName);
                     foreach (string dependency in dependencies)
@@ -138,7 +143,7 @@ namespace CatAsset.Editor
                         }
                     }
                 }
-                
+
                 //将隐式依赖转为显式构建资源
                 foreach (string implicitDependency in implicitDependencies)
                 {
@@ -148,56 +153,17 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 冗余分析，将在不同资源包中的相同资源单独提取出来到冗余资源包中
+        /// 冗余资源分析
         /// </summary>
-        private void RedundancyAnalyze()
+        private void RedundancyAssetAnalyze()
         {
-            //资源->所属资源包
-            Dictionary<AssetBuildInfo, HashSet<BundleBuildInfo>> dependencyDict =
-                new Dictionary<AssetBuildInfo, HashSet<BundleBuildInfo>>();
-
-            //统计资源和其所属资源包
-            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            List<BundleBuildInfo> redundancyBundles = RedundancyAssetAnalyzer.Analyze(Bundles);
+            foreach (BundleBuildInfo redundancyBundle in redundancyBundles)
             {
-                foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
-                {
-                    if (!dependencyDict.TryGetValue(assetBuildInfo, out HashSet<BundleBuildInfo> set))
-                    {
-                        set = new HashSet<BundleBuildInfo>();
-                        dependencyDict.Add(assetBuildInfo,set);
-                    }
-
-                    set.Add(bundleBuildInfo);
-                }
+                Bundles.Add(redundancyBundle);
             }
-
-            //冗余资源列表
-            List<AssetBuildInfo> redundancies = new List<AssetBuildInfo>();
-            
-            foreach (KeyValuePair<AssetBuildInfo, HashSet<BundleBuildInfo>> pair in dependencyDict)
-            {
-                if (pair.Value.Count >= 2)
-                {
-                    //冗余资源
-                    //先从原本所在的资源包里删掉
-                    foreach (BundleBuildInfo bundleBuildInfo in pair.Value)
-                    {
-                        bundleBuildInfo.Assets.Remove(pair.Key);
-                    }
-                    
-                    redundancies.Add(pair.Key);
-                }
-            }
-            
-            //新建冗余资源包
-            BundleBuildInfo redundancyBundle = new BundleBuildInfo(null, "redundancy.bundle", Util.DefaultGroup, false);
-            foreach (AssetBuildInfo redundancy in redundancies)
-            {
-                redundancyBundle.Assets.Add(redundancy);
-            }
-            Bundles.Add(redundancyBundle);
         }
-        
+
         /// <summary>
         /// 分割场景资源包中的非场景资源
         /// </summary>
@@ -212,10 +178,10 @@ namespace CatAsset.Editor
                     newBundles.Add(bundleBuildInfo);
                     continue;
                 }
-                
+
                 List<AssetBuildInfo> sceneAssets = new List<AssetBuildInfo>(); //场景资源
                 List<AssetBuildInfo> normalAssets = new List<AssetBuildInfo>(); //非场景资源
-                
+
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
                     string assetName = assetBuildInfo.AssetName;
@@ -231,13 +197,13 @@ namespace CatAsset.Editor
 
                 if (sceneAssets.Count == 0 || normalAssets.Count == 0)
                 {
-                    //没有混合场景资源和非场景资源
+                    //没有混合场景资源和非场景资源 直接跳过了
                     newBundles.Add(bundleBuildInfo);
                     continue;
                 }
-                
+
                 //场景资源和非场景资源被混进同一个资源包里了，需要拆分
-                
+
                 //重建场景资源包
                 BundleBuildInfo sceneBundleBuildInfo = new BundleBuildInfo(bundleBuildInfo.DirectoryName,
                     bundleBuildInfo.BundleName, bundleBuildInfo.Group, false);
@@ -245,25 +211,27 @@ namespace CatAsset.Editor
                 {
                     sceneBundleBuildInfo.Assets.Add(sceneAsset);
                 }
+
                 newBundles.Add(sceneBundleBuildInfo);
-                
+
                 //重建非场景资源包
                 string[] splitNames = bundleBuildInfo.BundleName.Split('.');
-                string bundleName =  $"{splitNames[0]}_res.{splitNames[1]}";
+                string bundleName = $"{splitNames[0]}_res.{splitNames[1]}";
                 BundleBuildInfo normalBundleBuildInfo = new BundleBuildInfo(bundleBuildInfo.DirectoryName, bundleName,
                     bundleBuildInfo.Group, false);
                 foreach (AssetBuildInfo normalAsset in normalAssets)
                 {
                     normalBundleBuildInfo.Assets.Add(normalAsset);
                 }
+
                 newBundles.Add(normalBundleBuildInfo);
-                
+
 
             }
 
             Bundles = newBundles;
         }
-        
+
         /// <summary>
         /// 检查资源包构建目录是否可被添加
         /// </summary>
@@ -282,8 +250,8 @@ namespace CatAsset.Editor
 
             return true;
         }
-        
-        
+
+
     }
 }
 

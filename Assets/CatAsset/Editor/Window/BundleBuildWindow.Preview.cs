@@ -29,7 +29,7 @@ namespace CatAsset.Editor
             {
                 if (GUILayout.Button("刷新", GUILayout.Width(100)))
                 {
-                    bundleBuildConfg.RefreshBundleBuildInfo();
+                    bundleBuildConfg.RefreshBundleBuildInfos();
                 }
 
                 if (GUILayout.Button("全部展开", GUILayout.Width(100)))
