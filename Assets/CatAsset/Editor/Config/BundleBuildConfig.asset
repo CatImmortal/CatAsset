@@ -36,7 +36,6 @@ MonoBehaviour:
     IsRaw: 0
     Assets:
     - AssetName: Assets/BundleRes/Prefab1/TestGO 1.prefab
-    - AssetName: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
   - RelativePath: BundleRes/Prefab1/testgo 2_prefab.bundle
     DirectoryName: BundleRes/Prefab1
     BundleName: testgo 2_prefab.bundle
@@ -68,7 +67,6 @@ MonoBehaviour:
     - AssetName: Assets/BundleRes/Prefab2/TestGO 2.prefab
     - AssetName: Assets/BundleRes/Prefab2/TestGO 3.prefab
     - AssetName: Assets/BundleRes/Prefab2/TestGO.prefab
-    - AssetName: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
   - RelativePath: BundleRes/Prefab3/prefab31.bundle
     DirectoryName: BundleRes/Prefab3
     BundleName: prefab31.bundle
@@ -103,9 +101,9 @@ MonoBehaviour:
     IsRaw: 0
     Assets:
     - AssetName: Assets/BundleRes/Scene/New Scene.unity
-  - RelativePath: BundleRes/scene_res.bundle
-    DirectoryName: BundleRes
-    BundleName: scene_res.bundle
+  - RelativePath: redundancy.bundle
+    DirectoryName: 
+    BundleName: redundancy.bundle
     Group: Base
     IsRaw: 0
     Assets:

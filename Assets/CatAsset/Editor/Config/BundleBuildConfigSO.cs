@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using Codice.Client.BaseCommands;
 using UnityEditor;
 using UnityEngine;
 
@@ -130,7 +128,7 @@ namespace CatAsset.Editor
                     string assetName = assetBuildInfo.AssetName;
                     
                     //检查依赖列表
-                    string[] dependencies = Util.GetDependencies(assetName);
+                    List<string> dependencies = Util.GetDependencies(assetName);
                     foreach (string dependency in dependencies)
                     {
                         if (!explicitBuildAssetSet.Contains(dependency))
@@ -154,7 +152,50 @@ namespace CatAsset.Editor
         /// </summary>
         private void RedundancyAnalyze()
         {
+            //资源->所属资源包
+            Dictionary<AssetBuildInfo, HashSet<BundleBuildInfo>> dependencyDict =
+                new Dictionary<AssetBuildInfo, HashSet<BundleBuildInfo>>();
+
+            //统计资源和其所属资源包
+            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            {
+                foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
+                {
+                    if (!dependencyDict.TryGetValue(assetBuildInfo, out HashSet<BundleBuildInfo> set))
+                    {
+                        set = new HashSet<BundleBuildInfo>();
+                        dependencyDict.Add(assetBuildInfo,set);
+                    }
+
+                    set.Add(bundleBuildInfo);
+                }
+            }
+
+            //冗余资源列表
+            List<AssetBuildInfo> redundancies = new List<AssetBuildInfo>();
             
+            foreach (KeyValuePair<AssetBuildInfo, HashSet<BundleBuildInfo>> pair in dependencyDict)
+            {
+                if (pair.Value.Count >= 2)
+                {
+                    //冗余资源
+                    //先从原本所在的资源包里删掉
+                    foreach (BundleBuildInfo bundleBuildInfo in pair.Value)
+                    {
+                        bundleBuildInfo.Assets.Remove(pair.Key);
+                    }
+                    
+                    redundancies.Add(pair.Key);
+                }
+            }
+            
+            //新建冗余资源包
+            BundleBuildInfo redundancyBundle = new BundleBuildInfo(null, "redundancy.bundle", Util.DefaultGroup, false);
+            foreach (AssetBuildInfo redundancy in redundancies)
+            {
+                redundancyBundle.Assets.Add(redundancy);
+            }
+            Bundles.Add(redundancyBundle);
         }
         
         /// <summary>
