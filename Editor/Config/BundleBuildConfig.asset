@@ -94,6 +94,20 @@ MonoBehaviour:
     - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 1.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 2.prefab
     - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO.prefab
+  - RelativePath: BundleRes/RawAsset/RawImage.jpg
+    DirectoryName: BundleRes/RawAsset
+    BundleName: RawImage.jpg
+    Group: Base
+    IsRaw: 1
+    Assets:
+    - AssetName: Assets/BundleRes/RawAsset/RawImage.jpg
+  - RelativePath: BundleRes/RawAsset/rawText.txt
+    DirectoryName: BundleRes/RawAsset
+    BundleName: rawText.txt
+    Group: Base
+    IsRaw: 1
+    Assets:
+    - AssetName: Assets/BundleRes/RawAsset/rawText.txt
   - RelativePath: BundleRes/scene.bundle
     DirectoryName: BundleRes
     BundleName: scene.bundle

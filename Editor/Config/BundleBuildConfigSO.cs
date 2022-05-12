@@ -209,6 +209,7 @@ namespace CatAsset.Editor
             {
                 if (bundleBuildInfo.IsRaw)
                 {
+                    newBundles.Add(bundleBuildInfo);
                     continue;
                 }
                 
