@@ -13,113 +13,71 @@ MonoBehaviour:
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
   Directories:
-  - DirectoryName: Assets/BundleRes/Prefab1
-    BuildRuleName: NAssetToNBundle
-    Group: Base
-  - DirectoryName: Assets/BundleRes/Prefab2
+  - DirectoryName: Assets/BundleRes/ResTestA
     BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/Prefab3
-    BuildRuleName: NAssetToOneBundleWithTopDirectory
+  - DirectoryName: Assets/BundleRes/ResTestB
+    BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/RawAsset
-    BuildRuleName: NAssetToNRawBundle
+  - DirectoryName: Assets/BundleRes/ResTestC
+    BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/Scene
+  - DirectoryName: Assets/BundleRes/ResTestD
+    BuildRuleName: NAssetToOneBundle
+    Group: Base
+  - DirectoryName: Assets/BundleRes/ResTestE
     BuildRuleName: NAssetToOneBundle
     Group: Base
   Bundles:
-  - RelativePath: BundleRes/Prefab1/testgo 1_prefab.bundle
-    DirectoryName: BundleRes/Prefab1
-    BundleName: testgo 1_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO 1.prefab
-  - RelativePath: BundleRes/Prefab1/testgo 2_prefab.bundle
-    DirectoryName: BundleRes/Prefab1
-    BundleName: testgo 2_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO 2.prefab
-  - RelativePath: BundleRes/Prefab1/testgo 3_prefab.bundle
-    DirectoryName: BundleRes/Prefab1
-    BundleName: testgo 3_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO 3.prefab
-  - RelativePath: BundleRes/Prefab1/testgo_prefab.bundle
-    DirectoryName: BundleRes/Prefab1
-    BundleName: testgo_prefab.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab1/TestGO.prefab
-  - RelativePath: BundleRes/prefab2.bundle
+  - RelativePath: BundleRes/restesta.bundle
     DirectoryName: BundleRes
-    BundleName: prefab2.bundle
+    BundleName: restesta.bundle
     Group: Base
     IsRaw: 0
     Assets:
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 1.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 2.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 3.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO.prefab
-  - RelativePath: BundleRes/Prefab3/prefab31.bundle
-    DirectoryName: BundleRes/Prefab3
-    BundleName: prefab31.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO 1.prefab
-    - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO 2.prefab
-    - AssetName: Assets/BundleRes/Prefab3/Prefab31/TestGO.prefab
-  - RelativePath: BundleRes/Prefab3/prefab32.bundle
-    DirectoryName: BundleRes/Prefab3
-    BundleName: prefab32.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO 1.prefab
-    - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO 2.prefab
-    - AssetName: Assets/BundleRes/Prefab3/Prefab32/TestGO.prefab
-  - RelativePath: BundleRes/Prefab3/prefab33.bundle
-    DirectoryName: BundleRes/Prefab3
-    BundleName: prefab33.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 1.prefab
-    - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO 2.prefab
-    - AssetName: Assets/BundleRes/Prefab3/Prefab33/TestGO.prefab
-  - RelativePath: BundleRes/RawAsset/RawImage.jpg
-    DirectoryName: BundleRes/RawAsset
-    BundleName: RawImage.jpg
-    Group: Base
-    IsRaw: 1
-    Assets:
-    - AssetName: Assets/BundleRes/RawAsset/RawImage.jpg
-  - RelativePath: BundleRes/RawAsset/rawText.txt
-    DirectoryName: BundleRes/RawAsset
-    BundleName: rawText.txt
-    Group: Base
-    IsRaw: 1
-    Assets:
-    - AssetName: Assets/BundleRes/RawAsset/rawText.txt
-  - RelativePath: BundleRes/scene.bundle
+    - AssetName: Assets/BundleRes/ResTestA/New Prefab.prefab
+  - RelativePath: BundleRes/restestb.bundle
     DirectoryName: BundleRes
-    BundleName: scene.bundle
+    BundleName: restestb.bundle
     Group: Base
     IsRaw: 0
     Assets:
-    - AssetName: Assets/BundleRes/Scene/New Scene.unity
-  - RelativePath: redundancy.bundle
+    - AssetName: Assets/BundleRes/ResTestB/New Prefab.prefab
+  - RelativePath: BundleRes/restestc.bundle
+    DirectoryName: BundleRes
+    BundleName: restestc.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/ResTestC/New Prefab.prefab
+  - RelativePath: BundleRes/restestd.bundle
+    DirectoryName: BundleRes
+    BundleName: restestd.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/ResTestD/New Prefab.prefab
+  - RelativePath: BundleRes/resteste.bundle
+    DirectoryName: BundleRes
+    BundleName: resteste.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/BundleRes/ResTestE/New Prefab.prefab
+  - RelativePath: redundancy_0.bundle
     DirectoryName: 
-    BundleName: redundancy.bundle
+    BundleName: redundancy_0.bundle
     Group: Base
     IsRaw: 0
     Assets:
-    - AssetName: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
+    - AssetName: Assets/Prefabs/PrefabW.prefab
+    - AssetName: Assets/Prefabs/PrefabX.prefab
+    - AssetName: Assets/Prefabs/PrefabZ.prefab
+  - RelativePath: redundancy_1.bundle
+    DirectoryName: 
+    BundleName: redundancy_1.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - AssetName: Assets/Prefabs/PrefabY.prefab
   IsRedundancyAnalyze: 1
