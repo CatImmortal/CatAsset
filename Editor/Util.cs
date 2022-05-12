@@ -111,16 +111,18 @@ namespace CatAsset.Editor
         /// <summary>
         /// 获取排除了自身和csharp代码文件的依赖资源列表
         /// </summary>
-        public static string[] GetDependencies(string assetName,bool recursive = true)
+        public static List<string> GetDependencies(string assetName,bool recursive = true)
         {
+            List<string> result = new List<string>();
+            
             string[] dependencies = AssetDatabase.GetDependencies(assetName,recursive);
 
             if (dependencies.Length == 0)
             {
-                return dependencies;
+                return result;
             }
 
-            List<string> result = new List<string>();
+        
             for (int i = 0; i < dependencies.Length; i++)
             {
                 string dependencyName = dependencies[i];
@@ -132,7 +134,7 @@ namespace CatAsset.Editor
                 result.Add(dependencyName);
             }
 
-            return result.ToArray();
+            return result;
         }
 
 

@@ -11,7 +11,7 @@ namespace CatAsset.Editor
     /// 资源包构建信息
     /// </summary>
     [Serializable]
-    public class BundleBuildInfo
+    public class BundleBuildInfo : IComparable<BundleBuildInfo>,IEquatable<BundleBuildInfo>
     {
         /// <summary>
         /// 相对路径
@@ -48,9 +48,37 @@ namespace CatAsset.Editor
         {
             DirectoryName = directoryName;
             BundleName = bundleName;
-            RelativePath = $"{DirectoryName}/{BundleName}";
             Group = group;
             IsRaw = isRaw;
+            
+            if (!string.IsNullOrEmpty(DirectoryName))
+            {
+                RelativePath = $"{DirectoryName}/{BundleName}";
+            }
+            else
+            {
+                RelativePath = BundleName;
+            }
+        }
+
+        public override string ToString()
+        {
+            return RelativePath;
+        }
+        
+        public int CompareTo(BundleBuildInfo other)
+        {
+            return RelativePath.CompareTo(other.RelativePath);
+        }
+        
+        public bool Equals(BundleBuildInfo other)
+        {
+            return RelativePath.Equals(other.RelativePath);
+        }
+
+        public override int GetHashCode()
+        {
+            return RelativePath.GetHashCode();
         }
     }
 
