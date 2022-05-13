@@ -13,71 +13,53 @@ MonoBehaviour:
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
   Directories:
-  - DirectoryName: Assets/BundleRes/ResTestA
+  - DirectoryName: Assets/BundleRes/Prefab1
     BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/ResTestB
+  - DirectoryName: Assets/BundleRes/Prefab2
     BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/ResTestC
+  - DirectoryName: Assets/BundleRes/Prefab3
     BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/ResTestD
-    BuildRuleName: NAssetToOneBundle
-    Group: Base
-  - DirectoryName: Assets/BundleRes/ResTestE
-    BuildRuleName: NAssetToOneBundle
+  - DirectoryName: Assets/BundleRes/RawAsset
+    BuildRuleName: NAssetToNRawBundle
     Group: Base
   Bundles:
-  - RelativePath: BundleRes/restesta.bundle
+  - RelativePath: BundleRes/prefab1.bundle
     DirectoryName: BundleRes
-    BundleName: restesta.bundle
+    BundleName: prefab1.bundle
     Group: Base
     IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/ResTestA/New Prefab.prefab
-  - RelativePath: BundleRes/restestb.bundle
+    Assets: []
+  - RelativePath: BundleRes/prefab2.bundle
     DirectoryName: BundleRes
-    BundleName: restestb.bundle
+    BundleName: prefab2.bundle
     Group: Base
     IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/ResTestB/New Prefab.prefab
-  - RelativePath: BundleRes/restestc.bundle
+    Assets: []
+  - RelativePath: BundleRes/prefab3.bundle
     DirectoryName: BundleRes
-    BundleName: restestc.bundle
+    BundleName: prefab3.bundle
     Group: Base
     IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/ResTestC/New Prefab.prefab
-  - RelativePath: BundleRes/restestd.bundle
-    DirectoryName: BundleRes
-    BundleName: restestd.bundle
+    Assets: []
+  - RelativePath: BundleRes/RawAsset/RawImage.jpg
+    DirectoryName: BundleRes/RawAsset
+    BundleName: RawImage.jpg
     Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/ResTestD/New Prefab.prefab
-  - RelativePath: BundleRes/resteste.bundle
-    DirectoryName: BundleRes
-    BundleName: resteste.bundle
+    IsRaw: 1
+    Assets: []
+  - RelativePath: BundleRes/RawAsset/rawText.txt
+    DirectoryName: BundleRes/RawAsset
+    BundleName: rawText.txt
     Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/BundleRes/ResTestE/New Prefab.prefab
+    IsRaw: 1
+    Assets: []
   - RelativePath: redundancy_0.bundle
     DirectoryName: 
     BundleName: redundancy_0.bundle
     Group: Base
     IsRaw: 0
-    Assets:
-    - AssetName: Assets/Prefabs/PrefabW.prefab
-    - AssetName: Assets/Prefabs/PrefabX.prefab
-    - AssetName: Assets/Prefabs/PrefabZ.prefab
-  - RelativePath: redundancy_1.bundle
-    DirectoryName: 
-    BundleName: redundancy_1.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - AssetName: Assets/Prefabs/PrefabY.prefab
+    Assets: []
   IsRedundancyAnalyze: 1

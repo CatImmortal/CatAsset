@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace CatAsset.Editor
 {
@@ -14,7 +11,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源名
         /// </summary>
-        public string AssetName;
+        public readonly string AssetName;
 
         public AssetBuildInfo(string assetName)
         {
