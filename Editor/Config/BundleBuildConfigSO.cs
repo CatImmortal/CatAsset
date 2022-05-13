@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,7 +8,7 @@ namespace CatAsset.Editor
     /// <summary>
     /// 资源包构建配置
     /// </summary>
-    [CreateAssetMenu()]
+    [CreateAssetMenu]
     public class BundleBuildConfigSO : ScriptableObject
     {
         /// <summary>
@@ -38,12 +36,15 @@ namespace CatAsset.Editor
         /// </summary>
         public void RefreshBundleBuildInfos()
         {
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","初始化资源包构建规则...",1/5f);
             //初始化资源包构建规则
             InitRuleDict();
 
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","始化资源包构建信息...",2/5f);
             //根据构建规则初始化资源包构建信息
             InitBundleBuildInfo();
 
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","将隐式依赖都转换为显式构建资源...",3/5f);
             //将隐式依赖都转换为显式构建资源
             ImplicitDependencyToExplicitBuildAsset();
 
@@ -52,19 +53,27 @@ namespace CatAsset.Editor
 
             if (IsRedundancyAnalyze)
             {
+                EditorUtility.DisplayProgressBar("刷新资源包构建信息","进行冗余资源分析...",4/5f);
                 //进行冗余资源分析
                 RedundancyAssetAnalyze();
             }
 
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","分割场景资源包中的非场景资源...",5/5f);
             //在将隐式依赖转换为显式构建资源后，可能出现场景资源和非场景资源被放进了同一个资源包的情况
             //而这是Unity不允许的，会在BuildBundle时报错，所以需要在这一步将其拆开
             SplitSceneBundle();
 
+            
             //最后给资源包列表排下序
             Bundles.Sort();
 
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
+            
+            EditorUtility.ClearProgressBar();
+            Debug.Log("资源包构建信息刷新完毕");
+            
+            
         }
 
         /// <summary>
