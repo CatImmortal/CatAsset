@@ -20,6 +20,11 @@ namespace CatAsset.Editor
         /// </summary>
         public const string DefaultGroup = "Base";
         
+        /// <summary>
+        /// 资源清单文件名
+        /// </summary>
+        public const string ManifestFileName = "CatAssetManifest.json";
+        
         static Util()
         {
             ExcludeSet.Add(".meta");
@@ -137,6 +142,26 @@ namespace CatAsset.Editor
             return result;
         }
 
+        /// <summary>
+        /// 删除指定目录
+        /// </summary>
+        public static void DeleteDirectory(DirectoryInfo dirInfo)
+        {
+            //删除当前目录下的所有文件
+            foreach (FileInfo fileInfo in dirInfo.GetFiles())
+            {
+                fileInfo.Delete();
+            }
+
+            //递归删除子目录
+            foreach (DirectoryInfo childDirInfo in dirInfo.GetDirectories())
+            {
+                DeleteDirectory(childDirInfo);
+            }
+            
+            //删除自身
+            dirInfo.Delete();
+        }
 
     }
 }

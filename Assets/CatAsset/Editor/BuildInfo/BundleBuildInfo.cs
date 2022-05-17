@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 
 namespace CatAsset.Editor
 {
@@ -49,7 +51,7 @@ namespace CatAsset.Editor
             
             if (!string.IsNullOrEmpty(DirectoryName))
             {
-                RelativePath = $"{DirectoryName}/{BundleName}";
+                RelativePath = $"{DirectoryName.ToLower()}/{BundleName}";
             }
             else
             {
@@ -57,6 +59,27 @@ namespace CatAsset.Editor
             }
         }
 
+        /// <summary>
+        /// 获取用于构建资源包的AssetBundleBuild
+        /// </summary>
+        public AssetBundleBuild GetAssetBundleBuild()
+        {
+            AssetBundleBuild bundleBuild = new AssetBundleBuild
+            {
+                assetBundleName = RelativePath
+            };
+
+            List<string> assetNames = new List<string>();
+            foreach (AssetBuildInfo assetBuildInfo in Assets)
+            {
+                assetNames.Add(assetBuildInfo.AssetName);
+            }
+
+            bundleBuild.assetNames = assetNames.ToArray();
+
+            return bundleBuild;
+        }
+        
         public override string ToString()
         {
             return RelativePath;
@@ -76,6 +99,8 @@ namespace CatAsset.Editor
         {
             return RelativePath.GetHashCode();
         }
+        
+        
     }
 
 }

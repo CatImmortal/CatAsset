@@ -42,17 +42,7 @@ namespace CatAsset.Editor
                     
                     //绘制目录名
                     directory.DirectoryName = EditorGUILayout.TextField(directory.DirectoryName);
-                    if (GUILayout.Button("选择目录", GUILayout.Width(100)))
-                    {
-                        string folder = EditorUtility.OpenFolderPanel("选择目录", directory.DirectoryName, "");
-                        if (folder != string.Empty)
-                        {
-                            folder = folder.Substring(folder.IndexOf("Assets"));
-                            directory.DirectoryName = folder;
-                        }
-                    }
-                    
-                    
+
                     //绘制构建规则名
                     string[] ruleNames = GetRuleNames();
                     ruleNameDict.TryGetValue(directory.BuildRuleName, out int index);
