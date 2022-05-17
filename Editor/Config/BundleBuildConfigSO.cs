@@ -12,6 +12,43 @@ namespace CatAsset.Editor
     public class BundleBuildConfigSO : ScriptableObject
     {
         /// <summary>
+        /// 资源清单版本号
+        /// </summary>
+        public int ManifestVersion;
+        
+        /// <summary>
+        /// 资源包构建目标平台
+        /// </summary>
+        public List<BuildTarget> TargetPlatforms;
+        
+        /// <summary>
+        /// 资源包构建设置
+        /// </summary>
+        public BuildAssetBundleOptions Options = BuildAssetBundleOptions.ChunkBasedCompression
+                                                 | BuildAssetBundleOptions.DisableLoadAssetByFileName
+                                                 | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
+        
+        /// <summary>
+        /// 资源包构建输出目录
+        /// </summary>
+        public string OutputPath = "./AssetBundles";
+        
+        /// <summary>
+        /// 是否进行冗余资源分析
+        /// </summary>
+        public bool IsRedundancyAnalyze = true;
+        
+        /// <summary>
+        /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到StreamingAssets目录下
+        /// </summary>
+        public bool IsCopyToStreamingAssets = true;
+
+        /// <summary>
+        /// 要复制到StreamingAssets目录下的资源组，以分号分隔
+        /// </summary>
+        public string CopyGroup = Util.DefaultGroup;
+
+        /// <summary>
         /// 资源包构建目录列表
         /// </summary>
         public List<BundleBuildDirectory> Directories;
@@ -20,11 +57,6 @@ namespace CatAsset.Editor
         /// 资源包构建信息列表
         /// </summary>
         public List<BundleBuildInfo> Bundles;
-
-        /// <summary>
-        /// 是否进行冗余资源分析
-        /// </summary>
-        public bool IsRedundancyAnalyze = true;
 
         /// <summary>
         /// 资源包构建规则名->资源包构建规则接口实例
@@ -260,6 +292,52 @@ namespace CatAsset.Editor
             return true;
         }
 
+        /// <summary>
+        /// 获取用于构建资源包的AssetBundleBuild列表
+        /// </summary>
+        public List<AssetBundleBuild> GetAssetBundleBuilds()
+        {
+            List<AssetBundleBuild> result = new List<AssetBundleBuild>();
+            foreach (BundleBuildInfo bundleBuildInfo in GetNormalBundleBuilds())
+            {
+                AssetBundleBuild bundleBuild = bundleBuildInfo.GetAssetBundleBuild();
+                result.Add(bundleBuild);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 获取普通资源包构建信息列表
+        /// </summary>
+        public List<BundleBuildInfo> GetNormalBundleBuilds()
+        {
+            return GetBundleBuilds(false);
+        }
+        
+        /// <summary>
+        /// 获取原生资源包构建信息列表
+        /// </summary>
+        public List<BundleBuildInfo> GetRawBundleBuilds()
+        {
+            return GetBundleBuilds(true);
+        }
+        
+        /// <summary>
+        /// 获取资源包构建信息列表
+        /// </summary>
+        private List<BundleBuildInfo> GetBundleBuilds(bool isRaw)
+        {
+            List<BundleBuildInfo> result = new List<BundleBuildInfo>();
+            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            {
+                if (bundleBuildInfo.IsRaw == isRaw)
+                {
+                    result.Add(bundleBuildInfo);
+                }
+                
+            }
+            return result;
+        }
 
     }
 }

@@ -51,7 +51,7 @@ namespace CatAsset.Editor
             switch (selectedTab)
             {
                 case 0:
-                    //DrawPackageConfigView();
+                    DrawBundleBuildConfigView();
                     break;
                 case 1:
                     DrawBundleBuildDirectoryView();

@@ -11,7 +11,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源名
         /// </summary>
-        public readonly string AssetName;
+        public string AssetName;
 
         public AssetBuildInfo(string assetName)
         {
