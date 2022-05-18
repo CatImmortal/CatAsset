@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 0
+  ManifestVersion: 1
   TargetPlatforms: 13000000
   Options: 12544
   OutputPath: ./AssetBundles
   IsRedundancyAnalyze: 1
-  IsCopyToStreamingAssets: 1
+  IsCopyToReadOnlyPath: 1
   CopyGroup: Base
   Directories:
   - DirectoryName: Assets/BundleRes/Prefab2

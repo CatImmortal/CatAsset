@@ -68,15 +68,6 @@ namespace CatAsset.Editor
             return false;
         }
         
-        /// <summary>
-        /// 获取资源包名
-        /// </summary>
-        public static string GetBundleName(string directory)
-        {
-            string bundleName = directory.Replace("Assets/","").Replace('/','_') + ".bundle";
-            bundleName = bundleName.ToLower();
-            return bundleName;
-        }
         
         /// <summary>
         /// 获取SO配置
@@ -143,6 +134,22 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
+        /// 创建空目录（若存在则清空）
+        /// </summary>
+        public static void CreateEmptyDirectory(string directory)
+        {
+            //目录已存在就删除
+            if (Directory.Exists(directory))
+            {
+                DirectoryInfo dirInfo = new DirectoryInfo(directory);
+                DeleteDirectory(dirInfo);
+            }
+            
+            //创建目录
+            Directory.CreateDirectory(directory);
+        }
+        
+        /// <summary>
         /// 删除指定目录
         /// </summary>
         public static void DeleteDirectory(DirectoryInfo dirInfo)
@@ -163,5 +170,23 @@ namespace CatAsset.Editor
             dirInfo.Delete();
         }
 
+        /// <summary>
+        /// 将原生资源清单合并至主资源清单
+        /// </summary>
+        public static void MergeManifest(CatAssetManifest main, CatAssetManifest raw)
+        {
+            for (int i = main.Bundles.Count - 1; i >= 0; i--)
+            {
+                if (main.Bundles[i].IsRaw)
+                {
+                    main.Bundles.RemoveAt(i);
+                }
+            }
+
+            foreach (BundleManifestInfo bundleManifestInfo in raw.Bundles)
+            {
+                main.Bundles.Add(bundleManifestInfo);
+            }
+        }
     }
 }

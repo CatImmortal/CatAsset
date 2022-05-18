@@ -13,38 +13,53 @@ namespace CatAsset.Editor
         /// <summary>
         /// 执行资源包构建管线
         /// </summary>
-        public static void ExecuteBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig,
-            bool isSelectSinglePlatform, BuildTarget targetPlatform)
+        public static void ExecuteBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig,BuildTarget targetPlatform)
         {
-            //获取完整资源包构建输出目录
-            string fullOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
-                bundleBuildConfig.ManifestVersion);
-
             List<AssetBundleBuild> assetBundleBuilds = bundleBuildConfig.GetAssetBundleBuilds();
             List<BundleBuildInfo> normalBundleBuilds = bundleBuildConfig.GetNormalBundleBuilds();
             List<BundleBuildInfo> rawBundleBuilds = bundleBuildConfig.GetRawBundleBuilds();
-
-            //创建资源包构建输出目录
-            CreateOutputPath(fullOutputPath);
-
+            AssetBundleManifest unityManifest = null;
+            
+ 
+            //创建完整资源包构建输出目录
+            string fullOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+                bundleBuildConfig.ManifestVersion);
+            Util.CreateEmptyDirectory(fullOutputPath);
+            
             //构建AssetBundle
-            AssetBundleManifest unityManifest =
-                BuildAssetBundles(fullOutputPath, assetBundleBuilds, bundleBuildConfig.Options, targetPlatform);
+            unityManifest = BuildAssetBundles(fullOutputPath, assetBundleBuilds, bundleBuildConfig.Options, targetPlatform);
 
             //删除所有.manifest文件
             DeleteManifestFiles(fullOutputPath);
-
+            
             //构建原生资源包
             BuildRawBundles(fullOutputPath, rawBundleBuilds);
-
+            
             //创建资源清单文件
             CatAssetManifest catAssetManifest = CreateManifest(fullOutputPath, bundleBuildConfig.ManifestVersion, normalBundleBuilds, rawBundleBuilds,
                 unityManifest);
             
             //写入资源清单文件到构建输出目录下
             WriteManifestFile(fullOutputPath,catAssetManifest);
+            
+            if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
+            {
+                //复制指定资源组的资源到只读目录下
+                CopyToReadOnlyPath(fullOutputPath,bundleBuildConfig.CopyGroup,catAssetManifest);
+            }
         }
 
+        /// <summary>
+        /// 执行原生资源包构建管线
+        /// </summary>
+        public static void ExecuteRawBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig,BuildTarget targetPlatform)
+        {
+            //获取完整原生资源包构建输出目录
+            string fullOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+                bundleBuildConfig.ManifestVersion);
+            fullOutputPath += "_rawbundles";
+        }
+        
         /// <summary>
         /// 获取完整资源包构建输出目录
         /// </summary>
@@ -56,26 +71,16 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 创建资源包构建输出目录
-        /// </summary>
-        private static void CreateOutputPath(string outputPath)
-        {
-            //目录已存在就删除
-            if (Directory.Exists(outputPath))
-            {
-                DirectoryInfo dirInfo = new DirectoryInfo(outputPath);
-                Util.DeleteDirectory(dirInfo);
-            }
-            
-            Directory.CreateDirectory(outputPath);
-        }
-
-        /// <summary>
         /// 构建AssetBundle
         /// </summary>
         private static AssetBundleManifest BuildAssetBundles(string outputPath, List<AssetBundleBuild> bundleBuilds,
             BuildAssetBundleOptions options, BuildTarget targetPlatform)
         {
+            if (bundleBuilds == null)
+            {
+                return null;
+            }
+            
             AssetBundleManifest unityManifest =
                 UnityEditor.BuildPipeline.BuildAssetBundles(outputPath, bundleBuilds.ToArray(), options,
                     targetPlatform);
@@ -88,10 +93,10 @@ namespace CatAsset.Editor
         private static void DeleteManifestFiles(string outputPath)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(outputPath);
-            string directoryName = outputPath.Substring(outputPath.LastIndexOf("\\") + 1);
+            string directory = outputPath.Substring(outputPath.LastIndexOf("\\") + 1);
             foreach (FileInfo file in dirInfo.GetFiles("*", SearchOption.AllDirectories))
             {
-                if (file.Name == directoryName || file.Extension == ".manifest")
+                if (file.Name == directory || file.Extension == ".manifest")
                 {
                     //删除manifest文件
                     file.Delete();
@@ -119,7 +124,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 生成资源清单文件
+        /// 生成资源清单
         /// </summary>
         private static CatAssetManifest CreateManifest(string outputPath, int manifestVersion,
             List<BundleBuildInfo> bundleBuilds, List<BundleBuildInfo> rawBundleBuilds,
@@ -137,7 +142,7 @@ namespace CatAsset.Editor
                 BundleManifestInfo bundleManifestInfo = new BundleManifestInfo()
                 {
                     RelativePath = bundleBuildInfo.RelativePath,
-                    DirectoryName = bundleBuildInfo.DirectoryName,
+                    Directory = bundleBuildInfo.DirectoryName,
                     BundleName = bundleBuildInfo.BundleName,
                     Group = bundleBuildInfo.Group,
                     IsRaw = false,
@@ -171,7 +176,7 @@ namespace CatAsset.Editor
                 BundleManifestInfo bundleManifestInfo = new BundleManifestInfo()
                 {
                     RelativePath = bundleBuildInfo.RelativePath,
-                    DirectoryName = bundleBuildInfo.DirectoryName,
+                    Directory = bundleBuildInfo.DirectoryName,
                     BundleName = bundleBuildInfo.BundleName,
                     Group = bundleBuildInfo.Group,
                     IsRaw = true,
@@ -198,7 +203,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 写入清单文件
+        /// 写入资源清单文件
         /// </summary>
         private static void WriteManifestFile(string outputPath,CatAssetManifest manifest)
         {
@@ -208,6 +213,59 @@ namespace CatAsset.Editor
             {
                 sw.Write(json);
             }
+        }
+
+        /// <summary>
+        /// 将指定资源组的资源复制到只读下
+        /// </summary>
+        private static void CopyToReadOnlyPath(string outputPath, string copyGroup,CatAssetManifest manifest)
+        {
+            //要复制的资源组的Set
+            HashSet<string> copyGroupSet = null;
+            if (!string.IsNullOrEmpty(copyGroup))
+            {
+                copyGroupSet = new HashSet<string>(copyGroup.Split(';'));
+            }
+            
+            Util.CreateEmptyDirectory(Application.streamingAssetsPath);
+
+            List<BundleManifestInfo> copiedBundles = new List<BundleManifestInfo>();
+
+            //复制指定组的资源文件
+            foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
+            {
+                if (copyGroupSet != null)
+                {
+                    if (!copyGroupSet.Contains(bundleManifestInfo.Group))
+                    {
+                        //跳过并非指定资源组的资源文件
+                        continue;
+                    }
+
+                }
+
+                FileInfo fi = new FileInfo(Path.Combine(outputPath, bundleManifestInfo.RelativePath));
+
+                string fullPath = CatAsset.Util.GetReadOnlyPath(bundleManifestInfo.RelativePath);
+                string fullDirectory =  CatAsset.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
+                if (!Directory.Exists(fullDirectory))
+                {
+                    //StreamingAssets下的目录不存在则创建
+                    Directory.CreateDirectory(fullDirectory);
+                }
+                
+                fi.CopyTo(fullPath);
+
+                copiedBundles.Add(bundleManifestInfo);
+            }
+            
+            //根据复制过去的资源包修改资源清单
+            manifest.Bundles = copiedBundles;
+            
+            //写入仅包含被复制的资源包的资源清单文件到只读区下
+            WriteManifestFile(Application.streamingAssetsPath,manifest);
+
+            AssetDatabase.Refresh();
         }
     }
 }

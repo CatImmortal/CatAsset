@@ -90,11 +90,11 @@ namespace CatAsset.Editor
             }
             
             EditorGUILayout.Space();
-            using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("资源包构建目标平台只有1个时，在构建完成后将其复制到StreamingAssets目录下", bundleBuildConfg.IsCopyToStreamingAssets))
+            using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("资源包构建目标平台只有1个时，在构建完成后将其复制到StreamingAssets目录下", bundleBuildConfg.IsCopyToReadOnlyPath))
             {
-                bundleBuildConfg.IsCopyToStreamingAssets = toggle.enabled;
+                bundleBuildConfg.IsCopyToReadOnlyPath = toggle.enabled;
             }
-            if (bundleBuildConfg.IsCopyToStreamingAssets)
+            if (bundleBuildConfg.IsCopyToReadOnlyPath)
             {
                 EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：");
                 bundleBuildConfg.CopyGroup = EditorGUILayout.TextField(bundleBuildConfg.CopyGroup);
@@ -116,9 +116,9 @@ namespace CatAsset.Editor
 
 
                     //处理多个平台
-                    foreach (BuildTarget item in bundleBuildConfg.TargetPlatforms)
+                    foreach (BuildTarget targetPlatform in bundleBuildConfg.TargetPlatforms)
                     {
-                        BuildPipeline.ExecuteBundleBuildPipeline(bundleBuildConfg,bundleBuildConfg.TargetPlatforms.Count == 1,item);
+                        BuildPipeline.ExecuteBundleBuildPipeline(bundleBuildConfg,targetPlatform);
                     }
 
 
@@ -128,7 +128,23 @@ namespace CatAsset.Editor
 
                 if (GUILayout.Button("仅构建原生资源包", GUILayout.Width(200)))
                 {
-                    
+                    //检查是否选中至少一个平台
+                    if (bundleBuildConfg.TargetPlatforms.Count == 0)
+                    {
+                        EditorUtility.DisplayDialog("提示", "至少要选择一个平台", "确认");
+                        return;
+                    }
+
+
+                    //处理多个平台
+                    foreach (BuildTarget targetPlatform in bundleBuildConfg.TargetPlatforms)
+                    {
+                        BuildPipeline.ExecuteRawBundleBuildPipeline(bundleBuildConfg,targetPlatform);
+                    }
+
+
+                    EditorUtility.DisplayDialog("提示", "原生资源包构建结束", "确认");
+                    return;
                 }
             }
             
