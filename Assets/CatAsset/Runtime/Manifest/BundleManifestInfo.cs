@@ -17,7 +17,7 @@ namespace CatAsset
         /// <summary>
         /// 目录名
         /// </summary>
-        public string DirectoryName;
+        public string Directory;
         
         /// <summary>
         /// 资源包名

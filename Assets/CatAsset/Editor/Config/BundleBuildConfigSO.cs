@@ -14,7 +14,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源清单版本号
         /// </summary>
-        public int ManifestVersion;
+        public int ManifestVersion = 1;
         
         /// <summary>
         /// 资源包构建目标平台
@@ -39,9 +39,9 @@ namespace CatAsset.Editor
         public bool IsRedundancyAnalyze = true;
         
         /// <summary>
-        /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到StreamingAssets目录下
+        /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到只读目录下
         /// </summary>
-        public bool IsCopyToStreamingAssets = true;
+        public bool IsCopyToReadOnlyPath = true;
 
         /// <summary>
         /// 要复制到StreamingAssets目录下的资源组，以分号分隔

@@ -14,3 +14,6 @@
 Logs/
 UserSettings/
 /AssetBundles
+Assets/StreamingAssets
+Assets/StreamingAssets.meta
+ProjectSettings/RiderScriptEditorPersistedState.asset
