@@ -58,7 +58,10 @@ namespace CatAsset.Editor
             BuildTarget targetPlatform)
         {
             List<BundleBuildInfo> rawBundleBuilds = bundleBuildConfig.GetRawBundleBuilds();
-
+            CatAssetManifest rawManifest = null;
+            CatAssetManifest mainManifest = null;
+            CatAssetManifest mergedManifest = null;
+            
             //获取完整原生资源包构建输出目录
             string fullOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                 bundleBuildConfig.ManifestVersion);
@@ -68,15 +71,14 @@ namespace CatAsset.Editor
             BuildRawBundles(fullOutputPath, rawBundleBuilds);
 
             //创建仅包含原生资源包的资源清单文件
-            CatAssetManifest rawManifest = CreateManifest(fullOutputPath, bundleBuildConfig.ManifestVersion,
+            rawManifest = CreateManifest(fullOutputPath, bundleBuildConfig.ManifestVersion,
                 new List<BundleBuildInfo>(), rawBundleBuilds, null);
             
             //获取主资源清单(将清单版本号-1)
             string mainOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                 bundleBuildConfig.ManifestVersion - 1);
             string mainManifestPath = Path.Combine(mainOutputPath, Util.ManifestFileName);
-
-            CatAssetManifest mainManifest = null;
+            
             if (File.Exists(mainManifestPath))
             {
                string json = File.ReadAllText(mainManifestPath);
@@ -84,7 +86,7 @@ namespace CatAsset.Editor
             }
             
             //合并资源清单与资源包
-            CatAssetManifest mergedManifest = MergeManifestAndBundles(mainOutputPath,fullOutputPath, mainManifest, rawManifest);
+            mergedManifest = MergeManifestAndBundles(mainOutputPath,fullOutputPath, mainManifest, rawManifest);
             
             //写入合并后的资源清单文件到构建输出目录下
             WriteManifestFile(fullOutputPath, mergedManifest);
@@ -239,7 +241,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 将主资源清单与原生资源清单进行合并（包括资源包）
+        /// 合并资源清单与资源包
         /// </summary>
         private static CatAssetManifest MergeManifestAndBundles(string mainOutputPath,string outputPath, CatAssetManifest main, CatAssetManifest raw)
         {
@@ -289,7 +291,7 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 将指定资源组的资源复制到只读下
+        /// 将指定资源组的资源复制到只读目录下
         /// </summary>
         private static void CopyToReadOnlyPath(string outputPath, string copyGroup, CatAssetManifest manifest)
         {
