@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace CatAsset.Editor
 {
@@ -33,6 +35,40 @@ namespace CatAsset.Editor
             ExcludeSet.Add(".giparams");
         }
 
+        [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 2)]
+        private static void OpenAssetBundleOutputPath()
+        {
+            Open(GetConfigAsset<BundleBuildConfigSO>().OutputPath);
+        }
+
+        [MenuItem("CatAsset/打开目录/只读区", priority = 2)]
+        private static void OpenReadOnlyPath()
+        {
+            Open(Application.streamingAssetsPath);
+        }
+
+        [MenuItem("CatAsset/打开目录/读写区", priority = 2)]
+        private static void OpenReadWritePath()
+        {
+            Open(Application.persistentDataPath);
+        }
+
+        /// <summary>
+        /// 打开指定目录
+        /// </summary>
+        private static void Open(string directory)
+        {
+            directory = string.Format("\"{0}\"", directory);
+
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                Process.Start("Explorer.exe", directory.Replace('/', '\\'));
+            }
+            else if (Application.platform == RuntimePlatform.OSXEditor)
+            {
+                Process.Start("open", directory);
+            }
+        }
 
         [MenuItem("Assets/添加为资源包构建目录（可多选）", false)]
         private static void AddToBundleBuildDirectory()
