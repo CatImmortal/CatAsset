@@ -13,57 +13,93 @@ namespace CatAsset.Editor
         /// <summary>
         /// 执行资源包构建管线
         /// </summary>
-        public static void ExecuteBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig,BuildTarget targetPlatform)
+        public static void ExecuteBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
             List<AssetBundleBuild> assetBundleBuilds = bundleBuildConfig.GetAssetBundleBuilds();
             List<BundleBuildInfo> normalBundleBuilds = bundleBuildConfig.GetNormalBundleBuilds();
             List<BundleBuildInfo> rawBundleBuilds = bundleBuildConfig.GetRawBundleBuilds();
             AssetBundleManifest unityManifest = null;
-            
- 
+
+
             //创建完整资源包构建输出目录
             string fullOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                 bundleBuildConfig.ManifestVersion);
             Util.CreateEmptyDirectory(fullOutputPath);
-            
+
             //构建AssetBundle
-            unityManifest = BuildAssetBundles(fullOutputPath, assetBundleBuilds, bundleBuildConfig.Options, targetPlatform);
+            unityManifest = BuildAssetBundles(fullOutputPath, assetBundleBuilds, bundleBuildConfig.Options,
+                targetPlatform);
 
             //删除所有.manifest文件
-            DeleteManifestFiles(fullOutputPath);
-            
+            DeleteUnityManifestFiles(fullOutputPath);
+
             //构建原生资源包
             BuildRawBundles(fullOutputPath, rawBundleBuilds);
-            
+
             //创建资源清单文件
-            CatAssetManifest catAssetManifest = CreateManifest(fullOutputPath, bundleBuildConfig.ManifestVersion, normalBundleBuilds, rawBundleBuilds,
+            CatAssetManifest catAssetManifest = CreateManifest(fullOutputPath, bundleBuildConfig.ManifestVersion,
+                normalBundleBuilds, rawBundleBuilds,
                 unityManifest);
-            
+
             //写入资源清单文件到构建输出目录下
-            WriteManifestFile(fullOutputPath,catAssetManifest);
-            
+            WriteManifestFile(fullOutputPath, catAssetManifest);
+
             if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
             {
                 //复制指定资源组的资源到只读目录下
-                CopyToReadOnlyPath(fullOutputPath,bundleBuildConfig.CopyGroup,catAssetManifest);
+                CopyToReadOnlyPath(fullOutputPath, bundleBuildConfig.CopyGroup, catAssetManifest);
             }
         }
 
         /// <summary>
         /// 执行原生资源包构建管线
         /// </summary>
-        public static void ExecuteRawBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig,BuildTarget targetPlatform)
+        public static void ExecuteRawBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig,
+            BuildTarget targetPlatform)
         {
+            List<BundleBuildInfo> rawBundleBuilds = bundleBuildConfig.GetRawBundleBuilds();
+
             //获取完整原生资源包构建输出目录
             string fullOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                 bundleBuildConfig.ManifestVersion);
-            fullOutputPath += "_rawbundles";
+            Util.CreateEmptyDirectory(fullOutputPath);
+
+            //构建原生资源包
+            BuildRawBundles(fullOutputPath, rawBundleBuilds);
+
+            //创建仅包含原生资源包的资源清单文件
+            CatAssetManifest rawManifest = CreateManifest(fullOutputPath, bundleBuildConfig.ManifestVersion,
+                new List<BundleBuildInfo>(), rawBundleBuilds, null);
+            
+            //获取主资源清单(将清单版本号-1)
+            string mainOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+                bundleBuildConfig.ManifestVersion - 1);
+            string mainManifestPath = Path.Combine(mainOutputPath, Util.ManifestFileName);
+
+            CatAssetManifest mainManifest = null;
+            if (File.Exists(mainManifestPath))
+            {
+               string json = File.ReadAllText(mainManifestPath);
+               mainManifest = CatJson.JsonParser.ParseJson<CatAssetManifest>(json);
+            }
+            
+            //合并资源清单与资源包
+            CatAssetManifest mergedManifest = MergeManifestAndBundles(mainOutputPath,fullOutputPath, mainManifest, rawManifest);
+            
+            //写入合并后的资源清单文件到构建输出目录下
+            WriteManifestFile(fullOutputPath, mergedManifest);
+            
+            if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
+            {
+                //复制指定资源组的资源到只读目录下
+                CopyToReadOnlyPath(fullOutputPath, bundleBuildConfig.CopyGroup, mergedManifest);
+            }
         }
-        
+
         /// <summary>
         /// 获取完整资源包构建输出目录
         /// </summary>
-        private static string GetFullOutputPath(string outputPath, BuildTarget targetPlatform, int manifestVersion)
+        public static string GetFullOutputPath(string outputPath, BuildTarget targetPlatform, int manifestVersion)
         {
             string dir = Application.version + "_" + manifestVersion;
             string result = Path.Combine(outputPath, targetPlatform.ToString(), dir);
@@ -80,7 +116,7 @@ namespace CatAsset.Editor
             {
                 return null;
             }
-            
+
             AssetBundleManifest unityManifest =
                 UnityEditor.BuildPipeline.BuildAssetBundles(outputPath, bundleBuilds.ToArray(), options,
                     targetPlatform);
@@ -90,7 +126,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 删除所有.manifest文件
         /// </summary>
-        private static void DeleteManifestFiles(string outputPath)
+        private static void DeleteUnityManifestFiles(string outputPath)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(outputPath);
             string directory = outputPath.Substring(outputPath.LastIndexOf("\\") + 1);
@@ -189,7 +225,7 @@ namespace CatAsset.Editor
                 bundleManifestInfo.Length = bytes.Length;
 
                 bundleManifestInfo.Hash = Hash128.Compute(bytes);
-                
+
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                 {
                     AssetName = bundleBuildInfo.Assets[0].AssetName,
@@ -197,15 +233,52 @@ namespace CatAsset.Editor
                 bundleManifestInfo.Assets.Add(assetManifestInfo);
             }
 
-         
+            manifest.Bundles.Sort();
 
             return manifest;
         }
 
         /// <summary>
+        /// 将主资源清单与原生资源清单进行合并（包括资源包）
+        /// </summary>
+        private static CatAssetManifest MergeManifestAndBundles(string mainOutputPath,string outputPath, CatAssetManifest main, CatAssetManifest raw)
+        {
+            if (main == null)
+            {
+                return raw;
+            }
+            
+            foreach (BundleManifestInfo bundleManifestInfo in main.Bundles)
+            {
+                if (!bundleManifestInfo.IsRaw)
+                {
+                    //合并原生资源包
+                    FileInfo fi = new FileInfo(Path.Combine(mainOutputPath, bundleManifestInfo.RelativePath));
+
+                    string fullPath = Path.Combine(outputPath, bundleManifestInfo.RelativePath);
+                    string fullDirectory =  Path.Combine(outputPath, bundleManifestInfo.Directory.ToLower());
+                    
+                    if (!Directory.Exists(fullDirectory))
+                    {
+                        //目录不存在则创建
+                        Directory.CreateDirectory(fullDirectory);
+                    }
+
+                    fi.CopyTo(fullPath);
+                    
+                    //合并资源清单记录
+                    raw.Bundles.Add(bundleManifestInfo);
+                }
+            }
+
+            raw.Bundles.Sort();
+            return raw;
+        }
+        
+        /// <summary>
         /// 写入资源清单文件
         /// </summary>
-        private static void WriteManifestFile(string outputPath,CatAssetManifest manifest)
+        private static void WriteManifestFile(string outputPath, CatAssetManifest manifest)
         {
             //写入清单文件json
             string json = CatJson.JsonParser.ToJson(manifest);
@@ -218,7 +291,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 将指定资源组的资源复制到只读下
         /// </summary>
-        private static void CopyToReadOnlyPath(string outputPath, string copyGroup,CatAssetManifest manifest)
+        private static void CopyToReadOnlyPath(string outputPath, string copyGroup, CatAssetManifest manifest)
         {
             //要复制的资源组的Set
             HashSet<string> copyGroupSet = null;
@@ -226,7 +299,7 @@ namespace CatAsset.Editor
             {
                 copyGroupSet = new HashSet<string>(copyGroup.Split(';'));
             }
-            
+
             Util.CreateEmptyDirectory(Application.streamingAssetsPath);
 
             List<BundleManifestInfo> copiedBundles = new List<BundleManifestInfo>();
@@ -241,29 +314,28 @@ namespace CatAsset.Editor
                         //跳过并非指定资源组的资源文件
                         continue;
                     }
-
                 }
 
                 FileInfo fi = new FileInfo(Path.Combine(outputPath, bundleManifestInfo.RelativePath));
 
                 string fullPath = CatAsset.Util.GetReadOnlyPath(bundleManifestInfo.RelativePath);
-                string fullDirectory =  CatAsset.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
+                string fullDirectory = CatAsset.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
                 if (!Directory.Exists(fullDirectory))
                 {
                     //StreamingAssets下的目录不存在则创建
                     Directory.CreateDirectory(fullDirectory);
                 }
-                
+
                 fi.CopyTo(fullPath);
 
                 copiedBundles.Add(bundleManifestInfo);
             }
-            
+
             //根据复制过去的资源包修改资源清单
             manifest.Bundles = copiedBundles;
-            
+
             //写入仅包含被复制的资源包的资源清单文件到只读区下
-            WriteManifestFile(Application.streamingAssetsPath,manifest);
+            WriteManifestFile(Application.streamingAssetsPath, manifest);
 
             AssetDatabase.Refresh();
         }

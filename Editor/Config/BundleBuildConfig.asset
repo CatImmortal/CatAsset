@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 1
+  ManifestVersion: 4
   TargetPlatforms: 13000000
   Options: 12544
   OutputPath: ./AssetBundles
@@ -45,6 +45,13 @@ MonoBehaviour:
     IsRaw: 1
     Assets:
     - AssetName: Assets/BundleRes/RawAsset/RawImage.jpg
+  - RelativePath: bundleres/rawasset/rawText 1.txt
+    DirectoryName: BundleRes/RawAsset
+    BundleName: rawText 1.txt
+    Group: Base
+    IsRaw: 1
+    Assets:
+    - AssetName: Assets/BundleRes/RawAsset/rawText 1.txt
   - RelativePath: bundleres/rawasset/rawText.txt
     DirectoryName: BundleRes/RawAsset
     BundleName: rawText.txt

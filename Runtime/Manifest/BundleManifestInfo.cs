@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace CatAsset
     /// <summary>
     /// Bundle清单信息
     /// </summary>
-    public class BundleManifestInfo
+    public class BundleManifestInfo : IComparable<BundleManifestInfo>,IEquatable<BundleManifestInfo>
     {
         /// <summary>
         /// 相对路径
@@ -54,9 +55,19 @@ namespace CatAsset
         /// </summary>
         public List<AssetManifestInfo> Assets = new List<AssetManifestInfo>();
 
+        public int CompareTo(BundleManifestInfo other)
+        {
+            return RelativePath.CompareTo(other.RelativePath);
+        }
+        
         public bool Equals(BundleManifestInfo other)
         {
-            return RelativePath == other.RelativePath && Length == other.Length && Hash == other.Hash && Group == other.Group;
+            return RelativePath.Equals(other.RelativePath)  && Length.Equals(other.Length) && Hash.Equals(other.Hash) && Group.Equals(other.Group);
+        }
+
+        public override string ToString()
+        {
+            return RelativePath;
         }
     }
 }

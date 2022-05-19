@@ -24,7 +24,15 @@ namespace CatAsset.Editor
         private void DrawBundlePreviewView()
         {
             EditorGUILayout.Space();
-            
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("冗余分析", bundleBuildConfg.IsRedundancyAnalyze))
+                {
+                    bundleBuildConfg.IsRedundancyAnalyze = toggle.enabled;
+                }
+            }
+
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("刷新", GUILayout.Width(100)))
@@ -47,13 +55,11 @@ namespace CatAsset.Editor
                         foldOutDict[bundleBuildInfo.RelativePath] = false;
                     }
                 }
-
+                
                 if (GUILayout.Button("检测循环依赖",GUILayout.Width(150)))
                 {
                     //LoopDependencAnalyzer.AnalyzeLoopDependenc(PkgUtil.PkgRuleCfg.GetAssetBundleBuildList(PkgUtil.PkgCfg.IsAnalyzeRedundancy));
                 }
-
-               
             }
             
             using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(scrollPos))

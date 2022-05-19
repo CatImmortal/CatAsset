@@ -8,7 +8,7 @@ namespace CatAsset
     /// <summary>
     /// 资源清单信息
     /// </summary>
-    public class AssetManifestInfo
+    public class AssetManifestInfo : IComparable<AssetManifestInfo>,IEquatable<AssetManifestInfo>
     {
         /// <summary>
         /// 资源名
@@ -19,6 +19,21 @@ namespace CatAsset
         /// 依赖资源名列表
         /// </summary>
         public List<string> Dependencies;
+
+        public int CompareTo(AssetManifestInfo other)
+        {
+            return AssetName.CompareTo(other.AssetName);
+        }
+
+        public bool Equals(AssetManifestInfo other)
+        {
+            return AssetName.Equals(other.AssetName);
+        }
+
+        public override string ToString()
+        {
+            return AssetName;
+        }
     }
 
 }
