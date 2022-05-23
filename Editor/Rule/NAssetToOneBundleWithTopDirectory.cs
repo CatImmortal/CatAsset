@@ -8,6 +8,7 @@ namespace CatAsset.Editor
     /// </summary>
     public class NAssetToOneBundleWithTopDirectory : NAssetToOneBundle
     {
+        /// <inheritdoc />
         public override List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();

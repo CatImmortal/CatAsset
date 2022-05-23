@@ -9,6 +9,7 @@ namespace CatAsset.Editor
     /// </summary>
     public class NAssetToOneBundle : IBundleBuildRule
     {
+        /// <inheritdoc />
         public virtual List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();
