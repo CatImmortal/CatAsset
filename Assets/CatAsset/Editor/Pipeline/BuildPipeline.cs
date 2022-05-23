@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using CatAsset.Editor.Task;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,44 +12,51 @@ namespace CatAsset.Editor
     public static class BuildPipeline
     {
         /// <summary>
+        /// 完整资源包构建输出目录的参数key
+        /// </summary>
+        public const string FullOutputPath = nameof(FullOutputPath);
+
+        public const string NormalBundleBuilds = nameof(NormalBundleBuilds);
+        public const string RawBundleBuilds = nameof(RawBundleBuilds);
+        
+        /// <summary>
         /// 执行资源包构建管线
         /// </summary>
         public static void ExecuteBundleBuildPipeline(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
+            List<IBuildPipelineTask> tasks = new List<IBuildPipelineTask>()
+            {
+                new CreateOutputDirectoryTask(),
+                new BuildAssetBundleTask(),
+                new DeleteUnityManifestFileTask(),
+                new BuildRawBundleTask(),
+                new CreateManifestTask(),
+                new WriteManifestFileTask(),
+            };
+            
+            if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
+            {
+                //需要复制资源包到只读目录下
+                tasks.Add(new CopyToReadOnlyDirectoryTask());
+                tasks.Add(new WriteManifestFileTask());
+            }
+            
             List<AssetBundleBuild> assetBundleBuilds = bundleBuildConfig.GetAssetBundleBuilds();
             List<BundleBuildInfo> normalBundleBuilds = bundleBuildConfig.GetNormalBundleBuilds();
             List<BundleBuildInfo> rawBundleBuilds = bundleBuildConfig.GetRawBundleBuilds();
-            AssetBundleManifest unityManifest = null;
-
-
-            //创建完整资源包构建输出目录
-            string fullOutputPath = GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
-                bundleBuildConfig.ManifestVersion);
-            Util.CreateEmptyDirectory(fullOutputPath);
-
-            //构建AssetBundle
-            unityManifest = BuildAssetBundles(fullOutputPath, assetBundleBuilds, bundleBuildConfig.Options,
-                targetPlatform);
-
-            //删除所有.manifest文件
-            DeleteUnityManifestFiles(fullOutputPath);
-
-            //构建原生资源包
-            BuildRawBundles(fullOutputPath, rawBundleBuilds);
-
-            //创建资源清单文件
-            CatAssetManifest catAssetManifest = CreateManifest(fullOutputPath, bundleBuildConfig.ManifestVersion,
-                normalBundleBuilds, rawBundleBuilds,
-                unityManifest);
-
-            //写入资源清单文件到构建输出目录下
-            WriteManifestFile(fullOutputPath, catAssetManifest);
-
-            if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
-            {
-                //复制指定资源组的资源到只读目录下
-                CopyToReadOnlyPath(fullOutputPath, bundleBuildConfig.CopyGroup, catAssetManifest);
-            }
+            
+            //注入构建管线参数
+            BuildPipelineRunner.InjectPipelineParam(nameof(BundleBuildConfigSO),bundleBuildConfig);
+            BuildPipelineRunner.InjectPipelineParam(nameof(BuildTarget),targetPlatform);
+            BuildPipelineRunner.InjectPipelineParam(FullOutputPath ,null);
+            BuildPipelineRunner.InjectPipelineParam(nameof(List<AssetBundleBuild>), assetBundleBuilds);
+            BuildPipelineRunner.InjectPipelineParam(nameof(AssetBundleManifest),null);
+            BuildPipelineRunner.InjectPipelineParam(NormalBundleBuilds,normalBundleBuilds);
+            BuildPipelineRunner.InjectPipelineParam(RawBundleBuilds,rawBundleBuilds);
+            BuildPipelineRunner.InjectPipelineParam(nameof(CatAssetManifest),null);
+            
+            //运行构建管线任务
+            BuildPipelineRunner.Run(tasks);
         }
 
         /// <summary>
