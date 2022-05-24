@@ -3,27 +3,37 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace CatAsset.Editor.Task
+namespace CatAsset.Editor
 {
     /// <summary>
     /// 构建AssetBundle的任务
     /// </summary>
     public class BuildAssetBundleTask : IBuildPipelineTask
     {
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private BundleBuildConfigParam bundleBuildConfigParam;
+
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private FullOutputDirectoryParam fullOutputDirectoryParam;
+
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private BundleBuildsParam bundleBuildsParam;
+
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.Out)]
+        private UnityManifestParam unityManifestParam;
+
         /// <inheritdoc />
         public TaskResult Run()
         {
             try
             {
-                BundleBuildConfigSO bundleBuildConfig =
-                    BuildPipelineRunner.GetPipelineParam<BundleBuildConfigSO>(nameof(BundleBuildConfigSO));
-            
-                BuildTarget targetPlatform = BuildPipelineRunner.GetPipelineParam<BuildTarget>(nameof(BuildTarget));
+                BundleBuildConfigSO bundleBuildConfig = bundleBuildConfigParam.Config;
 
-                string fullOutputPath = BuildPipelineRunner.GetPipelineParam<string>(BuildPipeline.FullOutputPath);
-            
-                List<AssetBundleBuild> bundleBuilds =
-                    BuildPipelineRunner.GetPipelineParam<List<AssetBundleBuild>>(nameof(List<AssetBundleBuild>));
+                BuildTarget targetPlatform = bundleBuildConfigParam.TargetPlatform;
+
+                List<AssetBundleBuild> bundleBuilds = bundleBuildsParam.AssetBundleBuilds;
+
+                string directory = fullOutputDirectoryParam.FullOutputDirectory;
 
                 if (bundleBuilds == null)
                 {
@@ -32,18 +42,22 @@ namespace CatAsset.Editor.Task
 
                 //构建AssetBundle
                 AssetBundleManifest unityManifest =
-                    UnityEditor.BuildPipeline.BuildAssetBundles(fullOutputPath, bundleBuilds.ToArray(), bundleBuildConfig.Options,
+                    UnityEditor.BuildPipeline.BuildAssetBundles(directory,
+                        bundleBuilds.ToArray(), bundleBuildConfig.Options,
                         targetPlatform);
-            
-                BuildPipelineRunner.InjectPipelineParam(nameof(AssetBundleManifest),unityManifest);
+
+                unityManifestParam = new UnityManifestParam()
+                {
+                    UnityManifest = unityManifest
+                };
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
                 return TaskResult.Failed;
             }
-            
-           
+
+
 
             return TaskResult.Success;
         }

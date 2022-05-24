@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CatAsset
+namespace CatAsset.Runtime
 {
     /// <summary>
     /// CatAsset资源清单

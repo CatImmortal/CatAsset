@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;

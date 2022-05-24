@@ -131,12 +131,12 @@ namespace CatAsset.Editor
                     {
                         if (!buildRawBundleOnly)
                         {
-                            BuildPipeline.ExecuteBundleBuildPipeline(bundleBuildConfg, targetPlatform);
+                            BuildPipeline.BuildBundles(bundleBuildConfg, targetPlatform);
                         }
                         else
                         {
                             //仅构建原生资源包
-                            BuildPipeline.ExecuteRawBundleBuildPipeline(bundleBuildConfg,targetPlatform);
+                            BuildPipeline.BuildRawBundles(bundleBuildConfg,targetPlatform);
                         }
                        
                     }
@@ -144,8 +144,8 @@ namespace CatAsset.Editor
                     bundleBuildConfg.ManifestVersion++;
                     EditorUtility.SetDirty(bundleBuildConfg);
                     AssetDatabase.SaveAssets();
-                    
-                    EditorUtility.DisplayDialog("提示", "资源包构建结束", "确认");
+                    AssetDatabase.Refresh();
+
                     return;
                 }
 

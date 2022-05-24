@@ -1,29 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
 
 
-namespace CatAsset.Editor.Task
+namespace CatAsset.Editor
 {
     /// <summary>
     /// 复制指定资源组的资源到只读目录下的任务
     /// </summary>
     public class CopyToReadOnlyDirectoryTask : IBuildPipelineTask
     {
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private BundleBuildConfigParam bundleBuildConfigParam;
+        
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.InOut)]
+        private FullOutputDirectoryParam fullOutputDirectoryParam;
+        
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.InOut)]
+        private CatAssetManifestParam catAssetManifestParam;
+        
         /// <inheritdoc />
         public TaskResult Run()
         {
             try
             {
                 BundleBuildConfigSO bundleBuildConfig =
-                    BuildPipelineRunner.GetPipelineParam<BundleBuildConfigSO>(nameof(BundleBuildConfigSO));
-                
-                string fullOutputPath = BuildPipelineRunner.GetPipelineParam<string>(BuildPipeline.FullOutputPath);
+                    bundleBuildConfigParam.Config;
+
+                string directory = fullOutputDirectoryParam.FullOutputDirectory;
 
                 CatAssetManifest manifest =
-                    BuildPipelineRunner.GetPipelineParam<CatAssetManifest>(nameof(CatAssetManifest));
+                    catAssetManifestParam.Manifest;
                 
                 
                 if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
@@ -55,10 +65,10 @@ namespace CatAsset.Editor.Task
                         }
 
                         
-                        FileInfo fi = new FileInfo(Path.Combine(fullOutputPath, bundleManifestInfo.RelativePath));
+                        FileInfo fi = new FileInfo(Path.Combine(directory, bundleManifestInfo.RelativePath));
                         
-                        string fullPath = CatAsset.Util.GetReadOnlyPath(bundleManifestInfo.RelativePath);
-                        string fullDirectory = CatAsset.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
+                        string fullPath = CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.RelativePath);
+                        string fullDirectory = CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
                         if (!Directory.Exists(fullDirectory))
                         {
                             //StreamingAssets下的目录不存在则创建
@@ -74,8 +84,8 @@ namespace CatAsset.Editor.Task
                     manifest.Bundles = copiedBundles;
 
                     //写入仅包含被复制的资源包的资源清单文件到只读区下
-                    BuildPipelineRunner.InjectPipelineParam(BuildPipeline.FullOutputPath,Application.streamingAssetsPath);
-                    BuildPipelineRunner.InjectPipelineParam(nameof(CatAssetManifest),manifest);
+                    fullOutputDirectoryParam.FullOutputDirectory = Application.streamingAssetsPath;
+                    catAssetManifestParam.Manifest = manifest;
                 }
             }
             catch (Exception e)

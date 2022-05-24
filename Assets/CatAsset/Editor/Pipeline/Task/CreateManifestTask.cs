@@ -1,29 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using CatAsset.Runtime;
 using UnityEngine;
 
-namespace CatAsset.Editor.Task
+namespace CatAsset.Editor
 {
     public class CreateManifestTask : IBuildPipelineTask
     {
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private BundleBuildConfigParam bundleBuildConfigParam;
+        
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private BundleBuildsParam bundleBuildsParam;
+        
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private FullOutputDirectoryParam fullOutputDirectoryParam;
+        
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private UnityManifestParam unityManifestParam;
+
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.Out)]
+        private CatAssetManifestParam catAssetManifestParam;
+        
         public TaskResult Run()
         {
             try
             {
 
                 BundleBuildConfigSO bundleBuildConfig =
-                    BuildPipelineRunner.GetPipelineParam<BundleBuildConfigSO>(nameof(BundleBuildConfigSO));
+                    bundleBuildConfigParam.Config;
 
                 List<BundleBuildInfo> normalBundleBuilds =
-                    BuildPipelineRunner.GetPipelineParam<List<BundleBuildInfo>>(BuildPipeline.NormalBundleBuilds);
+                    bundleBuildsParam.NormalBundleBuilds;
 
                 List<BundleBuildInfo> rawBundleBuilds =
-                    BuildPipelineRunner.GetPipelineParam<List<BundleBuildInfo>>(BuildPipeline.RawBundleBuilds);
-                string fullOutputPath = BuildPipelineRunner.GetPipelineParam<string>(BuildPipeline.FullOutputPath);
+                    bundleBuildsParam.RawBundleBuilds;
+
+                string directory = fullOutputDirectoryParam.FullOutputDirectory;
 
                 AssetBundleManifest unityManifest =
-                    BuildPipelineRunner.GetPipelineParam<AssetBundleManifest>(nameof(AssetBundleManifest));
+                    unityManifestParam.UnityManifest;
 
                 //创建资源清单
                 CatAssetManifest manifest = new CatAssetManifest
@@ -47,7 +64,7 @@ namespace CatAsset.Editor.Task
 
                     bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].AssetName.EndsWith(".unity");
 
-                    string fullPath = Path.Combine(fullOutputPath, bundleBuildInfo.RelativePath);
+                    string fullPath = Path.Combine(directory, bundleBuildInfo.RelativePath);
                     FileInfo fi = new FileInfo(fullPath);
                     bundleManifestInfo.Length = fi.Length;
 
@@ -80,7 +97,7 @@ namespace CatAsset.Editor.Task
                     };
                     manifest.Bundles.Add(bundleManifestInfo);
 
-                    string fullPath = Path.Combine(fullOutputPath, bundleBuildInfo.RelativePath);
+                    string fullPath = Path.Combine(directory, bundleBuildInfo.RelativePath);
                     byte[] bytes = File.ReadAllBytes(fullPath);
                     bundleManifestInfo.Length = bytes.Length;
 
@@ -94,8 +111,10 @@ namespace CatAsset.Editor.Task
                 }
 
                 manifest.Bundles.Sort();
-                
-                BuildPipelineRunner.InjectPipelineParam(nameof(CatAssetManifest),manifest);
+                catAssetManifestParam = new CatAssetManifestParam()
+                {
+                    Manifest = manifest
+                };
             }
             catch (Exception e)
             {

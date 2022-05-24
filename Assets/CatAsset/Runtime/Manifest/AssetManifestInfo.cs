@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CatAsset
+namespace CatAsset.Runtime
 {
     /// <summary>
     /// 资源清单信息
