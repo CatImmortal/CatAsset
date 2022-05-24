@@ -10,53 +10,70 @@ namespace CatAsset.Editor
     /// </summary>
     public static class BuildPipelineRunner
     {
+        
         /// <summary>
-        /// 参数名->参数
+        /// 参数类型->参数对象
         /// </summary>
-        private static readonly Dictionary<string, object> injectDict = new Dictionary<string, object>();
+        private static readonly Dictionary<Type, IBuildPipelineParam> paramDict =
+            new Dictionary<Type, IBuildPipelineParam>();
 
         /// <summary>
         /// 运行构建管线任务
         /// </summary>
-        public static void Run(List<IBuildPipelineTask> tasks)
+        public static TaskResult Run(List<IBuildPipelineTask> tasks)
         {
-            foreach (IBuildPipelineTask task in tasks)
+            for (int i = 0; i < tasks.Count; i++)
             {
+                IBuildPipelineTask task = tasks[i];
+
+                BuildPipelineInjector.In(task);
+
+                EditorUtility.DisplayProgressBar("构建管线运行中...", $"当前任务:{task.GetType().Name}", (i * 1.0f) / tasks.Count);
+
                 if (task.Run() == TaskResult.Failed)
                 {
+                    EditorUtility.ClearProgressBar();
                     Debug.LogError($"构建管线任务运行失败，当前任务:{task.GetType().Name}");
-                    return;
+                    return TaskResult.Failed;
                 }
+
+                BuildPipelineInjector.Out(task);
+
                 Debug.Log($"构建管线任务运行成功，当前任务:{task.GetType().Name}");
             }
+
+            EditorUtility.ClearProgressBar();
             Debug.Log("资源管线运行结束");
-            AssetDatabase.Refresh();
+            return TaskResult.Success;
         }
 
         /// <summary>
         /// 注入构建管线参数
         /// </summary>
-        public static void InjectPipelineParam(string key, object param)
+        public static void InjectParam(IBuildPipelineParam param)
         {
-            injectDict[key] = param;
+            paramDict[param.GetType()] = param;
+        }
+
+        /// <summary>
+        /// 获取构建管线参数
+        /// </summary>
+        public static IBuildPipelineParam GetParam(Type key)
+        {
+            if (!paramDict.TryGetValue(key,out IBuildPipelineParam param))
+            {
+                return default;
+            }
+
+            return param;
         }
         
         /// <summary>
         /// 获取构建管线参数
         /// </summary>
-        public static T GetPipelineParam<T>(string key)
+        public static T GetParam<T>() where T : IBuildPipelineParam
         {
-            if (!injectDict.TryGetValue(key,out object obj))
-            {
-                return default;
-            }
-
-            if (!(obj is T param))
-            {
-                throw new Exception($"GetParam调用失败，使用了{typeof(T).Name}类型来获取{obj.GetType().Name}类型的参数");
-            }
-
-            return param;
+            return (T) GetParam(typeof(T));
         }
 
 

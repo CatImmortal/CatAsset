@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using UnityEngine;
 
-namespace CatAsset
+namespace CatAsset.Runtime
 {
     public class Util
     {

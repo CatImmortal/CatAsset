@@ -3,23 +3,28 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace CatAsset.Editor.Task
+namespace CatAsset.Editor
 {
     /// <summary>
     /// 构建原生资源包的任务
     /// </summary>
     public class BuildRawBundleTask : IBuildPipelineTask
     {
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private FullOutputDirectoryParam fullOutputDirectoryParam;
+        
+        [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
+        private BundleBuildsParam bundleBuildsParam;
+        
         /// <inheritdoc />
         public TaskResult Run()
         {
             try
             {
-                
-                string fullOutputPath = BuildPipelineRunner.GetPipelineParam<string>(BuildPipeline.FullOutputPath);
-                
-                List<BundleBuildInfo> rawBundleBuilds =
-                    BuildPipelineRunner.GetPipelineParam<List<BundleBuildInfo>>(BuildPipeline.RawBundleBuilds);
+
+                string directory = fullOutputDirectoryParam.FullOutputDirectory;
+
+                List<BundleBuildInfo> rawBundleBuilds = bundleBuildsParam.RawBundleBuilds;
                 
                 if (rawBundleBuilds == null)
                 {
@@ -30,13 +35,13 @@ namespace CatAsset.Editor.Task
                 foreach (BundleBuildInfo rawBundleBuildInfo in rawBundleBuilds)
                 {
                     string rawAssetName = rawBundleBuildInfo.Assets[0].AssetName;
-                    string fullDirectory = Path.Combine(fullOutputPath, rawBundleBuildInfo.DirectoryName.ToLower());
-                    if (!Directory.Exists(fullDirectory))
+                    string rawBundleDirectory = Path.Combine(directory, rawBundleBuildInfo.DirectoryName.ToLower());
+                    if (!Directory.Exists(rawBundleDirectory))
                     {
-                        Directory.CreateDirectory(fullDirectory);
+                        Directory.CreateDirectory(rawBundleDirectory);
                     }
 
-                    string targetFileName = Path.Combine(fullOutputPath, rawBundleBuildInfo.RelativePath);
+                    string targetFileName = Path.Combine(directory, rawBundleBuildInfo.RelativePath);
                     File.Copy(rawAssetName, targetFileName); //直接将原生资源复制过去
                 }
             }
