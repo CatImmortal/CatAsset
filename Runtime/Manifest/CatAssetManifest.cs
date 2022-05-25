@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包清单信息列表
         /// </summary>
-        public List<BundleManifestInfo> Bundles = new List<BundleManifestInfo>();
+        public List<BundleManifestInfo> Bundles;
     }
 }
 
