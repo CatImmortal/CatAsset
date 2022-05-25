@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 15
+  ManifestVersion: 1
   TargetPlatforms: 13000000
   Options: 45312
   OutputPath: ./AssetBundles

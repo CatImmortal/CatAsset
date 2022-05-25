@@ -10,24 +10,23 @@ namespace CatAsset.Editor
     {
         [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
         private BundleBuildConfigParam bundleBuildConfigParam;
-        
+
         [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
         private BundleBuildsParam bundleBuildsParam;
-        
+
         [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
         private FullOutputDirectoryParam fullOutputDirectoryParam;
-        
+
         [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
         private UnityManifestParam unityManifestParam;
 
         [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.Out)]
         private CatAssetManifestParam catAssetManifestParam;
-        
+
         public TaskResult Run()
         {
             try
             {
-
                 BundleBuildConfigSO bundleBuildConfig =
                     bundleBuildConfigParam.Config;
 

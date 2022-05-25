@@ -101,6 +101,10 @@ namespace CatAsset.Editor
         private void DrawAsset(string assetName)
         {
             Object asset = AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
+            if (!asset)
+            {
+                return;
+            }
             Type assetType = asset.GetType();
 
             GUIContent content = new GUIContent();
