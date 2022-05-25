@@ -46,6 +46,7 @@ namespace CatAsset.Editor
                 {
                     GameVersion = Application.version,
                     ManifestVersion = bundleBuildConfig.ManifestVersion,
+                    Bundles = new List<BundleManifestInfo>(),
                 };
 
                 //创建普通资源包的清单信息
