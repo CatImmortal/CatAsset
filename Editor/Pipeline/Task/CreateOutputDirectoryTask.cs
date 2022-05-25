@@ -24,7 +24,7 @@ namespace CatAsset.Editor
                 BuildTarget targetPlatform = bundleBuildConfigParam.TargetPlatform;
 
                 //创建完整资源包构建输出目录
-                string directory = BuildPipeline.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+                string directory = Util.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                     bundleBuildConfig.ManifestVersion);
                 Util.CreateEmptyDirectory(directory);
 

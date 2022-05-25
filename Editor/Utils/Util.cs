@@ -146,7 +146,7 @@ namespace CatAsset.Editor
         /// </summary>
         public static List<string> GetDependencies(string assetName,bool recursive = true)
         {
-            List<string> result = new List<string>();
+            List<string> result  = null;
             
             string[] dependencies = AssetDatabase.GetDependencies(assetName,recursive);
 
@@ -155,6 +155,7 @@ namespace CatAsset.Editor
                 return result;
             }
 
+            result = new List<string>();
         
             for (int i = 0; i < dependencies.Length; i++)
             {
@@ -170,6 +171,16 @@ namespace CatAsset.Editor
             return result;
         }
 
+        /// <summary>
+        /// 获取完整资源包构建输出目录
+        /// </summary>
+        public static string GetFullOutputPath(string outputPath, BuildTarget targetPlatform, int manifestVersion)
+        {
+            string dir = Application.version + "_" + manifestVersion;
+            string result = Path.Combine(outputPath, targetPlatform.ToString(), dir);
+            return result;
+        }
+        
         /// <summary>
         /// 创建空目录（若存在则清空）
         /// </summary>

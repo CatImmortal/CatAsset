@@ -26,6 +26,7 @@ namespace CatAsset.Editor
             {
                 IBuildPipelineTask task = tasks[i];
 
+                //输入参数
                 BuildPipelineInjector.In(task);
 
                 EditorUtility.DisplayProgressBar("构建管线运行中...", $"当前任务:{task.GetType().Name}", (i * 1.0f) / tasks.Count);
@@ -37,6 +38,7 @@ namespace CatAsset.Editor
                     return TaskResult.Failed;
                 }
 
+                //输出参数
                 BuildPipelineInjector.Out(task);
 
                 Debug.Log($"构建管线任务运行成功，当前任务:{task.GetType().Name}");
