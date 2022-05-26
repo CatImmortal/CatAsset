@@ -8,9 +8,9 @@ namespace CatAsset.Runtime
     public abstract class BaseTask<T> : ITask where T : ITask
     {
         /// <summary>
-        /// 子任务列表（同名的任务）
+        /// 已合并的任务列表（同名的任务）
         /// </summary>
-        protected readonly List<T> childTask = new List<T>();
+        protected readonly List<T> mergedTasks = new List<T>();
 
         protected BaseTask(TaskRunner owner, string name)
         {
@@ -33,7 +33,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public void AddChild(ITask child)
         {
-            childTask.Add((T)child);
+            mergedTasks.Add((T)child);
         }
         
         /// <inheritdoc />

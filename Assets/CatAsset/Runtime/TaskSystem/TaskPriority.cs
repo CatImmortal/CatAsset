@@ -8,17 +8,17 @@
         /// <summary>
         /// 低
         /// </summary>
-        Low,
+        Low = 0,
         
         /// <summary>
         /// 中
         /// </summary>
-        Middle,
+        Middle = 1,
         
         /// <summary>
         /// 高
         /// </summary>
-        Height,
+        Height = 2,
         
     }
 }
