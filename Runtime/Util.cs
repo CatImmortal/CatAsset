@@ -6,6 +6,12 @@ namespace CatAsset.Runtime
     public class Util
     {
         /// <summary>
+        /// 资源清单文件名
+        /// </summary>
+        public const string ManifestFileName = "CatAssetManifest.json";
+
+        
+        /// <summary>
         /// 获取在只读区下的完整路径
         /// </summary>
         public static string GetReadOnlyPath(string path)

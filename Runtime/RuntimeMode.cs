@@ -1,9 +1,9 @@
 namespace CatAsset.Runtime
 {
     /// <summary>
-    /// 加载模式
+    /// 资源管理器运行模式
     /// </summary>
-    public enum LoadMode
+    public enum RuntimeMode
     {
         /// <summary>
         /// 仅使用安装包内资源（单机模式）

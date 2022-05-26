@@ -32,7 +32,7 @@ namespace CatAsset.Editor
                 //获取主资源清单(将清单版本号-1)
                 string mainOutputPath = Util.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                     bundleBuildConfig.ManifestVersion - 1);
-                string mainManifestPath = Path.Combine(mainOutputPath, Util.ManifestFileName);
+                string mainManifestPath = Path.Combine(mainOutputPath,CatAsset.Runtime.Util.ManifestFileName);
 
                 //尝试加载主资源清单
                 CatAssetManifest mainManifest = null;

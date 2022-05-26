@@ -4,13 +4,22 @@ using UnityEngine.Networking;
 namespace CatAsset.Runtime
 {
     /// <summary>
+    /// Web请求任务完成回调原型
+    /// </summary>
+    public delegate void WebRequestTaskCallback(bool success,string errorMsg,UnityWebRequest uwr,object userdata);
+    
+    /// <summary>
     /// Web请求任务
     /// </summary>
     public class WebRequestTask : BaseTask<WebRequestTask>
     {
-        private UnityWebRequestAsyncOperation op;
         private string uri;
-        private Action<bool,string, UnityWebRequest> onFinished;
+        private object userdata;
+        private WebRequestTaskCallback onFinished;
+        
+        private UnityWebRequestAsyncOperation op;
+      
+      
         
         public override float Progress
         {
@@ -24,9 +33,10 @@ namespace CatAsset.Runtime
             }
         }
         
-        public WebRequestTask(TaskRunner owner, string name,string uri, Action<bool, string, UnityWebRequest> onFinished) : base(owner, name)
+        public WebRequestTask(TaskRunner owner, string name,string uri,object userdata, WebRequestTaskCallback onFinished) : base(owner, name)
         {
             this.uri = uri;
+            this.userdata = userdata;
             this.onFinished = onFinished;
         }
 
@@ -45,22 +55,22 @@ namespace CatAsset.Runtime
             }
 
             //请求完毕
-            State =TaskState.Executing;
+            State =TaskState.Finished;
 
             if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
             {
-                onFinished?.Invoke(false, op.webRequest.error, op.webRequest);
-                foreach (WebRequestTask child in childTask)
+                onFinished?.Invoke(false, op.webRequest.error, op.webRequest,userdata);
+                foreach (WebRequestTask task in mergedTasks)
                 {
-                    child.onFinished?.Invoke(false, op.webRequest.error, op.webRequest);
+                    task.onFinished?.Invoke(false, op.webRequest.error, op.webRequest,userdata);
                 }
             }
             else
             {
-                onFinished?.Invoke(true, null, op.webRequest);
-                foreach (WebRequestTask child in childTask)
+                onFinished?.Invoke(true, null, op.webRequest,userdata);
+                foreach (WebRequestTask task in mergedTasks)
                 {
-                    child.onFinished?.Invoke(true, null, op.webRequest);
+                    task.onFinished?.Invoke(true, null, op.webRequest,userdata);
                 }
             }
         }

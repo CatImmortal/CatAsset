@@ -23,11 +23,7 @@ namespace CatAsset.Editor
         /// </summary>
         public const string DefaultGroup = "Base";
         
-        /// <summary>
-        /// 资源清单文件名
-        /// </summary>
-        public const string ManifestFileName = "CatAssetManifest.json";
-        
+
         static Util()
         {
             ExcludeSet.Add(".meta");
