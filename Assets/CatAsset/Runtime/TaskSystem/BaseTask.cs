@@ -11,29 +11,23 @@ namespace CatAsset.Runtime
         /// 已合并的任务列表（同名的任务）
         /// </summary>
         protected readonly List<T> mergedTasks = new List<T>();
-
-        protected BaseTask(TaskRunner owner, string name)
-        {
-            Owner = owner;
-            Name = name;
-        }
         
         /// <inheritdoc />
-        public string Name { get; }
+        public TaskRunner Owner { get; private set; }
+        
+        /// <inheritdoc />
+        public string Name { get; private set; }
 
         /// <inheritdoc />
         public TaskState State { get; protected set; }
         
         /// <inheritdoc />
-        public TaskRunner Owner { get; }
-        
-        /// <inheritdoc />
         public virtual float Progress { get; }
 
         /// <inheritdoc />
-        public void AddChild(ITask child)
+        public void MergeTask(ITask task)
         {
-            mergedTasks.Add((T)child);
+            mergedTasks.Add((T)task);
         }
         
         /// <inheritdoc />
@@ -46,6 +40,32 @@ namespace CatAsset.Runtime
         {
             return Name;
         }
+        
+        /// <summary>
+        /// 创建基类部分
+        /// </summary>
+        protected void CreateBase(TaskRunner owner,string name)
+        {
+            Owner = owner;
+            Name = name;
+        }
+        
+        /// <inheritdoc />
+        public virtual void Clear()
+        {
+            foreach (T task in mergedTasks)
+            {
+                ReferencePool.Release(task);
+            }
+            mergedTasks.Clear();
+            
+            Owner = default;
+            Name = default;
+            State = default;
+        }
+
+
+
     }
 
 }

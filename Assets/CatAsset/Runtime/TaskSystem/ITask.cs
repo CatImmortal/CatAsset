@@ -3,7 +3,7 @@
     /// <summary>
     /// 任务接口
     /// </summary>
-    public interface ITask
+    public interface ITask : IReference
     {
         /// <summary>
         /// 持有者
@@ -26,9 +26,9 @@
         float Progress { get; }
 
         /// <summary>
-        /// 添加子任务
+        /// 合并任务
         /// </summary>
-        void AddChild(ITask child);
+        void MergeTask(ITask task);
         
         /// <summary>
         /// 运行任务

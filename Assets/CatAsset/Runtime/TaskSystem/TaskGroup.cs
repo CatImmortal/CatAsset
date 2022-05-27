@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace CatAsset.Runtime
 {
@@ -48,12 +49,14 @@ namespace CatAsset.Runtime
         /// </summary>
         private void InternalAddTask(ITask task)
         {
-            if (mainTaskDict.TryGetValue(task.Name,out ITask parent))
+            if (mainTaskDict.TryGetValue(task.Name,out ITask mainTask))
             {
-                parent.AddChild(task);
+                Debug.Log($"合并任务:{task}");
+                mainTask.MergeTask(task);
             }
             else
             {
+                Debug.Log($"添加任务:{task}");
                 mainTaskDict.Add(task.Name,task);
                 runningTasks.Add(task);
             }
@@ -91,12 +94,16 @@ namespace CatAsset.Runtime
             if (task.State == TaskState.Free)
             {
                 //运行空闲状态的任务
+                Debug.Log($"运行任务:{task}");
                 task.Run();
+               
             }
 
             //轮询任务
+            Debug.Log($"轮询任务:{task}");
             task.Update();
-
+           
+            
             switch (task.State)
             {
                 case TaskState.Executing:
@@ -127,8 +134,10 @@ namespace CatAsset.Runtime
                     int removeIndex = waitRemoveTasks[i];
                     ITask task = runningTasks[removeIndex];
                     
+                    Debug.Log($"移除任务:{task}");
                     runningTasks.RemoveAt(removeIndex);
                     mainTaskDict.Remove(task.Name);
+                    ReferencePool.Release(task);
                 }
 
                 waitRemoveTasks.Clear();

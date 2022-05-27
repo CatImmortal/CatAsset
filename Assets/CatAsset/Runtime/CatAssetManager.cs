@@ -11,21 +11,28 @@ namespace CatAsset.Runtime
     /// </summary>
     public static class CatAssetManager
     {
-        private static TaskRunner loadTaskRunner = new TaskRunner();
-        private static TaskRunner downloadTaskRunner = new TaskRunner();
+        /// <summary>
+        /// 加载相关任务运行器
+        /// </summary>
+        private static readonly TaskRunner loadTaskRunner = new TaskRunner();
+        
+        /// <summary>
+        /// 下载相关任务运行器
+        /// </summary>
+        private static readonly TaskRunner downloadTaskRunner = new TaskRunner();
         
         /// <summary>
         /// 资源包相对路径->资源包运行时信息（只有在这个字典里的才是在本地可加载的）
         /// </summary>
-        internal static readonly Dictionary<string, BundleRuntimeInfo> bundleInfoDict = new Dictionary<string, BundleRuntimeInfo>();
+        private static readonly Dictionary<string, BundleRuntimeInfo> bundleInfoDict = new Dictionary<string, BundleRuntimeInfo>();
         
         /// <summary>
         /// 资源名->资源运行时信息（只有在这个字典里的才是在本地可加载的）
         /// </summary>
-        internal static readonly Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
+        private static readonly Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
         
         /// <summary>
-        /// 加载模式
+        /// 运行模式
         /// </summary>
         public static RuntimeMode RuntimeMode
         {
@@ -43,7 +50,7 @@ namespace CatAsset.Runtime
         }
         
         /// <summary>
-        /// 轮询CatAsset管理器
+        /// 轮询CatAsset资源管理器
         /// </summary>
         public static void Update()
         {
@@ -54,7 +61,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 根据资源包清单信息初始化运行时信息
         /// </summary>
-        internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
+        private static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
         {
             BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
             bundleInfoDict.Add(bundleManifestInfo.RelativePath, bundleRuntimeInfo);
@@ -84,7 +91,7 @@ namespace CatAsset.Runtime
 
             string path = Util.GetReadOnlyPath(Util.ManifestFileName);
 
-            WebRequestTask task = new WebRequestTask(downloadTaskRunner, path, path, callback,
+            WebRequestTask task = WebRequestTask.Create(downloadTaskRunner, path, path, callback,
                 (success, error, uwr, userdata) =>
                 {
                     Action<bool> onChecked = (Action<bool>)userdata;
@@ -97,6 +104,10 @@ namespace CatAsset.Runtime
                     else
                     {
                         CatAssetManifest manifest = CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+                       
+                        bundleInfoDict.Clear();
+                        assetInfoDict.Clear();
+                        
                         foreach (BundleManifestInfo info in manifest.Bundles)
                         {
                             InitRuntimeInfo(info, false);
