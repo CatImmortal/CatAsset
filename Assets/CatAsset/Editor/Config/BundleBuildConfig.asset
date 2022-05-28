@@ -37,6 +37,7 @@ MonoBehaviour:
     - AssetName: Assets/BundleRes/Prefab2/TestGO 2.prefab
     - AssetName: Assets/BundleRes/Prefab2/TestGO 3.prefab
     - AssetName: Assets/BundleRes/Prefab2/TestGO.prefab
+    - AssetName: Assets/BundleRes/RawAsset/RawImage.jpg
     - AssetName: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
   - RelativePath: bundleres/rawasset/RawImage.jpg
     DirectoryName: BundleRes/RawAsset

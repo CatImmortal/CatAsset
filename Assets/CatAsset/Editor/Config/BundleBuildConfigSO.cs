@@ -68,15 +68,19 @@ namespace CatAsset.Editor
         /// </summary>
         public void RefreshBundleBuildInfos()
         {
-            EditorUtility.DisplayProgressBar("刷新资源包构建信息","初始化资源包构建规则...",1/5f);
+           
+            Bundles.Clear();
+            float stepNum = 6f;
+            
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","初始化资源包构建规则...",1/stepNum);
             //初始化资源包构建规则
             InitRuleDict();
 
-            EditorUtility.DisplayProgressBar("刷新资源包构建信息","始化资源包构建信息...",2/5f);
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","初始化资源包构建信息...",2/stepNum);
             //根据构建规则初始化资源包构建信息
-            InitBundleBuildInfo();
+            InitBundleBuildInfo(false);
 
-            EditorUtility.DisplayProgressBar("刷新资源包构建信息","将隐式依赖都转换为显式构建资源...",3/5f);
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","将隐式依赖都转换为显式构建资源...",3/stepNum);
             //将隐式依赖都转换为显式构建资源
             ImplicitDependencyToExplicitBuildAsset();
 
@@ -85,16 +89,19 @@ namespace CatAsset.Editor
 
             if (IsRedundancyAnalyze)
             {
-                EditorUtility.DisplayProgressBar("刷新资源包构建信息","进行冗余资源分析...",4/5f);
+                EditorUtility.DisplayProgressBar("刷新资源包构建信息","进行冗余资源分析...",4/stepNum);
                 //进行冗余资源分析
                 RedundancyAssetAnalyze();
             }
 
-            EditorUtility.DisplayProgressBar("刷新资源包构建信息","分割场景资源包中的非场景资源...",5/5f);
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","分割场景资源包中的非场景资源...",5/stepNum);
             //在将隐式依赖转换为显式构建资源后，可能出现场景资源和非场景资源被放进了同一个资源包的情况
             //而这是Unity不允许的，会在BuildBundle时报错，所以需要在这一步将其拆开
             SplitSceneBundle();
 
+            EditorUtility.DisplayProgressBar("刷新资源包构建信息","初始化原生资源包构建信息...",6/stepNum);
+            //根据构建规则初始化原生资源包构建信息
+            InitBundleBuildInfo(true);
             
             //最后给资源包列表排下序
             Bundles.Sort();
@@ -128,16 +135,18 @@ namespace CatAsset.Editor
         /// <summary>
         /// 根据构建规则获取初始的资源包构建信息列表
         /// </summary>
-        private void InitBundleBuildInfo()
+        private void InitBundleBuildInfo(bool isRaw)
         {
-            Bundles.Clear();
             for (int i = 0; i < Directories.Count; i++)
             {
                 BundleBuildDirectory bundleBuildDirectory = Directories[i];
 
                 IBundleBuildRule rule = ruleDict[bundleBuildDirectory.BuildRuleName];
-                List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
-                Bundles.AddRange(bundles);
+                if (rule.IsRaw == isRaw)
+                {
+                    List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
+                    Bundles.AddRange(bundles);
+                }
             }
         }
 
@@ -160,13 +169,6 @@ namespace CatAsset.Editor
 
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
-                if (bundleBuildInfo.IsRaw)
-                {
-                    //原生资源包不进行处理
-                    //因为原生资源包本质是个虚拟资源包，所以bundleBuildInfo.Assets列表里只能有1个原生资源存在
-                    continue;
-                }
-
                 List<string> implicitDependencies = new List<string>();
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)

@@ -11,6 +11,12 @@ namespace CatAsset.Editor
     public interface IBundleBuildRule
     {
         /// <summary>
+        /// 此规则所构建的是否为原生资源包
+        /// </summary>
+        /// <returns></returns>
+        bool IsRaw { get; }
+        
+        /// <summary>
         /// 获取使用此规则构建的资源包构建信息列表
         /// </summary>
         List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory);
