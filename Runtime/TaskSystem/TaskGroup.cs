@@ -106,7 +106,7 @@ namespace CatAsset.Runtime
             
             switch (task.State)
             {
-                case TaskState.Executing:
+                case TaskState.Running:
                     return true;
 
                 case TaskState.Finished:

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace CatAsset.Runtime
 {
     /// <summary>
@@ -24,6 +26,11 @@ namespace CatAsset.Runtime
         /// 引用计数
         /// </summary>
         public int RefCount;
+
+        /// <summary>
+        /// 通过依赖加载引用了此资源的资源列表
+        /// </summary>
+        public List<string> RefAssetList;
 
         public override string ToString()
         {

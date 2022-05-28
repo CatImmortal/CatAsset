@@ -14,7 +14,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包清单信息
         /// </summary>
-        public BundleManifestInfo BundleManifest;
+        public BundleManifestInfo Manifest;
 
         /// <summary>
         /// 资源包实例
@@ -38,11 +38,11 @@ namespace CatAsset.Runtime
                 {
                     if (InReadWrite)
                     {
-                        loadPath = Util.GetReadWritePath(BundleManifest.RelativePath);
+                        loadPath = Util.GetReadWritePath(Manifest.RelativePath);
                     }
                     else
                     {
-                        loadPath = Util.GetReadOnlyPath(BundleManifest.RelativePath);
+                        loadPath = Util.GetReadOnlyPath(Manifest.RelativePath);
                     }
                 }
                 return loadPath;
@@ -67,7 +67,7 @@ namespace CatAsset.Runtime
 
         public override string ToString()
         {
-            return BundleManifest.ToString();
+            return Manifest.ToString();
         }
     }
 }
