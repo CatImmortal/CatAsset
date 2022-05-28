@@ -13,8 +13,9 @@ namespace CatAsset.Runtime
             {
                 if (list.Count == 0)
                 {
-                    Debug.Log($"创建引用:{typeof(T).Name}");
-                    return new T();
+                    T obj = new T();
+                    Debug.Log($"创建引用:{obj.GetType()}");
+                    return obj;
                 }
 
                 IReference reference = list[list.Count - 1];

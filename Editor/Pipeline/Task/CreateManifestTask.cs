@@ -75,13 +75,13 @@ namespace CatAsset.Editor
                     {
                         AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                         {
-                            AssetName = assetBuildInfo.AssetName,
-                            AssetType = AssetDatabase.GetMainAssetTypeAtPath(assetBuildInfo.AssetName),
+                            Name = assetBuildInfo.AssetName,
+                            Type = AssetDatabase.GetMainAssetTypeAtPath(assetBuildInfo.AssetName),
                         };
                         bundleManifestInfo.Assets.Add(assetManifestInfo);
 
                         //依赖列表不进行递归记录 因为加载的时候会对依赖进行递归加载
-                        assetManifestInfo.Dependencies = Util.GetDependencies(assetManifestInfo.AssetName, false);
+                        assetManifestInfo.Dependencies = Util.GetDependencies(assetManifestInfo.Name, false);
                     }
                 }
 
@@ -107,7 +107,7 @@ namespace CatAsset.Editor
 
                     AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                     {
-                        AssetName = bundleBuildInfo.Assets[0].AssetName,
+                        Name = bundleBuildInfo.Assets[0].AssetName,
                     };
                     bundleManifestInfo.Assets.Add(assetManifestInfo);
                 }
