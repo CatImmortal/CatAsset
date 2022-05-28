@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using CatAsset.Runtime;
+using UnityEditor;
 using UnityEngine;
 
 namespace CatAsset.Editor
@@ -75,6 +76,7 @@ namespace CatAsset.Editor
                         AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                         {
                             AssetName = assetBuildInfo.AssetName,
+                            AssetType = AssetDatabase.GetMainAssetTypeAtPath(assetBuildInfo.AssetName),
                         };
                         bundleManifestInfo.Assets.Add(assetManifestInfo);
 

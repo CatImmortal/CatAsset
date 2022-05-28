@@ -7,6 +7,8 @@ namespace CatAsset.Runtime
     /// </summary>
     public class AssetRuntimeInfo
     {
+        private List<string> refAssetList;
+
         /// <summary>
         /// 所在资源包清单信息
         /// </summary>
@@ -30,7 +32,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 通过依赖加载引用了此资源的资源列表
         /// </summary>
-        public List<string> RefAssetList;
+        public List<string> RefAssetList{
+            get
+            {
+                if (refAssetList == null)
+                {
+                    refAssetList = new List<string>();
+                }
+                
+                return refAssetList;
+            }
+        }
 
         public override string ToString()
         {

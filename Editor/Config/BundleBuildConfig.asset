@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 2
+  ManifestVersion: 6
   TargetPlatforms: 13000000
   Options: 45312
   OutputPath: ./AssetBundles
@@ -37,7 +37,6 @@ MonoBehaviour:
     - AssetName: Assets/BundleRes/Prefab2/TestGO 2.prefab
     - AssetName: Assets/BundleRes/Prefab2/TestGO 3.prefab
     - AssetName: Assets/BundleRes/Prefab2/TestGO.prefab
-    - AssetName: Assets/BundleRes/RawAsset/RawImage.jpg
     - AssetName: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
   - RelativePath: bundleres/rawasset/RawImage.jpg
     DirectoryName: BundleRes/RawAsset

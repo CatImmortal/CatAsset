@@ -27,7 +27,7 @@ namespace CatJson
             TextUtil.Append(RealTypeKey);
             TextUtil.Append("\"");
             TextUtil.Append(":");
-            TextUtil.Append(GetRealTypeJsonValue(realType));
+            TextUtil.Append(TypeUtil.GetTypeString(realType));
                 
             TextUtil.AppendLine(",");
                 
@@ -75,18 +75,5 @@ namespace CatJson
             return obj;
         }
         
-        /// <summary>
-        /// 获取用于多态序列化的真实类型的json value字符串
-        /// </summary>
-        private static string GetRealTypeJsonValue(Type realType)
-        {
-#if FUCK_LUA
-            if (realType is ILRuntime.Reflection.ILRuntimeType ilrtType)
-            {
-                 return $"\"{ilrtType.FullName}\"";
-            }
-#endif
-            return $"\"{realType.FullName},{realType.Assembly.GetName().Name}\"";
-        }
     }
 }

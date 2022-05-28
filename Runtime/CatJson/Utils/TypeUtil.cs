@@ -70,6 +70,20 @@ namespace CatJson
         }
         
         /// <summary>
+        /// 获取Type对象序列化后的字符串
+        /// </summary>
+        public static string GetTypeString(Type value)
+        {
+#if FUCK_LUA
+            if (value is ILRuntime.Reflection.ILRuntimeType ilrtType)
+            {
+                 return $"\"{ilrtType.FullName}\"";
+            }
+#endif
+            return $"\"{value.AssemblyQualifiedName}\"";
+        }
+        
+        /// <summary>
         /// 根据memberType和realTypeValue获取字段/属性的真实Type
         /// </summary>
         public static Type GetRealType(Type memberType, string realTypeValue)
