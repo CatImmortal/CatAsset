@@ -13,12 +13,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源名
         /// </summary>
-        public string AssetName;
+        public string Name;
 
         /// <summary>
         /// 资源类型
         /// </summary>
-        public Type AssetType;
+        public Type Type;
         
         /// <summary>
         /// 依赖资源名列表
@@ -27,17 +27,17 @@ namespace CatAsset.Runtime
 
         public int CompareTo(AssetManifestInfo other)
         {
-            return AssetName.CompareTo(other.AssetName);
+            return Name.CompareTo(other.Name);
         }
 
         public bool Equals(AssetManifestInfo other)
         {
-            return AssetName.Equals(other.AssetName);
+            return Name.Equals(other.Name);
         }
 
         public override string ToString()
         {
-            return AssetName;
+            return Name;
         }
     }
 

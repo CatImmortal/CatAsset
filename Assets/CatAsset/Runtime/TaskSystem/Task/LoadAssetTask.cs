@@ -7,12 +7,12 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadAssetTaskCallback(bool success,object asset,object userdata);
+    public delegate void LoadAssetTaskCallback<T>(bool success,T asset,object userdata) where T: Object;
     
     /// <summary>
     /// 资源加载任务
     /// </summary>
-    public class LoadAssetTask : BaseTask<LoadAssetTask>
+    public class LoadAssetTask<T> : BaseTask<LoadAssetTask<T>> where T: Object
     {
         /// <summary>
         /// 资源加载状态
@@ -54,7 +54,7 @@ namespace CatAsset.Runtime
 
 
         private object userdata;
-        protected LoadAssetTaskCallback OnFinished;
+        protected LoadAssetTaskCallback<T> OnFinished;
         
 
         protected AssetRuntimeInfo AssetRuntimeInfo;
@@ -64,7 +64,7 @@ namespace CatAsset.Runtime
         
         private int totalDependencyCount;
         private int loadedDependencyCount;
-        private LoadAssetTaskCallback onDependencyLoadedCallback;
+        private LoadAssetTaskCallback<Object> onDependencyLoadedCallback;
 
       
         private LoadAssetState loadAssetState;
@@ -146,7 +146,7 @@ namespace CatAsset.Runtime
         /// </summary>
         protected virtual void LoadAsync()
         {
-            Operation = BundleRuntimeInfo.Bundle.LoadAssetAsync(Name);
+            Operation = BundleRuntimeInfo.Bundle.LoadAssetAsync(Name,AssetRuntimeInfo.AssetManifest.Type);
         }
         
         /// <summary>
@@ -236,7 +236,7 @@ namespace CatAsset.Runtime
                 Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
                 
                 OnFinished?.Invoke(false,null,userdata);
-                foreach (LoadAssetTask task in mergedTasks)
+                foreach (LoadAssetTask<T> task in mergedTasks)
                 {
                     task. OnFinished?.Invoke(false,null,userdata);
                 }
@@ -260,7 +260,7 @@ namespace CatAsset.Runtime
                 Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
                 
                 OnFinished?.Invoke(false,null,userdata);
-                foreach (LoadAssetTask task in mergedTasks)
+                foreach (LoadAssetTask<T> task in mergedTasks)
                 {
                     task. OnFinished?.Invoke(false,null,userdata);
                 }
@@ -270,10 +270,10 @@ namespace CatAsset.Runtime
                 
             Debug.Log($"资源加载成功：{AssetRuntimeInfo}");
             
-            OnFinished?.Invoke(true, AssetRuntimeInfo.Asset,userdata);
-            foreach (LoadAssetTask task in mergedTasks)
+            OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,userdata);
+            foreach (LoadAssetTask<T> task in mergedTasks)
             {
-                task.OnFinished?.Invoke(true, AssetRuntimeInfo.Asset,userdata);
+                task.OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,userdata);
             }
         }
 
@@ -348,9 +348,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建资源加载任务的对象
         /// </summary>
-        public static LoadAssetTask Create(TaskRunner owner, string name,object userdata,LoadAssetTaskCallback callback)
+        public static LoadAssetTask<T> Create(TaskRunner owner, string name,object userdata,LoadAssetTaskCallback<T> callback)
         {
-            LoadAssetTask task = ReferencePool.Get<LoadAssetTask>();
+            LoadAssetTask<T> task = ReferencePool.Get<LoadAssetTask<T>>();
             task.CreateBase(owner,name);
 
             task.AssetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(name);
