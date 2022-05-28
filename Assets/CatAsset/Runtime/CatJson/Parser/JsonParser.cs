@@ -17,6 +17,8 @@ namespace CatJson
                 throw new Exception("请先调用CatJson.ILRuntimeHelper.RegisterILRuntimeCLRRedirection(appDomain)进行CatJson重定向");
             }
 #endif
+            //Type类型的变量其对象一般为RuntimeType类型，但是不能直接typeof(Runtime)，只能这样了
+            formatterDict.Add(Type.GetType("System.RuntimeType,mscorlib"),new TypeFormatter());
         }
 
         /// <summary>
@@ -63,6 +65,8 @@ namespace CatJson
             //Unity特有类型
             {typeof(Hash128), new Hash128Formatter()},
         };
+
+
 
         /// <summary>
         /// 添加需要忽略的成员

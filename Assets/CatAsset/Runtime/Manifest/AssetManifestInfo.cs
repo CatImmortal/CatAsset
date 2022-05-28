@@ -16,6 +16,11 @@ namespace CatAsset.Runtime
         public string AssetName;
 
         /// <summary>
+        /// 资源类型
+        /// </summary>
+        public Type AssetType;
+        
+        /// <summary>
         /// 依赖资源名列表
         /// </summary>
         public List<string> Dependencies;
