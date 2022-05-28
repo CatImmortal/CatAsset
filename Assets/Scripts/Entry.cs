@@ -10,7 +10,13 @@ public class Entry : MonoBehaviour
     {
         CatAssetManager.CheckPackageManifest((b =>
         {
-            
+            CatAssetManager.LoadAsset("Assets/BundleRes/Prefab2/TestGO 1.prefab",null,((success, asset, userdata) =>
+            {
+                if (success)
+                {
+                    Instantiate((GameObject)asset);
+                }
+            }));
         }));
     }
 

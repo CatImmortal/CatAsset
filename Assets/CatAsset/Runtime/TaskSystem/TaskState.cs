@@ -16,12 +16,12 @@ namespace CatAsset.Runtime
         Waiting,
 
         /// <summary>
-        /// 执行中
+        /// 运行中
         /// </summary>
-        Executing,
+        Running,
 
         /// <summary>
-        /// 执行完毕
+        /// 已结束
         /// </summary>
         Finished,
     }

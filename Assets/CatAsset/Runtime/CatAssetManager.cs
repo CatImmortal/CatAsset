@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
@@ -14,39 +15,101 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载相关任务运行器
         /// </summary>
-        private static readonly TaskRunner loadTaskRunner = new TaskRunner();
+        private static TaskRunner loadTaskRunner = new TaskRunner();
         
         /// <summary>
         /// 下载相关任务运行器
         /// </summary>
-        private static readonly TaskRunner downloadTaskRunner = new TaskRunner();
+        private static TaskRunner downloadTaskRunner = new TaskRunner();
         
         /// <summary>
         /// 资源包相对路径->资源包运行时信息（只有在这个字典里的才是在本地可加载的）
         /// </summary>
-        private static readonly Dictionary<string, BundleRuntimeInfo> bundleInfoDict = new Dictionary<string, BundleRuntimeInfo>();
+        private static Dictionary<string, BundleRuntimeInfo> bundleRuntimeInfoDict = new Dictionary<string, BundleRuntimeInfo>();
         
         /// <summary>
         /// 资源名->资源运行时信息（只有在这个字典里的才是在本地可加载的）
         /// </summary>
-        private static readonly Dictionary<string, AssetRuntimeInfo> assetInfoDict = new Dictionary<string, AssetRuntimeInfo>();
+        private static Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict = new Dictionary<string, AssetRuntimeInfo>();
+        
+        /// <summary>
+        /// 资源对象->资源运行时信息
+        /// </summary>
+        private static Dictionary<object, AssetRuntimeInfo> assetDict = new Dictionary<object, AssetRuntimeInfo>();
         
         /// <summary>
         /// 运行模式
         /// </summary>
-        public static RuntimeMode RuntimeMode
-        {
-            get;
-            set;
-        }
-        
+        public static RuntimeMode RuntimeMode { get; set; }
+
         /// <summary>
         /// 是否开启编辑器资源模式
         /// </summary>
-        public static bool IsEditorMode
+        public static bool IsEditorMode { get; set; }
+        
+        /// <summary>
+        /// 根据资源包清单信息初始化运行时信息
+        /// </summary>
+        private static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
         {
-            get;
-            set;
+            BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
+            bundleRuntimeInfoDict.Add(bundleManifestInfo.RelativePath, bundleRuntimeInfo);
+            bundleRuntimeInfo.Manifest = bundleManifestInfo;
+            bundleRuntimeInfo.InReadWrite = inReadWrite;
+
+            foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
+            {
+                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
+                assetRuntimeInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
+                assetRuntimeInfo.BundleManifest = bundleManifestInfo;
+                assetRuntimeInfo.AssetManifest = assetManifestInfo;
+            }
+        }
+
+        /// <summary>
+        /// 获取资源包运行时信息
+        /// </summary>
+        public static BundleRuntimeInfo GetBundleRuntimeInfo(string bundleRelativePath)
+        {
+            return bundleRuntimeInfoDict[bundleRelativePath];
+        }
+
+        /// <summary>
+        /// 获取资源运行时信息
+        /// </summary>
+        public static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
+        {
+            return assetRuntimeInfoDict[assetName];
+        }
+        
+        /// <summary>
+        /// 获取资源运行时信息
+        /// </summary>
+        public static AssetRuntimeInfo GetAssetRuntimeInfo(object asset)
+        {
+            return assetDict[asset];
+        }
+        
+        /// <summary>
+        /// 设置资源运行时信息
+        /// </summary>
+        public static void SetAssetRuntimeInfo(object asset,AssetRuntimeInfo assetRuntimeInfo)
+        {
+            assetDict.Add(asset, assetRuntimeInfo);
+        }
+        
+        /// <summary>
+        /// 检查资源是否已准备好
+        /// </summary>
+        private static bool CheckAssetReady(string assetName)
+        {
+            if (!assetRuntimeInfoDict.ContainsKey(assetName))
+            {
+                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
+                return false;
+            }
+
+            return true;
         }
         
         /// <summary>
@@ -57,26 +120,6 @@ namespace CatAsset.Runtime
             loadTaskRunner.Update();
             downloadTaskRunner.Update();
         }
-        
-        /// <summary>
-        /// 根据资源包清单信息初始化运行时信息
-        /// </summary>
-        private static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
-        {
-            BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
-            bundleInfoDict.Add(bundleManifestInfo.RelativePath, bundleRuntimeInfo);
-            bundleRuntimeInfo.BundleManifest = bundleManifestInfo;
-            bundleRuntimeInfo.InReadWrite = inReadWrite;
-
-            foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
-            {
-                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
-                assetInfoDict.Add(assetManifestInfo.AssetName, assetRuntimeInfo);
-                assetRuntimeInfo.BundleManifest = bundleManifestInfo;
-                assetRuntimeInfo.AssetManifest = assetManifestInfo;
-            }
-        }
-
         
         /// <summary>
         /// 检查安装包内资源清单,仅使用安装包内资源模式下专用
@@ -105,8 +148,8 @@ namespace CatAsset.Runtime
                     {
                         CatAssetManifest manifest = CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
                        
-                        bundleInfoDict.Clear();
-                        assetInfoDict.Clear();
+                        bundleRuntimeInfoDict.Clear();
+                        assetRuntimeInfoDict.Clear();
                         
                         foreach (BundleManifestInfo info in manifest.Bundles)
                         {
@@ -120,7 +163,65 @@ namespace CatAsset.Runtime
            downloadTaskRunner.AddTask(task,TaskPriority.Height);
         }
 
+        /// <summary>
+        /// 加载资源
+        /// </summary>
+        public static void LoadAsset(string assetName,object userdata, LoadAssetTaskCallback callback,TaskPriority priority = TaskPriority.Low)
+        {
+            //检查资源是否已在本地准备好
+            if (!CheckAssetReady(assetName))
+            {
+                return;
+            }
 
+            AssetRuntimeInfo info = assetRuntimeInfoDict[assetName];
+            if (info.Asset != null)
+            {
+                //此资源已加载过了
+                //增加引用计数后直接返回
+                info.RefCount++;
+                callback?.Invoke(true,info.Asset,userdata);
+                return;
+            }
+            
+            //未被加载过 开始加载
+            
+            LoadAssetTask task = LoadAssetTask.Create(loadTaskRunner,assetName,userdata,callback);
+            loadTaskRunner.AddTask(task,priority);
+        }
+        
+        
+        /// <summary>
+        /// 卸载资源
+        /// </summary>
+        public static void UnloadAsset(object asset)
+        {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                return;
+            }
+#endif
+            if (asset == null)
+            {
+                return;
+            }
+
+            if (!assetDict.TryGetValue(asset, out AssetRuntimeInfo assetInfo))
+            {
+                if (asset is Object unityObj)
+                {
+                    Debug.LogError($"要卸载的资源未加载过：{unityObj.name}");
+                }
+                else
+                {
+                    Debug.LogError("要卸载的资源未加载过");
+                }
+                return;
+            }
+
+            //InternalUnloadAsset(assetInfo);
+        }
     }
 }
 

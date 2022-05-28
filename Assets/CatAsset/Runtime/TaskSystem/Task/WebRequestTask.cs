@@ -5,14 +5,14 @@ namespace CatAsset.Runtime
 {
 
     /// <summary>
-    /// Web请求任务完成回调方法的原型
+    /// Web请求任务完成回调的原型
     /// </summary>
     public delegate void WebRequestTaskCallback(bool success,string error,UnityWebRequest uwr,object userdata);
     
     /// <summary>
     /// Web请求任务
     /// </summary>
-    public class WebRequestTask : BaseTask<WebRequestTask>,IReference
+    public class WebRequestTask : BaseTask<WebRequestTask>
     {
         /// <summary>
         /// Web请求的uri地址
@@ -30,20 +30,20 @@ namespace CatAsset.Runtime
         private WebRequestTaskCallback onFinished;
         
         /// <summary>
-        /// Web请求异步操作对象
+        /// Web请求的异步操作对象
         /// </summary>
-        private UnityWebRequestAsyncOperation op;
+        private UnityWebRequestAsyncOperation operation;
 
         /// <inheritdoc />
         public override float Progress
         {
             get
             {
-                if (op == null)
+                if (operation == null)
                 {
                     return 0;
                 }
-                return op.progress;
+                return operation.progress;
             }
         }
         
@@ -51,35 +51,35 @@ namespace CatAsset.Runtime
         public override void Run()
         {
             UnityWebRequest uwr = UnityWebRequest.Get(uri);
-            op = uwr.SendWebRequest();
+            operation = uwr.SendWebRequest();
         }
 
         /// <inheritdoc />
         public override void Update()
         {
-            if (!op.isDone)
+            if (!operation.isDone)
             {
-                State = TaskState.Executing;
+                State = TaskState.Running;
                 return;
             }
 
             //请求完毕
             State =TaskState.Finished;
 
-            if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
+            if (operation.webRequest.isNetworkError || operation.webRequest.isHttpError)
             {
-                onFinished?.Invoke(false, op.webRequest.error, op.webRequest,userdata);
+                onFinished?.Invoke(false, operation.webRequest.error, operation.webRequest,userdata);
                 foreach (WebRequestTask task in mergedTasks)
                 {
-                    task.onFinished?.Invoke(false, op.webRequest.error, op.webRequest,userdata);
+                    task.onFinished?.Invoke(false, operation.webRequest.error, operation.webRequest,userdata);
                 }
             }
             else
             {
-                onFinished?.Invoke(true, null, op.webRequest,userdata);
+                onFinished?.Invoke(true, null, operation.webRequest,userdata);
                 foreach (WebRequestTask task in mergedTasks)
                 {
-                    task.onFinished?.Invoke(true, null, op.webRequest,userdata);
+                    task.onFinished?.Invoke(true, null, operation.webRequest,userdata);
                 }
             }
         }
@@ -87,14 +87,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建Web请求任务的对象
         /// </summary>
-        public static WebRequestTask Create(TaskRunner owner, string name,string uri,object userdata, WebRequestTaskCallback onFinished)
+        public static WebRequestTask Create(TaskRunner owner, string name,string uri,object userdata, WebRequestTaskCallback callback)
         {
             WebRequestTask task = ReferencePool.Get<WebRequestTask>();
             task.CreateBase(owner,name);
 
             task.uri = uri;
             task.userdata = userdata;
-            task.onFinished = onFinished;
+            task.onFinished = callback;
             
             return task;
         }
@@ -107,7 +107,7 @@ namespace CatAsset.Runtime
             uri = default;
             userdata = default;
             onFinished = default;
-            op = default;
+            operation = default;
         }
     }
 }
