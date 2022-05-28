@@ -18,6 +18,12 @@ namespace CatAsset.Editor
             
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
+                if (bundleBuildInfo.IsRaw)
+                {
+                    //跳过原生资源包，因为加载原生资源时不会加载其依赖资源
+                    continue;
+                }
+                
                 foreach (AssetBuildInfo assetBuildInfo  in bundleBuildInfo.Assets)
                 {
                     string assetName = assetBuildInfo.AssetName;
@@ -31,19 +37,19 @@ namespace CatAsset.Editor
                     if (!RecursiveDependencies(assetName,depChainSet,depChainList))
                     {
                         string loopLog = "     ";
-                        HashSet<string> depLinkSet = new HashSet<string>();
+                        HashSet<string> lookedDepSet = new HashSet<string>();  //记录在依赖链上出现过资源
                         foreach (string dep in depChainList)
                         {
                             loopLog += dep + "\n->";
 
-                            if (depLinkSet.Contains(dep))
+                            if (lookedDepSet.Contains(dep))
                             {
+                                //重复出现过 是依赖环的入口
                                 loopLog = loopLog.Replace(dep, "<color=#ff0000>" + dep + "</color>");
                             }
                             else
                             {
-                               
-                                depLinkSet.Add(dep);
+                                lookedDepSet.Add(dep);
                             }
                         }
                         loopLog += "\n--------------------";
@@ -76,6 +82,12 @@ namespace CatAsset.Editor
             //获取所有直接依赖
             List<string> dependencies = Util.GetDependencies(assetName, false);
 
+            if (dependencies == null)
+            {
+                //没有依赖 直接返回true了
+                return true;
+            }
+            
             //递归检查依赖
             foreach (string item in dependencies)
             {
@@ -96,7 +108,7 @@ namespace CatAsset.Editor
                 depChainSet.Remove(item);
             }
 
-            //把直接依赖都从set中移除
+            //返回上一层前 把直接依赖都从set中移除
             foreach (string item in dependencies)
             {
                 depChainSet.Remove(item);

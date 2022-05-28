@@ -10,6 +10,9 @@ namespace CatAsset.Editor
     public class NAssetToOneBundle : IBundleBuildRule
     {
         /// <inheritdoc />
+        public virtual bool IsRaw => false;
+        
+        /// <inheritdoc />
         public virtual List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
         {
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();
