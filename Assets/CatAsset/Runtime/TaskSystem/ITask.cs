@@ -26,6 +26,11 @@
         float Progress { get; }
 
         /// <summary>
+        /// 已合并任务数量
+        /// </summary>
+        public int MergedTaskCount { get; }
+        
+        /// <summary>
         /// 合并任务
         /// </summary>
         void MergeTask(ITask task);

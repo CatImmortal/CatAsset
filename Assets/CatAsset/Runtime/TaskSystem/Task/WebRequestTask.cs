@@ -64,7 +64,7 @@ namespace CatAsset.Runtime
             }
 
             //请求完毕
-            State =TaskState.Finished;
+            State = TaskState.Finished;
 
             if (operation.webRequest.isNetworkError || operation.webRequest.isHttpError)
             {

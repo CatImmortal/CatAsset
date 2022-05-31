@@ -25,6 +25,9 @@ namespace CatAsset.Runtime
         public virtual float Progress { get; }
 
         /// <inheritdoc />
+        public int MergedTaskCount => mergedTasks.Count;
+        
+        /// <inheritdoc />
         public void MergeTask(ITask task)
         {
             mergedTasks.Add((T)task);

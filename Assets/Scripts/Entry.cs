@@ -10,19 +10,29 @@ public class Entry : MonoBehaviour
     {
         CatAssetManager.CheckPackageManifest((b =>
         {
-            CatAssetManager.LoadAsset("Assets/BundleRes/Prefab2/TestGO 1.prefab",null,((success, asset, userdata) =>
-            {
-                if (success)
-                {
-                    Instantiate((GameObject)asset);
-                }
-            }));
+           
         }));
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            CatAssetManager.LoadAsset<GameObject>("Assets/BundleRes/Prefab2/TestGO 1.prefab",null,((success, asset, userdata) =>
+            {
+           
+            }));
+        }
         
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            CatAssetManager.LoadAsset<Texture2D>("Assets/BundleRes/Texture/Tex1.jpg",null,((success, asset, userdata) =>
+            {
+           
+            }));
+        }
     }
+
+
 }

@@ -40,7 +40,7 @@ namespace CatAsset.Editor
                 case PlayModeStateChange.ExitingEditMode:
                     //窗口打开期间，每次运行游戏都重置下数据
                     isInitRuntimeInfoView = false;
-                    // isInitTaskInfoView = false;
+                    isInitTaskInfoView = false;
                     // isInitUpdateInfoView = false;
                     // isInitGroupInfoView = false;
                     break;
@@ -80,9 +80,9 @@ namespace CatAsset.Editor
                     DrawRuntimeInfoView();
                     break;
 
-                // case 1:
-                //     DrawTaskInfoView();
-                //     break;
+                case 1:
+                    DrawTaskInfoView();
+                    break;
                 //
                 // case 2:
                 //     DrawUpdateInfoView();
