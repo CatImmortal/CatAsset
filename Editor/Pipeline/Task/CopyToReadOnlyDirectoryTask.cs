@@ -68,12 +68,18 @@ namespace CatAsset.Editor
                         FileInfo fi = new FileInfo(Path.Combine(directory, bundleManifestInfo.RelativePath));
                         
                         string fullPath = CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.RelativePath);
-                        string fullDirectory = CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
-                        if (!Directory.Exists(fullDirectory))
+
+                        //冗余资源包没有bundleManifestInfo.Directory
+                        if (!string.IsNullOrEmpty(bundleManifestInfo.Directory))
                         {
-                            //StreamingAssets下的目录不存在则创建
-                            Directory.CreateDirectory(fullDirectory);
+                            string fullDirectory = CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
+                            if (!Directory.Exists(fullDirectory))
+                            {
+                                //StreamingAssets下的目录不存在则创建
+                                Directory.CreateDirectory(fullDirectory);
+                            }
                         }
+
 
                         fi.CopyTo(fullPath);
 

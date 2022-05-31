@@ -72,7 +72,7 @@ namespace CatAsset.Editor
             List<string> assetNames = new List<string>();
             foreach (AssetBuildInfo assetBuildInfo in Assets)
             {
-                assetNames.Add(assetBuildInfo.AssetName);
+                assetNames.Add(assetBuildInfo.Name);
             }
 
             bundleBuild.assetNames = assetNames.ToArray();

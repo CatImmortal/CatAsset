@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
@@ -11,16 +12,14 @@ namespace CatAsset.Runtime
     public static class CatAssetManager
     {
         /// <summary>
-        /// 下载相关任务运行器
-        /// </summary>
-        private static TaskRunner downloadTaskRunner = new TaskRunner();
-        
-        /// <summary>
         /// 加载相关任务运行器
         /// </summary>
         private static TaskRunner loadTaskRunner = new TaskRunner();
-
-
+        
+        /// <summary>
+        /// 下载相关任务运行器
+        /// </summary>
+        private static TaskRunner downloadTaskRunner = new TaskRunner();
 
         /// <summary>
         /// 资源包相对路径->资源包运行时信息（只有在这个字典里的才是在本地可加载的）
@@ -123,6 +122,8 @@ namespace CatAsset.Runtime
             downloadTaskRunner.Update();
         }
 
+        #region 资源清单检查
+
         /// <summary>
         /// 检查安装包内资源清单,仅使用安装包内资源模式下专用
         /// </summary>
@@ -167,6 +168,10 @@ namespace CatAsset.Runtime
             downloadTaskRunner.AddTask(task, TaskPriority.Height);
         }
 
+        #endregion
+
+        #region 资源加载
+
         /// <summary>
         /// 加载资源
         /// </summary>
@@ -210,6 +215,42 @@ namespace CatAsset.Runtime
             LoadAssetTask<T> task = LoadAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
         }
+
+        /// <summary>
+        /// 加载场景
+        /// </summary>
+        public static void LoadScene(string sceneName, object userdata, LoadAssetTaskCallback<Object> callback,
+            TaskPriority priority = TaskPriority.Low)
+        {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).completed += (op) =>
+                {
+                    callback?.Invoke(true,null,userdata);
+                };
+                return;
+            }
+#endif
+            if (!CheckAssetReady(sceneName))
+            {
+                return;
+            }
+            
+            //创建加载场景的任务
+            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner,sceneName,userdata,callback);
+            loadTaskRunner.AddTask(task,priority);
+        }
+        
+        #endregion
+
+        #region 资源卸载
+
+        
+
+        #endregion
+
+      
 
 
         /// <summary>

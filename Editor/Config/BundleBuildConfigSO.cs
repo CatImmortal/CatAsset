@@ -161,7 +161,7 @@ namespace CatAsset.Editor
             {
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
-                    string assetName = assetBuildInfo.AssetName;
+                    string assetName = assetBuildInfo.Name;
                     explicitBuildAssetSet.Add(assetName);
                 }
             }
@@ -173,7 +173,7 @@ namespace CatAsset.Editor
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
-                    string assetName = assetBuildInfo.AssetName;
+                    string assetName = assetBuildInfo.Name;
 
                     //检查依赖列表
                     List<string> dependencies = Util.GetDependencies(assetName);
@@ -227,7 +227,7 @@ namespace CatAsset.Editor
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
-                    string assetName = assetBuildInfo.AssetName;
+                    string assetName = assetBuildInfo.Name;
                     if (assetName.EndsWith(".unity"))
                     {
                         sceneAssets.Add(assetBuildInfo);

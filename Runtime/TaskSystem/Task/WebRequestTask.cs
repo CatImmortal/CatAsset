@@ -71,7 +71,7 @@ namespace CatAsset.Runtime
                 onFinished?.Invoke(false, operation.webRequest.error, operation.webRequest,userdata);
                 foreach (WebRequestTask task in mergedTasks)
                 {
-                    task.onFinished?.Invoke(false, operation.webRequest.error, operation.webRequest,userdata);
+                    task.onFinished?.Invoke(false, operation.webRequest.error, operation.webRequest,task.userdata);
                 }
             }
             else
@@ -79,7 +79,7 @@ namespace CatAsset.Runtime
                 onFinished?.Invoke(true, null, operation.webRequest,userdata);
                 foreach (WebRequestTask task in mergedTasks)
                 {
-                    task.onFinished?.Invoke(true, null, operation.webRequest,userdata);
+                    task.onFinished?.Invoke(true, null, operation.webRequest,task.userdata);
                 }
             }
         }

@@ -34,7 +34,7 @@ namespace CatAsset.Editor
                 //遍历原生资源包列表
                 foreach (BundleBuildInfo rawBundleBuildInfo in rawBundleBuilds)
                 {
-                    string rawAssetName = rawBundleBuildInfo.Assets[0].AssetName;
+                    string rawAssetName = rawBundleBuildInfo.Assets[0].Name;
                     string rawBundleDirectory = Path.Combine(directory, rawBundleBuildInfo.DirectoryName.ToLower());
                     if (!Directory.Exists(rawBundleDirectory))
                     {
