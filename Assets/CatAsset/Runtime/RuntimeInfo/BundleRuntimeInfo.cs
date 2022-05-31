@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,10 +7,10 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包运行时信息
     /// </summary>
-    public class BundleRuntimeInfo
+    public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>,IEquatable<BundleRuntimeInfo>
     {
         private string loadPath;
-        private HashSet<string> usedAsset;
+        private HashSet<AssetRuntimeInfo> usedAsset;
 
         /// <summary>
         /// 资源包清单信息
@@ -52,17 +53,27 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 当前使用中的资源集合，这里面的资源的引用计数都大于0
         /// </summary>
-        public HashSet<string> UsedAssets
+        public HashSet<AssetRuntimeInfo> UsedAssets
         {
             get
             {
                 if (usedAsset == null)
                 {
-                    usedAsset = new HashSet<string>();
+                    usedAsset = new HashSet<AssetRuntimeInfo>();
                 }
 
                 return usedAsset;
             }
+        }
+
+        public int CompareTo(BundleRuntimeInfo other)
+        {
+            return Manifest.CompareTo(other.Manifest);
+        }
+
+        public bool Equals(BundleRuntimeInfo other)
+        {
+            return Manifest.Equals(other.Manifest);
         }
 
         public override string ToString()

@@ -65,7 +65,7 @@ namespace CatAsset.Runtime
             }
             else
             {
-                Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
+                //Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
                 onFinished?.Invoke(true,userdata);
                 foreach (LoadBundleTask task in mergedTasks)
                 {

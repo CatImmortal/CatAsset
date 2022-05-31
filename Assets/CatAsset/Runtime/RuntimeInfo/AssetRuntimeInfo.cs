@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace CatAsset.Runtime
@@ -5,9 +6,9 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源运行时信息
     /// </summary>
-    public class AssetRuntimeInfo
+    public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>,IEquatable<AssetRuntimeInfo>
     {
-        private List<string> refAssetList;
+        private HashSet<AssetRuntimeInfo> refAssetS;
 
         /// <summary>
         /// 所在资源包清单信息
@@ -32,16 +33,26 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 通过依赖加载引用了此资源的资源列表
         /// </summary>
-        public List<string> RefAssetList{
+        public HashSet<AssetRuntimeInfo> RefAssets{
             get
             {
-                if (refAssetList == null)
+                if (refAssetS == null)
                 {
-                    refAssetList = new List<string>();
+                    refAssetS = new HashSet<AssetRuntimeInfo>();
                 }
                 
-                return refAssetList;
+                return refAssetS;
             }
+        }
+
+        public int CompareTo(AssetRuntimeInfo other)
+        {
+            return AssetManifest.CompareTo(other.AssetManifest);
+        }
+
+        public bool Equals(AssetRuntimeInfo other)
+        {
+            return BundleManifest.Equals(other.BundleManifest) && AssetManifest.Equals(other.AssetManifest);
         }
 
         public override string ToString()
