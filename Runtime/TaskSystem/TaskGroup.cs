@@ -51,12 +51,12 @@ namespace CatAsset.Runtime
         {
             if (mainTaskDict.TryGetValue(task.Name,out ITask mainTask))
             {
-                Debug.Log($"合并任务:{task}");
+                //Debug.Log($"合并任务:{task}");
                 mainTask.MergeTask(task);
             }
             else
             {
-                Debug.Log($"添加任务:{task}");
+                //Debug.Log($"添加任务:{task}");
                 mainTaskDict.Add(task.Name,task);
                 runningTasks.Add(task);
             }
@@ -94,7 +94,7 @@ namespace CatAsset.Runtime
             if (task.State == TaskState.Free)
             {
                 //运行空闲状态的任务
-                Debug.Log($"运行任务:{task}");
+                //Debug.Log($"运行任务:{task}");
                 task.Run();
                
             }
@@ -134,7 +134,7 @@ namespace CatAsset.Runtime
                     int removeIndex = waitRemoveTasks[i];
                     ITask task = runningTasks[removeIndex];
                     
-                    Debug.Log($"移除任务:{task}");
+                    //Debug.Log($"移除任务:{task}");
                     runningTasks.RemoveAt(removeIndex);
                     mainTaskDict.Remove(task.Name);
                     ReferencePool.Release(task);

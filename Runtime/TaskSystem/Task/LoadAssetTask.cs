@@ -90,210 +90,13 @@ namespace CatAsset.Runtime
             }
         }
         
-        /// <summary>
-        /// 资源包加载结束的回调
-        /// </summary>
-        private void OnBundleLoaded(bool success,object userdata)
-        {
-            if (!success)
-            {
-                //资源包加载失败了 直接转移到AssetLoaded状态
-                loadAssetState = LoadAssetState.AssetLoaded;
-                return;
-            }
-
-            loadAssetState = LoadAssetState.BundleLoaded;
-        }
-        
-        /// <summary>
-        /// 依赖资源加载完毕的回调
-        /// </summary>
-        private void OnDependencyLoaded(bool success, object asset,object userdata)
-        {
-            loadedDependencyCount++;
-
-            if (success)
-            {
-                AssetRuntimeInfo dependencyRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(asset);
-                
-                //添加依赖引用记录
-                dependencyRuntimeInfo.RefAssetList.Add(Name);
-            }
-        }
-        
-        /// <summary>
-        /// 卸载掉加载过的依赖资源
-        /// </summary>
-        private void UnloadDependencies()
-        {
             
-            for (int i = 0; i < AssetRuntimeInfo.AssetManifest.Dependencies.Count; i++)
-            {
-                string dependencyName = AssetRuntimeInfo.AssetManifest.Dependencies[i];
-
-                AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
-                if (dependencyInfo != null && dependencyInfo.Asset != null)
-                {
-                    //将已加载好的依赖都卸载了
-                    CatAssetManager.UnloadAsset(dependencyInfo.Asset);
-                }
-
-            }
-        }
-        
-        /// <summary>
-        /// 发起异步加载
-        /// </summary>
-        protected virtual void LoadAsync()
-        {
-            Operation = BundleRuntimeInfo.Bundle.LoadAssetAsync(Name,AssetRuntimeInfo.AssetManifest.Type);
-        }
-        
-        /// <summary>
-        /// 异步加载结束时调用
-        /// </summary>
-        protected virtual void OnLoadDone()
-        {
-            AssetBundleRequest request = (AssetBundleRequest)Operation;
-            AssetRuntimeInfo.Asset = request.asset;
-
-            if (AssetRuntimeInfo.Asset != null)
-            {
-                //添加关联
-                CatAssetManager.SetAssetRuntimeInfo(AssetRuntimeInfo.Asset,AssetRuntimeInfo);
-            }
-        }
-
-        #region 资源加载状态检查
-
-          private void CheckStateWithBundleLoading()
-        {
-            State = TaskState.Waiting;
-        }
-        
-        private void CheckStateWithBundleLoaded()
-        {
-            //添加引用计数
-            AssetRuntimeInfo.RefCount++;
-            AssetRuntimeInfo.RefCount += mergedTasks.Count; //要把已合并的任务数量也加到引用计数上
-            BundleRuntimeInfo.UsedAssets.Add(Name);
-                
-            if (AssetRuntimeInfo.AssetManifest.Dependencies == null)
-            {
-                loadAssetState = LoadAssetState.DependenciesLoaded;
-                totalDependencyCount = 0;
-            }
-            else
-            {
-                //加载依赖
-                loadAssetState =  LoadAssetState.DependenciesLoading;
-                totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
-                foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
-                {
-                    CatAssetManager.LoadAsset(dependency,null, onDependencyLoadedCallback,TaskPriority.Height);
-                }
-            }
-        }
-
-        private bool CheckStateWithDependenciesLoading()
-        {
-            if (loadedDependencyCount != totalDependencyCount)
-            {
-                State = TaskState.Waiting;
-                return true;
-            }
-            
-            loadAssetState = LoadAssetState.DependenciesLoaded;
-            return false;
-        }
-        
-        private void CheckStateWithDependenciesLoaded()
-        {
-            loadAssetState = LoadAssetState.AssetLoading;
-            LoadAsync();
-        }
-        
-        private bool CheckStateWithAssetLoading()
-        {
-            State = TaskState.Running;
-            if (!Operation.isDone)
-            {
-                return true;
-            }
-
-            loadAssetState = LoadAssetState.AssetLoaded;
-            OnLoadDone();
-            return false;
-        }
-        
-        private void CheckStateWithAssetLoaded()
-        {
-            State = TaskState.Finished;
-
-            if (BundleRuntimeInfo.Bundle == null)
-            {
-                //资源包加载失败
-                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
-                
-                OnFinished?.Invoke(false,null,Userdata);
-                foreach (LoadAssetTask<T> task in mergedTasks)
-                {
-                    task.OnFinished?.Invoke(false,null,Userdata);
-                }
-                
-                return;
-            }
-
-            if (IsAssetLoadFailed())
-            {
-                //资源加载失败
-                //清空引用计数
-                AssetRuntimeInfo.RefCount = 0;
-                BundleRuntimeInfo.UsedAssets.Remove(Name);
-                    
-                //加载过依赖 要卸载依赖
-                if (totalDependencyCount > 0)
-                {
-                    UnloadDependencies();
-                }
-                    
-                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
-                
-                OnFinished?.Invoke(false,null,Userdata);
-                foreach (LoadAssetTask<T> task in mergedTasks)
-                {
-                    task.OnFinished?.Invoke(false,null,task.Userdata);
-                }
-                
-                return;
-            }
-                
-            Debug.Log($"资源加载成功：{AssetRuntimeInfo}");
-            
-            OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,Userdata);
-            foreach (LoadAssetTask<T> task in mergedTasks)
-            {
-                task.OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,task.Userdata);
-            }
-        }
-
-        /// <summary>
-        /// 资源是否加载失败
-        /// </summary>
-        /// <returns></returns>
-        protected virtual bool IsAssetLoadFailed()
-        {
-            return AssetRuntimeInfo.Asset == null;
-        }
-        
-        #endregion
-        
         /// <inheritdoc />
         public override void Run()
         {
             if (BundleRuntimeInfo.Bundle == null)
             {
-                //需要先加载资源包
+                //资源包未加载
                 loadAssetState = LoadAssetState.BundleLoading;
                 
                 LoadBundleTask task = LoadBundleTask.Create(Owner,BundleRuntimeInfo.Manifest.RelativePath,null,onBundleLoadedCallback);
@@ -301,6 +104,7 @@ namespace CatAsset.Runtime
             }
             else
             {
+                //资源包已加载
                 loadAssetState = LoadAssetState.BundleLoaded;
             }
         }
@@ -353,6 +157,217 @@ namespace CatAsset.Runtime
                 CheckStateWithAssetLoaded();
             }
         }
+        
+        /// <summary>
+        /// 资源包加载结束的回调
+        /// </summary>
+        private void OnBundleLoaded(bool success,object userdata)
+        {
+            if (!success)
+            {
+                //资源包加载失败
+                loadAssetState = LoadAssetState.None;
+                State = TaskState.Finished;
+                
+                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
+                
+                OnFinished?.Invoke(false,null,Userdata);
+                foreach (LoadAssetTask<T> task in mergedTasks)
+                {
+                    task.OnFinished?.Invoke(false,null,Userdata);
+                }
+            }
+            else
+            {
+                //资源包加载成功
+                loadAssetState = LoadAssetState.BundleLoaded;
+            }
+
+           
+        }
+        
+        /// <summary>
+        /// 依赖资源加载完毕的回调
+        /// </summary>
+        private void OnDependencyLoaded(bool success, object asset,object userdata)
+        {
+            loadedDependencyCount++;
+
+            if (success)
+            {
+                AssetRuntimeInfo dependencyRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(asset);
+                
+                //添加依赖加载记录
+                dependencyRuntimeInfo.RefAssets.Add(AssetRuntimeInfo);
+            }
+        }
+        
+        /// <summary>
+        /// 卸载掉加载过的依赖资源
+        /// </summary>
+        private void UnloadDependencies()
+        {
+            
+            for (int i = 0; i < AssetRuntimeInfo.AssetManifest.Dependencies.Count; i++)
+            {
+                string dependencyName = AssetRuntimeInfo.AssetManifest.Dependencies[i];
+
+                AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
+                if (dependencyInfo != null && dependencyInfo.Asset != null)
+                {
+                    //将已加载好的依赖都卸载了
+                    dependencyInfo.RefAssets.Remove(AssetRuntimeInfo);
+                    CatAssetManager.UnloadAsset(dependencyInfo.Asset);
+                }
+
+            }
+        }
+        
+        /// <summary>
+        /// 发起异步加载
+        /// </summary>
+        protected virtual void LoadAsync()
+        {
+            Operation = BundleRuntimeInfo.Bundle.LoadAssetAsync(Name,AssetRuntimeInfo.AssetManifest.Type);
+        }
+        
+        /// <summary>
+        /// 异步加载结束时调用
+        /// </summary>
+        protected virtual void OnLoadDone()
+        {
+            AssetBundleRequest request = (AssetBundleRequest)Operation;
+            AssetRuntimeInfo.Asset = request.asset;
+
+            if (AssetRuntimeInfo.Asset != null)
+            {
+                //添加关联
+                CatAssetManager.SetAssetRuntimeInfo(AssetRuntimeInfo.Asset,AssetRuntimeInfo);
+            }
+        }
+
+        #region 资源加载状态检查
+
+          private void CheckStateWithBundleLoading()
+        {
+            State = TaskState.Waiting;
+        }
+        
+        private void CheckStateWithBundleLoaded()
+        {
+            //这里要在资源包加载好后就马上增加资源的引用计数和UsedAssets记录
+            //防止在依赖资源加载过程中触发了资源包的卸载
+            AssetRuntimeInfo.RefCount++;
+            AssetRuntimeInfo.RefCount += mergedTasks.Count;
+            BundleRuntimeInfo.UsedAssets.Add(AssetRuntimeInfo);
+                
+            if (AssetRuntimeInfo.AssetManifest.Dependencies == null)
+            {
+                loadAssetState = LoadAssetState.DependenciesLoaded;
+                totalDependencyCount = 0;
+            }
+            else
+            {
+                //加载依赖
+                loadAssetState =  LoadAssetState.DependenciesLoading;
+                totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
+                foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
+                {
+                    CatAssetManager.LoadAsset(dependency,null, onDependencyLoadedCallback,TaskPriority.Height);
+                }
+            }
+        }
+
+        private bool CheckStateWithDependenciesLoading()
+        {
+            if (loadedDependencyCount != totalDependencyCount)
+            {
+                State = TaskState.Waiting;
+                return true;
+            }
+            
+            loadAssetState = LoadAssetState.DependenciesLoaded;
+            return false;
+        }
+        
+        private void CheckStateWithDependenciesLoaded()
+        {
+            loadAssetState = LoadAssetState.AssetLoading;
+
+            if (AssetRuntimeInfo.Asset == null)
+            {
+                //未加载过 发起异步加载
+                LoadAsync();
+            }
+            else
+            {
+                //已加载过 直接转移到AssetLoaded状态
+                loadAssetState = LoadAssetState.AssetLoaded;
+            }
+            
+        }
+        
+        private bool CheckStateWithAssetLoading()
+        {
+            State = TaskState.Running;
+            if (!Operation.isDone)
+            {
+                return true;
+            }
+
+            loadAssetState = LoadAssetState.AssetLoaded;
+            OnLoadDone();
+            
+            return false;
+        }
+        
+        private void CheckStateWithAssetLoaded()
+        {
+            State = TaskState.Finished;
+            
+            if (IsAssetLoadFailed())
+            {
+                //资源加载失败
+                //清空引用计数
+                AssetRuntimeInfo.RefCount = 0;
+                BundleRuntimeInfo.UsedAssets.Remove(AssetRuntimeInfo);
+                    
+                //加载过依赖 要卸载依赖
+                if (totalDependencyCount > 0)
+                {
+                    UnloadDependencies();
+                }
+                    
+                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
+                
+                OnFinished?.Invoke(false,null,Userdata);
+                foreach (LoadAssetTask<T> task in mergedTasks)
+                {
+                    task.OnFinished?.Invoke(false,null,task.Userdata);
+                }
+                
+                return;
+            }
+                
+            //Debug.Log($"资源加载成功：{AssetRuntimeInfo}");
+            
+            OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,Userdata);
+            foreach (LoadAssetTask<T> task in mergedTasks)
+            {
+                task.OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,task.Userdata);
+            }
+        }
+
+        /// <summary>
+        /// 资源是否加载失败
+        /// </summary>
+        protected virtual bool IsAssetLoadFailed()
+        {
+            return AssetRuntimeInfo.Asset == null;
+        }
+        
+        #endregion
+    
         
         /// <summary>
         /// 创建资源加载任务的对象

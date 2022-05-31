@@ -97,14 +97,8 @@ namespace CatAsset.Editor
                         if (foldOut[bundleRelativePath] == true)
                         {
                             
-                            foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
+                            foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsedAssets)
                             {
-                                string assetName = assetManifestInfo.Name;
-                                AssetRuntimeInfo assetRuntimeInfo = assetRuntimeInfoDict[assetName];
-                                if (assetRuntimeInfo.RefCount == 0)
-                                {
-                                    continue;
-                                }
                                 DrawAssetRuntimeInfo(assetRuntimeInfo);
                             }
 
@@ -167,7 +161,7 @@ namespace CatAsset.Editor
                 //引用计数
                 EditorGUILayout.LabelField("引用计数：" + assetRuntimeInfo.RefCount, GUILayout.Width(100));
 
-                EditorGUILayout.LabelField("RefAsset数量：" + assetRuntimeInfo.RefAssetList.Count, GUILayout.Width(100));
+                EditorGUILayout.LabelField("RefAsset数量：" + assetRuntimeInfo.RefAssets.Count, GUILayout.Width(100));
                 if (GUILayout.Button("查看RefAsset", GUILayout.Width(100)))
                 {
                     RefAssetListWindow.OpenWindow(this,assetRuntimeInfo);
@@ -198,16 +192,7 @@ namespace CatAsset.Editor
                 
 
             }
-
-            private void DrawRefAssetList()
-            {
-                foreach (string assetName in assetRuntimeInfo.RefAssetList)
-                {
-                    AssetRuntimeInfo refAsset = CatAssetManager.GetAssetRuntimeInfo(assetName);
-                    parent.DrawAssetRuntimeInfo(refAsset);
-                }
-            }
-
+            
             private void OnGUI()
             {
                 if (!Application.isPlaying)
@@ -215,9 +200,20 @@ namespace CatAsset.Editor
                     Close();
                     return;
                 }
-                
+
+                EditorGUILayout.LabelField(assetRuntimeInfo.AssetManifest.Name);
                 DrawRefAssetList();
             }
+
+            private void DrawRefAssetList()
+            {
+                foreach (AssetRuntimeInfo assetRuntimeInfo in assetRuntimeInfo.RefAssets)
+                {
+                    parent.DrawAssetRuntimeInfo(assetRuntimeInfo);
+                }
+            }
+
+           
         }
     }
 }
