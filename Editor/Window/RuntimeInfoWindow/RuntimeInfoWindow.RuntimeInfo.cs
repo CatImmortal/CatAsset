@@ -17,7 +17,7 @@ namespace CatAsset.Editor
         private Dictionary<string, BundleRuntimeInfo> bundleRuntimeInfoDict;
         private Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict;
 
-        private Vector2 assetInfoScrollPos;
+        private Vector2 runtimeInfo;
         
         private MethodInfo findTextureByTypeMI = typeof(EditorGUIUtility).GetMethod("FindTextureByType", BindingFlags.NonPublic | BindingFlags.Static);
         private object[] paramObjs = new object[1];
@@ -64,9 +64,9 @@ namespace CatAsset.Editor
                 }
             }
 
-            using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(assetInfoScrollPos))
+            using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(runtimeInfo))
             {
-                assetInfoScrollPos = sv.scrollPosition;
+                runtimeInfo = sv.scrollPosition;
 
                 foreach (KeyValuePair<string, BundleRuntimeInfo> item in bundleRuntimeInfoDict)
                 {

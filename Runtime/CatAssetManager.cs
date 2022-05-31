@@ -11,14 +11,16 @@ namespace CatAsset.Runtime
     public static class CatAssetManager
     {
         /// <summary>
+        /// 下载相关任务运行器
+        /// </summary>
+        private static TaskRunner downloadTaskRunner = new TaskRunner();
+        
+        /// <summary>
         /// 加载相关任务运行器
         /// </summary>
         private static TaskRunner loadTaskRunner = new TaskRunner();
 
-        /// <summary>
-        /// 下载相关任务运行器
-        /// </summary>
-        private static TaskRunner downloadTaskRunner = new TaskRunner();
+
 
         /// <summary>
         /// 资源包相对路径->资源包运行时信息（只有在这个字典里的才是在本地可加载的）
