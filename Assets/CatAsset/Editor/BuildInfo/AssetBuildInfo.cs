@@ -1,4 +1,5 @@
 using System;
+using UnityEditor;
 
 namespace CatAsset.Editor
 {
@@ -11,31 +12,43 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源名
         /// </summary>
-        public string AssetName;
+        public string Name;
 
-        public AssetBuildInfo(string assetName)
+        /// <summary>
+        /// 资源类型名
+        /// </summary>
+        public string TypeName;
+        
+        /// <summary>
+        /// 资源类型
+        /// </summary>
+        public Type Type;
+        
+        public AssetBuildInfo(string name)
         {
-            AssetName = assetName;
+            Name = name;
+            Type = AssetDatabase.GetMainAssetTypeAtPath(name);
+            TypeName = Type.Name;
         }
 
         public override string ToString()
         {
-            return AssetName;
+            return Name;
         }
         
         public int CompareTo(AssetBuildInfo other)
         {
-            return AssetName.CompareTo(other.AssetName);
+            return Name.CompareTo(other.Name);
         }
 
         public bool Equals(AssetBuildInfo other)
         {
-            return AssetName.Equals(other.AssetName);
+            return Name.Equals(other.Name);
         }
 
         public override int GetHashCode()
         {
-            return AssetName.GetHashCode();
+            return Name.GetHashCode();
         }
     }
 

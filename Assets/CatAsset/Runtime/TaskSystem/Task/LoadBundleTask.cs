@@ -53,16 +53,24 @@ namespace CatAsset.Runtime
         private void CheckStateWithLoaded()
         {
             State = TaskState.Finished;
-                
+            
             if (bundleRuntimeInfo.Bundle == null)
             {
                 Debug.LogError($"资源包加载失败：{bundleRuntimeInfo.Manifest}");
                 onFinished?.Invoke(false,userdata);
+                foreach (LoadBundleTask task in mergedTasks)
+                {
+                    task.onFinished?.Invoke(false,task.userdata);
+                }
             }
             else
             {
                 Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
                 onFinished?.Invoke(true,userdata);
+                foreach (LoadBundleTask task in mergedTasks)
+                {
+                    task.onFinished?.Invoke(true,task.userdata);
+                }
             }
         }
         

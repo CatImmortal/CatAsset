@@ -26,7 +26,7 @@ namespace CatAsset.Editor
                 
                 foreach (AssetBuildInfo assetBuildInfo  in bundleBuildInfo.Assets)
                 {
-                    string assetName = assetBuildInfo.AssetName;
+                    string assetName = assetBuildInfo.Name;
                     
                     List<string> depChainList = new List<string>();  //记录依赖链的列表
                     depChainList.Add(assetName);

@@ -100,7 +100,7 @@ namespace CatAsset.Runtime
             }
 
             //轮询任务
-            Debug.Log($"轮询任务:{task}");
+            //Debug.Log($"轮询任务:{task}");
             task.Update();
            
             

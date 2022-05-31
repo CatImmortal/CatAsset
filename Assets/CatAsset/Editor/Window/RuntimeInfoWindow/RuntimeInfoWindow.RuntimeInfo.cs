@@ -128,7 +128,17 @@ namespace CatAsset.Editor
                 
                 //资源图标
                 GUIContent content = new GUIContent();
-                Type assetType = assetRuntimeInfo.Asset.GetType();
+                Type assetType;
+                if (assetRuntimeInfo.Asset != null)
+                {
+                    assetType = assetRuntimeInfo.Asset.GetType();
+                }
+                else
+                {
+                    //场景资源
+                    assetType = typeof(SceneAsset);
+                }
+             
                 if (assetType != typeof(Texture2D))
                 {
                     paramObjs[0] = assetType;
@@ -155,9 +165,9 @@ namespace CatAsset.Editor
                 }
 
                 //引用计数
-                EditorGUILayout.LabelField("引用计数：" + assetRuntimeInfo.RefCount.ToString(), GUILayout.Width(100));
+                EditorGUILayout.LabelField("引用计数：" + assetRuntimeInfo.RefCount, GUILayout.Width(100));
 
-                EditorGUILayout.LabelField("RefAsset数量：" + assetRuntimeInfo.RefAssetList.Count.ToString(), GUILayout.Width(100));
+                EditorGUILayout.LabelField("RefAsset数量：" + assetRuntimeInfo.RefAssetList.Count, GUILayout.Width(100));
                 if (GUILayout.Button("查看RefAsset", GUILayout.Width(100)))
                 {
                     RefAssetListWindow.OpenWindow(this,assetRuntimeInfo);

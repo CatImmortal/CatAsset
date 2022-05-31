@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadAssetTaskCallback<T>(bool success,T asset,object userdata) where T: Object;
+    public delegate void LoadAssetTaskCallback<in T>(bool success,T asset,object userdata) where T: Object;
     
     /// <summary>
     /// 资源加载任务
@@ -53,18 +53,18 @@ namespace CatAsset.Runtime
         }
 
 
-        private object userdata;
+        protected object Userdata;
         protected LoadAssetTaskCallback<T> OnFinished;
         
 
         protected AssetRuntimeInfo AssetRuntimeInfo;
         protected BundleRuntimeInfo BundleRuntimeInfo;
         
-        private LoadBundleTaskCallback onBundleLoadedCallback;
+        private readonly LoadBundleTaskCallback onBundleLoadedCallback;
         
         private int totalDependencyCount;
         private int loadedDependencyCount;
-        private LoadAssetTaskCallback<Object> onDependencyLoadedCallback;
+        private readonly LoadAssetTaskCallback<Object> onDependencyLoadedCallback;
 
       
         private LoadAssetState loadAssetState;
@@ -124,7 +124,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 卸载掉加载过的依赖资源
         /// </summary>
-        protected void UnloadDependencies()
+        private void UnloadDependencies()
         {
             
             for (int i = 0; i < AssetRuntimeInfo.AssetManifest.Dependencies.Count; i++)
@@ -235,16 +235,16 @@ namespace CatAsset.Runtime
                 //资源包加载失败
                 Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
                 
-                OnFinished?.Invoke(false,null,userdata);
+                OnFinished?.Invoke(false,null,Userdata);
                 foreach (LoadAssetTask<T> task in mergedTasks)
                 {
-                    task. OnFinished?.Invoke(false,null,userdata);
+                    task.OnFinished?.Invoke(false,null,Userdata);
                 }
                 
                 return;
             }
 
-            if ((!BundleRuntimeInfo.Manifest.IsScene && AssetRuntimeInfo.Asset == null))
+            if (IsAssetLoadFailed())
             {
                 //资源加载失败
                 //清空引用计数
@@ -259,10 +259,10 @@ namespace CatAsset.Runtime
                     
                 Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
                 
-                OnFinished?.Invoke(false,null,userdata);
+                OnFinished?.Invoke(false,null,Userdata);
                 foreach (LoadAssetTask<T> task in mergedTasks)
                 {
-                    task. OnFinished?.Invoke(false,null,userdata);
+                    task.OnFinished?.Invoke(false,null,task.Userdata);
                 }
                 
                 return;
@@ -270,13 +270,22 @@ namespace CatAsset.Runtime
                 
             Debug.Log($"资源加载成功：{AssetRuntimeInfo}");
             
-            OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,userdata);
+            OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,Userdata);
             foreach (LoadAssetTask<T> task in mergedTasks)
             {
-                task.OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,userdata);
+                task.OnFinished?.Invoke(true, (T)AssetRuntimeInfo.Asset,task.Userdata);
             }
         }
 
+        /// <summary>
+        /// 资源是否加载失败
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool IsAssetLoadFailed()
+        {
+            return AssetRuntimeInfo.Asset == null;
+        }
+        
         #endregion
         
         /// <inheritdoc />
@@ -356,7 +365,7 @@ namespace CatAsset.Runtime
             task.AssetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
                 CatAssetManager.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
-            task.userdata = userdata;
+            task.Userdata = userdata;
             task.OnFinished = callback;
             
             return task;
@@ -367,7 +376,7 @@ namespace CatAsset.Runtime
         {
             base.Clear();
 
-            userdata = default;
+            Userdata = default;
             OnFinished = default;
             AssetRuntimeInfo = default;
             BundleRuntimeInfo = default;

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 9
+  ManifestVersion: 12
   TargetPlatforms: 13000000
   Options: 45312
   OutputPath: ./AssetBundles
@@ -26,6 +26,9 @@ MonoBehaviour:
   - DirectoryName: Assets/BundleRes/RawAsset
     BuildRuleName: NAssetToNRawBundle
     Group: Base
+  - DirectoryName: Assets/BundleRes/Scene
+    BuildRuleName: NAssetToOneBundle
+    Group: Base
   - DirectoryName: Assets/BundleRes/Texture
     BuildRuleName: NAssetToOneBundle
     Group: Base
@@ -36,36 +39,71 @@ MonoBehaviour:
     Group: Base
     IsRaw: 0
     Assets:
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 1.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 2.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO 3.prefab
-    - AssetName: Assets/BundleRes/Prefab2/TestGO.prefab
-    - AssetName: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
+    - Name: Assets/BundleRes/Prefab2/TestGO 1.prefab
+      TypeName: GameObject
+    - Name: Assets/BundleRes/Prefab2/TestGO 2.prefab
+      TypeName: GameObject
+    - Name: Assets/BundleRes/Prefab2/TestGO 3.prefab
+      TypeName: GameObject
+    - Name: Assets/BundleRes/Prefab2/TestGO.prefab
+      TypeName: GameObject
   - RelativePath: bundleres/rawasset/RawImage.jpg
     DirectoryName: BundleRes/RawAsset
     BundleName: RawImage.jpg
     Group: Base
     IsRaw: 1
     Assets:
-    - AssetName: Assets/BundleRes/RawAsset/RawImage.jpg
+    - Name: Assets/BundleRes/RawAsset/RawImage.jpg
+      TypeName: Texture2D
   - RelativePath: bundleres/rawasset/rawText 1.txt
     DirectoryName: BundleRes/RawAsset
     BundleName: rawText 1.txt
     Group: Base
     IsRaw: 1
     Assets:
-    - AssetName: Assets/BundleRes/RawAsset/rawText 1.txt
+    - Name: Assets/BundleRes/RawAsset/rawText 1.txt
+      TypeName: TextAsset
   - RelativePath: bundleres/rawasset/rawText.txt
     DirectoryName: BundleRes/RawAsset
     BundleName: rawText.txt
     Group: Base
     IsRaw: 1
     Assets:
-    - AssetName: Assets/BundleRes/RawAsset/rawText.txt
+    - Name: Assets/BundleRes/RawAsset/rawText.txt
+      TypeName: TextAsset
+  - RelativePath: bundleres/scene.bundle
+    DirectoryName: BundleRes
+    BundleName: scene.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - Name: Assets/BundleRes/Scene/New Scene.unity
+      TypeName: SceneAsset
+  - RelativePath: bundleres/scene_res.bundle
+    DirectoryName: BundleRes
+    BundleName: scene_res.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - Name: Assets/BundleRes/Prefab1/TestGO 1.prefab
+      TypeName: GameObject
+    - Name: Assets/BundleRes/Prefab1/TestGO 3.prefab
+      TypeName: GameObject
+    - Name: Assets/BundleRes/Prefab1/TestGO 2.prefab
+      TypeName: GameObject
   - RelativePath: bundleres/texture.bundle
     DirectoryName: BundleRes
     BundleName: texture.bundle
     Group: Base
     IsRaw: 0
     Assets:
-    - AssetName: Assets/BundleRes/Texture/Tex1.jpg
+    - Name: Assets/BundleRes/Texture/Tex1.jpg
+      TypeName: Texture2D
+  - RelativePath: redundancy_0.bundle
+    DirectoryName: 
+    BundleName: redundancy_0.bundle
+    Group: Base
+    IsRaw: 0
+    Assets:
+    - Name: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
+      TypeName: Texture2D

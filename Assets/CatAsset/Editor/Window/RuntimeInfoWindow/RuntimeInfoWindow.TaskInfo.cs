@@ -59,9 +59,7 @@ namespace CatAsset.Editor
             {
                 InitTaskInfoView();
             }
-
             
-
             using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(taskInfoScrollPos))
             {
                 taskInfoScrollPos = sv.scrollPosition;

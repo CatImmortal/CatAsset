@@ -63,7 +63,7 @@ namespace CatAsset.Editor
                     };
                     manifest.Bundles.Add(bundleManifestInfo);
 
-                    bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].AssetName.EndsWith(".unity");
+                    bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].Name.EndsWith(".unity");
 
                     string fullPath = Path.Combine(directory, bundleBuildInfo.RelativePath);
                     FileInfo fi = new FileInfo(fullPath);
@@ -75,9 +75,13 @@ namespace CatAsset.Editor
                     {
                         AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                         {
-                            Name = assetBuildInfo.AssetName,
-                            Type = AssetDatabase.GetMainAssetTypeAtPath(assetBuildInfo.AssetName),
+                            Name = assetBuildInfo.Name,
                         };
+                        if (!bundleManifestInfo.IsScene)
+                        {
+                            //非场景资源才写入资源类型信息
+                            assetManifestInfo.Type = assetBuildInfo.Type;
+                        }
                         bundleManifestInfo.Assets.Add(assetManifestInfo);
 
                         //依赖列表不进行递归记录 因为加载的时候会对依赖进行递归加载
@@ -107,7 +111,7 @@ namespace CatAsset.Editor
 
                     AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                     {
-                        Name = bundleBuildInfo.Assets[0].AssetName,
+                        Name = bundleBuildInfo.Assets[0].Name,
                     };
                     bundleManifestInfo.Assets.Add(assetManifestInfo);
                 }

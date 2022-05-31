@@ -88,7 +88,7 @@ namespace CatAsset.Editor
                         //展开状态下 绘制资源包中的所有资源
                         foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                         {
-                            DrawAsset(assetBuildInfo.AssetName);
+                            DrawAsset(assetBuildInfo);
                         }
                     }
                 }
@@ -98,14 +98,10 @@ namespace CatAsset.Editor
         /// <summary>
         /// 绘制资源
         /// </summary>
-        private void DrawAsset(string assetName)
+        private void DrawAsset(AssetBuildInfo assetBuildInfo)
         {
-            Object asset = AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
-            if (!asset)
-            {
-                return;
-            }
-            Type assetType = asset.GetType();
+
+            Type assetType = assetBuildInfo.Type;
 
             GUIContent content = new GUIContent();
 
@@ -116,18 +112,18 @@ namespace CatAsset.Editor
             }
             else
             {
-                content.image = EditorGUIUtility.FindTexture(assetName);
+                content.image = EditorGUIUtility.FindTexture(assetBuildInfo.Name);
             }
 
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
                 EditorGUILayout.LabelField(content, GUILayout.Width(20));
-                EditorGUILayout.LabelField(assetName, GUILayout.Width(400));
+                EditorGUILayout.LabelField(assetBuildInfo.Name, GUILayout.Width(400));
 
                 if (GUILayout.Button("选中",GUILayout.Width(50)))
                 {
-                    Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetName,typeof(Object));
+                    Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetBuildInfo.Name,assetBuildInfo.Type);
                 }
             }
            
