@@ -6,9 +6,9 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源运行时信息
     /// </summary>
-    public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>,IEquatable<AssetRuntimeInfo>
+    public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>
     {
-        private HashSet<AssetRuntimeInfo> refAssetS;
+
 
         /// <summary>
         /// 所在资源包清单信息
@@ -31,20 +31,37 @@ namespace CatAsset.Runtime
         public int RefCount;
 
         /// <summary>
-        /// 通过依赖加载引用了此资源的资源列表
+        /// 依赖此资源的资源集合
         /// </summary>
-        public HashSet<AssetRuntimeInfo> RefAssets{
-            get
-            {
-                if (refAssetS == null)
-                {
-                    refAssetS = new HashSet<AssetRuntimeInfo>();
-                }
-                
-                return refAssetS;
-            }
+        public HashSet<AssetRuntimeInfo> RefAssets { get; } = new HashSet<AssetRuntimeInfo>();
+
+        /// <summary>
+        /// 是否可卸载
+        /// </summary>
+        public bool CanUnload()
+        {
+            return RefCount == 0;
         }
 
+        /// <summary>
+        /// 卸载资源
+        /// </summary>
+        public void Unload()
+        {
+            BundleRuntimeInfo bundleRuntimeInfo = CatAssetManager.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+            bundleRuntimeInfo.UsedAssets.Remove(this);
+
+            AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(AssetManifest.Name);
+            if (assetRuntimeInfo.AssetManifest.Dependencies != null)
+            {
+                foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
+                {
+                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(dependency);
+                    dependencyRuntimeInfo.RefAssets.Remove(assetRuntimeInfo);
+                }
+            }
+        }
+        
         public int CompareTo(AssetRuntimeInfo other)
         {
             return AssetManifest.CompareTo(other.AssetManifest);

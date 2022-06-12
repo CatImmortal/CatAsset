@@ -9,9 +9,6 @@ namespace CatAsset.Runtime
     /// </summary>
     public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>,IEquatable<BundleRuntimeInfo>
     {
-        private string loadPath;
-        private HashSet<AssetRuntimeInfo> usedAsset;
-
         /// <summary>
         /// 资源包清单信息
         /// </summary>
@@ -27,7 +24,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public bool InReadWrite;
 
-        
+        private string loadPath;
         /// <summary>
         /// 加载地址
         /// </summary>
@@ -53,17 +50,36 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 当前使用中的资源集合，这里面的资源的引用计数都大于0
         /// </summary>
-        public HashSet<AssetRuntimeInfo> UsedAssets
-        {
-            get
-            {
-                if (usedAsset == null)
-                {
-                    usedAsset = new HashSet<AssetRuntimeInfo>();
-                }
+        public HashSet<AssetRuntimeInfo> UsedAssets { get; } = new HashSet<AssetRuntimeInfo>();
 
-                return usedAsset;
-            }
+        /// <summary>
+        /// 依赖此资源包的资源包集合
+        /// </summary>
+        public HashSet<BundleRuntimeInfo> RefBundles{ get; } = new HashSet<BundleRuntimeInfo>();
+        
+        /// <summary>
+        /// 此资源包依赖的资源包集合
+        /// </summary>
+        public HashSet<BundleRuntimeInfo> DependencyBundles { get; } = new HashSet<BundleRuntimeInfo>();
+
+
+
+        /// <summary>
+        /// 是否可卸载
+        /// </summary>
+        /// <returns></returns>
+        public bool CanUnload()
+        {
+            return UsedAssets.Count == 0 && RefBundles.Count == 0;
+        }
+
+        /// <summary>
+        /// 卸载资源包
+        /// </summary>
+        public void Unload(TaskRunner taskRunner)
+        {
+            UnloadBundleTask task = UnloadBundleTask.Create(taskRunner,Manifest.RelativePath,this);
+            taskRunner.AddTask(task, TaskPriority.Low);
         }
 
         public int CompareTo(BundleRuntimeInfo other)

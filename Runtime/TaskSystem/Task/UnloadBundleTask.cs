@@ -45,18 +45,27 @@ namespace CatAsset.Runtime
             //卸载时间到了
             State = TaskState.Finished;
             
-           
+            //删除此资源包中已加载的资源与AssetRuntimeInfo的关联
             foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
             {
                 AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(assetManifestInfo.Name);
-                
-                //删除此资源包中已加载的资源与AssetRuntimeInfo的关联
                 if (assetRuntimeInfo.Asset != null)
                 {
                     CatAssetManager.RemoveAssetRuntimeInfo(assetRuntimeInfo.Asset);
                     assetRuntimeInfo.Asset = null;
                 }
             }
+
+            //尝试卸载此资源包依赖的资源包
+            foreach (BundleRuntimeInfo dependencyBundleInfo in bundleRuntimeInfo.DependencyBundles)
+            {
+                dependencyBundleInfo.RefBundles.Remove(bundleRuntimeInfo);
+                if (dependencyBundleInfo.CanUnload())
+                {
+                    dependencyBundleInfo.Unload(Owner);
+                }
+            }
+            bundleRuntimeInfo.DependencyBundles.Clear();
             
             //卸载资源包
             bundleRuntimeInfo.Bundle.UnloadAsync(true);

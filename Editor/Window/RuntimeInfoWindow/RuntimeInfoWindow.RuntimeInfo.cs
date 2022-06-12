@@ -73,8 +73,8 @@ namespace CatAsset.Editor
                     string bundleRelativePath = item.Key;
                     BundleRuntimeInfo bundleRuntimeInfo = item.Value;
 
-                    //只绘制有资源在使用中的资源包
-                    if (bundleRuntimeInfo.UsedAssets.Count > 0)
+                    //只绘制有资源在使用中，或者被其他资源包依赖的资源包
+                    if (bundleRuntimeInfo.UsedAssets.Count > 0 || bundleRuntimeInfo.RefBundles.Count > 0)
                     {
                         if (!foldOut.ContainsKey(bundleRelativePath))
                         {
@@ -96,6 +96,10 @@ namespace CatAsset.Editor
 
                         if (foldOut[bundleRelativePath] == true)
                         {
+                            EditorGUILayout.Space();
+                            EditorGUILayout.LabelField($"RefBundle数量：{bundleRuntimeInfo.RefBundles.Count}");
+                            EditorGUILayout.LabelField($"DependencyBundle数量：{bundleRuntimeInfo.DependencyBundles.Count}");
+                            EditorGUILayout.Space();
                             
                             foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsedAssets)
                             {
