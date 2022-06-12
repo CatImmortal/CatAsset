@@ -334,27 +334,17 @@ namespace CatAsset.Runtime
                     UnloadAsset(dependencyRuntimeInfo.Asset);
                 }
             }
-            
-            if (assetRuntimeInfo.RefCount == 0)
+
+            if (assetRuntimeInfo.CanUnload())
             {
                 //此资源已经不再被使用
-                bundleRuntimeInfo.UsedAssets.Remove(assetRuntimeInfo);
-                if (assetRuntimeInfo.AssetManifest.Dependencies != null)
-                {
-                    foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
-                    {
-                        AssetRuntimeInfo dependencyRuntimeInfo = GetAssetRuntimeInfo(dependency);
-                        dependencyRuntimeInfo.RefAssets.Remove(assetRuntimeInfo);
-                    }
-                }
+                assetRuntimeInfo.Unload();
                 
-                if (bundleRuntimeInfo.UsedAssets.Count == 0)
+                if (bundleRuntimeInfo.CanUnload())
                 {
-                    //此资源的资源包已没有资源在使用了 准备卸载
-                    UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,bundleRuntimeInfo.Manifest.RelativePath,bundleRuntimeInfo);
-                    loadTaskRunner.AddTask(task, TaskPriority.Low);
+                    //此资源的资源包已没有资源在使用了 并且没有其他资源包依赖它 卸载资源包
+                    bundleRuntimeInfo.Unload(loadTaskRunner);
                 }
-                
             }
         }
         
