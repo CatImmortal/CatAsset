@@ -56,9 +56,14 @@ namespace CatAsset.Editor
                     }
                 }
                 
-                if (GUILayout.Button("检测循环依赖",GUILayout.Width(150)))
+                if (GUILayout.Button("检测资源循环依赖",GUILayout.Width(150)))
                 {
-                    LoopDependencyAnalyzer.Analyze(bundleBuildConfg.Bundles);
+                    LoopDependencyAnalyzer.AnalyzeAsset(bundleBuildConfg.Bundles);
+                }
+                
+                if (GUILayout.Button("检测资源包循环依赖",GUILayout.Width(150)))
+                {
+                    LoopDependencyAnalyzer.AnalyzeBundle(bundleBuildConfg.Bundles);
                 }
             }
             
