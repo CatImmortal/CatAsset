@@ -201,7 +201,7 @@ namespace CatAsset.Runtime
 
                 if (!dependencyBundleInfo.Equals(BundleRuntimeInfo))
                 {
-                    //不是同一资源包内资源互相依赖 需要添加资源包的依赖记录
+                    //依赖了其他资源包的资源 需要添加资源包的依赖记录
                     dependencyBundleInfo.RefBundles.Add(BundleRuntimeInfo);
                     BundleRuntimeInfo.DependencyBundles.Add(dependencyBundleInfo);
                 }

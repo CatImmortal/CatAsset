@@ -18,16 +18,16 @@ namespace CatAsset.Editor
         /// 资源类型名
         /// </summary>
         public string TypeName;
-        
+
+        private Type type;
         /// <summary>
         /// 资源类型
         /// </summary>
-        public Type Type;
-        
+        public Type Type => type ??= AssetDatabase.GetMainAssetTypeAtPath(Name);
+
         public AssetBuildInfo(string name)
         {
             Name = name;
-            Type = AssetDatabase.GetMainAssetTypeAtPath(name);
             TypeName = Type.Name;
         }
 
