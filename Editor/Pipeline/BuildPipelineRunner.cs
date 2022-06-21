@@ -45,7 +45,7 @@ namespace CatAsset.Editor
             }
 
             EditorUtility.ClearProgressBar();
-            Debug.Log("资源管线运行结束");
+            Debug.Log("构建管线运行结束");
             return TaskResult.Success;
         }
 

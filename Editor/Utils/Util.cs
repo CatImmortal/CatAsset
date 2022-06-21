@@ -32,24 +32,47 @@ namespace CatAsset.Editor
             ExcludeSet.Add(".giparams");
         }
 
-        [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 2)]
+        [MenuItem("CatAsset/将所有场景添加到BuildSetting中", priority = 2)]
+        private static void BuildAllScenes()
+        {
+            List<string> sceneNames = new List<string>();
+            string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new []{"Assets"});
+            foreach (string sceneGuid in sceneGuids)
+            {
+                string sceneName = AssetDatabase.GUIDToAssetPath(sceneGuid);
+                sceneNames.Add(sceneName);
+            }
+
+            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>();
+            foreach (string sceneName in sceneNames)
+            {
+                scenes.Add(new EditorBuildSettingsScene(sceneName, true));
+            }
+
+            EditorBuildSettings.scenes = scenes.ToArray();
+        }
+        
+        [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 3)]
         private static void OpenAssetBundleOutputPath()
         {
             Open(GetConfigAsset<BundleBuildConfigSO>().OutputPath);
         }
+        
 
-        [MenuItem("CatAsset/打开目录/只读区", priority = 2)]
+        [MenuItem("CatAsset/打开目录/只读区", priority = 3)]
         private static void OpenReadOnlyPath()
         {
             Open(Application.streamingAssetsPath);
         }
 
-        [MenuItem("CatAsset/打开目录/读写区", priority = 2)]
+        [MenuItem("CatAsset/打开目录/读写区", priority = 3)]
         private static void OpenReadWritePath()
         {
             Open(Application.persistentDataPath);
         }
 
+
+        
         /// <summary>
         /// 打开指定目录
         /// </summary>
@@ -100,6 +123,7 @@ namespace CatAsset.Editor
 
             return false;
         }
+        
         
         
         /// <summary>
@@ -214,23 +238,6 @@ namespace CatAsset.Editor
             dirInfo.Delete();
         }
 
-        /// <summary>
-        /// 将原生资源清单合并至主资源清单
-        /// </summary>
-        public static void MergeManifest(CatAssetManifest main, CatAssetManifest raw)
-        {
-            for (int i = main.Bundles.Count - 1; i >= 0; i--)
-            {
-                if (main.Bundles[i].IsRaw)
-                {
-                    main.Bundles.RemoveAt(i);
-                }
-            }
 
-            foreach (BundleManifestInfo bundleManifestInfo in raw.Bundles)
-            {
-                main.Bundles.Add(bundleManifestInfo);
-            }
-        }
     }
 }

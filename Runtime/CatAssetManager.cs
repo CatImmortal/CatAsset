@@ -200,6 +200,25 @@ namespace CatAsset.Runtime
         public static void LoadAsset<T>(string assetName, object userdata, LoadAssetTaskCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle) where T : Object
         {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                T asset;
+                try
+                {
+                    asset = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetName);
+                }
+                catch (Exception e)
+                {
+                    callback?.Invoke(false,null,userdata);
+                    throw;
+                }
+                callback?.Invoke(true,asset,userdata);
+               
+                return;
+            }
+#endif
+            
             //检查资源是否已在本地准备好
             if (!CheckAssetReady(assetName))
             {
@@ -230,10 +249,19 @@ namespace CatAsset.Runtime
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).completed += (op) =>
+                try
                 {
-                    callback?.Invoke(true,null,userdata);
-                };
+                    SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).completed += (op) =>
+                    {
+                        callback?.Invoke(true,null,userdata);
+                    };
+                }
+                catch (Exception e)
+                {
+                    callback?.Invoke(false,null,userdata);
+                    throw;
+                }
+               
                 return;
             }
 #endif
@@ -246,7 +274,7 @@ namespace CatAsset.Runtime
             LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner,sceneName,userdata,callback);
             loadTaskRunner.AddTask(task,priority);
         }
-        
+
         #endregion
 
         #region 资源卸载
