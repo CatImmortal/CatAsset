@@ -20,57 +20,22 @@ MonoBehaviour:
   IsCopyToReadOnlyPath: 1
   CopyGroup: Base
   Directories:
-  - DirectoryName: Assets/BundleRes/Prefab2
+  - DirectoryName: Assets/BundleRes/PrefabA
     BuildRuleName: NAssetToOneBundle
-    Group: Base
-  - DirectoryName: Assets/BundleRes/RawAsset
-    BuildRuleName: NAssetToNRawBundle
     Group: Base
   - DirectoryName: Assets/BundleRes/Scene
     BuildRuleName: NAssetToOneBundle
     Group: Base
-  - DirectoryName: Assets/BundleRes/Texture
-    BuildRuleName: NAssetToOneBundle
-    Group: Base
   Bundles:
-  - RelativePath: bundleres/prefab2.bundle
+  - RelativePath: bundleres/prefaba.bundle
     DirectoryName: BundleRes
-    BundleName: prefab2.bundle
+    BundleName: prefaba.bundle
     Group: Base
     IsRaw: 0
     Assets:
-    - Name: Assets/BundleRes/Prefab2/TestGO 1.prefab
+    - Name: Assets/BundleRes/PrefabA/New Prefab.prefab
       TypeName: GameObject
-    - Name: Assets/BundleRes/Prefab2/TestGO 2.prefab
-      TypeName: GameObject
-    - Name: Assets/BundleRes/Prefab2/TestGO 3.prefab
-      TypeName: GameObject
-    - Name: Assets/BundleRes/Prefab2/TestGO.prefab
-      TypeName: GameObject
-  - RelativePath: bundleres/rawasset/RawImage.jpg
-    DirectoryName: BundleRes/RawAsset
-    BundleName: RawImage.jpg
-    Group: Base
-    IsRaw: 1
-    Assets:
-    - Name: Assets/BundleRes/RawAsset/RawImage.jpg
-      TypeName: Texture2D
-  - RelativePath: bundleres/rawasset/rawText 1.txt
-    DirectoryName: BundleRes/RawAsset
-    BundleName: rawText 1.txt
-    Group: Base
-    IsRaw: 1
-    Assets:
-    - Name: Assets/BundleRes/RawAsset/rawText 1.txt
-      TypeName: TextAsset
-  - RelativePath: bundleres/rawasset/rawText.txt
-    DirectoryName: BundleRes/RawAsset
-    BundleName: rawText.txt
-    Group: Base
-    IsRaw: 1
-    Assets:
-    - Name: Assets/BundleRes/RawAsset/rawText.txt
-      TypeName: TextAsset
+      Length: 901
   - RelativePath: bundleres/scene.bundle
     DirectoryName: BundleRes
     BundleName: scene.bundle
@@ -79,31 +44,4 @@ MonoBehaviour:
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
       TypeName: SceneAsset
-  - RelativePath: bundleres/scene_res.bundle
-    DirectoryName: BundleRes
-    BundleName: scene_res.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - Name: Assets/BundleRes/Prefab1/TestGO 1.prefab
-      TypeName: GameObject
-    - Name: Assets/BundleRes/Prefab1/TestGO 3.prefab
-      TypeName: GameObject
-    - Name: Assets/BundleRes/Prefab1/TestGO 2.prefab
-      TypeName: GameObject
-  - RelativePath: bundleres/texture.bundle
-    DirectoryName: BundleRes
-    BundleName: texture.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - Name: Assets/BundleRes/Texture/Tex1.jpg
-      TypeName: Texture2D
-  - RelativePath: redundancy_0.bundle
-    DirectoryName: 
-    BundleName: redundancy_0.bundle
-    Group: Base
-    IsRaw: 0
-    Assets:
-    - Name: Assets/Image/1f2efac6fcf65bf8ac4220c68ac92d2d64b541e7.jpg
-      TypeName: Texture2D
+      Length: 5592
