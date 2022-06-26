@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -14,6 +15,9 @@ namespace CatAsset.Runtime
         
         private List<int> waitRemoveTasks = new List<int>();
 
+        /// <summary>
+        /// 主任务字典，与主任务同名的任务会进行合并
+        /// </summary>
         private Dictionary<string, ITask> mainTaskDict = new Dictionary<string, ITask>();
 
         /// <summary>
@@ -86,32 +90,46 @@ namespace CatAsset.Runtime
         /// </summary>
         public bool Run()
         {
+
             int index = nextRunningTaskIndex;
             nextRunningTaskIndex++;
             
             ITask task = runningTasks[index];
-            
-            if (task.State == TaskState.Free)
+
+            try
             {
-                //运行空闲状态的任务
-                //Debug.Log($"运行任务:{task}");
-                task.Run();
-               
+                if (task.State == TaskState.Free)
+                {
+                    //运行空闲状态的任务
+                    //Debug.Log($"运行任务:{task}");
+                    task.Run();
+                }
+
+                //轮询任务
+                //Debug.Log($"轮询任务:{task}");
+                task.Update();
+            }
+            catch (Exception e)
+            {
+                task.State = TaskState.Finished;
+                //Debug.LogError($"任务运行出错:{e}");
+                throw;
+            }
+            finally
+            {
+                switch (task.State)
+                {
+                    case TaskState.Finished:
+                        //任务运行结束 需要删除
+                        waitRemoveTasks.Add(index);
+                        break;
+                };
             }
 
-            //轮询任务
-            //Debug.Log($"轮询任务:{task}");
-            task.Update();
-           
-            
             switch (task.State)
             {
                 case TaskState.Running:
-                    return true;
-
                 case TaskState.Finished:
-                    //任务运行结束 需要删除
-                    waitRemoveTasks.Add(index);
                     return true;
             }
 

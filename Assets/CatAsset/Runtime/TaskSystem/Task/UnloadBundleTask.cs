@@ -51,7 +51,7 @@ namespace CatAsset.Runtime
                 AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(assetManifestInfo.Name);
                 if (assetRuntimeInfo.Asset != null)
                 {
-                    CatAssetManager.RemoveAssetRuntimeInfo(assetRuntimeInfo.Asset);
+                    CatAssetManager.RemoveAssetInstance(assetRuntimeInfo.Asset);
                     assetRuntimeInfo.Asset = null;
                 }
             }

@@ -40,10 +40,13 @@ namespace CatAsset.Runtime
             taskGroups[(int)priority].AddTask(task);
         }
 
+        /// <summary>
+        /// 轮询任务运行器
+        /// </summary>
         public void Update()
         {
             //当前运行任务次数
-            int curRunningCount = 0;
+            int curRanCount = 0;
             
             for (int i = taskGroups.Count - 1; i >= 0; i--)
             {
@@ -51,12 +54,12 @@ namespace CatAsset.Runtime
                 
                 group.PreRun();
 
-                while (curRunningCount < MaxRunCount && group.CanRun)
+                while (curRanCount < MaxRunCount && group.CanRun)
                 {
                     if (group.Run())
                     {
                         //Run调用返回true 意味着需要增加curRunningCount
-                        curRunningCount++;
+                        curRanCount++;
                     }
                 }
                 

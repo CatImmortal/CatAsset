@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
 {
@@ -8,8 +9,6 @@ namespace CatAsset.Runtime
     /// </summary>
     public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>
     {
-
-
         /// <summary>
         /// 所在资源包清单信息
         /// </summary>
@@ -24,14 +23,14 @@ namespace CatAsset.Runtime
         /// 已加载的资源实例
         /// </summary>
         public object Asset;
-
+        
         /// <summary>
         /// 引用计数
         /// </summary>
         public int RefCount;
 
         /// <summary>
-        /// 依赖此资源的资源集合
+        /// 引用了此资源的资源集合
         /// </summary>
         public HashSet<AssetRuntimeInfo> RefAssets { get; } = new HashSet<AssetRuntimeInfo>();
 
