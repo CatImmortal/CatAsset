@@ -40,25 +40,7 @@ namespace CatAsset.Runtime
         {
             return RefCount == 0;
         }
-
-        /// <summary>
-        /// 卸载资源
-        /// </summary>
-        public void Unload()
-        {
-            BundleRuntimeInfo bundleRuntimeInfo = CatAssetManager.GetBundleRuntimeInfo(BundleManifest.RelativePath);
-            bundleRuntimeInfo.UsedAssets.Remove(this);
-
-            AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(AssetManifest.Name);
-            if (assetRuntimeInfo.AssetManifest.Dependencies != null)
-            {
-                foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
-                {
-                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(dependency);
-                    dependencyRuntimeInfo.RefAssets.Remove(assetRuntimeInfo);
-                }
-            }
-        }
+        
         
         public int CompareTo(AssetRuntimeInfo other)
         {

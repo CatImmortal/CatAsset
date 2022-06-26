@@ -61,9 +61,7 @@ namespace CatAsset.Runtime
         /// 此资源包依赖的资源包集合
         /// </summary>
         public HashSet<BundleRuntimeInfo> DependencyBundles { get; } = new HashSet<BundleRuntimeInfo>();
-
-
-
+        
         /// <summary>
         /// 是否可卸载
         /// </summary>
@@ -71,15 +69,6 @@ namespace CatAsset.Runtime
         public bool CanUnload()
         {
             return UsedAssets.Count == 0 && RefBundles.Count == 0;
-        }
-
-        /// <summary>
-        /// 卸载资源包
-        /// </summary>
-        public void Unload(TaskRunner taskRunner)
-        {
-            UnloadBundleTask task = UnloadBundleTask.Create(taskRunner,Manifest.RelativePath,this);
-            taskRunner.AddTask(task, TaskPriority.Low);
         }
 
         public int CompareTo(BundleRuntimeInfo other)
