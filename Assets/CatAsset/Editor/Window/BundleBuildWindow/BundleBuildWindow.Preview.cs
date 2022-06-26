@@ -125,8 +125,8 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
                 EditorGUILayout.LabelField(content, GUILayout.Width(20));
                 EditorGUILayout.LabelField(assetBuildInfo.Name, GUILayout.Width(400));
-                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(assetBuildInfo.Length), GUILayout.Width(50));
-                if (GUILayout.Button("选中", GUILayout.Width(50)))
+
+                if (GUILayout.Button("选中",GUILayout.Width(50)))
                 {
                     Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetBuildInfo.Name,assetBuildInfo.Type);
                 }

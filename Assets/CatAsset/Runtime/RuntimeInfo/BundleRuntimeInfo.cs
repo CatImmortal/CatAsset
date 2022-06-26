@@ -53,7 +53,7 @@ namespace CatAsset.Runtime
         public HashSet<AssetRuntimeInfo> UsedAssets { get; } = new HashSet<AssetRuntimeInfo>();
 
         /// <summary>
-        /// 引用了此资源包的资源包集合
+        /// 依赖此资源包的资源包集合
         /// </summary>
         public HashSet<BundleRuntimeInfo> RefBundles{ get; } = new HashSet<BundleRuntimeInfo>();
         

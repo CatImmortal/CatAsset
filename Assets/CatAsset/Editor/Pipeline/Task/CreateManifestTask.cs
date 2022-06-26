@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace CatAsset.Editor
 {
-    /// <summary>
-    /// 创建资源清单的任务
-    /// </summary>
     public class CreateManifestTask : IBuildPipelineTask
     {
         [BuildPipelineParam(ParamProp = BuildPipelineParamAttribute.Property.In)]
@@ -79,7 +76,6 @@ namespace CatAsset.Editor
                         AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                         {
                             Name = assetBuildInfo.Name,
-                            Length = assetBuildInfo.Length,
                         };
                         if (!bundleManifestInfo.IsScene)
                         {
@@ -88,7 +84,7 @@ namespace CatAsset.Editor
                         }
                         bundleManifestInfo.Assets.Add(assetManifestInfo);
 
-                        //依赖列表不需要进行递归记录 因为加载的时候会对依赖进行递归加载
+                        //依赖列表不进行递归记录 因为加载的时候会对依赖进行递归加载
                         assetManifestInfo.Dependencies = Util.GetDependencies(assetManifestInfo.Name, false);
                     }
                 }
@@ -116,7 +112,6 @@ namespace CatAsset.Editor
                     AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                     {
                         Name = bundleBuildInfo.Assets[0].Name,
-                        Length = bundleManifestInfo.Length,
                     };
                     bundleManifestInfo.Assets.Add(assetManifestInfo);
                 }

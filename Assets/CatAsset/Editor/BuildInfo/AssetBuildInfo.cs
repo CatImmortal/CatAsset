@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using UnityEditor;
 
 namespace CatAsset.Editor
@@ -26,16 +25,10 @@ namespace CatAsset.Editor
         /// </summary>
         public Type Type => type ??= AssetDatabase.GetMainAssetTypeAtPath(Name);
 
-        /// <summary>
-        /// 资源文件长度
-        /// </summary>
-        public long Length;
-        
         public AssetBuildInfo(string name)
         {
             Name = name;
             TypeName = Type.Name;
-            Length = new FileInfo(name).Length;
         }
 
         public override string ToString()
