@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// Web请求任务完成回调的原型
     /// </summary>
-    public delegate void WebRequestTaskCallback(bool success,string error,UnityWebRequest uwr,object userdata);
+    public delegate void WebRequestTaskCallback(bool success,UnityWebRequest uwr,object userdata);
     
     /// <summary>
     /// Web请求任务
@@ -66,20 +66,20 @@ namespace CatAsset.Runtime
             //请求完毕
             State = TaskState.Finished;
 
-            if (operation.webRequest.isNetworkError || operation.webRequest.isHttpError)
+            if (operation.webRequest.result != UnityWebRequest.Result.Success)
             {
-                onFinished?.Invoke(false, operation.webRequest.error, operation.webRequest,userdata);
+                onFinished?.Invoke(false, operation.webRequest,userdata);
                 foreach (WebRequestTask task in mergedTasks)
                 {
-                    task.onFinished?.Invoke(false, operation.webRequest.error, operation.webRequest,task.userdata);
+                    task.onFinished?.Invoke(false, operation.webRequest,task.userdata);
                 }
             }
             else
             {
-                onFinished?.Invoke(true, null, operation.webRequest,userdata);
+                onFinished?.Invoke(true, operation.webRequest,userdata);
                 foreach (WebRequestTask task in mergedTasks)
                 {
-                    task.onFinished?.Invoke(true, null, operation.webRequest,task.userdata);
+                    task.onFinished?.Invoke(true,operation.webRequest,task.userdata);
                 }
             }
         }

@@ -7,11 +7,7 @@ namespace CatAsset.Runtime
     /// </summary>
     public abstract class BaseTask<T> : ITask where T : ITask
     {
-        /// <summary>
-        /// 已合并的任务列表（同名的任务）
-        /// </summary>
-        protected readonly List<T> mergedTasks = new List<T>();
-        
+
         /// <inheritdoc />
         public TaskRunner Owner { get; private set; }
         
@@ -19,11 +15,16 @@ namespace CatAsset.Runtime
         public string Name { get; private set; }
 
         /// <inheritdoc />
-        public TaskState State { get; protected set; }
+        public TaskState State { get; set; }
         
         /// <inheritdoc />
         public virtual float Progress { get; }
 
+        /// <summary>
+        /// 已合并的任务列表（同名的任务）
+        /// </summary>
+        protected List<T> mergedTasks = new List<T>();
+        
         /// <inheritdoc />
         public int MergedTaskCount => mergedTasks.Count;
         

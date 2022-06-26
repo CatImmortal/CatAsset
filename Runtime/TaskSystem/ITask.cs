@@ -18,7 +18,7 @@
         /// <summary>
         /// 状态
         /// </summary>
-        TaskState State { get; }
+        TaskState State { get; set; }
         
         /// <summary>
         /// 进度

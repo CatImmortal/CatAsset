@@ -15,7 +15,7 @@ namespace CatAsset.Runtime
         /// 加载相关任务运行器
         /// </summary>
         private static TaskRunner loadTaskRunner = new TaskRunner();
-        
+
         /// <summary>
         /// 下载相关任务运行器
         /// </summary>
@@ -34,9 +34,15 @@ namespace CatAsset.Runtime
             new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 资源对象->资源运行时信息
+        /// 资源实例->资源运行时信息
         /// </summary>
-        private static Dictionary<object, AssetRuntimeInfo> assetDict = new Dictionary<object, AssetRuntimeInfo>();
+        private static Dictionary<object, AssetRuntimeInfo> assetInstanceDict =
+            new Dictionary<object, AssetRuntimeInfo>();
+
+        /// <summary>
+        /// 场景实例handler->资源运行时信息
+        /// </summary>
+        private static Dictionary<int, AssetRuntimeInfo> sceneInstanceDict = new Dictionary<int, AssetRuntimeInfo>();
 
         /// <summary>
         /// 运行模式
@@ -52,7 +58,7 @@ namespace CatAsset.Runtime
         /// 资源包卸载延迟时间
         /// </summary>
         public static float UnloadDelayTime { get; set; }
-        
+
         /// <summary>
         /// 根据资源包清单信息初始化运行时信息
         /// </summary>
@@ -93,23 +99,47 @@ namespace CatAsset.Runtime
         /// </summary>
         public static AssetRuntimeInfo GetAssetRuntimeInfo(object asset)
         {
-            return assetDict[asset];
+            return assetInstanceDict[asset];
         }
 
         /// <summary>
-        /// 设置资源与资源运行时信息的关联
+        /// 获取场景运行时信息
         /// </summary>
-        public static void SetAssetRuntimeInfo(object asset, AssetRuntimeInfo assetRuntimeInfo)
+        public static AssetRuntimeInfo GetAssetRuntimeInfo(Scene scene)
         {
-            assetDict.Add(asset, assetRuntimeInfo);
+            return sceneInstanceDict[scene.handle];
         }
-        
+
         /// <summary>
-        /// 删除资源与资源运行时信息的关联
+        /// 设置资源实例与资源运行时信息的关联
         /// </summary>
-        public static void RemoveAssetRuntimeInfo(object asset)
+        public static void SetAssetInstance(object asset, AssetRuntimeInfo assetRuntimeInfo)
         {
-            assetDict.Remove(asset);
+            assetInstanceDict.Add(asset, assetRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 删除资源实例与资源运行时信息的关联
+        /// </summary>
+        public static void RemoveAssetInstance(object asset)
+        {
+            assetInstanceDict.Remove(asset);
+        }
+
+        /// <summary>
+        /// 设置场景实例与资源运行时信息的关联
+        /// </summary>
+        public static void SetSceneInstance(Scene scene, AssetRuntimeInfo assetRuntimeInfo)
+        {
+            sceneInstanceDict.Add(scene.handle, assetRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 删除场景实例与资源运行时信息的关联
+        /// </summary>
+        public static void RemoveSceneInstance(Scene scene)
+        {
+            sceneInstanceDict.Remove(scene.handle);
         }
 
         /// <summary>
@@ -151,13 +181,13 @@ namespace CatAsset.Runtime
             string path = Util.GetReadOnlyPath(Util.ManifestFileName);
 
             WebRequestTask task = WebRequestTask.Create(downloadTaskRunner, path, path, callback,
-                (success, error, uwr, userdata) =>
+                (success, uwr, userdata) =>
                 {
                     Action<bool> onChecked = (Action<bool>) userdata;
 
                     if (!success)
                     {
-                        Debug.LogError($"单机模式资源清单检查失败:{error}");
+                        Debug.LogError($"单机模式资源清单检查失败:{uwr.error}");
                         onChecked?.Invoke(false);
                     }
                     else
@@ -210,15 +240,16 @@ namespace CatAsset.Runtime
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false,null,userdata);
+                    callback?.Invoke(false, null, userdata);
                     throw;
                 }
-                callback?.Invoke(true,asset,userdata);
-               
+
+                callback?.Invoke(true, asset, userdata);
+
                 return;
             }
 #endif
-            
+
             //检查资源是否已在本地准备好
             if (!CheckAssetReady(assetName))
             {
@@ -226,7 +257,7 @@ namespace CatAsset.Runtime
             }
 
             AssetRuntimeInfo info = assetRuntimeInfoDict[assetName];
-            
+
             Type assetType = typeof(T);
             if (assetType != info.AssetManifest.Type && assetType != typeof(Object))
             {
@@ -234,7 +265,7 @@ namespace CatAsset.Runtime
                     $"资源加载类型错误，资源名:{info.AssetManifest.Name},资源类型:{info.AssetManifest.Type},目标类型:{typeof(T).Name}");
                 return;
             }
-            
+
             //开始加载
             LoadAssetTask<T> task = LoadAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
@@ -243,7 +274,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static void LoadScene(string sceneName, object userdata, LoadAssetTaskCallback<Object> callback,
+        public static void LoadScene(string sceneName, object userdata, LoadAssetTaskCallback<Scene> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
 #if UNITY_EDITOR
@@ -253,15 +284,15 @@ namespace CatAsset.Runtime
                 {
                     SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).completed += (op) =>
                     {
-                        callback?.Invoke(true,null,userdata);
+                        callback?.Invoke(true, SceneManager.GetSceneByPath(sceneName), userdata);
                     };
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false,null,userdata);
+                    callback?.Invoke(false, default, userdata);
                     throw;
                 }
-               
+
                 return;
             }
 #endif
@@ -269,10 +300,10 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-            
+
             //创建加载场景的任务
-            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner,sceneName,userdata,callback);
-            loadTaskRunner.AddTask(task,priority);
+            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, userdata, callback);
+            loadTaskRunner.AddTask(task, priority);
         }
 
         #endregion
@@ -295,7 +326,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (!assetDict.TryGetValue(asset, out AssetRuntimeInfo assetInfo))
+            if (!assetInstanceDict.TryGetValue(asset, out AssetRuntimeInfo assetRuntimeInfo))
             {
                 if (asset is Object unityObj)
                 {
@@ -309,51 +340,51 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            InternalUnloadAsset(assetInfo);
-        }
-
-        /// <summary>
-        /// 卸载场景
-        /// </summary>
-        public static void UnloadScene(string sceneName)
-        {
-#if UNITY_EDITOR
-            if (IsEditorMode)
-            {
-                SceneManager.UnloadSceneAsync(sceneName);
-                return;
-            }
-#endif
-
-            if (!assetRuntimeInfoDict.TryGetValue(sceneName, out AssetRuntimeInfo assetInfo))
-            {
-                Debug.LogError("要卸载的场景不在资源清单中：" + sceneName);
-                return;
-            }
-
-            InternalUnloadAsset(assetInfo);
-        }
-        
-        /// <summary>
-        /// 卸载资源
-        /// </summary>
-        private static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
-        {
             if (assetRuntimeInfo.RefCount == 0)
             {
                 Debug.LogError($"试图卸载一个引用计数为0的资源:{assetRuntimeInfo.AssetManifest.Name}");
                 return;
             }
 
-            BundleRuntimeInfo bundleRuntimeInfo =  GetBundleRuntimeInfo(assetRuntimeInfo.BundleManifest.RelativePath);
-            if (bundleRuntimeInfo.Manifest.IsScene)
+            InternalUnloadAsset(assetRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 卸载场景
+        /// </summary>
+        public static void UnloadScene(Scene scene)
+        {
+#if UNITY_EDITOR
+            if (IsEditorMode)
             {
-                //卸载场景
-                SceneManager.UnloadSceneAsync(assetRuntimeInfo.AssetManifest.Name);
+                SceneManager.UnloadSceneAsync(scene);
+                return;
+            }
+#endif
+            if (scene == default)
+            {
+                return;
             }
 
+            if (!sceneInstanceDict.TryGetValue(scene.handle, out AssetRuntimeInfo assetRuntimeInfo))
+            {
+                Debug.LogError($"要卸载的场景未加载过：{scene.path}");
+                return;
+            }
+
+            //卸载场景
+            sceneInstanceDict.Remove(scene.handle);
+            SceneManager.UnloadSceneAsync(scene);
+
+            InternalUnloadAsset(assetRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 卸载资源
+        /// </summary>
+        private static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
+        {
             //减少自身和依赖资源的引用计数
-            assetRuntimeInfo.RefCount--;
             if (assetRuntimeInfo.AssetManifest.Dependencies != null)
             {
                 foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
@@ -362,11 +393,16 @@ namespace CatAsset.Runtime
                     UnloadAsset(dependencyRuntimeInfo.Asset);
                 }
             }
+            assetRuntimeInfo.RefCount--;
+            
+
 
             if (assetRuntimeInfo.CanUnload())
             {
-                //此资源已经不再被使用 从所属资源包的usedAssets和依赖资源的RefAssets中删除
-                bundleRuntimeInfo.UsedAssets.Remove(assetRuntimeInfo);
+                BundleRuntimeInfo bundleRuntimeInfo =
+                    GetBundleRuntimeInfo(assetRuntimeInfo.BundleManifest.RelativePath);
+
+                //此资源已经不再被使用 从依赖资源的RefAssets和所属资源包的usedAssets中删除
                 if (assetRuntimeInfo.AssetManifest.Dependencies != null)
                 {
                     foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
@@ -375,21 +411,19 @@ namespace CatAsset.Runtime
                         dependencyRuntimeInfo.RefAssets.Remove(assetRuntimeInfo);
                     }
                 }
+                bundleRuntimeInfo.UsedAssets.Remove(assetRuntimeInfo);
+
                 
                 if (bundleRuntimeInfo.CanUnload())
                 {
-                    //此资源的资源包已没有资源在使用了 并且没有其他资源包依赖它 卸载资源包
-                    UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,bundleRuntimeInfo.Manifest.RelativePath,bundleRuntimeInfo);
+                    //此资源所属资源包已没有资源在使用了 并且没有其他资源包引用它 卸载资源包
+                    UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,
+                        bundleRuntimeInfo.Manifest.RelativePath, bundleRuntimeInfo);
                     loadTaskRunner.AddTask(task, TaskPriority.Low);
                 }
             }
         }
-        
+
         #endregion
-
-      
-
-
-    
     }
 }
