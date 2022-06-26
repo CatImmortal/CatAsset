@@ -16,11 +16,6 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
-        /// 文件长度
-        /// </summary>
-        public long Length;
-        
-        /// <summary>
         /// 资源类型
         /// </summary>
         public Type Type;

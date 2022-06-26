@@ -25,7 +25,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包相对路径->是否展开
         /// </summary>
-        private Dictionary<string, bool> foldOutDcit = new Dictionary<string, bool>();
+        private Dictionary<string, bool> foldOut = new Dictionary<string, bool>();
 
         /// <summary>
         /// 初始化运行时信息界面
@@ -76,36 +76,29 @@ namespace CatAsset.Editor
                     //只绘制有资源在使用中，或者被其他资源包依赖的资源包
                     if (bundleRuntimeInfo.UsedAssets.Count > 0 || bundleRuntimeInfo.RefBundles.Count > 0)
                     {
-                        if (!foldOutDcit.ContainsKey(bundleRelativePath))
+                        if (!foldOut.ContainsKey(bundleRelativePath))
                         {
-                            foldOutDcit.Add(bundleRelativePath, false);
+                            foldOut.Add(bundleRelativePath, false);
                         }
 
                         if (isAllFoldOutTrue)
                         {
                             //点击过全部展开
-                            foldOutDcit[bundleRelativePath] = true;
+                            foldOut[bundleRelativePath] = true;
                         }
                         else if (isAllFoldOutFalse)
                         {
                             //点击过全部收起
-                            foldOutDcit[bundleRelativePath] = false;
+                            foldOut[bundleRelativePath] = false;
                         }
 
-                        using (new EditorGUILayout.HorizontalScope())
-                        {
-                            foldOutDcit[bundleRelativePath] = EditorGUILayout.Foldout(foldOutDcit[bundleRelativePath], bundleRelativePath);
+                        foldOut[bundleRelativePath] = EditorGUILayout.Foldout(foldOut[bundleRelativePath], bundleRelativePath);
 
+                        if (foldOut[bundleRelativePath] == true)
+                        {
                             EditorGUILayout.Space();
-                            EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length));
                             EditorGUILayout.LabelField($"RefBundle数量：{bundleRuntimeInfo.RefBundles.Count}");
                             EditorGUILayout.LabelField($"DependencyBundle数量：{bundleRuntimeInfo.DependencyBundles.Count}");
-                        }
-
-                        if (foldOutDcit[bundleRelativePath])
-                        {
-                            // EditorGUILayout.Space();
-
                             EditorGUILayout.Space();
                             
                             foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsedAssets)
@@ -153,38 +146,32 @@ namespace CatAsset.Editor
                 {
                     content.image = EditorGUIUtility.FindTexture(assetName);
                 }
-                
-                EditorGUILayout.LabelField("", GUILayout.Width(30));
-                
-                //图标
+
                 EditorGUILayout.LabelField(content, GUILayout.Width(20));
 
                 //资源名
-                EditorGUILayout.LabelField(assetName, GUILayout.Width(400));
+                EditorGUILayout.LabelField(assetName, GUILayout.Width(350));
 
                 //资源类型
                 if (assetRuntimeInfo.Asset != null)
                 {
-                    EditorGUILayout.LabelField(assetRuntimeInfo.Asset.GetType().Name, GUILayout.Width(100));
+                    EditorGUILayout.LabelField(assetRuntimeInfo.Asset.GetType().Name, GUILayout.Width(150));
                 }
                 else
                 {
-                    EditorGUILayout.LabelField("Scene", GUILayout.Width(100));
+                    EditorGUILayout.LabelField("Scene", GUILayout.Width(150));
                 }
 
-                //文件字节长度
-                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length), GUILayout.Width(100));
-                
                 //引用计数
                 EditorGUILayout.LabelField("引用计数：" + assetRuntimeInfo.RefCount, GUILayout.Width(100));
 
                 EditorGUILayout.LabelField("RefAsset数量：" + assetRuntimeInfo.RefAssets.Count, GUILayout.Width(100));
-                if (assetRuntimeInfo.RefAssets.Count > 0 && GUILayout.Button("查看RefAsset", GUILayout.Width(100)))
+                if (GUILayout.Button("查看RefAsset", GUILayout.Width(100)))
                 {
                     RefAssetListWindow.OpenWindow(this,assetRuntimeInfo);
                 }
                 
-                if (GUILayout.Button("选中", GUILayout.Width(100)))
+                if (GUILayout.Button("选中", GUILayout.Width(50)))
                 {
                     Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetName, assetType);
                 }
