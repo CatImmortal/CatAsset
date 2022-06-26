@@ -372,13 +372,22 @@ namespace CatAsset.Runtime
 
             if (assetRuntimeInfo.CanUnload())
             {
-                //此资源已经不再被使用
-                assetRuntimeInfo.Unload();
+                //此资源已经不再被使用 从所属资源包的usedAssets和依赖资源的RefAssets中删除
+                bundleRuntimeInfo.UsedAssets.Remove(assetRuntimeInfo);
+                if (assetRuntimeInfo.AssetManifest.Dependencies != null)
+                {
+                    foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
+                    {
+                        AssetRuntimeInfo dependencyRuntimeInfo = GetAssetRuntimeInfo(dependency);
+                        dependencyRuntimeInfo.RefAssets.Remove(assetRuntimeInfo);
+                    }
+                }
                 
                 if (bundleRuntimeInfo.CanUnload())
                 {
                     //此资源的资源包已没有资源在使用了 并且没有其他资源包依赖它 卸载资源包
-                    bundleRuntimeInfo.Unload(loadTaskRunner);
+                    UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,bundleRuntimeInfo.Manifest.RelativePath,bundleRuntimeInfo);
+                    loadTaskRunner.AddTask(task, TaskPriority.Low);
                 }
             }
         }

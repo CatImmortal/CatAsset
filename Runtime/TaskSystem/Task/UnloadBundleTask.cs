@@ -62,7 +62,8 @@ namespace CatAsset.Runtime
                 dependencyBundleInfo.RefBundles.Remove(bundleRuntimeInfo);
                 if (dependencyBundleInfo.CanUnload())
                 {
-                    dependencyBundleInfo.Unload(Owner);
+                    UnloadBundleTask task = Create(Owner,dependencyBundleInfo.Manifest.RelativePath,dependencyBundleInfo);
+                    Owner.AddTask(task, TaskPriority.Low);
                 }
             }
             bundleRuntimeInfo.DependencyBundles.Clear();
