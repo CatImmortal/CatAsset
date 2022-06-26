@@ -8,8 +8,6 @@ namespace CatAsset.Runtime
     /// </summary>
     public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>
     {
-
-
         /// <summary>
         /// 所在资源包清单信息
         /// </summary>
@@ -31,7 +29,7 @@ namespace CatAsset.Runtime
         public int RefCount;
 
         /// <summary>
-        /// 依赖此资源的资源集合
+        /// 引用了此资源的资源集合
         /// </summary>
         public HashSet<AssetRuntimeInfo> RefAssets { get; } = new HashSet<AssetRuntimeInfo>();
 

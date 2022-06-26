@@ -196,12 +196,12 @@ namespace CatAsset.Runtime
                 BundleRuntimeInfo dependencyBundleInfo =
                     CatAssetManager.GetBundleRuntimeInfo(dependencyAssetInfo.BundleManifest.RelativePath);
 
-                //添加资源的依赖记录
+                //添加依赖资源的被引用记录
                 dependencyAssetInfo.RefAssets.Add(AssetRuntimeInfo);
 
                 if (!dependencyBundleInfo.Equals(BundleRuntimeInfo))
                 {
-                    //依赖了其他资源包的资源 需要添加资源包的依赖记录
+                    //依赖了其他资源包的资源 需要添加依赖记录和引用记录
                     dependencyBundleInfo.RefBundles.Add(BundleRuntimeInfo);
                     BundleRuntimeInfo.DependencyBundles.Add(dependencyBundleInfo);
                 }

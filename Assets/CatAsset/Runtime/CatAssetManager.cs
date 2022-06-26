@@ -269,6 +269,13 @@ namespace CatAsset.Runtime
             {
                 return;
             }
+
+            if (!GetAssetRuntimeInfo(sceneName).BundleManifest.IsScene)
+            {
+                Debug.LogError($"要加载的场景不是场景资源:{sceneName}");
+                callback?.Invoke(false,null,userdata);
+                return;
+            }
             
             //创建加载场景的任务
             LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner,sceneName,userdata,callback);
