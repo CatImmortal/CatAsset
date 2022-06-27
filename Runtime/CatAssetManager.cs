@@ -45,6 +45,11 @@ namespace CatAsset.Runtime
         private static Dictionary<int, AssetRuntimeInfo> sceneInstanceDict = new Dictionary<int, AssetRuntimeInfo>();
 
         /// <summary>
+        /// 任务id->任务
+        /// </summary>
+        private static Dictionary<int, ITask> allTaskDict = new Dictionary<int, ITask>();
+
+        /// <summary>
         /// 运行模式
         /// </summary>
         public static RuntimeMode RuntimeMode { get; set; }
@@ -143,6 +148,22 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 添加任务id与任务的关联
+        /// </summary>
+        public static void AddTaskGUID(ITask task)
+        {
+            allTaskDict.Add(task.GUID,task);
+        }
+        
+        /// <summary>
+        /// 删除任务id与任务的关联
+        /// </summary>
+        public static void RemoveTaskGUID(ITask task)
+        {
+            allTaskDict.Remove(task.GUID);
+        }
+        
+        /// <summary>
         /// 检查资源是否已准备好
         /// </summary>
         private static bool CheckAssetReady(string assetName)
@@ -218,16 +239,16 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static void LoadAsset(string assetName, object userdata, LoadAssetTaskCallback<Object> callback,
+        public static int LoadAsset(string assetName, object userdata, LoadAssetTaskCallback<Object> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            LoadAsset<Object>(assetName, userdata, callback, priority);
+            return LoadAsset<Object>(assetName, userdata, callback, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static void LoadAsset<T>(string assetName, object userdata, LoadAssetTaskCallback<T> callback,
+        public static int LoadAsset<T>(string assetName, object userdata, LoadAssetTaskCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle) where T : Object
         {
 #if UNITY_EDITOR
@@ -246,14 +267,14 @@ namespace CatAsset.Runtime
 
                 callback?.Invoke(true, asset, userdata);
 
-                return;
+                return default;
             }
 #endif
 
             //检查资源是否已在本地准备好
             if (!CheckAssetReady(assetName))
             {
-                return;
+                return default;
             }
 
             AssetRuntimeInfo info = assetRuntimeInfoDict[assetName];
@@ -263,18 +284,20 @@ namespace CatAsset.Runtime
             {
                 Debug.LogError(
                     $"资源加载类型错误，资源名:{info.AssetManifest.Name},资源类型:{info.AssetManifest.Type},目标类型:{typeof(T).Name}");
-                return;
+                return default;
             }
 
             //开始加载
             LoadAssetTask<T> task = LoadAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
+            
+            return task.GUID;
         }
 
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static void LoadScene(string sceneName, object userdata, LoadAssetTaskCallback<Scene> callback,
+        public static int LoadScene(string sceneName, object userdata, LoadSceneTaskCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
 #if UNITY_EDITOR
@@ -293,19 +316,32 @@ namespace CatAsset.Runtime
                     throw;
                 }
 
-                return;
+                return default;
             }
 #endif
             if (!CheckAssetReady(sceneName))
             {
-                return;
+                return default;
             }
 
             //创建加载场景的任务
             LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
+
+            return task.GUID;
         }
 
+        /// <summary>
+        /// 取消任务
+        /// </summary>
+        public static void CancelTask(int guid)
+        {
+            if (allTaskDict.TryGetValue(guid,out ITask task))
+            {
+                task.Cancel();
+            }
+        }
+        
         #endregion
 
         #region 资源卸载

@@ -4,13 +4,16 @@ using UnityEngine.SceneManagement;
 namespace CatAsset.Runtime
 {
     /// <summary>
+    /// 场景加载任务完成回调的原型
+    /// </summary>
+    public delegate void LoadSceneTaskCallback(bool success, Scene scene, object userdata);
+    
+    /// <summary>
     /// 场景加载任务
     /// </summary>
-    public class LoadSceneTask : LoadAssetTask<Scene>
+    public class LoadSceneTask : LoadAssetTask<Object>
     {
-        /// <summary>
-        /// 已加载的场景实例
-        /// </summary>
+        private LoadSceneTaskCallback onFinished;
         private Scene loadedScene;
         
         /// <inheritdoc />
@@ -40,26 +43,49 @@ namespace CatAsset.Runtime
         {
             if (success)
             {
-                OnFinished?.Invoke(true, loadedScene, Userdata);
+                if (!NeedCancel)
+                {
+                    onFinished?.Invoke(true, loadedScene, Userdata);
+                }
+                else
+                {
+                    //被取消了 卸载场景
+                    CatAssetManager.UnloadScene(loadedScene);
+                }
+                
+                //加载成功时 无论主任务是否被取消 都要重新运行未取消的已合并任务
+                //因为每次加载场景都是在实例化一个新场景 不存在复用的概念
+                foreach (LoadSceneTask task in mergedTasks)
+                {
+                    if (!task.NeedCancel)
+                    {
+                        CatAssetManager.LoadScene(task.Name,task.Userdata,task.onFinished);
+                    }
+                }
+                
+               
             }
             else
             {
-                OnFinished?.Invoke(false, default, Userdata);
+                if (!NeedCancel)
+                {
+                    onFinished?.Invoke(false, default, Userdata);
+                    foreach (LoadSceneTask task in mergedTasks)
+                    {
+                        task.onFinished?.Invoke(false, default, Userdata);
+                    }
+                }
+              
             }
             
-            //对于场景资源来说 没有复用的概念 每次加载场景都需要加载新场景实例
-            //所以对于已合并任务 需要在主任务结束后重新进行加载
-            foreach (LoadSceneTask task in mergedTasks)
-            {
-                CatAssetManager.LoadScene(task.Name,task.Userdata,task.OnFinished);
-            }
+           
             
         }
 
         /// <summary>
         /// 创建场景加载任务的对象
         /// </summary>
-        public static LoadSceneTask Create(TaskRunner owner, string name,object userdata,LoadAssetTaskCallback<Scene> callback)
+        public static LoadSceneTask Create(TaskRunner owner, string name,object userdata,LoadSceneTaskCallback callback)
         {
             LoadSceneTask task = ReferencePool.Get<LoadSceneTask>();
             task.CreateBase(owner,name);
@@ -68,7 +94,7 @@ namespace CatAsset.Runtime
             task.BundleRuntimeInfo =
                 CatAssetManager.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
             task.Userdata = userdata;
-            task.OnFinished = callback;
+            task.onFinished = callback;
 
             return task;
         }

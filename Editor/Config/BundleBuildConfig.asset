@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 12
+  ManifestVersion: 13
   TargetPlatforms: 13000000
   Options: 45312
   OutputPath: ./AssetBundles
@@ -33,9 +33,18 @@ MonoBehaviour:
     Group: Base
     IsRaw: 0
     Assets:
-    - Name: Assets/BundleRes/PrefabA/New Prefab.prefab
+    - Name: Assets/BundleRes/PrefabA/A1.prefab
       TypeName: GameObject
-      Length: 901
+      Length: 1409
+    - Name: Assets/BundleRes/PrefabA/A2.prefab
+      TypeName: GameObject
+      Length: 1409
+    - Name: Assets/BundleRes/PrefabA/A3.prefab
+      TypeName: GameObject
+      Length: 1409
+    - Name: Assets/BundleRes/PrefabA/A4.prefab
+      TypeName: GameObject
+      Length: 1331
   - RelativePath: bundleres/scene.bundle
     DirectoryName: BundleRes
     BundleName: scene.bundle
