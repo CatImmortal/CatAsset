@@ -101,18 +101,15 @@ namespace CatAsset.Runtime
                 if (task.State == TaskState.Free)
                 {
                     //运行空闲状态的任务
-                    //Debug.Log($"运行任务:{task}");
                     task.Run();
                 }
 
                 //轮询任务
-                //Debug.Log($"轮询任务:{task}");
                 task.Update();
             }
             catch (Exception e)
             {
                 task.State = TaskState.Finished;
-                //Debug.LogError($"任务运行出错:{e}");
                 throw;
             }
             finally

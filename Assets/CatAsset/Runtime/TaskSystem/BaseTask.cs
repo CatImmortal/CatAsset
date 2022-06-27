@@ -7,9 +7,11 @@ namespace CatAsset.Runtime
     /// </summary>
     public abstract class BaseTask<T> : ITask where T : ITask
     {
-
         /// <inheritdoc />
         public TaskRunner Owner { get; private set; }
+
+        /// <inheritdoc />
+        public int GUID { get; protected set; }
         
         /// <inheritdoc />
         public string Name { get; private set; }
@@ -40,6 +42,12 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public abstract void Update();
 
+        /// <inheritdoc />
+        public virtual void Cancel()
+        {
+            
+        }
+
         public override string ToString()
         {
             return Name;
@@ -51,6 +59,8 @@ namespace CatAsset.Runtime
         protected void CreateBase(TaskRunner owner,string name)
         {
             Owner = owner;
+            GUID = ++TaskRunner.GUIDFactory;
+            CatAssetManager.AddTaskGUID(this);
             Name = name;
         }
         
@@ -64,6 +74,8 @@ namespace CatAsset.Runtime
             mergedTasks.Clear();
             
             Owner = default;
+            CatAssetManager.RemoveTaskGUID(this);
+            GUID = default;
             Name = default;
             State = default;
         }

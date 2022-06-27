@@ -11,6 +11,11 @@
         TaskRunner Owner { get; }
         
         /// <summary>
+        /// 全局id
+        /// </summary>
+        int GUID { get; }
+        
+        /// <summary>
         /// 名称
         /// </summary>
         string Name { get; }
@@ -44,5 +49,10 @@
         /// 轮询任务
         /// </summary>
         void Update();
+
+        /// <summary>
+        /// 取消任务
+        /// </summary>
+        void Cancel();
     }
 }

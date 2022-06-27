@@ -10,6 +10,8 @@ namespace CatAsset.Runtime
     /// </summary>
     public class TaskRunner
     {
+        public static int GUIDFactory = 0;
+
         /// <summary>
         /// 任务组列表
         /// </summary>

@@ -26,10 +26,14 @@ public class Entry : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.A))
         {
             //SceneManager.UnloadSceneAsync("Assets/BundleRes/Scene/TestScene.unity");
-            CatAssetManager.LoadAsset("Assets/BundleRes/PrefabA/A1.prefab",null,null);
-            CatAssetManager.LoadAsset("Assets/BundleRes/PrefabA/A1.prefab",null,null);
-            CatAssetManager.LoadAsset("Assets/BundleRes/PrefabA/A1.prefab",null,null);
-
+            int id = CatAssetManager.LoadAsset("Assets/BundleRes/PrefabA/A1.prefab",null,null);
+            CatAssetManager.CancelTask(id);
+            
+            id = CatAssetManager.LoadAsset("Assets/BundleRes/PrefabA/A1.prefab",null,null);
+            CatAssetManager.CancelTask(id);
+            
+            id = CatAssetManager.LoadAsset("Assets/BundleRes/PrefabA/A1.prefab",null,null);
+            CatAssetManager.CancelTask(id);
         }
 
         if (Input.GetKeyDown(KeyCode.S))

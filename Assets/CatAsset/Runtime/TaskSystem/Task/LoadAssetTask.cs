@@ -1,72 +1,77 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
     /// <summary>
     /// 资源加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadAssetTaskCallback<in T>(bool success, T asset, object userdata);
+    public delegate void LoadAssetTaskCallback<in T>(bool success, T asset, object userdata) where T : Object;
 
     /// <summary>
     /// 资源加载任务
     /// </summary>
-    public class LoadAssetTask<T> : BaseTask<LoadAssetTask<T>>
+    public class LoadAssetTask<T> : BaseTask<LoadAssetTask<T>> where T : Object
     {
         /// <summary>
         /// 资源加载状态
         /// </summary>
         private enum LoadAssetState
         {
-            None,
+            None = 0,
 
             /// <summary>
             /// 资源包加载中
             /// </summary>
-            BundleLoading,
+            BundleLoading = 1,
 
             /// <summary>
             /// 资源包加载结束
             /// </summary>
-            BundleLoaded,
+            BundleLoaded = 2,
 
             /// <summary>
             /// 依赖资源加载中
             /// </summary>
-            DependenciesLoading,
+            DependenciesLoading = 3,
 
             /// <summary>
             /// 依赖资源加载结束
             /// </summary>
-            DependenciesLoaded,
+            DependenciesLoaded = 4,
 
             /// <summary>
             /// 资源加载中
             /// </summary>
-            AssetLoading,
+            AssetLoading = 5,
 
             /// <summary>
             /// 资源加载结束
             /// </summary>
-            AssetLoaded,
+            AssetLoaded = 6,
         }
 
 
         protected object Userdata;
-        protected LoadAssetTaskCallback<T> OnFinished;
+        private LoadAssetTaskCallback<T> onFinished;
 
 
         protected AssetRuntimeInfo AssetRuntimeInfo;
         protected BundleRuntimeInfo BundleRuntimeInfo;
-
-        private readonly LoadBundleTaskCallback onBundleLoadedCallback;
+        
+        private LoadBundleTaskCallback onBundleLoadedCallback;
 
         private int totalDependencyCount;
-        private int loadedDependencyCount;
-        private readonly LoadAssetTaskCallback<Object> onDependencyLoadedCallback;
+        private int loadFinishDependencyCount;
+        private LoadAssetTaskCallback<Object> onDependencyLoadedCallback;
 
 
         private LoadAssetState loadAssetState;
         protected AsyncOperation Operation;
+
+        protected bool NeedCancel;
 
         public LoadAssetTask()
         {
@@ -106,6 +111,9 @@ namespace CatAsset.Runtime
                 //资源包已加载
                 loadAssetState = LoadAssetState.BundleLoaded;
             }
+            
+            //这里不能直接检查资源是否已加载好 因为还需要添加资源引用计数以及为依赖资源递归添加引用计数
+            //所以最多只能转移到BundleLoaded阶段
         }
 
         /// <inheritdoc />
@@ -157,6 +165,13 @@ namespace CatAsset.Runtime
             }
         }
 
+        /// <inheritdoc />
+        public override void Cancel()
+        {
+            NeedCancel = true;
+            Debug.Log("Cancel：" + GUID);
+        }
+
         /// <summary>
         /// 资源包加载结束的回调
         /// </summary>
@@ -170,6 +185,7 @@ namespace CatAsset.Runtime
 
                 Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
                 CallFinished(false);
+
             }
             else
             {
@@ -183,7 +199,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private void OnDependencyLoaded(bool success, object asset, object userdata)
         {
-            loadedDependencyCount++;
+            loadFinishDependencyCount++;
 
             if (success)
             {
@@ -208,12 +224,17 @@ namespace CatAsset.Runtime
         /// </summary>
         private void UnloadDependencies()
         {
+            if (totalDependencyCount == 0)
+            {
+                return;
+            }
+            
             foreach (string dependencyName in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
                 AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
                 if (dependencyInfo.Asset != null)
                 {
-                    //将已加载好的依赖都卸载一遍
+                    //将已加载的依赖都卸载一遍
                     dependencyInfo.RefAssets.Remove(AssetRuntimeInfo);
                     CatAssetManager.UnloadAsset(dependencyInfo.Asset);
                 }
@@ -258,38 +279,78 @@ namespace CatAsset.Runtime
         {
             if (success)
             {
-                //对自身和已加载的依赖资源增加 已合并任务数量的引用计数 保证1次LoadAsset一定增加1个引用计数
-                AssetRuntimeInfo.RefCount += mergedTasks.Count;
-                if (AssetRuntimeInfo.AssetManifest.Dependencies != null)
+                if (!NeedCancel)
                 {
-                    foreach (string dependencyName in AssetRuntimeInfo.AssetManifest.Dependencies)
+                    //对自身和已加载的依赖资源递归增加 已合并任务数量的引用计数
+                    //保证1次LoadAsset一定增加1个自身和所有已加载依赖资源的引用计数
+                    AddDependencyRefCount(Name,MergedTaskCount);
+                
+                    onFinished?.Invoke(true, (T) AssetRuntimeInfo.Asset, Userdata);
+                    foreach (LoadAssetTask<T> task in mergedTasks)
                     {
-                        AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
-                        if (dependencyInfo.Asset != null)
+                        if (!task.NeedCancel)
                         {
-                            dependencyInfo.RefCount += mergedTasks.Count;
+                            task.onFinished?.Invoke(true, (T) AssetRuntimeInfo.Asset, task.Userdata);
+                        }
+                   
+                    }
+                }
+                else
+                {
+                    //被取消了 卸载掉加载成功的资源
+                    CatAssetManager.UnloadAsset(AssetRuntimeInfo.Asset);
+                
+                    //只是主任务被取消了 未取消的已合并任务还需要继续运行
+                    foreach (LoadAssetTask<T> task in mergedTasks)
+                    {
+                        if (!task.NeedCancel)
+                        {
+                            CatAssetManager.LoadAsset(task.Name, task.Userdata, task.onFinished);
                         }
                     }
                 }
                 
-                OnFinished?.Invoke(true, (T) AssetRuntimeInfo.Asset, Userdata);
-                foreach (LoadAssetTask<T> task in mergedTasks)
-                {
-                    task.OnFinished?.Invoke(true, (T) AssetRuntimeInfo.Asset, task.Userdata);
-                }
+               
             }
             else
             {
-                OnFinished?.Invoke(false,default, Userdata);
-                foreach (LoadAssetTask<T> task in mergedTasks)
+                if (!NeedCancel)
                 {
-                    task.OnFinished?.Invoke(false,default, task.Userdata);
+                    onFinished?.Invoke(false,default, Userdata);
+                    foreach (LoadAssetTask<T> task in mergedTasks)
+                    {
+                        task.onFinished?.Invoke(false,default, task.Userdata);
+                    }
                 }
+                
             }
             
            
         }
 
+        /// <summary>
+        /// 为资源及其依赖资源递归添加引用计数
+        /// </summary>
+        private void AddDependencyRefCount(string assetName, int count)
+        {
+            AssetRuntimeInfo info = CatAssetManager.GetAssetRuntimeInfo(assetName);
+            if (info.Asset == null)
+            {
+                //没加载好的资源就不添加引用计数了
+                return;
+            }
+            
+            if (info.AssetManifest.Dependencies != null)
+            {
+                foreach (string dependencyName in info.AssetManifest.Dependencies)
+                {
+                    AddDependencyRefCount(dependencyName,count);
+                }                
+            }
+
+            info.RefCount += count;
+        }
+        
         #region 资源加载状态检查
 
         private void CheckStateWithBundleLoading()
@@ -300,7 +361,7 @@ namespace CatAsset.Runtime
         private void CheckStateWithBundleLoaded()
         {
             //这里要在资源包加载好后就马上增加资源的引用计数和使用记录
-            //防止在依赖资源加载过程中错误进行了资源包的卸载
+            //防止在依赖资源加载过程中意外的进行了资源包的卸载
             AssetRuntimeInfo.RefCount++;
             BundleRuntimeInfo.UsedAssets.Add(AssetRuntimeInfo);
 
@@ -324,7 +385,7 @@ namespace CatAsset.Runtime
 
         private bool CheckStateWithDependenciesLoading()
         {
-            if (loadedDependencyCount != totalDependencyCount)
+            if (loadFinishDependencyCount != totalDependencyCount)
             {
                 State = TaskState.Waiting;
                 return true;
@@ -373,19 +434,17 @@ namespace CatAsset.Runtime
             if (IsLoadFailed())
             {
                 //资源加载失败
+                
                 //清空引用计数，删除使用记录
                 AssetRuntimeInfo.RefCount = 0;
                 BundleRuntimeInfo.UsedAssets.Remove(AssetRuntimeInfo);
 
-                //卸载已加载的依赖
-                if (totalDependencyCount > 0)
-                {
-                    UnloadDependencies();
-                }
+                //卸载已加载好的依赖 清除引用记录
+                UnloadDependencies();
 
                 Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
-                CallFinished(false);
 
+                CallFinished(false);
                 return;
             }
 
@@ -410,7 +469,7 @@ namespace CatAsset.Runtime
             task.BundleRuntimeInfo =
                 CatAssetManager.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
             task.Userdata = userdata;
-            task.OnFinished = callback;
+            task.onFinished = callback;
 
             return task;
         }
@@ -421,13 +480,14 @@ namespace CatAsset.Runtime
             base.Clear();
 
             Userdata = default;
-            OnFinished = default;
+            onFinished = default;
             AssetRuntimeInfo = default;
             BundleRuntimeInfo = default;
             totalDependencyCount = default;
-            loadedDependencyCount = default;
+            loadFinishDependencyCount = default;
             loadAssetState = default;
             Operation = default;
+            NeedCancel = default;
         }
     }
 }
