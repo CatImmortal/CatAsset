@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
 
         public override void Update()
         {
-            if (bundleRuntimeInfo.UsedAssets.Count > 0)
+            if (bundleRuntimeInfo.UsedAssets.Count > 0 || bundleRuntimeInfo.RefBundles.Count > 0)
             {
                 //被重新使用了 不进行卸载了
                 State = TaskState.Finished;
@@ -56,12 +56,13 @@ namespace CatAsset.Runtime
                 }
             }
 
-            //尝试卸载此资源包依赖的资源包
+            //删除依赖的其他资源包的被引用记录
             foreach (BundleRuntimeInfo dependencyBundleInfo in bundleRuntimeInfo.DependencyBundles)
             {
-                dependencyBundleInfo.RefBundles.Remove(bundleRuntimeInfo);
+                dependencyBundleInfo.RemoveRefBundle(bundleRuntimeInfo);
                 if (dependencyBundleInfo.CanUnload())
                 {
+                    //依赖的其他资源包可以卸载了
                     UnloadBundleTask task = Create(Owner,dependencyBundleInfo.Manifest.RelativePath,dependencyBundleInfo);
                     Owner.AddTask(task, TaskPriority.Low);
                 }
@@ -71,6 +72,7 @@ namespace CatAsset.Runtime
             //卸载资源包
             bundleRuntimeInfo.Bundle.UnloadAsync(true);
             bundleRuntimeInfo.Bundle = null;
+            
             Debug.Log($"已卸载资源包:{bundleRuntimeInfo.Manifest.RelativePath}");
         }
         
@@ -93,7 +95,7 @@ namespace CatAsset.Runtime
             base.Clear();
 
             bundleRuntimeInfo = default;
-            timer = 0;
+            timer = default;
         }
     }
 }

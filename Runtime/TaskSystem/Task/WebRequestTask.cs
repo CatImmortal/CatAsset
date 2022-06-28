@@ -69,7 +69,7 @@ namespace CatAsset.Runtime
             if (operation.webRequest.result != UnityWebRequest.Result.Success)
             {
                 onFinished?.Invoke(false, operation.webRequest,userdata);
-                foreach (WebRequestTask task in mergedTasks)
+                foreach (WebRequestTask task in MergedTasks)
                 {
                     task.onFinished?.Invoke(false, operation.webRequest,task.userdata);
                 }
@@ -77,7 +77,7 @@ namespace CatAsset.Runtime
             else
             {
                 onFinished?.Invoke(true, operation.webRequest,userdata);
-                foreach (WebRequestTask task in mergedTasks)
+                foreach (WebRequestTask task in MergedTasks)
                 {
                     task.onFinished?.Invoke(true,operation.webRequest,task.userdata);
                 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
@@ -27,7 +28,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 引用计数
         /// </summary>
-        public int RefCount;
+        public int RefCount { get; private set; }
 
         /// <summary>
         /// 引用了此资源的资源集合
@@ -35,13 +36,77 @@ namespace CatAsset.Runtime
         public HashSet<AssetRuntimeInfo> RefAssets { get; } = new HashSet<AssetRuntimeInfo>();
 
         /// <summary>
-        /// 是否可卸载
+        /// 增加引用计数
         /// </summary>
-        public bool CanUnload()
+        public void AddRefCount(int count = 1)
+        {
+            //引用计数从0变为1
+            if (IsUnused())
+            {
+                //添加到资源包的已使用资源集合中
+                BundleRuntimeInfo bundleRuntimeInfo =
+                    CatAssetManager.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+                bundleRuntimeInfo.UseAsset(this);
+            }
+            
+            RefCount += count;
+        }
+
+        /// <summary>
+        /// 减少引用计数
+        /// </summary>
+        public void SubRefCount(int count = 1)
+        {
+            if (RefCount == 0)
+            {
+                Debug.LogError($"尝试减少引用计数为0的资源的引用计数:{this}");
+                return;
+            }
+
+            RefCount -= count;
+            
+            //引用计数从1变为0
+            if (IsUnused())
+            {
+                //从资源包的已使用资源集合中删除
+                BundleRuntimeInfo bundleRuntimeInfo =
+                    CatAssetManager.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+                bundleRuntimeInfo.EndUseAsset(this);
+            }
+        }
+        
+        /// <summary>
+        /// 是否未被使用
+        /// </summary>
+        public bool IsUnused()
         {
             return RefCount == 0;
         }
-        
+
+        /// <summary>
+        /// 添加引用了此资源的资源
+        /// </summary>
+        /// <param name="assetRuntimeInfo"></param>
+        public void AddRefAsset(AssetRuntimeInfo assetRuntimeInfo)
+        {
+            if (Asset == null)
+            {
+                return;
+            }
+            RefAssets.Add(assetRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 移除引用了此资源的资源
+        /// </summary>
+        public void RemoveRefAsset(AssetRuntimeInfo assetRuntimeInfo)
+        {
+            if (Asset == null)
+            {
+                return;
+            }
+            RefAssets.Remove(assetRuntimeInfo);
+        }
         
         public int CompareTo(AssetRuntimeInfo other)
         {

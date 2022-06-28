@@ -61,11 +61,64 @@ namespace CatAsset.Runtime
         /// 此资源包依赖的资源包集合
         /// </summary>
         public HashSet<BundleRuntimeInfo> DependencyBundles { get; } = new HashSet<BundleRuntimeInfo>();
+
+        /// <summary>
+        /// 使用资源
+        /// </summary>
+        public void UseAsset(AssetRuntimeInfo assetRuntimeInfo)
+        {
+            UsedAssets.Add(assetRuntimeInfo);
+        }
+        
+        /// <summary>
+        /// 停止使用资源
+        /// </summary>
+        public void EndUseAsset(AssetRuntimeInfo assetRuntimeInfo)
+        {
+            UsedAssets.Remove(assetRuntimeInfo);
+
+            if (CanUnload())
+            {
+                //此资源所属资源包已没有资源在使用了 并且没有其他资源包引用它 卸载资源包
+                CatAssetManager.UnloadBundle(this);
+            }
+        }
+
+        /// <summary>
+        /// 添加引用了此资源包的资源包
+        /// </summary>
+        public void AddRefBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        {
+            RefBundles.Add(bundleRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 移除引用了此资源包的资源包
+        /// </summary>
+        public void RemoveRefBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        {
+            RefBundles.Remove(bundleRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 添加此资源包依赖的资源包
+        /// </summary>
+        public void AddDependencyBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        {
+            DependencyBundles.Add(bundleRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 移除此资源包依赖的资源包
+        /// </summary>
+        public void RemoveDependencyBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        {
+            DependencyBundles.Remove(bundleRuntimeInfo);
+        }
         
         /// <summary>
         /// 是否可卸载
         /// </summary>
-        /// <returns></returns>
         public bool CanUnload()
         {
             return UsedAssets.Count == 0 && RefBundles.Count == 0;
