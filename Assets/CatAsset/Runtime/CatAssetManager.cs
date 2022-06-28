@@ -266,7 +266,6 @@ namespace CatAsset.Runtime
                 }
 
                 callback?.Invoke(true, asset, userdata);
-
                 return default;
             }
 #endif
@@ -283,7 +282,7 @@ namespace CatAsset.Runtime
             if (assetType != info.AssetManifest.Type && assetType != typeof(Object))
             {
                 Debug.LogError(
-                    $"资源加载类型错误，资源名:{info.AssetManifest.Name},资源类型:{info.AssetManifest.Type},目标类型:{typeof(T).Name}");
+                    $"资源加载类型错误，资源名:{info.AssetManifest.Name},资源类型:{info.AssetManifest.Type.Name},加载类型:{typeof(T).Name}");
                 return default;
             }
 
@@ -375,12 +374,7 @@ namespace CatAsset.Runtime
 
                 return;
             }
-
-            if (assetRuntimeInfo.RefCount == 0)
-            {
-                Debug.LogError($"试图卸载一个引用计数为0的资源:{assetRuntimeInfo.AssetManifest.Name}");
-                return;
-            }
+            
 
             InternalUnloadAsset(assetRuntimeInfo);
         }
@@ -409,7 +403,7 @@ namespace CatAsset.Runtime
             }
 
             //卸载场景
-            sceneInstanceDict.Remove(scene.handle);
+            RemoveSceneInstance(scene);
             SceneManager.UnloadSceneAsync(scene);
 
             InternalUnloadAsset(assetRuntimeInfo);
@@ -420,46 +414,33 @@ namespace CatAsset.Runtime
         /// </summary>
         private static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
         {
-            //减少自身和依赖资源的引用计数
-            if (assetRuntimeInfo.AssetManifest.Dependencies != null)
+            assetRuntimeInfo.SubRefCount();
+
+            //引用计数为0 卸载依赖
+            if (assetRuntimeInfo.IsUnused())
             {
-                foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
-                {
-                    AssetRuntimeInfo dependencyRuntimeInfo = GetAssetRuntimeInfo(dependency);
-                    UnloadAsset(dependencyRuntimeInfo.Asset);
-                }
-            }
-            assetRuntimeInfo.RefCount--;
-            
-
-
-            if (assetRuntimeInfo.CanUnload())
-            {
-                BundleRuntimeInfo bundleRuntimeInfo =
-                    GetBundleRuntimeInfo(assetRuntimeInfo.BundleManifest.RelativePath);
-
-                //此资源已经不再被使用 从依赖资源的RefAssets和所属资源包的usedAssets中删除
                 if (assetRuntimeInfo.AssetManifest.Dependencies != null)
                 {
                     foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
                         AssetRuntimeInfo dependencyRuntimeInfo = GetAssetRuntimeInfo(dependency);
-                        dependencyRuntimeInfo.RefAssets.Remove(assetRuntimeInfo);
+                        UnloadAsset(dependencyRuntimeInfo.Asset);
                     }
                 }
-                bundleRuntimeInfo.UsedAssets.Remove(assetRuntimeInfo);
-
-                
-                if (bundleRuntimeInfo.CanUnload())
-                {
-                    //此资源所属资源包已没有资源在使用了 并且没有其他资源包引用它 卸载资源包
-                    UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,
-                        bundleRuntimeInfo.Manifest.RelativePath, bundleRuntimeInfo);
-                    loadTaskRunner.AddTask(task, TaskPriority.Low);
-                }
             }
+            
         }
 
+        /// <summary>
+        /// 卸载资源包
+        /// </summary>
+        public static void UnloadBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        {
+            UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,
+                bundleRuntimeInfo.Manifest.RelativePath, bundleRuntimeInfo);
+            loadTaskRunner.AddTask(task, TaskPriority.Low);
+        }
+        
         #endregion
     }
 }

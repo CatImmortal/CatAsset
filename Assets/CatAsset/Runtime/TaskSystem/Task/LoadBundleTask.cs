@@ -58,7 +58,7 @@ namespace CatAsset.Runtime
             {
                 Debug.LogError($"资源包加载失败：{bundleRuntimeInfo.Manifest}");
                 onFinished?.Invoke(false,userdata);
-                foreach (LoadBundleTask task in mergedTasks)
+                foreach (LoadBundleTask task in MergedTasks)
                 {
                     task.onFinished?.Invoke(false,task.userdata);
                 }
@@ -67,7 +67,7 @@ namespace CatAsset.Runtime
             {
                 //Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
                 onFinished?.Invoke(true,userdata);
-                foreach (LoadBundleTask task in mergedTasks)
+                foreach (LoadBundleTask task in MergedTasks)
                 {
                     task.onFinished?.Invoke(true,task.userdata);
                 }

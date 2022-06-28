@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace CatAsset.Runtime
 {
@@ -25,15 +26,15 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 已合并的任务列表（同名的任务）
         /// </summary>
-        protected List<T> mergedTasks = new List<T>();
+        protected List<T> MergedTasks = new List<T>();
         
         /// <inheritdoc />
-        public int MergedTaskCount => mergedTasks.Count;
+        public int MergedTaskCount => MergedTasks.Count;
         
         /// <inheritdoc />
         public void MergeTask(ITask task)
         {
-            mergedTasks.Add((T)task);
+            MergedTasks.Add((T)task);
         }
         
         /// <inheritdoc />
@@ -45,7 +46,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public virtual void Cancel()
         {
-            
+            Debug.LogError($"此任务类型未支持取消操作:{GetType().Name}");
         }
 
         public override string ToString()
@@ -67,11 +68,11 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public virtual void Clear()
         {
-            foreach (T task in mergedTasks)
+            foreach (T task in MergedTasks)
             {
                 ReferencePool.Release(task);
             }
-            mergedTasks.Clear();
+            MergedTasks.Clear();
             
             Owner = default;
             CatAssetManager.RemoveTaskGUID(this);

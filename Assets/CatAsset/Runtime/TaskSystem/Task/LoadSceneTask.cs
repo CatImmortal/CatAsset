@@ -55,31 +55,27 @@ namespace CatAsset.Runtime
                 
                 //加载成功时 无论主任务是否被取消 都要重新运行未取消的已合并任务
                 //因为每次加载场景都是在实例化一个新场景 不存在复用的概念
-                foreach (LoadSceneTask task in mergedTasks)
+                foreach (LoadSceneTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
                         CatAssetManager.LoadScene(task.Name,task.Userdata,task.onFinished);
                     }
                 }
-                
-               
             }
             else
             {
                 if (!NeedCancel)
                 {
                     onFinished?.Invoke(false, default, Userdata);
-                    foreach (LoadSceneTask task in mergedTasks)
+                    foreach (LoadSceneTask task in MergedTasks)
                     {
                         task.onFinished?.Invoke(false, default, Userdata);
                     }
                 }
               
             }
-            
-           
-            
+
         }
 
         /// <summary>
@@ -102,7 +98,8 @@ namespace CatAsset.Runtime
         public override void Clear()
         {
             base.Clear();
-
+            
+            onFinished = default;
             loadedScene = default;
         }
     }
