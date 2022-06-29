@@ -44,7 +44,7 @@ namespace CatAsset.Editor
         public bool IsCopyToReadOnlyPath = true;
 
         /// <summary>
-        /// 要复制到StreamingAssets目录下的资源组，以分号分隔
+        /// 要复制到只读目录下的资源组，以分号分隔
         /// </summary>
         public string CopyGroup = Util.DefaultGroup;
 
@@ -177,12 +177,15 @@ namespace CatAsset.Editor
 
                     //检查依赖列表
                     List<string> dependencies = Util.GetDependencies(assetName);
-                    foreach (string dependency in dependencies)
+                    if (dependencies != null)
                     {
-                        if (!explicitBuildAssetSet.Contains(dependency))
+                        foreach (string dependency in dependencies)
                         {
-                            //被显式构建资源依赖，并且没有被显式构建的，就是隐式依赖
-                            implicitDependencies.Add(dependency);
+                            if (!explicitBuildAssetSet.Contains(dependency))
+                            {
+                                //被显式构建资源依赖，并且没有被显式构建的，就是隐式依赖
+                                implicitDependencies.Add(dependency);
+                            }
                         }
                     }
                 }

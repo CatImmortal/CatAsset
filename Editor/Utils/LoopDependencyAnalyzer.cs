@@ -212,7 +212,6 @@ namespace CatAsset.Editor
         /// <summary>
         /// 检查是否有循环依赖的记录
         /// </summary>
-        /// <param name="loops"></param>
         private static void CheckLoops(List<string> loops)
         {
             if (loops.Count > 0)

@@ -64,7 +64,19 @@ namespace CatAsset.Runtime
         /// </summary>
         public static float UnloadDelayTime { get; set; }
 
+        
         /// <summary>
+        /// 轮询CatAsset资源管理器
+        /// </summary>
+        public static void Update()
+        {
+            loadTaskRunner.Update();
+            downloadTaskRunner.Update();
+        }
+        
+        #region 数据操作
+
+         /// <summary>
         /// 根据资源包清单信息初始化运行时信息
         /// </summary>
         private static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
@@ -116,6 +128,20 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 检查资源是否已准备好
+        /// </summary>
+        private static bool CheckAssetReady(string assetName)
+        {
+            if (!assetRuntimeInfoDict.ContainsKey(assetName))
+            {
+                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
+                return false;
+            }
+
+            return true;
+        }
+        
+        /// <summary>
         /// 设置资源实例与资源运行时信息的关联
         /// </summary>
         public static void SetAssetInstance(object asset, AssetRuntimeInfo assetRuntimeInfo)
@@ -163,28 +189,7 @@ namespace CatAsset.Runtime
             allTaskDict.Remove(task.GUID);
         }
         
-        /// <summary>
-        /// 检查资源是否已准备好
-        /// </summary>
-        private static bool CheckAssetReady(string assetName)
-        {
-            if (!assetRuntimeInfoDict.ContainsKey(assetName))
-            {
-                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// 轮询CatAsset资源管理器
-        /// </summary>
-        public static void Update()
-        {
-            loadTaskRunner.Update();
-            downloadTaskRunner.Update();
-        }
+        #endregion
 
         #region 资源清单检查
 
@@ -273,6 +278,7 @@ namespace CatAsset.Runtime
             //检查资源是否已在本地准备好
             if (!CheckAssetReady(assetName))
             {
+                callback?.Invoke(false, null, userdata);
                 return default;
             }
 
@@ -283,6 +289,7 @@ namespace CatAsset.Runtime
             {
                 Debug.LogError(
                     $"资源加载类型错误，资源名:{info.AssetManifest.Name},资源类型:{info.AssetManifest.Type.Name},加载类型:{typeof(T).Name}");
+                callback?.Invoke(false, null, userdata);
                 return default;
             }
 
@@ -293,6 +300,49 @@ namespace CatAsset.Runtime
             return task.GUID;
         }
 
+        /// <summary>
+        /// 批量加载资源
+        /// </summary>
+        public static int BatchLoadAsset(List<string> assetNames, object userdata, BatchLoadAssetTaskCallback callback, TaskPriority priority = TaskPriority.Middle)
+        {
+            if (assetNames == null || assetNames.Count == 0)
+            {
+                Debug.LogError("批量加载资源失败，资源名列表为空");
+                callback?.Invoke(null,userdata);
+                return default;
+            }
+            
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                List<object> assets = new List<object>();
+                foreach (string assetName in assetNames)
+                {
+                    Object asset = null;
+                    try
+                    {
+                        asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                    }
+                    finally
+                    {
+                        assets.Add(asset);
+                    }
+                    callback?.Invoke(assets,userdata);
+                }
+
+                return default;
+            }
+#endif
+            
+            BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,$"{nameof(BatchLoadAsset)}.{Time.time}",assetNames,userdata,callback);
+            loadTaskRunner.AddTask(task,priority);
+            return task.GUID;
+        }
+        
         /// <summary>
         /// 加载场景
         /// </summary>
@@ -320,6 +370,7 @@ namespace CatAsset.Runtime
 #endif
             if (!CheckAssetReady(sceneName))
             {
+                callback?.Invoke(false, default, userdata);
                 return default;
             }
 

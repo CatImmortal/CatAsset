@@ -49,11 +49,31 @@ namespace CatAsset.Runtime
                 }
                 else
                 {
-                    //被取消了 卸载场景
-                    CatAssetManager.UnloadScene(loadedScene);
+                    //被取消了 将加载好的场景回调给下一个未被取消的已合并任务 然后将它从MergedTasks中移除掉
+                    int index = -1;
+                    for (int i = 0; i < MergedTaskCount; i++)
+                    {
+                        LoadSceneTask task = (LoadSceneTask)MergedTasks[i];
+                        if (!task.NeedCancel)
+                        {
+                            index = i;
+                            task.onFinished?.Invoke(true,loadedScene,task.Userdata);
+                            break;
+                        }
+                    }
+
+                    if (index != -1)
+                    {
+                        MergedTasks.RemoveAt(index);
+                    }
+                    else
+                    {
+                        //没有任何一个需要这个场景的已合并任务 直接卸载了
+                        CatAssetManager.UnloadScene(loadedScene);
+                    }
                 }
                 
-                //加载成功时 无论主任务是否被取消 都要重新运行未取消的已合并任务
+                //加载成功后 无论主任务是否被取消 都要重新运行未取消的已合并任务
                 //因为每次加载场景都是在实例化一个新场景 不存在复用的概念
                 foreach (LoadSceneTask task in MergedTasks)
                 {
