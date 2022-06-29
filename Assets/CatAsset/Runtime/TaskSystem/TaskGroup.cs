@@ -28,7 +28,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此任务组的优先级
         /// </summary>
-        public readonly TaskPriority Priority;
+        public TaskPriority Priority { get; }
 
         /// <summary>
         /// 任务组是否能运行
