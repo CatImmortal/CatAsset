@@ -78,62 +78,22 @@ namespace CatAsset.Runtime
                 loadedAssets.Add(assetRuntimeInfo.Asset);
             }
 
+            //无需处理已合并任务 因为按照现在的设计 批量加载任务，就算是相同的资源名列表，也是不会判断为重复任务的
             if (!needCancel)
             {
                 onFinished?.Invoke(loadedAssets,userdata);
-                CallMergedTasks();
             }
             else
             {
                 //被取消了
-                
-                //只是主任务被取消了 未取消的已合并任务还需要处理
-                bool called = CallMergedTasks();
-                
-                if (called)
+                foreach (object loadSuccessAsset in loadSuccessAssets)
                 {
-                    foreach (object loadSuccessAsset in loadSuccessAssets)
-                    {
-                        //至少有一个需要这个资源的已合并任务 那就只需要将主任务增加的那1个引用计数减去就行
-                        AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(loadSuccessAsset);
-                        assetRuntimeInfo.SubRefCount();
-                    }
-                }
-                else
-                {
-                    //没有任何一个需要这个资源的已合并任务 直接卸载了
-                    foreach (object loadSuccessAsset in loadSuccessAssets)
-                    {
-                        CatAssetManager.UnloadAsset(loadSuccessAsset);
-                    }
+                    CatAssetManager.UnloadAsset(loadSuccessAsset);
                 }
             }
         }
 
-        /// <summary>
-        /// 调用所有未取消的已合并任务回调
-        /// </summary>
-        private bool CallMergedTasks()
-        {
-            bool called = false;
-            
-            foreach (BatchLoadAssetTask task in MergedTasks)
-            {
-                if (!task.needCancel)
-                {
-                    called = true;
-                    foreach (object loadSuccessAsset in loadSuccessAssets)
-                    {
-                        //增加已合并任务带来的引用计数
-                        AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(loadSuccessAsset);
-                        assetRuntimeInfo.AddRefCount();
-                    }
-                    task.onFinished?.Invoke(loadedAssets,task.userdata);
-                }
-            }
 
-            return called;
-        }
         
         /// <summary>
         /// 创建批量资源加载任务的对象

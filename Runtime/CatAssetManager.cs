@@ -201,6 +201,7 @@ namespace CatAsset.Runtime
             if (RuntimeMode != RuntimeMode.PackageOnly)
             {
                 Debug.LogError("PackageOnly模式下才能调用CheckPackageManifest");
+                callback(false);
                 return;
             }
 
@@ -338,7 +339,7 @@ namespace CatAsset.Runtime
             }
 #endif
             
-            BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,$"{nameof(BatchLoadAsset)}.{Time.time}",assetNames,userdata,callback);
+            BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,$"{nameof(BatchLoadAsset)} - {TaskRunner.GUIDFactory + 1}",assetNames,userdata,callback);
             loadTaskRunner.AddTask(task,priority);
             return task.GUID;
         }
