@@ -376,8 +376,8 @@ namespace CatAsset.Runtime
                     {
                         if (!task.NeedCancel)
                         {
-                            //对自身增加 已合并且未取消任务数量的引用计数
-                            //保证1次成功的LoadAsset一定增加1个自身的引用计数
+                            //增加已合并任务带来的引用计数
+                            //保证1次成功的LoadAsset一定增加1个资源的引用计数
                             AssetRuntimeInfo.AddRefCount();
                             task.onFinished?.Invoke(true, (T) AssetRuntimeInfo.Asset, task.Userdata);
                         }
@@ -386,16 +386,29 @@ namespace CatAsset.Runtime
                 }
                 else
                 {
-                    //被取消了 卸载掉加载成功的资源
-                    CatAssetManager.UnloadAsset(AssetRuntimeInfo.Asset);
-                
-                    //只是主任务被取消了 未取消的已合并任务还需要继续运行
+                    //被取消了
+                    bool needUnload = true;
+
+                    //只是主任务被取消了 未取消的已合并任务还需要继续处理
                     foreach (LoadAssetTask<T> task in MergedTasks)
                     {
                         if (!task.NeedCancel)
                         {
-                            CatAssetManager.LoadAsset(task.Name, task.Userdata, task.onFinished);
+                            needUnload = false;
+                            AssetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
+                            task.onFinished?.Invoke(true, (T) AssetRuntimeInfo.Asset, task.Userdata);
                         }
+                    }
+
+                    if (!needUnload)
+                    {
+                       //至少有一个需要这个资源的已合并任务 那就只需要将主任务增加的那1个引用计数减去就行
+                       AssetRuntimeInfo.SubRefCount();
+                    }
+                    else
+                    {
+                        //没有任何一个需要这个资源的已合并任务 直接卸载了
+                        CatAssetManager.UnloadAsset(AssetRuntimeInfo.Asset);
                     }
                 }
                 
