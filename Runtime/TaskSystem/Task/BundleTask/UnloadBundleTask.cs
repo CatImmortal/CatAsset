@@ -10,10 +10,6 @@ namespace CatAsset.Runtime
     public class UnloadBundleTask : BaseTask<UnloadBundleTask>
     {
         private BundleRuntimeInfo bundleRuntimeInfo;
-        
-        /// <summary>
-        /// 卸载倒计时
-        /// </summary>
         private float timer;
         
         /// <inheritdoc />
@@ -21,8 +17,7 @@ namespace CatAsset.Runtime
 
         public override void Run()
         {
-            //初始状态设置为Waiting 避免占用每帧任务处理次数
-            State = TaskState.Waiting;
+
         }
 
         public override void Update()

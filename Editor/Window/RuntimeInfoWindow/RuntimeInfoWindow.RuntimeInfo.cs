@@ -95,11 +95,14 @@ namespace CatAsset.Editor
                         using (new EditorGUILayout.HorizontalScope())
                         {
                             foldOutDcit[bundleRelativePath] = EditorGUILayout.Foldout(foldOutDcit[bundleRelativePath], bundleRelativePath);
+   
+                            using (new EditorGUILayout.HorizontalScope())
+                            {
+                                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length),GUILayout.Width(200));
+                                EditorGUILayout.LabelField($"RefBundle数量：{bundleRuntimeInfo.RefBundles.Count}",GUILayout.Width(150));
+                                EditorGUILayout.LabelField($"DependencyBundle数量：{bundleRuntimeInfo.DependencyBundles.Count}",GUILayout.Width(200));
+                            }
 
-                            EditorGUILayout.Space();
-                            EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length));
-                            EditorGUILayout.LabelField($"RefBundle数量：{bundleRuntimeInfo.RefBundles.Count}");
-                            EditorGUILayout.LabelField($"DependencyBundle数量：{bundleRuntimeInfo.DependencyBundles.Count}");
                         }
 
                         if (foldOutDcit[bundleRelativePath])

@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// Web请求任务完成回调的原型
     /// </summary>
-    public delegate void WebRequestTaskCallback(bool success,UnityWebRequest uwr,object userdata);
+    public delegate void WebRequestCallback(bool success,UnityWebRequest uwr,object userdata);
     
     /// <summary>
     /// Web请求任务
@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// Web请求任务完成回调
         /// </summary>
-        private WebRequestTaskCallback onFinished;
+        private WebRequestCallback onFinished;
         
         /// <summary>
         /// Web请求的异步操作对象
@@ -87,7 +87,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建Web请求任务的对象
         /// </summary>
-        public static WebRequestTask Create(TaskRunner owner, string name,string uri,object userdata, WebRequestTaskCallback callback)
+        public static WebRequestTask Create(TaskRunner owner, string name,string uri,object userdata, WebRequestCallback callback)
         {
             WebRequestTask task = ReferencePool.Get<WebRequestTask>();
             task.CreateBase(owner,name);

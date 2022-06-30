@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源加载任务完成回调的原型
     /// </summary>
-    public delegate void BatchLoadAssetTaskCallback(List<object> assets, object userdata);
+    public delegate void BatchLoadAssetCallback(List<object> assets, object userdata);
     
     /// <summary>
     /// 批量资源加载任务
@@ -15,13 +15,17 @@ namespace CatAsset.Runtime
     {
         private object userdata;
         private List<string> assetNames;
-        private BatchLoadAssetTaskCallback onFinished;
+        private BatchLoadAssetCallback onFinished;
 
-        private LoadAssetTaskCallback<Object> onAssetLoadedCallback;
+        private LoadAssetCallback<Object> onAssetLoadedCallback;
         private int loadedAssetCount;
         private List<object> loadedAssets;
         private List<object> loadSuccessAssets = new List<object>();
+        
         private bool needCancel;
+
+        /// <inheritdoc />
+        public override float Progress => loadedAssetCount / assetNames.Count;
 
         public BatchLoadAssetTask()
         {
@@ -78,10 +82,10 @@ namespace CatAsset.Runtime
                 loadedAssets.Add(assetRuntimeInfo.Asset);
             }
 
-            //无需处理已合并任务 因为按照现在的设计 批量加载任务，就算是相同的资源名列表，也是不会判断为重复任务的
+            //无需处理已合并任务 因为按照现在的设计 批量加载任务，就算是资源名列表相同，也是不会判断为重复任务的
             if (!needCancel)
             {
-                onFinished?.Invoke(loadedAssets,userdata);
+                onFinished?.Invoke(loadedAssets,this.userdata);
             }
             else
             {
@@ -99,7 +103,7 @@ namespace CatAsset.Runtime
         /// 创建批量资源加载任务的对象
         /// </summary>
         public static BatchLoadAssetTask Create(TaskRunner owner, string name, List<string> assetNames,object userdata, 
-            BatchLoadAssetTaskCallback callback)
+            BatchLoadAssetCallback callback)
         {
             BatchLoadAssetTask task = ReferencePool.Get<BatchLoadAssetTask>();
             task.CreateBase(owner,name);
@@ -122,6 +126,7 @@ namespace CatAsset.Runtime
             loadedAssets = default;
             loadedAssetCount = default;
             loadSuccessAssets.Clear();
+            
             needCancel = default;
             
         }
