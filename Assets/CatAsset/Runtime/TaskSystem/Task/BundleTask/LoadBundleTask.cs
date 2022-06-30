@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadBundleTaskCallback(bool success,object userdata);
+    public delegate void LoadBundleCallback(bool success,object userdata);
     
     /// <summary>
     /// 资源包加载任务
@@ -33,12 +33,53 @@ namespace CatAsset.Runtime
         }
 
         private object userdata;
-        private LoadBundleTaskCallback onFinished;
+        private LoadBundleCallback onFinished;
         
         private BundleRuntimeInfo bundleRuntimeInfo;
         private LoadBundleStatus loadBundleState;
         private AssetBundleCreateRequest request;
 
+        /// <inheritdoc />
+        public override float Progress
+        {
+            get
+            {
+                if (request == null)
+                {
+                    return 0;
+                }
+
+                return request.progress;
+            }
+        }
+        
+       
+        
+        /// <inheritdoc />
+        public override void Run()
+        {
+            loadBundleState = LoadBundleStatus.Loading;
+            request =  AssetBundle.LoadFromFileAsync(bundleRuntimeInfo.LoadPath);
+        }
+
+        /// <inheritdoc />
+        public override void Update()
+        {
+            switch (loadBundleState)
+            {
+                case LoadBundleStatus.Loading:
+                    //加载中
+                    CheckStateWithLoading();
+                    break;
+                
+                case LoadBundleStatus.Loaded:
+                    //加载结束
+                    CheckStateWithLoaded();
+                    break;
+
+            }
+        }
+        
         private void CheckStateWithLoading()
         {
             State = TaskState.Running;
@@ -74,33 +115,10 @@ namespace CatAsset.Runtime
             }
         }
         
-        /// <inheritdoc />
-        public override void Run()
-        {
-            loadBundleState = LoadBundleStatus.Loading;
-            request =  AssetBundle.LoadFromFileAsync(bundleRuntimeInfo.LoadPath);
-        }
-
-        /// <inheritdoc />
-        public override void Update()
-        {
-            if (loadBundleState == LoadBundleStatus.Loading)
-            {
-                //加载中
-                CheckStateWithLoading();
-            }
-
-            if (loadBundleState == LoadBundleStatus.Loaded)
-            {
-                //加载结束
-                CheckStateWithLoaded();
-            }
-        }
-        
         /// <summary>
         /// 创建资源包加载任务的对象
         /// </summary>
-        public static LoadBundleTask Create(TaskRunner owner, string name,object userdata,LoadBundleTaskCallback callback)
+        public static LoadBundleTask Create(TaskRunner owner, string name,object userdata,LoadBundleCallback callback)
         {
             LoadBundleTask task = ReferencePool.Get<LoadBundleTask>();
             task.CreateBase(owner,name);

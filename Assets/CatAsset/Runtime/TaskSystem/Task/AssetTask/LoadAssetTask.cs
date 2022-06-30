@@ -8,7 +8,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadAssetTaskCallback<in T>(bool success, T asset, object userdata) where T : Object;
+    public delegate void LoadAssetCallback<in T>(bool success, T asset, object userdata) where T : Object;
 
     /// <summary>
     /// 资源加载任务
@@ -54,29 +54,23 @@ namespace CatAsset.Runtime
         }
         
         protected object Userdata;
-        private LoadAssetTaskCallback<T> onFinished;
+        private LoadAssetCallback<T> onFinished;
 
 
         protected AssetRuntimeInfo AssetRuntimeInfo;
         protected BundleRuntimeInfo BundleRuntimeInfo;
         
-        private LoadBundleTaskCallback onBundleLoadedCallback;
+        private LoadBundleCallback onBundleLoadedCallback;
 
         private int totalDependencyCount;
         private int loadFinishDependencyCount;
-        private LoadAssetTaskCallback<Object> onDependencyLoadedCallback;
+        private LoadAssetCallback<Object> onDependencyLoadedCallback;
 
 
         private LoadAssetState loadAssetState;
         protected AsyncOperation Operation;
 
         protected bool NeedCancel;
-
-        public LoadAssetTask()
-        {
-            onBundleLoadedCallback = OnBundleLoaded;
-            onDependencyLoadedCallback = OnDependencyLoaded;
-        }
 
         /// <inheritdoc />
         public override float Progress
@@ -91,7 +85,13 @@ namespace CatAsset.Runtime
                 return Operation.progress;
             }
         }
-
+        
+        public LoadAssetTask()
+        {
+            onBundleLoadedCallback = OnBundleLoaded;
+            onDependencyLoadedCallback = OnDependencyLoaded;
+        }
+        
 
         /// <inheritdoc />
         public override void Run()
@@ -387,6 +387,7 @@ namespace CatAsset.Runtime
                 else
                 {
                     //被取消了
+                    
                     bool needUnload = true;
 
                     //只是主任务被取消了 未取消的已合并任务还需要继续处理
@@ -419,7 +420,11 @@ namespace CatAsset.Runtime
                 if (!NeedCancel)
                 {
                     onFinished?.Invoke(false,null, Userdata);
-                    foreach (LoadAssetTask<T> task in MergedTasks)
+                }
+                
+                foreach (LoadAssetTask<T> task in MergedTasks)
+                {
+                    if (!task.NeedCancel)
                     {
                         task.onFinished?.Invoke(false,null, task.Userdata);
                     }
@@ -436,7 +441,7 @@ namespace CatAsset.Runtime
         /// 创建资源加载任务的对象
         /// </summary>
         public static LoadAssetTask<T> Create(TaskRunner owner, string name, object userdata,
-            LoadAssetTaskCallback<T> callback)
+            LoadAssetCallback<T> callback)
         {
             LoadAssetTask<T> task = ReferencePool.Get<LoadAssetTask<T>>();
             task.CreateBase(owner, name);

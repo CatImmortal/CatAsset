@@ -6,14 +6,14 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 场景加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadSceneTaskCallback(bool success, Scene scene, object userdata);
+    public delegate void LoadSceneCallback(bool success, Scene scene, object userdata);
     
     /// <summary>
     /// 场景加载任务
     /// </summary>
     public class LoadSceneTask : LoadAssetTask<Object>
     {
-        private LoadSceneTaskCallback onFinished;
+        private LoadSceneCallback onFinished;
         private Scene loadedScene;
         
         /// <inheritdoc />
@@ -88,10 +88,15 @@ namespace CatAsset.Runtime
                 if (!NeedCancel)
                 {
                     onFinished?.Invoke(false, default, Userdata);
-                    foreach (LoadSceneTask task in MergedTasks)
+                }
+                
+                foreach (LoadSceneTask task in MergedTasks)
+                {
+                    if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(false, default, Userdata);
+                        task.onFinished?.Invoke(false, default, task.Userdata);
                     }
+                       
                 }
               
             }
@@ -101,7 +106,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建场景加载任务的对象
         /// </summary>
-        public static LoadSceneTask Create(TaskRunner owner, string name,object userdata,LoadSceneTaskCallback callback)
+        public static LoadSceneTask Create(TaskRunner owner, string name,object userdata,LoadSceneCallback callback)
         {
             LoadSceneTask task = ReferencePool.Get<LoadSceneTask>();
             task.CreateBase(owner,name);

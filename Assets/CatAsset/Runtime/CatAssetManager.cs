@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -98,7 +99,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取资源包运行时信息
         /// </summary>
-        public static BundleRuntimeInfo GetBundleRuntimeInfo(string bundleRelativePath)
+        internal static BundleRuntimeInfo GetBundleRuntimeInfo(string bundleRelativePath)
         {
             return bundleRuntimeInfoDict[bundleRelativePath];
         }
@@ -106,7 +107,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取资源运行时信息
         /// </summary>
-        public static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
+        internal static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
         {
             return assetRuntimeInfoDict[assetName];
         }
@@ -114,7 +115,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取资源运行时信息
         /// </summary>
-        public static AssetRuntimeInfo GetAssetRuntimeInfo(object asset)
+        internal static AssetRuntimeInfo GetAssetRuntimeInfo(object asset)
         {
             return assetInstanceDict[asset];
         }
@@ -122,7 +123,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取场景运行时信息
         /// </summary>
-        public static AssetRuntimeInfo GetAssetRuntimeInfo(Scene scene)
+        internal static AssetRuntimeInfo GetAssetRuntimeInfo(Scene scene)
         {
             return sceneInstanceDict[scene.handle];
         }
@@ -144,7 +145,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 设置资源实例与资源运行时信息的关联
         /// </summary>
-        public static void SetAssetInstance(object asset, AssetRuntimeInfo assetRuntimeInfo)
+        internal static void SetAssetInstance(object asset, AssetRuntimeInfo assetRuntimeInfo)
         {
             assetInstanceDict.Add(asset, assetRuntimeInfo);
         }
@@ -152,7 +153,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 删除资源实例与资源运行时信息的关联
         /// </summary>
-        public static void RemoveAssetInstance(object asset)
+        internal static void RemoveAssetInstance(object asset)
         {
             assetInstanceDict.Remove(asset);
         }
@@ -160,7 +161,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 设置场景实例与资源运行时信息的关联
         /// </summary>
-        public static void SetSceneInstance(Scene scene, AssetRuntimeInfo assetRuntimeInfo)
+        internal static void SetSceneInstance(Scene scene, AssetRuntimeInfo assetRuntimeInfo)
         {
             sceneInstanceDict.Add(scene.handle, assetRuntimeInfo);
         }
@@ -168,7 +169,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 删除场景实例与资源运行时信息的关联
         /// </summary>
-        public static void RemoveSceneInstance(Scene scene)
+        internal static void RemoveSceneInstance(Scene scene)
         {
             sceneInstanceDict.Remove(scene.handle);
         }
@@ -176,7 +177,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 添加任务id与任务的关联
         /// </summary>
-        public static void AddTaskGUID(ITask task)
+        internal static void AddTaskGUID(ITask task)
         {
             allTaskDict.Add(task.GUID,task);
         }
@@ -184,7 +185,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 删除任务id与任务的关联
         /// </summary>
-        public static void RemoveTaskGUID(ITask task)
+        internal static void RemoveTaskGUID(ITask task)
         {
             allTaskDict.Remove(task.GUID);
         }
@@ -207,7 +208,7 @@ namespace CatAsset.Runtime
 
             string path = Util.GetReadOnlyPath(Util.ManifestFileName);
 
-            WebRequestTask task = WebRequestTask.Create(downloadTaskRunner, path, path, callback,
+            WebRequestTask task = WebRequestTask.Create(loadTaskRunner, path, path, callback,
                 (success, uwr, userdata) =>
                 {
                     Action<bool> onChecked = (Action<bool>) userdata;
@@ -235,7 +236,7 @@ namespace CatAsset.Runtime
                     }
                 });
 
-            downloadTaskRunner.AddTask(task, TaskPriority.Height);
+            loadTaskRunner.AddTask(task, TaskPriority.Height);
         }
 
         #endregion
@@ -245,7 +246,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAsset(string assetName, object userdata, LoadAssetTaskCallback<Object> callback,
+        public static int LoadAsset(string assetName, object userdata, LoadAssetCallback<Object> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
             return LoadAsset<Object>(assetName, userdata, callback, priority);
@@ -254,7 +255,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAsset<T>(string assetName, object userdata, LoadAssetTaskCallback<T> callback,
+        public static int LoadAsset<T>(string assetName, object userdata, LoadAssetCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle) where T : Object
         {
 #if UNITY_EDITOR
@@ -304,7 +305,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static int BatchLoadAsset(List<string> assetNames, object userdata, BatchLoadAssetTaskCallback callback, TaskPriority priority = TaskPriority.Middle)
+        public static int BatchLoadAsset(List<string> assetNames, object userdata, BatchLoadAssetCallback callback, TaskPriority priority = TaskPriority.Middle)
         {
             if (assetNames == null || assetNames.Count == 0)
             {
@@ -347,7 +348,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static int LoadScene(string sceneName, object userdata, LoadSceneTaskCallback callback,
+        public static int LoadScene(string sceneName, object userdata, LoadSceneCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
 #if UNITY_EDITOR
@@ -379,6 +380,42 @@ namespace CatAsset.Runtime
             LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
 
+            return task.GUID;
+        }
+
+        /// <summary>
+        /// 加载原生资源
+        /// </summary>
+        public static int LoadRawAsset(string assetName, object userdata,LoadRawAssetCallback callback,TaskPriority priority = TaskPriority.Middle)
+        {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                byte[] asset;
+                try
+                {
+                    asset = File.ReadAllBytes(assetName);
+                }
+                catch (Exception e)
+                {
+                    callback?.Invoke(false, null, userdata);
+                    throw;
+                }
+
+                callback?.Invoke(true, asset, userdata);
+                return default;
+            }
+#endif
+            //检查资源是否已在本地准备好
+            if (!CheckAssetReady(assetName))
+            {
+                callback?.Invoke(false, null, userdata);
+                return default;
+            }
+
+            LoadRawAssetTask task = LoadRawAssetTask.Create(loadTaskRunner,assetName,userdata,callback);
+            loadTaskRunner.AddTask(task, priority);
+            
             return task.GUID;
         }
 
@@ -486,13 +523,22 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 卸载资源包
         /// </summary>
-        public static void UnloadBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        internal static void UnloadBundle(BundleRuntimeInfo bundleRuntimeInfo)
         {
             UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,
                 bundleRuntimeInfo.Manifest.RelativePath, bundleRuntimeInfo);
             loadTaskRunner.AddTask(task, TaskPriority.Low);
         }
-        
+
+        /// <summary>
+        /// 卸载原生资源
+        /// </summary>
+        internal static void UnloadRawAsset(BundleRuntimeInfo bundleRuntimeInfo, AssetRuntimeInfo assetRuntimeInfo)
+        {
+            UnloadRawAssetTask task = UnloadRawAssetTask.Create(loadTaskRunner,bundleRuntimeInfo.Manifest.RelativePath,assetRuntimeInfo);
+            loadTaskRunner.AddTask(task, TaskPriority.Low);
+        }
+
         #endregion
     }
 }

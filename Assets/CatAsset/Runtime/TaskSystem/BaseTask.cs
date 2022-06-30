@@ -68,17 +68,16 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public virtual void Clear()
         {
-            foreach (T task in MergedTasks)
-            {
-                ReferencePool.Release(task);
-            }
-            MergedTasks.Clear();
-            
             Owner = default;
             CatAssetManager.RemoveTaskGUID(this);
             GUID = default;
             Name = default;
             State = default;
+            foreach (T task in MergedTasks)
+            {
+                ReferencePool.Release(task);
+            }
+            MergedTasks.Clear();
         }
 
 
