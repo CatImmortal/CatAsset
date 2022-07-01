@@ -15,29 +15,29 @@ namespace CatAsset.Editor
         /// 资源清单版本号
         /// </summary>
         public int ManifestVersion = 1;
-        
+
         /// <summary>
         /// 资源包构建目标平台
         /// </summary>
         public List<BuildTarget> TargetPlatforms;
-        
+
         /// <summary>
         /// 资源包构建设置
         /// </summary>
         public BuildAssetBundleOptions Options = BuildAssetBundleOptions.ChunkBasedCompression
                                                  | BuildAssetBundleOptions.DisableLoadAssetByFileName
                                                  | BuildAssetBundleOptions.DisableLoadAssetByFileNameWithExtension;
-        
+
         /// <summary>
         /// 资源包构建输出目录
         /// </summary>
         public string OutputPath = "./AssetBundles";
-        
+
         /// <summary>
         /// 是否进行冗余资源分析
         /// </summary>
         public bool IsRedundancyAnalyze = true;
-        
+
         /// <summary>
         /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到只读目录下
         /// </summary>
@@ -68,10 +68,10 @@ namespace CatAsset.Editor
         /// </summary>
         public void RefreshBundleBuildInfos()
         {
-           
+
             Bundles.Clear();
             float stepNum = 6f;
-            
+
             EditorUtility.DisplayProgressBar("刷新资源包构建信息","初始化资源包构建规则...",1/stepNum);
             //初始化资源包构建规则
             InitRuleDict();
@@ -104,17 +104,17 @@ namespace CatAsset.Editor
             //如果出现普通资源包中的资源依赖原生资源，那么需要冗余一份原生资源到普通资源包中，因为本质上原生资源是没有资源包的
             //所以这里将原生资源包的构建放到最后处理，这样通过前面的隐式依赖转换为显式构建资源这一步就可以达成原生资源在依赖它的普通资源包中的冗余了
             InitBundleBuildInfo(true);
-            
+
             //最后给资源包列表排下序
             Bundles.Sort();
 
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
-            
+
             EditorUtility.ClearProgressBar();
             Debug.Log("资源包构建信息刷新完毕");
-            
-            
+
+
         }
 
         /// <summary>
@@ -171,7 +171,9 @@ namespace CatAsset.Editor
 
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
-                List<string> implicitDependencies = new List<string>();
+                //隐式依赖集合
+                //这里使用HashSet 防止出现当资源包A中的资源a,b，同时隐式依赖资源c时，c被implicitDependencies.Add两次导致重复的问题
+                HashSet<string> implicitDependencies = new HashSet<string>();
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
@@ -320,7 +322,7 @@ namespace CatAsset.Editor
         {
             return GetBundleBuilds(false);
         }
-        
+
         /// <summary>
         /// 获取原生资源包构建信息列表
         /// </summary>
@@ -328,7 +330,7 @@ namespace CatAsset.Editor
         {
             return GetBundleBuilds(true);
         }
-        
+
         /// <summary>
         /// 获取资源包构建信息列表
         /// </summary>
@@ -341,7 +343,7 @@ namespace CatAsset.Editor
                 {
                     result.Add(bundleBuildInfo);
                 }
-                
+
             }
             return result;
         }
