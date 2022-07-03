@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 13
+  ManifestVersion: 2
   TargetPlatforms: 13000000
   Options: 45312
   OutputPath: ./AssetBundles
@@ -20,18 +20,55 @@ MonoBehaviour:
   IsCopyToReadOnlyPath: 1
   CopyGroup: Base
   Directories:
+  - DirectoryName: Assets/BundleRes/Image
+    BuildRuleName: NAssetToNRawBundle
+    Group: Base
   - DirectoryName: Assets/BundleRes/PrefabA
+    BuildRuleName: NAssetToOneBundle
+    Group: Base
+  - DirectoryName: Assets/BundleRes/PrefabB
     BuildRuleName: NAssetToOneBundle
     Group: Base
   - DirectoryName: Assets/BundleRes/Scene
     BuildRuleName: NAssetToOneBundle
     Group: Base
   Bundles:
+  - RelativePath: bundleres/image/Img1.jpg
+    DirectoryName: BundleRes/Image
+    BundleName: Img1.jpg
+    Group: Base
+    IsRaw: 1
+    AssetsLength: 934914
+    Assets:
+    - Name: Assets/BundleRes/Image/Img1.jpg
+      TypeName: Texture2D
+      Length: 934914
+  - RelativePath: bundleres/image/Img2.jpg
+    DirectoryName: BundleRes/Image
+    BundleName: Img2.jpg
+    Group: Base
+    IsRaw: 1
+    AssetsLength: 934914
+    Assets:
+    - Name: Assets/BundleRes/Image/Img2.jpg
+      TypeName: Texture2D
+      Length: 934914
+  - RelativePath: bundleres/image/Img3.jpg
+    DirectoryName: BundleRes/Image
+    BundleName: Img3.jpg
+    Group: Base
+    IsRaw: 1
+    AssetsLength: 934914
+    Assets:
+    - Name: Assets/BundleRes/Image/Img3.jpg
+      TypeName: Texture2D
+      Length: 934914
   - RelativePath: bundleres/prefaba.bundle
     DirectoryName: BundleRes
     BundleName: prefaba.bundle
     Group: Base
     IsRaw: 0
+    AssetsLength: 5638
     Assets:
     - Name: Assets/BundleRes/PrefabA/A1.prefab
       TypeName: GameObject
@@ -44,12 +81,32 @@ MonoBehaviour:
       Length: 1409
     - Name: Assets/BundleRes/PrefabA/A4.prefab
       TypeName: GameObject
-      Length: 1331
+      Length: 1411
+  - RelativePath: bundleres/prefabb.bundle
+    DirectoryName: BundleRes
+    BundleName: prefabb.bundle
+    Group: Base
+    IsRaw: 0
+    AssetsLength: 3572
+    Assets:
+    - Name: Assets/BundleRes/PrefabB/B1.prefab
+      TypeName: GameObject
+      Length: 893
+    - Name: Assets/BundleRes/PrefabB/B2.prefab
+      TypeName: GameObject
+      Length: 893
+    - Name: Assets/BundleRes/PrefabB/B3.prefab
+      TypeName: GameObject
+      Length: 893
+    - Name: Assets/BundleRes/PrefabB/B4.prefab
+      TypeName: GameObject
+      Length: 893
   - RelativePath: bundleres/scene.bundle
     DirectoryName: BundleRes
     BundleName: scene.bundle
     Group: Base
     IsRaw: 0
+    AssetsLength: 5592
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
       TypeName: SceneAsset

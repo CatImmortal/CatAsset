@@ -26,15 +26,6 @@ namespace CatAsset.Editor
             EditorGUILayout.Space();
             using (new EditorGUILayout.HorizontalScope())
             {
-                using (EditorGUILayout.ToggleGroupScope toggle = new EditorGUILayout.ToggleGroupScope("冗余分析", bundleBuildConfg.IsRedundancyAnalyze))
-                {
-                    bundleBuildConfg.IsRedundancyAnalyze = toggle.enabled;
-                }
-            }
-
-            EditorGUILayout.Space();
-            using (new EditorGUILayout.HorizontalScope())
-            {
                 if (GUILayout.Button("刷新", GUILayout.Width(100)))
                 {
                     bundleBuildConfg.RefreshBundleBuildInfos();
@@ -65,7 +56,12 @@ namespace CatAsset.Editor
                 {
                     LoopDependencyAnalyzer.AnalyzeBundle(bundleBuildConfg.Bundles);
                 }
+                    
+                bundleBuildConfg.IsRedundancyAnalyze = GUILayout.Toggle(bundleBuildConfg.IsRedundancyAnalyze, "冗余分析", GUILayout.Width(100));
             }
+
+
+          
             
             using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(scrollPos))
             {
@@ -80,12 +76,14 @@ namespace CatAsset.Editor
                         foldOutDict.TryGetValue(bundleBuildInfo.RelativePath, out bool foldOut);
                         foldOutDict[bundleBuildInfo.RelativePath] = EditorGUILayout.Foldout(foldOut, bundleBuildInfo.RelativePath);
 
-                        //绘制资源组
-                        string group = bundleBuildInfo.Group;
-                        if (group != null)
+
+                        using (new EditorGUILayout.HorizontalScope())
                         {
-                            EditorGUILayout.LabelField("资源组：" + group);
+                            EditorGUILayout.LabelField("|  资源组：" + bundleBuildInfo.Group,GUILayout.Width(100));
+                            EditorGUILayout.LabelField("|  资源数：" + bundleBuildInfo.Assets.Count,GUILayout.Width(100));
+                            EditorGUILayout.LabelField("|  总长度：" + Runtime.Util.GetByteLengthDesc(bundleBuildInfo.AssetsLength),GUILayout.Width(200));
                         }
+                        
                     }
                     
                     if (foldOutDict[bundleBuildInfo.RelativePath])
@@ -125,7 +123,7 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
                 EditorGUILayout.LabelField(content, GUILayout.Width(20));
                 EditorGUILayout.LabelField(assetBuildInfo.Name, GUILayout.Width(400));
-                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(assetBuildInfo.Length), GUILayout.Width(50));
+                EditorGUILayout.LabelField($"|  长度：{Runtime.Util.GetByteLengthDesc(assetBuildInfo.Length)}", GUILayout.Width(200));
                 if (GUILayout.Button("选中", GUILayout.Width(50)))
                 {
                     Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetBuildInfo.Name,assetBuildInfo.Type);
