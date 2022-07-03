@@ -37,11 +37,15 @@ namespace CatAsset.Editor
         public bool IsRaw;
         
         /// <summary>
+        /// 总资源长度
+        /// </summary>
+        public long AssetsLength;
+        
+        /// <summary>
         /// 资源构建信息列表
         /// </summary>
         public List<AssetBuildInfo> Assets = new List<AssetBuildInfo>();
-        
-        
+
         public BundleBuildInfo(string directoryName, string bundleName,string group,bool isRaw)
         {
             DirectoryName = directoryName;
@@ -56,6 +60,17 @@ namespace CatAsset.Editor
             else
             {
                 RelativePath = BundleName;
+            }
+        }
+
+        /// <summary>
+        /// 刷新总资源长度
+        /// </summary>
+        public void RefreshAssetsLength()
+        {
+            foreach (AssetBuildInfo assetBuildInfo in Assets)
+            {
+                AssetsLength += assetBuildInfo.Length;
             }
         }
 

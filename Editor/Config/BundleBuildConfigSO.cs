@@ -105,6 +105,9 @@ namespace CatAsset.Editor
             //所以这里将原生资源包的构建放到最后处理，这样通过前面的隐式依赖转换为显式构建资源这一步就可以达成原生资源在依赖它的普通资源包中的冗余了
             InitBundleBuildInfo(true);
 
+            //刷新资源包的总资源长度
+            RefreshBundleLength();
+            
             //最后给资源包列表排下序
             Bundles.Sort();
 
@@ -282,6 +285,17 @@ namespace CatAsset.Editor
             Bundles = newBundles;
         }
 
+        /// <summary>
+        /// 刷新资源包的总资源长度
+        /// </summary>
+        private void RefreshBundleLength()
+        {
+            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            {
+                bundleBuildInfo.RefreshAssetsLength();
+            }
+        }
+        
         /// <summary>
         /// 检查资源包构建目录是否可被添加
         /// </summary>
