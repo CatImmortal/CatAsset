@@ -18,7 +18,7 @@ namespace CatAsset.Editor
         private Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict;
 
         private Vector2 runtimeInfo;
-        
+
         private MethodInfo findTextureByTypeMI = typeof(EditorGUIUtility).GetMethod("FindTextureByType", BindingFlags.NonPublic | BindingFlags.Static);
         private object[] paramObjs = new object[1];
 
@@ -26,7 +26,7 @@ namespace CatAsset.Editor
         /// 是否只显示主动加载的资源
         /// </summary>
         private bool isOnlyShowActiveLoad = false;
-        
+
         /// <summary>
         /// 资源包相对路径->是否展开
         /// </summary>
@@ -52,10 +52,10 @@ namespace CatAsset.Editor
             {
                 InitRuntimeInfoView();
             }
-            
+
             bool isAllFoldOutTrue = false;
             bool isAllFoldOutFalse = false;
-            
+
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("全部展开", GUILayout.Width(100)))
@@ -67,8 +67,8 @@ namespace CatAsset.Editor
                 {
                     isAllFoldOutFalse = true;
                 }
-                
-                isOnlyShowActiveLoad = GUILayout.Toggle(isOnlyShowActiveLoad, "只显示被主动加载的资源", GUILayout.Width(200));
+
+                isOnlyShowActiveLoad = GUILayout.Toggle(isOnlyShowActiveLoad, "只显示主动加载的资源", GUILayout.Width(200));
             }
 
             using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(runtimeInfo))
@@ -77,57 +77,84 @@ namespace CatAsset.Editor
 
                 foreach (KeyValuePair<string, BundleRuntimeInfo> item in bundleRuntimeInfoDict)
                 {
+
+
                     string bundleRelativePath = item.Key;
                     BundleRuntimeInfo bundleRuntimeInfo = item.Value;
 
-                    //只绘制有资源在使用中，或者被其他资源包依赖的资源包
-                    if (bundleRuntimeInfo.UsedAssets.Count > 0 || bundleRuntimeInfo.RefBundles.Count > 0)
+                    if (!foldOutDcit.ContainsKey(bundleRelativePath))
                     {
-                        if (!foldOutDcit.ContainsKey(bundleRelativePath))
-                        {
-                            foldOutDcit.Add(bundleRelativePath, false);
-                        }
+                        foldOutDcit.Add(bundleRelativePath, false);
+                    }
 
-                        if (isAllFoldOutTrue)
-                        {
-                            //点击过全部展开
-                            foldOutDcit[bundleRelativePath] = true;
-                        }
-                        else if (isAllFoldOutFalse)
-                        {
-                            //点击过全部收起
-                            foldOutDcit[bundleRelativePath] = false;
-                        }
+                    if (isAllFoldOutTrue)
+                    {
+                        //点击过全部展开
+                        foldOutDcit[bundleRelativePath] = true;
+                    }
+                    else if (isAllFoldOutFalse)
+                    {
+                        //点击过全部收起
+                        foldOutDcit[bundleRelativePath] = false;
+                    }
 
-                        using (new EditorGUILayout.HorizontalScope())
-                        {
-                            foldOutDcit[bundleRelativePath] = EditorGUILayout.Foldout(foldOutDcit[bundleRelativePath], bundleRelativePath);
-   
-                            DrawBundleRuntimeInfo(bundleRuntimeInfo,false);
-                        }
 
-                        if (foldOutDcit[bundleRelativePath])
+                    //没有资源在使用 也没被其他资源包依赖 不显示
+                    if (bundleRuntimeInfo.UsedAssets.Count == 0 && bundleRuntimeInfo.RefBundles.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    if (isOnlyShowActiveLoad)
+                    {
+                        //仅显示主动加载的资源
+                        //此资源包至少有一个主动加载的资源，才能显示
+                        bool canShow = false;
+                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsedAssets)
                         {
-                            EditorGUILayout.Space();
-                            
-                            foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsedAssets)
+                            if (assetRuntimeInfo.RefCount != assetRuntimeInfo.RefAssets.Count)
                             {
-                                if (isOnlyShowActiveLoad && assetRuntimeInfo.RefCount == assetRuntimeInfo.RefAssets.Count)
-                                {
-                                    //只显示主动加载的资源 且此资源纯被依赖加载的 就跳过
-                                    continue;
-                                }
-                                
-                                DrawAssetRuntimeInfo(assetRuntimeInfo);
+                                canShow = true;
+                                break;
+                            }
+                        }
+                        if (!canShow)
+                        {
+                            continue;
+                        }
+                    }
+
+
+
+
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        foldOutDcit[bundleRelativePath] = EditorGUILayout.Foldout(foldOutDcit[bundleRelativePath], bundleRelativePath);
+
+                        DrawBundleRuntimeInfo(bundleRuntimeInfo,false);
+                    }
+
+                    if (foldOutDcit[bundleRelativePath])
+                    {
+                        EditorGUILayout.Space();
+
+                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsedAssets)
+                        {
+                            if (isOnlyShowActiveLoad && assetRuntimeInfo.RefCount == assetRuntimeInfo.RefAssets.Count)
+                            {
+                                //只显示主动加载的资源 且此资源纯被依赖加载的 就跳过
+                                continue;
                             }
 
-                            EditorGUILayout.Space();
+                            DrawAssetRuntimeInfo(assetRuntimeInfo);
                         }
+
+                        EditorGUILayout.Space();
                     }
                 }
             }
 
-           
+
         }
 
         /// <summary>
@@ -139,10 +166,14 @@ namespace CatAsset.Editor
             {
                 if (isDrawName)
                 {
-                    EditorGUILayout.LabelField($"{bundleRuntimeInfo.Manifest.RelativePath}" ,GUILayout.Width(200));
+                    EditorGUILayout.LabelField($"{bundleRuntimeInfo.Manifest.RelativePath}" ,GUILayout.Width(400));
                 }
-            
-                EditorGUILayout.LabelField($"|  资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(200));
+                else
+                {
+                    EditorGUILayout.Space();
+                }
+
+                EditorGUILayout.LabelField($"|  资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(100));
                 EditorGUILayout.LabelField($"|  使用中资源数：{bundleRuntimeInfo.UsedAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(150));
                 EditorGUILayout.LabelField($"|  文件长度：{Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(150));
                 EditorGUILayout.LabelField($"|  引用资源包的数量：{bundleRuntimeInfo.RefBundles.Count}",GUILayout.Width(150));
@@ -160,10 +191,10 @@ namespace CatAsset.Editor
                     {
                         BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyBundles);
                     }
-                }          
+                }
             }
         }
-        
+
         /// <summary>
         /// 绘制资源运行时信息
         /// </summary>
@@ -172,7 +203,7 @@ namespace CatAsset.Editor
             using (new EditorGUILayout.HorizontalScope())
             {
                 string assetName = assetRuntimeInfo.AssetManifest.Name;
-                
+
                 //资源图标
                 GUIContent content = new GUIContent();
                 Type assetType;
@@ -185,7 +216,7 @@ namespace CatAsset.Editor
                     //场景资源
                     assetType = typeof(SceneAsset);
                 }
-             
+
                 if (assetType != typeof(Texture2D))
                 {
                     paramObjs[0] = assetType;
@@ -195,9 +226,9 @@ namespace CatAsset.Editor
                 {
                     content.image = EditorGUIUtility.FindTexture(assetName);
                 }
-                
+
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
-                
+
                 //图标
                 EditorGUILayout.LabelField(content, GUILayout.Width(20));
 
@@ -214,7 +245,7 @@ namespace CatAsset.Editor
                 //     EditorGUILayout.LabelField("Scene", GUILayout.Width(100));
                 // }
 
-                
+
 
                 EditorGUILayout.LabelField($"|  长度：{Runtime.Util.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}", GUILayout.Width(100));
                 EditorGUILayout.LabelField($"|  引用计数：{assetRuntimeInfo.RefCount}", GUILayout.Width(100));
@@ -231,7 +262,7 @@ namespace CatAsset.Editor
                 {
                     Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetName, assetType);
                 }
-                
+
 
             }
         }
@@ -243,7 +274,7 @@ namespace CatAsset.Editor
         {
             private RuntimeInfoWindow parent;
             private HashSet<BundleRuntimeInfo> bundleRuntimeInfos;
-            
+
             public static void OpenWindow(RuntimeInfoWindow parent, HashSet<BundleRuntimeInfo> bundleRuntimeInfos)
             {
                 BundleListWindow window = CreateWindow<BundleListWindow>(nameof(BundleListWindow));
@@ -266,7 +297,7 @@ namespace CatAsset.Editor
                 }
             }
         }
-        
+
         /// <summary>
         ///  通过依赖加载引用了指定资源的资源列表窗口
         /// </summary>
@@ -274,17 +305,17 @@ namespace CatAsset.Editor
         {
             private RuntimeInfoWindow parent;
             private AssetRuntimeInfo assetRuntimeInfo;
-          
+
             public static void OpenWindow(RuntimeInfoWindow parent, AssetRuntimeInfo assetRuntimeInfo)
             {
                 RefAssetListWindow window = CreateWindow<RefAssetListWindow>(nameof(RefAssetListWindow));
                 window.ShowPopup();
                 window.parent = parent;
                 window.assetRuntimeInfo = assetRuntimeInfo;
-                
+
 
             }
-            
+
             private void OnGUI()
             {
                 if (!Application.isPlaying)
@@ -305,7 +336,7 @@ namespace CatAsset.Editor
                 }
             }
 
-           
+
         }
     }
 }
