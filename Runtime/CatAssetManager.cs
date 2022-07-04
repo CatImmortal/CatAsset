@@ -46,6 +46,12 @@ namespace CatAsset.Runtime
         private static Dictionary<int, AssetRuntimeInfo> sceneInstanceDict = new Dictionary<int, AssetRuntimeInfo>();
 
         /// <summary>
+        /// 场景实例handler->绑定的资源
+        /// </summary>
+        private static Dictionary<int, List<AssetRuntimeInfo>> sceneBindAssets =
+            new Dictionary<int, List<AssetRuntimeInfo>>();
+
+        /// <summary>
         /// 任务id->任务
         /// </summary>
         private static Dictionary<int, ITask> allTaskDict = new Dictionary<int, ITask>();
@@ -495,6 +501,15 @@ namespace CatAsset.Runtime
             RemoveSceneInstance(scene);
             SceneManager.UnloadSceneAsync(scene);
 
+            //卸载与场景绑定的资源
+            if (sceneBindAssets.TryGetValue(scene.handle,out List<AssetRuntimeInfo> assets))
+            {
+                foreach (AssetRuntimeInfo asset in assets)
+                {
+                    UnloadAsset(asset.Asset);
+                }
+            }
+            
             InternalUnloadAsset(assetRuntimeInfo);
         }
 
@@ -539,6 +554,45 @@ namespace CatAsset.Runtime
             loadTaskRunner.AddTask(task, TaskPriority.Low);
         }
 
+        #endregion
+
+        #region 资源生命周期绑定
+
+        /// <summary>
+        /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
+        /// </summary>
+        public static void BindToGameObject(GameObject target,Object asset)
+        {
+            AssetBinder assetBinder = target.GetOrAddComponent<AssetBinder>();
+            assetBinder.BindTo(asset);
+        }
+        
+        /// <summary>
+        /// 将原生资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的原生资源
+        /// </summary>
+        public static void BindToGameObject(GameObject target,byte[] rawAsset)
+        {
+            AssetBinder assetBinder = target.GetOrAddComponent<AssetBinder>();
+            assetBinder.BindTo(rawAsset);
+        }
+
+        /// <summary>
+        /// 将资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
+        /// </summary>
+        public static void BindToScene(Scene scene,object asset)
+        {
+            if (!sceneBindAssets.TryGetValue(scene.handle,out List<AssetRuntimeInfo> assets))
+            {
+                assets = new List<AssetRuntimeInfo>();
+                sceneBindAssets.Add(scene.handle,assets);
+            }
+
+            AssetRuntimeInfo assetRuntimeInfo = GetAssetRuntimeInfo(asset);
+            assets.Add(assetRuntimeInfo);
+        }
+
+        
+        
         #endregion
     }
 }
