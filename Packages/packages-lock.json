@@ -130,6 +130,13 @@
       "dependencies": {},
       "url": "https://packages.unity.cn"
     },
+    "com.unity.scriptablebuildpipeline": {
+      "version": "1.19.6",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.cn"
+    },
     "com.unity.services.core": {
       "version": "1.0.1",
       "depth": 1,
