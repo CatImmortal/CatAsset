@@ -97,12 +97,12 @@ namespace CatAsset.Editor
 
             using (EditorGUILayout.ToggleGroupScope toggle =
                    new EditorGUILayout.ToggleGroupScope("资源包构建目标平台只有1个时，在构建完成后将其复制到StreamingAssets目录下",
-                       bundleBuildConfg.IsCopyToReadOnlyPath))
+                       bundleBuildConfg.IsCopyToReadOnlyDirectory))
             {
-                bundleBuildConfg.IsCopyToReadOnlyPath = toggle.enabled;
+                bundleBuildConfg.IsCopyToReadOnlyDirectory = toggle.enabled;
             }
 
-            if (bundleBuildConfg.IsCopyToReadOnlyPath)
+            if (bundleBuildConfg.IsCopyToReadOnlyDirectory)
             {
                 EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：");
                 bundleBuildConfg.CopyGroup = EditorGUILayout.TextField(bundleBuildConfg.CopyGroup);

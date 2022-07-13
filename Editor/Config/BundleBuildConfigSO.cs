@@ -41,7 +41,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到只读目录下
         /// </summary>
-        public bool IsCopyToReadOnlyPath = true;
+        public bool IsCopyToReadOnlyDirectory = true;
 
         /// <summary>
         /// 要复制到只读目录下的资源组，以分号分隔

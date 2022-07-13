@@ -2,7 +2,9 @@
     "name": "CatAsset.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:2e39fa51ba999ed46bc19c7ff7632b3f"
+        "GUID:2e39fa51ba999ed46bc19c7ff7632b3f",
+        "GUID:c5ecc461727906345a35491a0440694f",
+        "GUID:5c1ff9bd975acec488150743d53a93ca"
     ],
     "includePlatforms": [
         "Editor"

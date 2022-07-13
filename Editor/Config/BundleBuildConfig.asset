@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 2
+  ManifestVersion: 5
   TargetPlatforms: 13000000
   Options: 45312
   OutputPath: ./AssetBundles
   IsRedundancyAnalyze: 1
-  IsCopyToReadOnlyPath: 1
+  IsCopyToReadOnlyDirectory: 1
   CopyGroup: Base
   Directories:
   - DirectoryName: Assets/BundleRes/Image
@@ -106,8 +106,11 @@ MonoBehaviour:
     BundleName: scene.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 5592
+    AssetsLength: 11184
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
+      TypeName: SceneAsset
+      Length: 5592
+    - Name: Assets/BundleRes/Scene/New Scene2.unity
       TypeName: SceneAsset
       Length: 5592

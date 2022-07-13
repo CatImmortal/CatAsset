@@ -2,7 +2,11 @@
 using System.IO;
 using CatAsset.Runtime;
 using UnityEditor;
+using UnityEditor.Build.Content;
+using UnityEditor.Build.Pipeline;
+using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEngine;
+using BuildCompression = UnityEngine.BuildCompression;
 
 namespace CatAsset.Editor
 {
@@ -12,94 +16,131 @@ namespace CatAsset.Editor
     public static class BuildPipeline
     {
         /// <summary>
+        /// 获取SBP用到的构建参数
+        /// </summary>
+        private static BundleBuildParameters GetParameters(BundleBuildConfigSO bundleBuildConfig,
+            BuildTarget targetPlatform, string fullOutputPath)
+        {
+            BuildTargetGroup group = UnityEditor.BuildPipeline.GetBuildTargetGroup(targetPlatform);
+
+            BundleBuildParameters parameters = new BundleBuildParameters(targetPlatform, group, fullOutputPath);
+
+            //是否全量构建
+            if ((bundleBuildConfig.Options & BuildAssetBundleOptions.ForceRebuildAssetBundle) != 0)
+            {
+                parameters.UseCache = false;
+            }
+
+            //是否附加hash值到文件名
+            if ((bundleBuildConfig.Options & BuildAssetBundleOptions.AppendHashToAssetBundleName) != 0)
+            {
+                parameters.AppendHash = true;
+            }
+
+            //压缩格式
+            if ((bundleBuildConfig.Options & BuildAssetBundleOptions.ChunkBasedCompression) != 0)
+            {
+                parameters.BundleCompression = BuildCompression.LZ4;
+            }
+            else if ((bundleBuildConfig.Options & BuildAssetBundleOptions.UncompressedAssetBundle) != 0)
+            {
+                parameters.BundleCompression = BuildCompression.Uncompressed;
+            }
+            else
+            {
+                parameters.BundleCompression = BuildCompression.LZMA;
+            }
+
+            //TypeTree
+            if ((bundleBuildConfig.Options & BuildAssetBundleOptions.DisableWriteTypeTree) != 0)
+            {
+                parameters.ContentBuildFlags |= ContentBuildFlags.DisableWriteTypeTree;
+            }
+
+            return parameters;
+        }
+
+        /// <summary>
+        /// 创建完整资源包构建输出目录
+        /// </summary>
+        private static string CreateFullOutputPath(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        {
+            string fullOutputPath = Util.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+                bundleBuildConfig.ManifestVersion);
+            Util.CreateEmptyDirectory(fullOutputPath);
+            return fullOutputPath;
+        }
+
+        /// <summary>
         /// 构建资源包
         /// </summary>
-        public static TaskResult BuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        public static void BuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
-            BundleBuildConfigParam bundleBuildConfigParam = new BundleBuildConfigParam()
-            {
-                Config = bundleBuildConfig,
-                TargetPlatform = targetPlatform,
-            };
-            
-            BundleBuildsParam bundleBuildsParam = new BundleBuildsParam()
-            {
-                AssetBundleBuilds = bundleBuildConfig.GetAssetBundleBuilds(),
-                NormalBundleBuilds = bundleBuildConfig.GetNormalBundleBuilds(),
-                RawBundleBuilds = bundleBuildConfig.GetRawBundleBuilds(),
-            };
-            
-            //注入构建管线参数
-            BuildPipelineRunner.InjectParam(bundleBuildConfigParam);
-            BuildPipelineRunner.InjectParam(bundleBuildsParam);
+            string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
 
-            //创建任务列表
-            List<IBuildPipelineTask> tasks = new List<IBuildPipelineTask>()
-            {
-                new CreateOutputDirectoryTask(),
-                new BuildAssetBundleTask(),
-                new DeleteUnityManifestFileTask(),
-                new BuildRawBundleTask(),
-                new CreateManifestTask(),
-                new WriteManifestFileTask(),
-            };
+            //准备参数
+            BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, fullOutputPath);
+            BundleBuildInfoParam infoParam = new BundleBuildInfoParam(bundleBuildConfig.GetAssetBundleBuilds(),
+                bundleBuildConfig.GetNormalBundleBuilds(), bundleBuildConfig.GetRawBundleBuilds());
+            BundleBuildConfigParam configParam =
+                new BundleBuildConfigParam(bundleBuildConfig, targetPlatform);
             
-            if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
+            BundleBuildContent content = new BundleBuildContent(infoParam.AssetBundleBuilds);
+
+            //添加构建任务
+            IList<IBuildTask> taskList = DefaultBuildTasks.Create(DefaultBuildTasks.Preset.AssetBundleCompatible);
+            taskList.Add(new BuildRawBundles());
+            taskList.Add(new BuildManifest());
+            taskList.Add(new WriteManifestFile());
+            if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
             {
                 //需要复制资源包到只读目录下
-                tasks.Add(new CopyToReadOnlyDirectoryTask());
-                tasks.Add(new WriteManifestFileTask());
+                taskList.Add(new CopyToReadOnlyDirectory());
+                taskList.Add(new WriteManifestFile());
             }
-            
-            //运行构建管线任务
-            return BuildPipelineRunner.Run(tasks);
+
+            //调用SBP的构建管线
+            ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
+                out IBundleBuildResults result, taskList, infoParam,configParam);
+
+            Debug.Log("资源包构建结束");
         }
 
         /// <summary>
         /// 构建原生资源包
         /// </summary>
-        public static TaskResult BuildRawBundles(BundleBuildConfigSO bundleBuildConfig,
+        public static void BuildRawBundles(BundleBuildConfigSO bundleBuildConfig,
             BuildTarget targetPlatform)
         {
-            BundleBuildConfigParam bundleBuildConfigParam = new BundleBuildConfigParam()
-            {
-                Config = bundleBuildConfig,
-                TargetPlatform = targetPlatform,
-            };
+            string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
             
-            BundleBuildsParam bundleBuildsParam = new BundleBuildsParam()
-            {
-                AssetBundleBuilds = new List<AssetBundleBuild>(),
-                NormalBundleBuilds = new List<BundleBuildInfo>(),
-                RawBundleBuilds = bundleBuildConfig.GetRawBundleBuilds(),
-            };
+            //准备参数
+            BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, fullOutputPath);
+            BundleBuildInfoParam infoParam = new BundleBuildInfoParam(new List<AssetBundleBuild>(),
+                new List<BundleBuildInfo>(), bundleBuildConfig.GetRawBundleBuilds());
+            BundleBuildConfigParam configParam =
+                new BundleBuildConfigParam(bundleBuildConfig, targetPlatform);
+            BundleBuildResults results = new BundleBuildResults();  //这里给个空参数，不然会报错
             
-            //注入构建管线参数
-            BuildPipelineRunner.InjectParam(bundleBuildConfigParam);
-            BuildPipelineRunner.InjectParam(bundleBuildsParam);
-            BuildPipelineRunner.InjectParam(new UnityManifestParam());  //给个空参数
+            BuildContext buildContext = new BuildContext(buildParam,infoParam,configParam,results);
             
-            //创建任务列表
-            List<IBuildPipelineTask> tasks = new List<IBuildPipelineTask>()
-            {
-                new CreateOutputDirectoryTask(),
-                new BuildRawBundleTask(),
-                new CreateManifestTask(),
-                new MergeManifestAndBundlesTask(), //仅构建原生资源包的情况，需要合并主资源清单和主资源包
-                new WriteManifestFileTask(),
-            };
-            
-            if (bundleBuildConfig.IsCopyToReadOnlyPath && bundleBuildConfig.TargetPlatforms.Count == 1)
+            //添加构建任务
+            IList<IBuildTask> taskList = new List<IBuildTask>();
+            taskList.Add(new BuildRawBundles());
+            taskList.Add(new BuildManifest());
+            taskList.Add(new MergeManifestAndBundles());
+            taskList.Add(new WriteManifestFile());
+            if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
             {
                 //需要复制资源包到只读目录下
-                tasks.Add(new CopyToReadOnlyDirectoryTask());
-                tasks.Add(new WriteManifestFileTask());
+                taskList.Add(new CopyToReadOnlyDirectory());
+                taskList.Add(new WriteManifestFile());
             }
             
-            //运行构建管线任务
-            return BuildPipelineRunner.Run(tasks);
+            //运行构建任务
+            BuildTasksRunner.Run(taskList, buildContext);
+            
+            Debug.Log("原生资源包构建结束");
         }
-        
-        
     }
 }
