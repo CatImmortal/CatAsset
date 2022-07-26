@@ -10,7 +10,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// CatAsset资源管理器
     /// </summary>
-    public static class CatAssetManager
+    public static partial class CatAssetManager
     {
         /// <summary>
         /// 加载相关任务运行器

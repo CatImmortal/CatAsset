@@ -9,6 +9,7 @@ namespace CatAsset.Runtime
     /// </summary>
     public class TaskGroup
     {
+        
         private List<ITask> runningTasks = new List<ITask>();
         
         private List<ITask> waitAddTasks = new List<ITask>();
@@ -55,12 +56,10 @@ namespace CatAsset.Runtime
         {
             if (mainTaskDict.TryGetValue(task.Name,out ITask mainTask))
             {
-                //Debug.Log($"合并任务:{task}");
                 mainTask.MergeTask(task);
             }
             else
             {
-                //Debug.Log($"添加任务:{task}");
                 mainTaskDict.Add(task.Name,task);
                 runningTasks.Add(task);
             }

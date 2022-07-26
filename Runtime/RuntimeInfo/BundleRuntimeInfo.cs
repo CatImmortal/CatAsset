@@ -25,6 +25,7 @@ namespace CatAsset.Runtime
         public bool InReadWrite;
 
         private string loadPath;
+        
         /// <summary>
         /// 加载地址
         /// </summary>
