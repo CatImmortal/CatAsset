@@ -9,8 +9,19 @@ namespace CatAsset.Editor
     /// </summary>
     public interface IBundleBuildInfoParam : IContextObject
     {
+        /// <summary>
+        /// 要构建的AssetBundleBuild列表
+        /// </summary>
         public List<AssetBundleBuild> AssetBundleBuilds { get; }
+        
+        /// <summary>
+        /// 要构建的普通资源包列表
+        /// </summary>
         public List<BundleBuildInfo> NormalBundleBuilds { get; }
+        
+        /// <summary>
+        /// 要构建的原生资源包列表
+        /// </summary>
         public List<BundleBuildInfo> RawBundleBuilds { get; }
     }
 }

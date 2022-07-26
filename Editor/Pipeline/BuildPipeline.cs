@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEditor.Build.Content;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
-using UnityEngine;
 using BuildCompression = UnityEngine.BuildCompression;
+using Debug = UnityEngine.Debug;
 
 namespace CatAsset.Editor
 {
@@ -99,11 +100,12 @@ namespace CatAsset.Editor
                 taskList.Add(new WriteManifestFile());
             }
 
+            Stopwatch sw = Stopwatch.StartNew();
             //调用SBP的构建管线
             ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
                 out IBundleBuildResults result, taskList, infoParam,configParam);
-
-            Debug.Log("资源包构建结束");
+            sw.Stop();
+            Debug.Log($"资源包构建结束:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
         }
 
         /// <summary>
@@ -137,10 +139,11 @@ namespace CatAsset.Editor
                 taskList.Add(new WriteManifestFile());
             }
             
+            Stopwatch sw = Stopwatch.StartNew();
             //运行构建任务
             BuildTasksRunner.Run(taskList, buildContext);
             
-            Debug.Log("原生资源包构建结束");
+            Debug.Log($"原生资源包构建结束，耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
         }
     }
 }
