@@ -29,13 +29,13 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle) where T : Object
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset<T>(assetName, tcs, (success, asset, userdata) =>
+            LoadAsset<T>(assetName, null, (success, asset, userdata) =>
             {
                 if (success && target != null)
                 {
                     BindToGameObject(target,asset);
                 }
-                ((TaskCompletionSource<Object>)userdata).SetResult(asset);
+                tcs.SetResult(asset);
                
             }, priority);
             return tcs.Task;
@@ -47,13 +47,13 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle) where T : Object
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset<T>(assetName, tcs, (success, asset, userdata) =>
+            LoadAsset<T>(assetName, null, (success, asset, userdata) =>
             {
                 if (success && target != default)
                 {
                     BindToScene(target,asset);
                 }
-                ((TaskCompletionSource<Object>)userdata).SetResult(asset);
+                tcs.SetResult(asset);
                
             }, priority);
             return tcs.Task;
@@ -65,13 +65,13 @@ namespace CatAsset.Runtime
         public static Task<byte[]> AwaitLoadRawAsset(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>();
-            LoadRawAsset(assetName, tcs, (success, asset, userdata) =>
+            LoadRawAsset(assetName, null, (success, asset, userdata) =>
             {
                 if (success && target != null)
                 {
                     BindToGameObject(target,asset);
                 }
-                ((TaskCompletionSource<byte[]>)userdata).SetResult(asset);
+                tcs.SetResult(asset);
                
             }, priority);
             return tcs.Task;
@@ -83,15 +83,15 @@ namespace CatAsset.Runtime
         public static Task<byte[]> AwaitLoadRawAsset(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>();
-            LoadRawAsset(assetName, tcs, ((success, asset, userdata) =>
+            LoadRawAsset(assetName, null, (success, asset, userdata) =>
             {
                 if (success && target != default)
                 {
                     BindToScene(target,asset);
                 }
-                ((TaskCompletionSource<byte[]>)userdata).SetResult(asset);
+                tcs.SetResult(asset);
                
-            }), priority);
+            }, priority);
             return tcs.Task;
         }
         
@@ -101,7 +101,7 @@ namespace CatAsset.Runtime
         public static Task<List<object>> AwaitBatchLoadAsset(List<string> assetNames,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<List<object>> tcs = new TaskCompletionSource<List<object>>();
-            BatchLoadAsset(assetNames, tcs, (assets, userdata) =>
+            BatchLoadAsset(assetNames, null, (assets, userdata) =>
             {
                 if (target != null)
                 {
@@ -120,8 +120,11 @@ namespace CatAsset.Runtime
                         }
                     }
                 }
+                
+                tcs.SetResult(assets);
                
             }, priority);
+            
             return tcs.Task;
         }
         
@@ -131,7 +134,7 @@ namespace CatAsset.Runtime
         public static Task<List<object>> AwaitBatchLoadAsset(List<string> assetNames,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<List<object>> tcs = new TaskCompletionSource<List<object>>();
-            BatchLoadAsset(assetNames, tcs, (assets, userdata) =>
+            BatchLoadAsset(assetNames, null, (assets, userdata) =>
             {
                 if (target != default)
                 {
@@ -150,6 +153,8 @@ namespace CatAsset.Runtime
                         }
                     }
                 }
+                
+                tcs.SetResult(assets);
                
             }, priority);
             return tcs.Task;
