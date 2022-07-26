@@ -8,7 +8,14 @@ namespace CatAsset.Editor
     /// </summary>
     public interface IManifestParam : IContextObject
     {
+        /// <summary>
+        /// CatAsset资源清单
+        /// </summary>
         public CatAssetManifest Manifest { get; }
+        
+        /// <summary>
+        /// 写入资源清单的路径
+        /// </summary>
         public string WritePath { get;}
     }
 }

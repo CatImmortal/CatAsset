@@ -22,7 +22,7 @@ namespace CatAsset.Editor
         private IBundleBuildResults results;
         
         [InjectContext(ContextUsage.In)] 
-        private BundleBuildConfigParam configParam;
+        private IBundleBuildConfigParam configParam;
 
         [InjectContext(ContextUsage.In)] 
         private IBundleBuildInfoParam infoParam;

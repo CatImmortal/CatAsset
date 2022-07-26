@@ -152,9 +152,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a64c593ac205aa043aefe98713556595, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabA1: {fileID: 0}
-  insA1: {fileID: 0}
-  prefabA2: {fileID: 0}
+  scene1:
+    m_Handle: 0
+  scene2:
+    m_Handle: 0
+  scene3:
+    m_Handle: 0
 --- !u!4 &72973165
 Transform:
   m_ObjectHideFlags: 0
@@ -200,8 +203,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RuntimeMode: 0
-  IsEditorMode: 0
-  UnloadDelayTime: 5
+  IsEditorMode: 1
+  UnloadDelayTime: 30
 --- !u!4 &409289156
 Transform:
   m_ObjectHideFlags: 0

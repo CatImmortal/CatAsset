@@ -7,9 +7,13 @@ namespace CatAsset.Editor
     public class BundleBuildInfoParam : IBundleBuildInfoParam
     {
 
-
+        /// <inheritdoc />
         public List<AssetBundleBuild> AssetBundleBuilds { get; }
+        
+        /// <inheritdoc />
         public List<BundleBuildInfo> NormalBundleBuilds { get; }
+        
+        /// <inheritdoc />
         public List<BundleBuildInfo> RawBundleBuilds { get; }
 
         public BundleBuildInfoParam(List<AssetBundleBuild> assetBundleBuilds, List<BundleBuildInfo> normalBundleBuilds, List<BundleBuildInfo> rawBundleBuilds)
