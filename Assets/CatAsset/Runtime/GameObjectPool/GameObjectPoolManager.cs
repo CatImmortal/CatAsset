@@ -54,7 +54,7 @@ namespace CatAsset.Runtime
         /// 等待卸载的预制体名字列表
         /// </summary>
         private static List<string> waitUnloadPrefabNames = new List<string>();
-        
+
         /// <summary>
         /// 轮询游戏对象池管理器
         /// </summary>
@@ -112,11 +112,13 @@ namespace CatAsset.Runtime
                 {
                     return;
                 }
-                
-                //进行第一次从池中获取游戏对象的流程，然后进行资源绑定
+
+                loadedPrefabDict[prefabName] = prefab;
                 GetGameObject(prefab, parent, callback);
+                
+                //进行资源绑定
                 GameObject root = poolDict[prefab].Root.gameObject;
-                root.GetOrAddComponent<AssetBinder>().BindTo(prefab);
+                CatAssetManager.BindToGameObject(root,prefab);
             });
         }
 
@@ -208,8 +210,15 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void Prewarm(string prefabName,int count,Action callback)
         {
-            Prewarm(prefabName,count,0, () =>
+            List<GameObject> objects = new List<GameObject>(count);
+            
+            Prewarm(prefabName,count,0,objects, () =>
             {
+                foreach (GameObject go in objects)
+                {
+                    ReleaseGameObject(prefabName,go);
+                }
+                
                 callback?.Invoke();
             });
         }
@@ -217,17 +226,18 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 递归预热对象
         /// </summary>
-        private static void Prewarm(string prefabName,int count,int counter,Action callback)
+        private static void Prewarm(string prefabName,int count,int counter, List<GameObject> objects,Action callback)
         {
             GetGameObject(prefabName,Root,(go =>
             {
                 counter++;
-                ReleaseGameObject(prefabName,go);
+                objects.Add(go);
+                
                 if (counter < count)
                 {
                     //预热未结束
                     //递归预热下去
-                    Prewarm(prefabName,count,counter,callback);
+                    Prewarm(prefabName,count,counter,objects,callback);
                 }
                 else
                 {
@@ -271,9 +281,6 @@ namespace CatAsset.Runtime
                 }
             }));
         }
-        
-        
-        
-       
+
     }
 }
