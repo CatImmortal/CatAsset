@@ -16,7 +16,7 @@ namespace CatJson
             Type dictType = type;
             if (!type.IsGenericType)
             {
-                //处理type是非泛型类型的情况
+                //此处的处理原因类似ArrayFormatter
                 dictType = realType;
             }
             Type valueType = TypeUtil.GetDictValueType(dictType);
@@ -29,7 +29,7 @@ namespace CatJson
                 foreach (DictionaryEntry item in value)
                 {
                     
-                    TextUtil.Append("\"", depth + 1);
+                    TextUtil.Append("\"", depth);
                     TextUtil.Append(item.Key.ToString());
                     TextUtil.Append("\"");
 
@@ -46,7 +46,7 @@ namespace CatJson
             }
 
             TextUtil.AppendLine(string.Empty);
-            TextUtil.Append("}", depth);
+            TextUtil.Append("}", depth - 1);
         }
 
         /// <inheritdoc />
@@ -63,16 +63,18 @@ namespace CatJson
             
             ParserHelper.ParseJsonObjectProcedure(dict,valueType,TypeUtil.TypeEquals(keyType,typeof(int)), (userdata1,userdata2,isIntKey, key) =>
             {
-                object value = JsonParser.InternalParseJson((Type)userdata2);
-                
+                IDictionary localDict = (IDictionary) userdata1;
+                Type localValueType = (Type) userdata2;
+
+                object value = JsonParser.InternalParseJson(localValueType);
                 if (!isIntKey)
                 {
-                    ((IDictionary)userdata1).Add(key.ToString(), value);
+                    localDict.Add(key.ToString(), value);
                 }
                 else
                 {
                     //处理字典key为int的情况
-                    ((IDictionary)userdata1).Add(int.Parse(key.ToString()), value);
+                    localDict.Add(int.Parse(key.AsSpan()), value);
                 }
             });
 

@@ -3,21 +3,21 @@
 namespace CatJson
 {
     /// <summary>
-    /// int类型的Json格式化器
+    /// ulong类型的Json格式化器
     /// </summary>
-    public class Int32Formatter : BaseJsonFormatter<int>
+    public class UInt64Formatter : BaseJsonFormatter<ulong>
     {
         /// <inheritdoc />
-        public override void ToJson(int value, Type type, Type realType, int depth)
+        public override void ToJson(ulong value, Type type, Type realType, int depth)
         {
             TextUtil.Append(value.ToString());
         }
 
         /// <inheritdoc />
-        public override int ParseJson(Type type, Type realType)
+        public override ulong ParseJson(Type type, Type realType)
         {
             RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.Number);
-            return rs.AsInt();
+            return ulong.Parse(rs.AsSpan());
         }
     }
 }

@@ -3,7 +3,7 @@ using System;
 namespace CatJson
 {
     /// <summary>
-    /// null值的Json格式化器
+    /// 处理null值的Json格式化器
     /// </summary>
     public class NullFormatter : IJsonFormatter
     {

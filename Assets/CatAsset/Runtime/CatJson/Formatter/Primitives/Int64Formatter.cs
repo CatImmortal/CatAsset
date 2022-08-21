@@ -17,7 +17,7 @@ namespace CatJson
         public override long ParseJson(Type type, Type realType)
         {
             RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.Number);
-            return long.Parse(rs.ToString());
+            return long.Parse(rs.AsSpan());
         }
     }
 }

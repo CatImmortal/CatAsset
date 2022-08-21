@@ -94,11 +94,13 @@ namespace CatJson
             
             if (JsonParser.Lexer.LookNextTokenType() == TokenType.LeftBrace)
             {
-                int curIndex = JsonParser.Lexer.GetCurIndex(); //记下当前lexer的index，是在{后的第一个字符上
+                int curIndex = JsonParser.Lexer.CurIndex; //记下当前lexer的index，是在{后的第一个字符上
+                int curLine = JsonParser.Lexer.CurLine;
+                
                 JsonParser.Lexer.GetNextTokenByType(TokenType.LeftBrace); // {
                 
                 RangeString rs = JsonParser.Lexer.GetNextToken(out TokenType tokenType);
-                if (tokenType == TokenType.String && rs.Equals(new RangeString(PolymorphicFormatter.RealTypeKey))) //"<>RealType"
+                if (tokenType == TokenType.String && rs.Equals(PolymorphicFormatter.RealTypeKey)) //"<>RealType"
                 {
                     //是被多态序列化的 获取真实类型
                     JsonParser.Lexer.GetNextTokenByType(TokenType.Colon); // :
@@ -110,8 +112,8 @@ namespace CatJson
                 }
                
                 //不是被多态序列化的
-                //回退到前一个{的位置上，并将缓存置空，因为被look过所以需要-1
-                JsonParser.Lexer.SetCurIndex(curIndex - 1);
+                //回滚到前一个{的位置上，并将缓存置空，因为被look过所以需要-1
+                JsonParser.Lexer.Rollback(curIndex - 1,curLine);
                 return false;
 
 

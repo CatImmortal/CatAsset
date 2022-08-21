@@ -1,21 +1,33 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace CatJson
 {
     /// <summary>
     /// Json值
     /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
     public class JsonValue
     {
+        [FieldOffset(0)]
         public ValueType Type;
-
-        public bool Boolean;
-        public double Number;
-        public string Str;
-        public JsonValue[] Array;
-        public JsonObject Obj;
+        
+        [FieldOffset(1)]
+        private bool boolean;
+        
+        [FieldOffset(1)]
+        private double number;
+        
+        [FieldOffset(8)]
+        private string str;
+        
+        [FieldOffset(8)]
+        private List<JsonValue> array;
+        
+        [FieldOffset(8)]
+        private JsonObject obj;
 
         #region 构造方法
 
@@ -27,32 +39,31 @@ namespace CatJson
         public JsonValue(bool b)
         {
             Type = ValueType.Boolean;
-            Boolean = b;
+            boolean = b;
         }
         public JsonValue(double d)
         {
             Type = ValueType.Number;
-            Number = d;
+            number = d;
         }
         public JsonValue(string s)
         {
             Type = ValueType.String;
-            Str = s;
+            str = s;
         }
-        public JsonValue(JsonValue[] arr)
+        public JsonValue(List<JsonValue> arr)
         {
             Type = ValueType.Array;
-            Array = arr;
+            array = arr;
         }
         public JsonValue(JsonObject jo)
         {
             Type = ValueType.Object;
-            Obj = jo;
+            obj = jo;
         }
 
         #endregion
         
-       
         
         public JsonValue this[int index]
         {
@@ -63,7 +74,7 @@ namespace CatJson
                     return default;
                 }
 
-                return Array[index];
+                return array[index];
             }
             set
             {
@@ -72,7 +83,7 @@ namespace CatJson
                     return;
                 }
 
-                Array[index] = value;
+                array[index] = value;
             }
         }
 
@@ -85,7 +96,7 @@ namespace CatJson
                     return default;
                 }
 
-                return Obj[key];
+                return obj[key];
             }
             set
             {
@@ -94,7 +105,7 @@ namespace CatJson
                     return;
                 }
 
-                Obj[key] = value;
+                obj[key] = value;
             }
         }
 
@@ -102,9 +113,7 @@ namespace CatJson
 
         public static implicit operator JsonValue(bool b)
         {
-            JsonValue value = new JsonValue();
-            value.Type = ValueType.Boolean;
-            value.Boolean = b;
+            JsonValue value = new JsonValue(b);
             return value;
         }
         
@@ -114,9 +123,15 @@ namespace CatJson
             {
                 throw new Exception("JsonValue转换bool失败");
             }
-            return value.Boolean;
+            return value.boolean;
         }
 
+        public static implicit operator JsonValue(double d)
+        {
+            JsonValue value = new JsonValue(d);
+            return value;
+        }
+        
         public static implicit operator double(JsonValue value)
         {
             if (value.Type != ValueType.Number)
@@ -124,25 +139,14 @@ namespace CatJson
                 throw new Exception("JsonValue转换double失败");
             }
             
-            return value.Number;
-        }
-        
-        public static implicit operator JsonValue(double d)
-        {
-            JsonValue value = new JsonValue();
-            value.Type = ValueType.Number;
-            value.Number = d;
-            return value;
+            return value.number;
         }
         
         public static implicit operator JsonValue(string s)
         {
-            JsonValue value = new JsonValue();
-            value.Type = ValueType.String;
-            value.Str = s;
+            JsonValue value = new JsonValue(s);
             return value;
         }
-        
         
         public static implicit operator string(JsonValue value)
         {
@@ -150,30 +154,26 @@ namespace CatJson
             {
                 throw new Exception("JsonValue转换string失败");
             }
-            return value.Str;
+            return value.str;
         }
         public static implicit operator JsonValue(JsonObject obj)
         {
-            JsonValue value = new JsonValue();
-            value.Type = ValueType.Object;
-            value.Obj = obj;
+            JsonValue value = new JsonValue(obj);
             return value;
         }
         
-        public static implicit operator JsonValue[](JsonValue value)
+        public static implicit operator List<JsonValue>(JsonValue value)
         {
             if (value.Type != ValueType.Array)
             {
-                throw new Exception("JsonValue转换JsonValue[]失败");
+                throw new Exception("JsonValue转换List<JsonValue>失败");
             }
 
-            return value.Array;
+            return value.array;
         }
-        public static implicit operator JsonValue(JsonValue[] arr)
+        public static implicit operator JsonValue(List<JsonValue> arr)
         {
-            JsonValue value = new JsonValue();
-            value.Type = ValueType.Array;
-            value.Array = arr;
+            JsonValue value = new JsonValue(arr);
             return value;
         }
         
@@ -184,7 +184,7 @@ namespace CatJson
                 throw new Exception("JsonValue转换JsonObject失败");
             }
 
-            return value.Obj;
+            return value.obj;
         }
 
         #endregion

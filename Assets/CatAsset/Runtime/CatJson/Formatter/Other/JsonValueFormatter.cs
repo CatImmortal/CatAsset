@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CatJson
 {
@@ -16,19 +17,19 @@ namespace CatJson
                     TextUtil.Append("null");
                     break;
                 case ValueType.Boolean:
-                    JsonParser.InternalToJson(value.Boolean);
+                    JsonParser.ToJson((bool)value,0);
                     break;
                 case ValueType.Number:
-                    JsonParser.InternalToJson(value.Number);
+                    JsonParser.ToJson((double)value,0);
                     break;
                 case ValueType.String:
-                    JsonParser.InternalToJson(value.Str);
+                    JsonParser.ToJson((string)value,0);
                     break;
                 case ValueType.Array:
-                    JsonParser.InternalToJson(value.Array, depth + 1);
+                    JsonParser.ToJson((List<JsonValue>)value, depth);
                     break;
                 case ValueType.Object:
-                    JsonParser.InternalToJson(value.Obj, depth + 1);
+                    JsonParser.ToJson((JsonObject)value, depth);
                     break;
             }
         }
@@ -41,22 +42,25 @@ namespace CatJson
             
             switch (nextTokenType)
             {
+                case TokenType.Null:
+                    JsonParser.Lexer.GetNextTokenByType(TokenType.Null);
+                    return new JsonValue();
+                
                 case TokenType.True:
                 case TokenType.False:
-                    return new JsonValue(JsonParser.InternalParseJson<bool>());
+                    return new JsonValue(JsonParser.ParseJson<bool>());
                 
                 case TokenType.Number:
-                    return new JsonValue(JsonParser.InternalParseJson<double>());
+                    return new JsonValue(JsonParser.ParseJson<double>());
                 
                 case TokenType.String:
-                    return new JsonValue(JsonParser.InternalParseJson<string>());
+                    return new JsonValue(JsonParser.ParseJson<string>());
                 
                 case TokenType.LeftBracket:
-                    return new JsonValue(JsonParser.InternalParseJson<JsonValue[]>());
+                    return new JsonValue(JsonParser.ParseJson<List<JsonValue>>());
                 
                 case TokenType.LeftBrace:
-                    return new JsonValue(JsonParser.InternalParseJson<JsonObject>());
-                
+                    return new JsonValue(JsonParser.ParseJson<JsonObject>());
                 default:
                     throw new Exception("JsonValue解析失败，tokenType == " + nextTokenType);
             }
