@@ -4,11 +4,6 @@ using UnityEngine.Networking;
 
 namespace CatAsset.Runtime
 {
-
-    /// <summary>
-    /// 原生资源加载任务完成回调的原型
-    /// </summary>
-    public delegate void LoadRawAssetCallback(bool success, byte[] asset, object userdata);
     
     /// <summary>
     /// 原生资源加载任务
@@ -34,7 +29,7 @@ namespace CatAsset.Runtime
         }
         
         private object userdata;
-        private LoadRawAssetCallback onFinished;
+        private LoadAssetCallback onFinished;
 
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
@@ -62,7 +57,6 @@ namespace CatAsset.Runtime
             //未加载过
             WebRequestTask task = WebRequestTask.Create(Owner,bundleRuntimeInfo.LoadPath,bundleRuntimeInfo.LoadPath,null,onWebRequestCallback);
             Owner.AddTask(task,TaskPriority.Middle);
-            assetRuntimeInfo.AddRefCount();
             loadRawAssetState = LoadRawAssetState.Loading;
             
         }
@@ -100,6 +94,12 @@ namespace CatAsset.Runtime
             if (success)
             {
                 assetRuntimeInfo.Asset = uwr.downloadHandler.data;
+                if (assetRuntimeInfo.AssetManifest.Length == default)
+                {
+                    assetRuntimeInfo.AssetManifest.Length = uwr.downloadHandler.data.Length;
+                    bundleRuntimeInfo.Manifest.Length = uwr.downloadHandler.data.Length;
+                }
+                
                 CatAssetManager.SetAssetInstance(assetRuntimeInfo.Asset,assetRuntimeInfo);
             }
             else
@@ -122,7 +122,9 @@ namespace CatAsset.Runtime
                 //加载成功
                 if (!needCancel)
                 {
-                    onFinished?.Invoke(true, (byte[]) assetRuntimeInfo.Asset, userdata);
+                    assetRuntimeInfo.AddRefCount();
+                    onFinished?.Invoke(true, assetRuntimeInfo.Asset, userdata);
+                    
                     foreach (LoadRawAssetTask task in MergedTasks)
                     {
                         if (!task.needCancel)
@@ -130,7 +132,7 @@ namespace CatAsset.Runtime
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadRawAsset一定增加1个资源的引用计数
                             assetRuntimeInfo.AddRefCount();
-                            task.onFinished?.Invoke(true, (byte[]) assetRuntimeInfo.Asset, task.userdata);
+                            task.onFinished?.Invoke(true, assetRuntimeInfo.Asset, task.userdata);
                         }
                    
                     }
@@ -139,7 +141,6 @@ namespace CatAsset.Runtime
                 {
                     //被取消了
                     bool needUnload = true;
-                   
                     
                     //只是主任务被取消了 未取消的已合并任务还需要继续处理
                     foreach (LoadRawAssetTask task in MergedTasks)
@@ -148,16 +149,11 @@ namespace CatAsset.Runtime
                         {
                             needUnload = false;
                             assetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(true, (byte[]) assetRuntimeInfo.Asset, task.userdata);
+                            task.onFinished?.Invoke(true, assetRuntimeInfo.Asset, task.userdata);
                         }
                     }
 
-                    if (!needUnload)
-                    {
-                        //至少有一个需要这个资源的已合并任务 那就只需要将主任务增加的那1个引用计数减去就行
-                        assetRuntimeInfo.SubRefCount();
-                    }
-                    else
+                    if (needUnload)
                     {
                         //没有任何一个需要这个资源的已合并任务 直接卸载了
                         CatAssetManager.UnloadAsset(assetRuntimeInfo.Asset);
@@ -185,7 +181,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建原生资源加载任务的对象
         /// </summary>
-        public static LoadRawAssetTask Create(TaskRunner owner, string name,object userdata,LoadRawAssetCallback callback)
+        public static LoadRawAssetTask Create(TaskRunner owner, string name,object userdata,LoadAssetCallback callback)
         {
             LoadRawAssetTask task = ReferencePool.Get<LoadRawAssetTask>();
             task.CreateBase(owner,name);

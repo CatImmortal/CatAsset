@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
@@ -22,7 +24,8 @@ namespace CatAsset.Runtime
             string result = Path.Combine(Application.streamingAssetsPath, path);
             return result;
         }
-
+        
+        
         /// <summary>
         /// 获取在读写区下的完整路径
         /// </summary>
@@ -52,5 +55,6 @@ namespace CatAsset.Runtime
 
             return length + "B";
         }
+
     }
 }

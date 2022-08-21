@@ -17,7 +17,7 @@ namespace CatAsset.Runtime
         private List<string> assetNames;
         private BatchLoadAssetCallback onFinished;
 
-        private LoadAssetCallback<Object> onAssetLoadedCallback;
+        private LoadAssetCallback onAssetLoadedCallback;
         private int loadedAssetCount;
         private List<object> loadedAssets;
         private List<object> loadSuccessAssets = new List<object>();
@@ -56,7 +56,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源加载结束的回调
         /// </summary>
-        private void OnAssetLoaded(bool success, Object asset, object userdata)
+        private void OnAssetLoaded(bool success, object asset, object userdata)
         {
             loadedAssetCount++;
             
@@ -82,7 +82,7 @@ namespace CatAsset.Runtime
                 loadedAssets.Add(assetRuntimeInfo.Asset);
             }
 
-            //无需处理已合并任务 因为按照现在的设计 批量加载任务，就算是资源名列表相同，也是不会判断为重复任务的
+            //无需处理已合并任务 因为按照现在的设计 批量加载任务，就算是资源名列表相同，也不会判断为重复任务的
             if (!needCancel)
             {
                 onFinished?.Invoke(loadedAssets,this.userdata);

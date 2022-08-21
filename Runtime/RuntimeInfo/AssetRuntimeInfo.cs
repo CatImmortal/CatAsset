@@ -40,9 +40,9 @@ namespace CatAsset.Runtime
         /// </summary>
         public void AddRefCount(int count = 1)
         {
-            //引用计数从0变为1
             if (IsUnused())
             {
+                //引用计数从0变为1
                 //添加到资源包的已使用资源集合中
                 BundleRuntimeInfo bundleRuntimeInfo =
                     CatAssetManager.GetBundleRuntimeInfo(BundleManifest.RelativePath);
@@ -64,10 +64,10 @@ namespace CatAsset.Runtime
             }
 
             RefCount -= count;
-            
-            //引用计数从1变为0
+
             if (IsUnused())
             {
+                //引用计数从1变为0
                 //从资源包的已使用资源集合中删除
                 BundleRuntimeInfo bundleRuntimeInfo =
                     CatAssetManager.GetBundleRuntimeInfo(BundleManifest.RelativePath);
