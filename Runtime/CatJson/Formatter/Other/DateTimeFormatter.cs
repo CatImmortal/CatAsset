@@ -1,15 +1,14 @@
-﻿using System;
-using UnityEngine;
+using System;
 
 namespace CatJson
 {
     /// <summary>
-    /// Hash128类型的Json格式化器
+    /// DateTime类型的Json格式化器
     /// </summary>
-    public class Hash128Formatter : BaseJsonFormatter<Hash128>
+    public class DateTimeFormatter : BaseJsonFormatter<DateTime>
     {
         /// <inheritdoc />
-        public override void ToJson(Hash128 value, Type type, Type realType, int depth)
+        public override void ToJson(DateTime value, Type type, Type realType, int depth)
         {
             TextUtil.Append('\"');
             TextUtil.Append(value.ToString());
@@ -17,10 +16,10 @@ namespace CatJson
         }
 
         /// <inheritdoc />
-        public override Hash128 ParseJson(Type type, Type realType)
+        public override DateTime ParseJson(Type type, Type realType)
         {
             RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.String);
-            return Hash128.Parse(rs.ToString());
+            return DateTime.Parse(rs.AsSpan());
         }
     }
 }

@@ -11,9 +11,7 @@ namespace CatJson
         /// <inheritdoc />
         public override void ToJson(string value, Type type, Type realType, int depth)
         {
-            //TextUtil.Append($"\"{value}\"");
-            
-            TextUtil.Append("\"");
+            TextUtil.Append('\"');
             for (int i = 0; i < value.Length; i++)
             {
                TextUtil.CachedSB.Append(value[i]);
@@ -24,7 +22,7 @@ namespace CatJson
                    TextUtil.CachedSB.Append('\\');
                }
             }
-            TextUtil.Append("\"");
+            TextUtil.Append('\"');
             
           
         }

@@ -14,13 +14,16 @@ namespace CatAsset.Runtime
         private List<byte[]> bindRawAssets = new List<byte[]>();
 
         /// <summary>
-        /// 绑定Asset
+        /// 绑定资源
         /// </summary>
         public void BindTo(Object asset)
         {
             bindAssets.Add(asset);
         }
 
+        /// <summary>
+        /// 绑定原生资源
+        /// </summary>
         public void BindTo(byte[] rawAsset)
         {
             bindRawAssets.Add(rawAsset);

@@ -16,13 +16,14 @@ namespace CatJson
             Type listType = type;
             if (!listType.IsGenericType)
             {
+                //此处的处理原因类似ArrayFormatter
                 listType = realType;
             }
             Type elementType = TypeUtil.GetArrayOrListElementType(listType);
             for (int i = 0; i < value.Count; i++)
             {
                 object element = value[i];
-                TextUtil.AppendTab(depth + 1);
+                TextUtil.AppendTab(depth);
                 if (element == null)
                 {
                     TextUtil.Append("null");
@@ -38,7 +39,7 @@ namespace CatJson
                  
             }
             TextUtil.AppendLine(string.Empty);
-            TextUtil.Append("]", depth);
+            TextUtil.Append("]", depth - 1);
         }
 
         /// <inheritdoc />
@@ -55,8 +56,11 @@ namespace CatJson
             
             ParserHelper.ParseJsonArrayProcedure(list, elementType, (userdata1, userdata2) =>
             {
-                object value = JsonParser.InternalParseJson((Type) userdata2);
-                ((IList) userdata1).Add(value);
+                IList localList = (IList) userdata1;
+                Type localElementType = (Type) userdata2;
+                
+                object value = JsonParser.InternalParseJson(localElementType);
+                localList.Add(value);
             });
 
             return list;

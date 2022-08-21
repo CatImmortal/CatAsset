@@ -19,13 +19,13 @@ namespace CatJson
                 foreach (KeyValuePair<string, JsonValue> item in value.ValueDict)
                 {
                     
-                    TextUtil.Append("\"", depth + 1);
+                    TextUtil.Append("\"", depth);
                     TextUtil.Append(item.Key);
                     TextUtil.Append("\"");
 
                     TextUtil.Append(":");
 
-                    JsonParser.InternalToJson(item.Value,depth);
+                    JsonParser.ToJson(item.Value,depth + 1);
 
                     if (index < value.ValueDict.Count-1)
                     {
@@ -36,7 +36,7 @@ namespace CatJson
             }
 
             TextUtil.AppendLine(string.Empty);
-            TextUtil.Append("}", depth);
+            TextUtil.Append("}", depth - 1);
         }
 
         /// <inheritdoc />
@@ -44,10 +44,11 @@ namespace CatJson
         {
             JsonObject obj = new JsonObject();
 
-            ParserHelper.ParseJsonObjectProcedure(obj,default,default, (userdata1,_,_, key) =>
+            ParserHelper.ParseJsonObjectProcedure(obj, default, default, (userdata1, _, _, key) =>
             {
-                 JsonValue value = JsonParser.InternalParseJson<JsonValue>();
-                ((JsonObject)userdata1)[key.ToString()] = value;
+                JsonObject localObj = (JsonObject) userdata1;
+                JsonValue value = JsonParser.ParseJson<JsonValue>();
+                localObj[key.ToString()] = value;
             });
 
             return obj;

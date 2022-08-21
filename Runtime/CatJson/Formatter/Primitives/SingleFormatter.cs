@@ -17,7 +17,7 @@ namespace CatJson
         public override float ParseJson(Type type, Type realType)
         {
             RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.Number);
-            return float.Parse(rs.ToString());
+            return rs.AsFloat();
         }
     }
 }
