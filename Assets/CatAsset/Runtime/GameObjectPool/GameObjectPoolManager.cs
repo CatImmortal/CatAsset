@@ -106,14 +106,17 @@ namespace CatAsset.Runtime
             }
             
             //此prefab未加载过，先加载
-            CatAssetManager.LoadAsset<GameObject>(prefabName,null, (success, prefab, userdata) =>
+            CatAssetManager.LoadAsset(prefabName,null, (success, asset, userdata) =>
             {
                 if (!success)
                 {
                     return;
                 }
 
+                GameObject prefab = (GameObject) asset;
                 loadedPrefabDict[prefabName] = prefab;
+                
+                //这里要先调用GetGameObject 才能保证 poolDict[prefab] 不为空
                 GetGameObject(prefab, parent, callback);
                 
                 //进行资源绑定

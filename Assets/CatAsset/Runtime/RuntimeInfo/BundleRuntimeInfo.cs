@@ -80,14 +80,15 @@ namespace CatAsset.Runtime
 
             if (CanUnload())
             {
+                //此资源包没有资源在使用中了 并且没有其他资源包引用它 卸载资源包
+                
                 if (!Manifest.IsRaw)
                 {
-                    //此资源所属资源包已没有资源在使用了 并且没有其他资源包引用它 卸载资源包
                     CatAssetManager.UnloadBundle(this);
                 }
                 else
                 {
-                    //一个原生资源包只对应一个原生资源
+                    //一个原生资源包只对应一个唯一的原生资源
                     CatAssetManager.UnloadRawAsset(this,assetRuntimeInfo);
                 }
                 

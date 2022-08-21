@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 场景加载任务
     /// </summary>
-    public class LoadSceneTask : LoadAssetTask<Object>
+    public class LoadSceneTask : LoadUnityAssetTask
     {
         private LoadSceneCallback onFinished;
         private Scene loadedScene;
@@ -25,7 +25,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         protected override void LoadDone()
         {
-            loadedScene= SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+            loadedScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             if (loadedScene != default)
             {
                 CatAssetManager.SetSceneInstance(loadedScene,AssetRuntimeInfo);

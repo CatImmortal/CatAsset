@@ -26,15 +26,23 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<T> AwaitLoadAsset<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle) where T : Object
+        public static Task<object> AwaitLoadAsset(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
-            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset<T>(assetName, null, (success, asset, userdata) =>
+            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+            LoadAsset(assetName, null, (success, asset, userdata) =>
             {
                 if (success && target != null)
                 {
-                    BindToGameObject(target,asset);
+                    if (asset is Object unityAsset)
+                    {
+                        BindToGameObject(target, unityAsset);
+                    }
+                    else if (asset is byte[] rawAsset)
+                    {
+                        BindToGameObject(target, rawAsset);
+                    }
                 }
+
                 tcs.SetResult(asset);
                
             }, priority);
@@ -44,10 +52,10 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<T> AwaitLoadAsset<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle) where T : Object
+        public static Task<object> AwaitLoadAsset(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
-            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset<T>(assetName, null, (success, asset, userdata) =>
+            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
+            LoadAsset(assetName, null, (success, asset, userdata) =>
             {
                 if (success && target != default)
                 {
@@ -59,42 +67,6 @@ namespace CatAsset.Runtime
             return tcs.Task;
         }
 
-        /// <summary>
-        /// 加载原生资源（可等待）
-        /// </summary>
-        public static Task<byte[]> AwaitLoadRawAsset(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
-        {
-            TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>();
-            LoadRawAsset(assetName, null, (success, asset, userdata) =>
-            {
-                if (success && target != null)
-                {
-                    BindToGameObject(target,asset);
-                }
-                tcs.SetResult(asset);
-               
-            }, priority);
-            return tcs.Task;
-        }
-        
-        /// <summary>
-        /// 加载原生资源（可等待）
-        /// </summary>
-        public static Task<byte[]> AwaitLoadRawAsset(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
-        {
-            TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>();
-            LoadRawAsset(assetName, null, (success, asset, userdata) =>
-            {
-                if (success && target != default)
-                {
-                    BindToScene(target,asset);
-                }
-                tcs.SetResult(asset);
-               
-            }, priority);
-            return tcs.Task;
-        }
-        
         /// <summary>
         /// 批量加载资源(可等待)
         /// </summary>
