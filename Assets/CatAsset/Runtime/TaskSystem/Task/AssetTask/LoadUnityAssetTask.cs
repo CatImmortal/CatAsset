@@ -192,9 +192,9 @@ namespace CatAsset.Runtime
 
             if (success)
             {
-                AssetRuntimeInfo dependencyAssetInfo = CatAssetManager.GetAssetRuntimeInfo(asset);
+                AssetRuntimeInfo dependencyAssetInfo = CatAssetDatabase.GetAssetRuntimeInfo(asset);
                 BundleRuntimeInfo dependencyBundleInfo =
-                    CatAssetManager.GetBundleRuntimeInfo(dependencyAssetInfo.BundleManifest.RelativePath);
+                    CatAssetDatabase.GetBundleRuntimeInfo(dependencyAssetInfo.BundleManifest.RelativePath);
 
                 //添加到依赖资源的被引用记录
                 dependencyAssetInfo.AddRefAsset(AssetRuntimeInfo);
@@ -302,7 +302,7 @@ namespace CatAsset.Runtime
                 {
                     foreach (string dependencyName in AssetRuntimeInfo.AssetManifest.Dependencies)
                     {
-                        AssetRuntimeInfo dependencyInfo = CatAssetManager.GetAssetRuntimeInfo(dependencyName);
+                        AssetRuntimeInfo dependencyInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyName);
                         if (dependencyInfo.Asset != null)
                         {
                             //将已加载的依赖都卸载一遍
@@ -346,7 +346,7 @@ namespace CatAsset.Runtime
             if (AssetRuntimeInfo.Asset != null)
             {
                 //添加关联
-                CatAssetManager.SetAssetInstance(AssetRuntimeInfo.Asset, AssetRuntimeInfo);
+                CatAssetDatabase.SetAssetInstance(AssetRuntimeInfo.Asset, AssetRuntimeInfo);
             }
         }
         
@@ -442,9 +442,9 @@ namespace CatAsset.Runtime
             LoadUnityAssetTask task = ReferencePool.Get<LoadUnityAssetTask>();
             task.CreateBase(owner, name);
 
-            task.AssetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(name);
+            task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
-                CatAssetManager.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
+                CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
             task.Userdata = userdata;
             task.onFinished = callback;
 

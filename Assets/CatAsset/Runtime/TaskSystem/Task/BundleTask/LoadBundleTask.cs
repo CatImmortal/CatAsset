@@ -125,7 +125,7 @@ namespace CatAsset.Runtime
             
             task.userdata = userdata;
             task.onFinished = callback;
-            task.bundleRuntimeInfo = CatAssetManager.GetBundleRuntimeInfo(name);
+            task.bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(name);
             
             return task;
         }

@@ -33,13 +33,13 @@ namespace CatAsset.Runtime
             {
                 if (success && target != null)
                 {
-                    if (asset is Object unityAsset)
+                    if (asset is Object unityObj)
                     {
-                        BindToGameObject(target, unityAsset);
+                        BindToGameObject(target,unityObj);
                     }
-                    else if (asset is byte[] rawAsset)
+                    else
                     {
-                        BindToGameObject(target, rawAsset);
+                        BindToGameObject(target,(byte[])asset);
                     }
                 }
 
@@ -114,14 +114,7 @@ namespace CatAsset.Runtime
                     {
                         if (asset != null)
                         {
-                            if (asset is Object unityObj)
-                            {
-                                BindToScene(target,unityObj);
-                            }
-                            else
-                            {
-                                BindToScene(target,(byte[])asset);
-                            }
+                            BindToScene(target, asset);
                         }
                     }
                 }
@@ -141,7 +134,8 @@ namespace CatAsset.Runtime
 
             LoadScene(sceneName, tcs, (success, scene, userdata) =>
             {
-                ((TaskCompletionSource<Scene>)userdata).SetResult(scene);
+                TaskCompletionSource<Scene> localTcs = (TaskCompletionSource<Scene>)userdata;
+                localTcs.SetResult(scene);
             });
             
             return tcs.Task;

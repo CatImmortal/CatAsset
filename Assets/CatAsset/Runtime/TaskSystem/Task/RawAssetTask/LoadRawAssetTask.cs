@@ -100,7 +100,7 @@ namespace CatAsset.Runtime
                     bundleRuntimeInfo.Manifest.Length = uwr.downloadHandler.data.Length;
                 }
                 
-                CatAssetManager.SetAssetInstance(assetRuntimeInfo.Asset,assetRuntimeInfo);
+                CatAssetDatabase.SetAssetInstance(assetRuntimeInfo.Asset,assetRuntimeInfo);
             }
             else
             {
@@ -188,9 +188,9 @@ namespace CatAsset.Runtime
             
             task.userdata = userdata;
             task.onFinished = callback;
-            task.assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(name);
+            task.assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.bundleRuntimeInfo =
-                CatAssetManager.GetBundleRuntimeInfo(task.assetRuntimeInfo.BundleManifest.RelativePath);
+                CatAssetDatabase.GetBundleRuntimeInfo(task.assetRuntimeInfo.BundleManifest.RelativePath);
             
             return task;
         }

@@ -28,7 +28,7 @@ namespace CatAsset.Runtime
             loadedScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             if (loadedScene != default)
             {
-                CatAssetManager.SetSceneInstance(loadedScene,AssetRuntimeInfo);
+                CatAssetDatabase.SetSceneInstance(loadedScene,AssetRuntimeInfo);
             }
         }
 
@@ -111,9 +111,9 @@ namespace CatAsset.Runtime
             LoadSceneTask task = ReferencePool.Get<LoadSceneTask>();
             task.CreateBase(owner,name);
 
-            task.AssetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(name);
+            task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
-                CatAssetManager.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
+                CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
             task.Userdata = userdata;
             task.onFinished = callback;
 

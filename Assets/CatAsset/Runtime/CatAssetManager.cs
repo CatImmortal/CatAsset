@@ -23,35 +23,6 @@ namespace CatAsset.Runtime
         private static TaskRunner downloadTaskRunner = new TaskRunner();
 
         /// <summary>
-        /// 资源包相对路径->资源包运行时信息（只有在这个字典里的才是在本地可加载的）
-        /// </summary>
-        private static Dictionary<string, BundleRuntimeInfo> bundleRuntimeInfoDict =
-            new Dictionary<string, BundleRuntimeInfo>();
-
-        /// <summary>
-        /// 资源名->资源运行时信息（只有在这个字典里的才是在本地可加载的）
-        /// </summary>
-        private static Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict =
-            new Dictionary<string, AssetRuntimeInfo>();
-
-        /// <summary>
-        /// 资源实例->资源运行时信息
-        /// </summary>
-        private static Dictionary<object, AssetRuntimeInfo> assetInstanceDict =
-            new Dictionary<object, AssetRuntimeInfo>();
-
-        /// <summary>
-        /// 场景实例handler->资源运行时信息
-        /// </summary>
-        private static Dictionary<int, AssetRuntimeInfo> sceneInstanceDict = new Dictionary<int, AssetRuntimeInfo>();
-
-        /// <summary>
-        /// 场景实例handler->绑定的资源
-        /// </summary>
-        private static Dictionary<int, List<AssetRuntimeInfo>> sceneBindAssets =
-            new Dictionary<int, List<AssetRuntimeInfo>>();
-
-        /// <summary>
         /// 任务id->任务
         /// </summary>
         private static Dictionary<int, ITask> allTaskDict = new Dictionary<int, ITask>();
@@ -81,158 +52,6 @@ namespace CatAsset.Runtime
             downloadTaskRunner.Update();
         }
         
-        #region 数据操作
-
-         /// <summary>
-        /// 根据资源包清单信息初始化运行时信息
-        /// </summary>
-        private static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
-        {
-            BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
-            bundleRuntimeInfoDict.Add(bundleManifestInfo.RelativePath, bundleRuntimeInfo);
-            bundleRuntimeInfo.Manifest = bundleManifestInfo;
-            bundleRuntimeInfo.InReadWrite = inReadWrite;
-
-            foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
-            {
-                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
-                assetRuntimeInfoDict.Add(assetManifestInfo.Name, assetRuntimeInfo);
-                assetRuntimeInfo.BundleManifest = bundleManifestInfo;
-                assetRuntimeInfo.AssetManifest = assetManifestInfo;
-            }
-        }
-
-        /// <summary>
-        /// 获取资源包运行时信息
-        /// </summary>
-        internal static BundleRuntimeInfo GetBundleRuntimeInfo(string bundleRelativePath)
-        {
-            return bundleRuntimeInfoDict[bundleRelativePath];
-        }
-
-        /// <summary>
-        /// 获取资源运行时信息
-        /// </summary>
-        internal static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
-        {
-            return assetRuntimeInfoDict[assetName];
-        }
-
-        /// <summary>
-        /// 获取资源运行时信息
-        /// </summary>
-        internal static AssetRuntimeInfo GetAssetRuntimeInfo(object asset)
-        {
-            return assetInstanceDict[asset];
-        }
-
-        /// <summary>
-        /// 获取资源运行时信息，若不存在则添加（主要用于外置原生资源）
-        /// </summary>
-        private static AssetRuntimeInfo GetOrAddAssetRuntimeInfo(string assetName)
-        {
-            if (!assetRuntimeInfoDict.TryGetValue(assetName,out AssetRuntimeInfo assetRuntimeInfo))
-            {
-                int index = assetName.LastIndexOf('/');
-                string dir = null;
-                string name;
-                if (index >= 0)
-                {
-                    dir = assetName.Substring(0, index - 1);
-                    name = assetName.Substring(index + 1);
-                }
-                else
-                {
-                    name = assetName;
-                }
-                
-                
-                //创建外置原生资源的资源运行时信息
-                assetRuntimeInfo = new AssetRuntimeInfo();
-                assetRuntimeInfo.AssetManifest = new AssetManifestInfo
-                {
-                    Name = assetName,
-                    Type = typeof(byte[])
-                };
-                assetRuntimeInfo.BundleManifest = new BundleManifestInfo
-                {
-                    RelativePath = assetName,
-                    Directory = dir,
-                    BundleName = name,
-                    Group = string.Empty,
-                    IsRaw = true,
-                    IsScene = false,
-                    Assets = new List<AssetManifestInfo>(){assetRuntimeInfo.AssetManifest},
-                };
-                assetRuntimeInfoDict.Add(assetName,assetRuntimeInfo);
-
-                //创建外置原生资源的资源包运行时信息（是虚拟出的）
-                BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo
-                {
-                    Manifest = assetRuntimeInfo.BundleManifest,
-                    InReadWrite = true,
-                };
-                bundleRuntimeInfoDict.Add(bundleRuntimeInfo.Manifest.RelativePath,bundleRuntimeInfo);
-            }
-
-            return assetRuntimeInfo;
-        }
-        
-        /// <summary>
-        /// 获取场景运行时信息
-        /// </summary>
-        internal static AssetRuntimeInfo GetAssetRuntimeInfo(Scene scene)
-        {
-            return sceneInstanceDict[scene.handle];
-        }
-        
-        /// <summary>
-        /// 检查资源是否已准备好
-        /// </summary>
-        private static bool CheckAssetReady(string assetName)
-        {
-            if (!assetRuntimeInfoDict.ContainsKey(assetName))
-            {
-                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
-                return false;
-            }
-
-            return true;
-        }
-
-        
-        /// <summary>
-        /// 设置资源实例与资源运行时信息的关联
-        /// </summary>
-        internal static void SetAssetInstance(object asset, AssetRuntimeInfo assetRuntimeInfo)
-        {
-            assetInstanceDict.Add(asset, assetRuntimeInfo);
-        }
-
-        /// <summary>
-        /// 删除资源实例与资源运行时信息的关联
-        /// </summary>
-        internal static void RemoveAssetInstance(object asset)
-        {
-            assetInstanceDict.Remove(asset);
-        }
-
-        /// <summary>
-        /// 设置场景实例与资源运行时信息的关联
-        /// </summary>
-        internal static void SetSceneInstance(Scene scene, AssetRuntimeInfo assetRuntimeInfo)
-        {
-            sceneInstanceDict.Add(scene.handle, assetRuntimeInfo);
-        }
-
-        /// <summary>
-        /// 删除场景实例与资源运行时信息的关联
-        /// </summary>
-        internal static void RemoveSceneInstance(Scene scene)
-        {
-            sceneInstanceDict.Remove(scene.handle);
-        }
-
         /// <summary>
         /// 添加任务id与任务的关联
         /// </summary>
@@ -248,9 +67,22 @@ namespace CatAsset.Runtime
         {
             allTaskDict.Remove(task.GUID);
         }
-        
-        #endregion
 
+        /// <summary>
+        /// 检查资源是否已准备好
+        /// </summary>
+        private static bool CheckAssetReady(string assetName)
+        {
+            AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
+            if (info == null)
+            {
+                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
+                return false;
+            }
+
+            return true;
+        }
+        
         #region 资源清单检查
 
         /// <summary>
@@ -281,15 +113,9 @@ namespace CatAsset.Runtime
                     {
                         CatAssetManifest manifest =
                             CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
-
-                        bundleRuntimeInfoDict.Clear();
-                        assetRuntimeInfoDict.Clear();
-
-                        foreach (BundleManifestInfo info in manifest.Bundles)
-                        {
-                            InitRuntimeInfo(info, false);
-                        }
-
+                        
+                        CatAssetDatabase.InitManifest(manifest);
+                        
                         Debug.Log("单机模式资源清单检查完毕");
                         onChecked?.Invoke(true);
                     }
@@ -394,7 +220,7 @@ namespace CatAsset.Runtime
                 case AssetCategory.ExternalRawAsset:
                     
                     //加载外置原生资源
-                    GetOrAddAssetRuntimeInfo(assetName);
+                    CatAssetDatabase.GetOrAddAssetRuntimeInfo(assetName);
                     loadRawAssetTask = LoadRawAssetTask.Create(loadTaskRunner,assetName,userdata,callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
             
@@ -511,7 +337,9 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (!assetInstanceDict.TryGetValue(asset, out AssetRuntimeInfo assetRuntimeInfo))
+            AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(asset);
+            
+            if (info == null)
             {
                 if (asset is Object unityObj)
                 {
@@ -526,7 +354,7 @@ namespace CatAsset.Runtime
             }
             
 
-            InternalUnloadAsset(assetRuntimeInfo);
+            InternalUnloadAsset(info);
         }
 
         /// <summary>
@@ -546,26 +374,29 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (!sceneInstanceDict.TryGetValue(scene.handle, out AssetRuntimeInfo assetRuntimeInfo))
+            AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(scene);
+            
+            if (info == null)
             {
                 Debug.LogError($"要卸载的场景未加载过：{scene.path}");
                 return;
             }
 
             //卸载场景
-            RemoveSceneInstance(scene);
+            CatAssetDatabase.RemoveSceneInstance(scene);
             SceneManager.UnloadSceneAsync(scene);
 
             //卸载与场景绑定的资源
-            if (sceneBindAssets.TryGetValue(scene.handle,out List<AssetRuntimeInfo> assets))
+            List<AssetRuntimeInfo> assets = CatAssetDatabase.GetSceneBindAssets(scene);
+            if (assets != null)
             {
                 foreach (AssetRuntimeInfo asset in assets)
                 {
                     UnloadAsset(asset.Asset);
                 }
             }
-            
-            InternalUnloadAsset(assetRuntimeInfo);
+
+            InternalUnloadAsset(info);
         }
 
         /// <summary>
@@ -584,7 +415,7 @@ namespace CatAsset.Runtime
                 {
                     foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
-                        AssetRuntimeInfo dependencyRuntimeInfo = GetAssetRuntimeInfo(dependency);
+                        AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
                         UnloadAsset(dependencyRuntimeInfo.Asset);
                     }
                 }
@@ -638,17 +469,8 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void BindToScene(Scene scene,object asset)
         {
-            if (!sceneBindAssets.TryGetValue(scene.handle,out List<AssetRuntimeInfo> assets))
-            {
-                assets = new List<AssetRuntimeInfo>();
-                sceneBindAssets.Add(scene.handle,assets);
-            }
-
-            AssetRuntimeInfo assetRuntimeInfo = GetAssetRuntimeInfo(asset);
-            assets.Add(assetRuntimeInfo);
+            CatAssetDatabase.AddSceneBindAsset(scene,asset);
         }
-
-        
         
         #endregion
     }

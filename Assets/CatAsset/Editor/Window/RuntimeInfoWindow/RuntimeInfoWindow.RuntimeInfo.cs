@@ -38,8 +38,9 @@ namespace CatAsset.Editor
         private void InitRuntimeInfoView()
         {
             isInitRuntimeInfoView = true;
-            bundleRuntimeInfoDict = typeof(CatAssetManager).GetField(nameof(bundleRuntimeInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, BundleRuntimeInfo>;
-            assetRuntimeInfoDict = typeof(CatAssetManager).GetField(nameof(assetRuntimeInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, AssetRuntimeInfo>;
+
+            bundleRuntimeInfoDict = typeof(CatAssetDatabase).GetField(nameof(bundleRuntimeInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, BundleRuntimeInfo>;
+            assetRuntimeInfoDict = typeof(CatAssetDatabase).GetField(nameof(assetRuntimeInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, AssetRuntimeInfo>;
 
         }
 

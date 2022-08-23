@@ -86,7 +86,7 @@ namespace CatAsset.Runtime
                     realAssetName = Util.GetRealInternalRawAssetName(assetName);
                 }
                 
-                AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(realAssetName); 
+                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(realAssetName); 
                 loadedAssets.Add(assetRuntimeInfo.Asset);
             }
 

@@ -42,7 +42,8 @@ namespace CatAsset.Runtime
             //卸载时间到了
             State = TaskState.Finished;
             
-            CatAssetManager.RemoveAssetInstance(assetRuntimeInfo.Asset);
+            CatAssetDatabase
+                .RemoveAssetInstance(assetRuntimeInfo.Asset);
             assetRuntimeInfo.Asset = null;
 
             Debug.Log($"已卸载原生资源:{assetRuntimeInfo}");
