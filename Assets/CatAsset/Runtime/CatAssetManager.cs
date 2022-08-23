@@ -312,25 +312,12 @@ namespace CatAsset.Runtime
         public static int LoadAsset(string assetName, object userdata, LoadAssetCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            AssetCategory category;
-            
-            if (assetName.StartsWith("Assets/"))
+            AssetCategory category = Util.GetAssetCategory(assetName);
+            if (category == AssetCategory.InternalRawAsset)
             {
-                //内置Unity资源
-                category = AssetCategory.InternalUnityAsset;
+                //内置原生资源需要去掉"raw:"
+                assetName = Util.GetRealInternalRawAssetName(assetName);
             }
-            else if (assetName.StartsWith("raw:Assets/"))
-            {
-                //内置原生资源
-                category = AssetCategory.InternalRawAsset;
-                assetName = assetName.Substring(4); //去掉"raw:"
-            }
-            else
-            {
-                //外置原生资源
-                category = AssetCategory.ExternalRawAsset;
-            }
-            
             return InternalLoadAsset(assetName, userdata, category, callback, priority);
         }
 
@@ -352,7 +339,6 @@ namespace CatAsset.Runtime
                     {
                         //加载Unity资源
                         asset = UnityEditor.AssetDatabase.LoadAssetAtPath<Object>(assetName);
-                    
                     }
                     else
                     {   
@@ -432,29 +418,24 @@ namespace CatAsset.Runtime
             }
             
 #if UNITY_EDITOR
-            // if (IsEditorMode)
-            // {
-            //     List<object> assets = new List<object>();
-            //     foreach (string assetName in assetNames)
-            //     {
-            //         Object asset = null;
-            //         try
-            //         {
-            //             asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, typeof(Object));
-            //         }
-            //         catch (Exception e)
-            //         {
-            //             Debug.LogError(e);
-            //         }
-            //         finally
-            //         {
-            //             assets.Add(asset);
-            //         }
-            //         callback?.Invoke(assets,userdata);
-            //     }
-            //
-            //     return default;
-            // }
+            if (IsEditorMode)
+            {
+                List<object> assets = new List<object>();
+                foreach (string assetName in assetNames)
+                {
+                    LoadAsset(assetName, null, ((success, asset, o) =>
+                    {
+                        assets.Add(asset);
+                        if (assets.Count == assetNames.Count)
+                        {
+                            //编辑器模式下是以同步的方式加载所有资源的 所以这里的asset顺序是和assetNames给出的顺序可以对上的
+                            callback(assets, userdata);
+                        }
+                    }));
+                }
+
+                return default;
+            }
 #endif
             
             BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,$"{nameof(BatchLoadAsset)} - {TaskRunner.GUIDFactory + 1}",assetNames,userdata,callback);

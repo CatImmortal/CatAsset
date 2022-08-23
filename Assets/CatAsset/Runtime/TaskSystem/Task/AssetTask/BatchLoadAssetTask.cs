@@ -25,7 +25,7 @@ namespace CatAsset.Runtime
         private bool needCancel;
 
         /// <inheritdoc />
-        public override float Progress => loadedAssetCount / assetNames.Count;
+        public override float Progress => (loadedAssetCount * 1.0f) / assetNames.Count;
 
         public BatchLoadAssetTask()
         {
@@ -78,7 +78,15 @@ namespace CatAsset.Runtime
             //保证资源顺序和加载顺序一致
             foreach (string assetName in assetNames)
             {
-                AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(assetName); 
+                string realAssetName = assetName;
+                AssetCategory category = Util.GetAssetCategory(assetName);
+                if (category == AssetCategory.InternalRawAsset)
+                {
+                    //内置原生资源需要去掉"raw:"
+                    realAssetName = Util.GetRealInternalRawAssetName(assetName);
+                }
+                
+                AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(realAssetName); 
                 loadedAssets.Add(assetRuntimeInfo.Asset);
             }
 
