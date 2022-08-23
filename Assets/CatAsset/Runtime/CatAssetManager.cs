@@ -334,29 +334,6 @@ namespace CatAsset.Runtime
             return InternalLoadAsset(assetName, userdata, category, callback, priority);
         }
 
-        
-        public static int LoadRawAsset(string assetName, object userdata, LoadAssetCallback callback,
-            TaskPriority priority = TaskPriority.Middle)
-        {
-            AssetCategory category;
-            
-            if (assetName.StartsWith("Assets/"))
-            {
-                //内置资源
-
-                //内置原生资源
-                category = AssetCategory.InternalRawAsset;
-              
-            }
-            else
-            {
-                //外置原生资源
-                category = AssetCategory.ExternalRawAsset;
-            }
-            
-            return InternalLoadAsset(assetName, userdata, category, callback, priority);
-        }
-        
         /// <summary>
         /// 加载资源
         /// </summary>

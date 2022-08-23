@@ -234,18 +234,7 @@ namespace CatAsset.Editor
 
                 //资源名
                 EditorGUILayout.LabelField(assetName, GUILayout.Width(400));
-
-                //资源类型
-                // if (assetRuntimeInfo.Asset != null)
-                // {
-                //     EditorGUILayout.LabelField(assetRuntimeInfo.Asset.GetType().Name, GUILayout.Width(100));
-                // }
-                // else
-                // {
-                //     EditorGUILayout.LabelField("Scene", GUILayout.Width(100));
-                // }
-
-
+                
 
                 EditorGUILayout.LabelField($"|  长度：{Runtime.Util.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}", GUILayout.Width(100));
                 EditorGUILayout.LabelField($"|  引用计数：{assetRuntimeInfo.RefCount}", GUILayout.Width(100));
