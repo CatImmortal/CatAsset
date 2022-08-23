@@ -43,10 +43,10 @@ namespace CatAsset.Runtime
             //删除此资源包中已加载的资源与AssetRuntimeInfo的关联
             foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
             {
-                AssetRuntimeInfo assetRuntimeInfo = CatAssetManager.GetAssetRuntimeInfo(assetManifestInfo.Name);
+                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
                 if (assetRuntimeInfo.Asset != null)
                 {
-                    CatAssetManager.RemoveAssetInstance(assetRuntimeInfo.Asset);
+                    CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
                     assetRuntimeInfo.Asset = null;
                 }
             }
