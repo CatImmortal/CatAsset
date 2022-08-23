@@ -301,10 +301,13 @@ namespace CatAsset.Runtime
         #endregion
 
         #region 资源加载
-
         
         /// <summary>
-        /// 加载资源（自动判断资源类别）
+        /// <para>加载资源</para>
+        /// <para>资源类别判断规则：</para>
+        /// <para>1.内置Unity资源的assetName以"Assets/"开头</para>
+        /// <para>2.内置原生资源的assetName以"raw:Assets/"开头</para>
+        /// <para>3.否则视为外置原生资源</para>
         /// </summary>
         public static int LoadAsset(string assetName, object userdata, LoadAssetCallback callback,
             TaskPriority priority = TaskPriority.Middle)
@@ -313,25 +316,14 @@ namespace CatAsset.Runtime
             
             if (assetName.StartsWith("Assets/"))
             {
-                //内置资源
-                if (!CheckAssetReady(assetName))
-                {
-                    callback(false, null, userdata);
-                    return default;
-                }
-                
-                AssetRuntimeInfo assetRuntimeInfo = GetAssetRuntimeInfo(assetName);
-                if (!assetRuntimeInfo.BundleManifest.IsRaw)
-                {
-                    //内置Unity资源
-                    category = AssetCategory.InternalUnityAsset;
-                }
-                else
-                {
-                    //内置原生资源
-                    category = AssetCategory.InternalRawAsset;
-                }
-              
+                //内置Unity资源
+                category = AssetCategory.InternalUnityAsset;
+            }
+            else if (assetName.StartsWith("raw:Assets/"))
+            {
+                //内置原生资源
+                category = AssetCategory.InternalRawAsset;
+                assetName = assetName.Substring(4); //去掉"raw:"
             }
             else
             {
@@ -342,6 +334,29 @@ namespace CatAsset.Runtime
             return InternalLoadAsset(assetName, userdata, category, callback, priority);
         }
 
+        
+        public static int LoadRawAsset(string assetName, object userdata, LoadAssetCallback callback,
+            TaskPriority priority = TaskPriority.Middle)
+        {
+            AssetCategory category;
+            
+            if (assetName.StartsWith("Assets/"))
+            {
+                //内置资源
+
+                //内置原生资源
+                category = AssetCategory.InternalRawAsset;
+              
+            }
+            else
+            {
+                //外置原生资源
+                category = AssetCategory.ExternalRawAsset;
+            }
+            
+            return InternalLoadAsset(assetName, userdata, category, callback, priority);
+        }
+        
         /// <summary>
         /// 加载资源
         /// </summary>
@@ -352,43 +367,36 @@ namespace CatAsset.Runtime
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                switch (category)
+                object asset;
+
+                try
                 {
-                    case AssetCategory.InternalUnityAsset:
+                    if (category == AssetCategory.InternalUnityAsset)
+                    {
                         //加载Unity资源
-                        Object unityAsset;
-                        try
-                        {
-                            unityAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<Object>(assetName);
-                        }
-                        catch (Exception e)
-                        {
-                            callback?.Invoke(false, null, userdata);
-                            throw;
-                        }
-
-                        callback?.Invoke(true, unityAsset, userdata);
-                        return default;
-
-                    case AssetCategory.InternalRawAsset:
-                    case AssetCategory.ExternalRawAsset:
+                        asset = UnityEditor.AssetDatabase.LoadAssetAtPath<Object>(assetName);
+                    
+                    }
+                    else
+                    {   
                         //加载原生资源
-                        byte[] rawAsset;
-                        try
+                        if (category == AssetCategory.ExternalRawAsset)
                         {
-                            rawAsset = File.ReadAllBytes(assetName);
+                            //编辑器资源模式下 加载外置原生资源 需要给出带读写区路径的完整assetName
+                            assetName = Util.GetReadWritePath(assetName);
                         }
-                        catch (Exception e)
-                        {
-                            callback?.Invoke(false, null, userdata);
-                            throw;
-                        }
-
-                        callback?.Invoke(true, rawAsset, userdata);
-                        return default;
+                    
+                        asset = File.ReadAllBytes(assetName);
+                    }
+                }
+                catch (Exception e)
+                {
+                    callback?.Invoke(false, null, userdata);
+                    throw;
                 }
                 
-
+                callback?.Invoke(true, asset, userdata);
+                return default;
             }
 #endif
 
@@ -396,34 +404,32 @@ namespace CatAsset.Runtime
             {
 
                 case AssetCategory.InternalUnityAsset:
-                    //加载Unity资源
                     
+                    //加载Unity资源
                     if (!CheckAssetReady(assetName))
                     {
                         callback?.Invoke(false, null, userdata);
                         return default;
                     }
-
                     LoadUnityAssetTask loadUnityAssetTask = LoadUnityAssetTask.Create(loadTaskRunner, assetName, userdata, callback);
                     loadTaskRunner.AddTask(loadUnityAssetTask, priority);
                     return loadUnityAssetTask.GUID;
                 
                 case AssetCategory.InternalRawAsset:
+                    
                     //加载内置原生资源
-
                     if (!CheckAssetReady(assetName))
                     {
                         callback?.Invoke(false, null, userdata);
                         return default;
                     }
-
-                    //加载内置原生资源
                     LoadRawAssetTask loadRawAssetTask = LoadRawAssetTask.Create(loadTaskRunner,assetName,userdata,callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
             
                     return loadRawAssetTask.GUID;
 
                 case AssetCategory.ExternalRawAsset:
+                    
                     //加载外置原生资源
                     GetOrAddAssetRuntimeInfo(assetName);
                     loadRawAssetTask = LoadRawAssetTask.Create(loadTaskRunner,assetName,userdata,callback);
