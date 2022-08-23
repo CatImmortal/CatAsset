@@ -56,5 +56,30 @@ namespace CatAsset.Runtime
             return length + "B";
         }
 
+        /// <summary>
+        /// 获取资源类别
+        /// </summary>
+        public static AssetCategory GetAssetCategory(string assetName)
+        {
+            if (assetName.StartsWith("Assets/"))
+            {
+                return AssetCategory.InternalUnityAsset;
+            }
+
+            if (assetName.StartsWith("raw:Assets/"))
+            {
+                return AssetCategory.InternalRawAsset;
+            }
+
+            return AssetCategory.ExternalRawAsset;
+        }
+        
+        /// <summary>
+        /// 获取内置原生资源的真实资源名
+        /// </summary>
+        public static string GetRealInternalRawAssetName(string assetName)
+        {
+            return assetName.Substring(4);
+        }
     }
 }
