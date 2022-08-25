@@ -49,6 +49,9 @@ namespace CatAsset.Editor
                     index = EditorGUILayout.Popup(index,ruleNames);
                     directory.BuildRuleName = ruleNames[index];
                   
+                    //绘制正则表达式字符串
+                    EditorGUILayout.LabelField("正则：",GUILayout.Width(50));
+                    directory.RuleRegex = EditorGUILayout.TextField(directory.RuleRegex);
                     
                     //绘制资源组
                     EditorGUILayout.LabelField("资源组：",GUILayout.Width(50));
