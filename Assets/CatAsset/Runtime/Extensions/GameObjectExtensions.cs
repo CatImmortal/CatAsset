@@ -2,7 +2,7 @@
 
 namespace CatAsset.Runtime
 {
-    public static class GameObjectExtension
+    public static class GameObjectExtensions
     {
         /// <summary>
         /// 获取组件，若不存在则添加

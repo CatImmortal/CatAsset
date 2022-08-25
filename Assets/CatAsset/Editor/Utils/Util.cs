@@ -100,7 +100,7 @@ namespace CatAsset.Editor
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 if (Directory.Exists(path) && config.CanAddDirectory(path))
                 {
-                    BundleBuildDirectory directory = new BundleBuildDirectory(path,nameof(NAssetToOneBundle),DefaultGroup);
+                    BundleBuildDirectory directory = new BundleBuildDirectory(path,nameof(NAssetToOneBundle),null,DefaultGroup);
                     config.Directories.Add(directory);
                 }
             }

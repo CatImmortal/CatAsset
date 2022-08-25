@@ -17,6 +17,11 @@ namespace CatAsset.Editor
         /// 构建规则名
         /// </summary>
         public string BuildRuleName;
+
+        /// <summary>
+        /// 构建规则所使用的正则表达式
+        /// </summary>
+        public string RuleRegex;
         
         /// <summary>
         /// 资源组
@@ -24,10 +29,11 @@ namespace CatAsset.Editor
         public string Group;
 
 
-        public BundleBuildDirectory(string directoryName, string buildRuleName, string group)
+        public BundleBuildDirectory(string directoryName, string buildRuleName, string ruleRegex, string group)
         {
             DirectoryName = directoryName;
             BuildRuleName = buildRuleName;
+            RuleRegex = ruleRegex;
             Group = group;
         }
 

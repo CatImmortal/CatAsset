@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace CatAsset.Editor
             if (Directory.Exists(bundleBuildDirectory.DirectoryName))
             {
                 //此构建规则只返回一个资源包
-                BundleBuildInfo info = GetNAssetToOneBundle(bundleBuildDirectory.DirectoryName, bundleBuildDirectory.Group);
+                BundleBuildInfo info = GetNAssetToOneBundle(bundleBuildDirectory.DirectoryName,bundleBuildDirectory.RuleRegex, bundleBuildDirectory.Group);
                 if (info != null)
                 {
                     result.Add(info);
@@ -35,7 +36,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 将指定目录下所有资源构建为一个资源包
         /// </summary>
-        protected BundleBuildInfo GetNAssetToOneBundle(string targetDirectory,string group)
+        protected BundleBuildInfo GetNAssetToOneBundle(string targetDirectory,string ruleRegex,string group)
         {
             //注意：targetDirectory在这里被假设为一个形如Assets/xxx/yyy....格式的目录
             DirectoryInfo dirInfo = new DirectoryInfo(targetDirectory);
@@ -48,8 +49,14 @@ namespace CatAsset.Editor
                 {
                     continue;
                 }
+
+                string assetName = Util.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
                 
-                string assetName = Util.FullNameToAssetName(file.FullName);
+                if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(assetName,ruleRegex))
+                {
+                    continue;
+                }
+                
                 assetNames.Add(assetName);
             }
 
