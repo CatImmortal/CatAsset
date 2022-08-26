@@ -37,6 +37,12 @@ namespace CatAsset.Runtime
         private static Dictionary<int, List<AssetRuntimeInfo>> sceneBindAssets =
             new Dictionary<int, List<AssetRuntimeInfo>>();
 
+
+        /// <summary>
+        /// 资源组名->资源组信息
+        /// </summary>
+        private static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
+
         /// <summary>
         /// 使用资源清单进行初始化
         /// </summary>
@@ -54,7 +60,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 根据资源包清单信息初始化运行时信息
         /// </summary>
-        private static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
+        internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
         {
             BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
             bundleRuntimeInfoDict.Add(bundleManifestInfo.RelativePath, bundleRuntimeInfo);
@@ -216,6 +222,21 @@ namespace CatAsset.Runtime
             AssetRuntimeInfo info = GetAssetRuntimeInfo(asset);
             assets.Add(info);
           
+        }
+        
+        /// <summary>
+        /// 获取资源组信息，若不存在则添加
+        /// </summary>
+        internal static GroupInfo GetOrAddGroupInfo(string group)
+        {
+            if (!groupInfoDict.TryGetValue(group, out GroupInfo groupInfo))
+            {
+                groupInfo = new GroupInfo();
+                groupInfo.GroupName = group;
+                groupInfoDict.Add(group, groupInfo);
+            }
+
+            return groupInfo;
         }
     }
 }

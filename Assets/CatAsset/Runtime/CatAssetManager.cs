@@ -121,9 +121,32 @@ namespace CatAsset.Runtime
                     }
                 });
 
-            loadTaskRunner.AddTask(task, TaskPriority.Height);
+            loadTaskRunner.AddTask(task, TaskPriority.VeryHeight);
         }
 
+        /// <summary>
+        /// 检查资源版本，可更新资源模式下专用
+        /// </summary>
+        public static void CheckVersion(OnVersionChecked onVersionChecked)
+        {
+            if (RuntimeMode != RuntimeMode.Updatable)
+            {
+                Debug.LogError("非Updatable模式下不能调用CheckVersion");
+                return;
+            }
+            
+            VersionChecker.CheckVersion(onVersionChecked);
+        }
+        
+        /// <summary>
+        /// 检查可更新模式下指定路径的资源清单
+        /// </summary>
+        internal static void CheckUpdatableManifest(string path,WebRequestCallback callback)
+        {
+            WebRequestTask task = WebRequestTask.Create(downloadTaskRunner,path,path,null,callback);
+            downloadTaskRunner.AddTask(task,TaskPriority.VeryHeight);
+        }
+        
         #endregion
 
         #region 资源加载
