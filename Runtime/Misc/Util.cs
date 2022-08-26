@@ -34,6 +34,15 @@ namespace CatAsset.Runtime
             string result = Path.Combine(Application.persistentDataPath, path);
             return result;
         }
+
+        /// <summary>
+        /// 获取在远端下的完整路径
+        /// </summary>
+        public static string GetRemotePath(string path)
+        {
+            string result = Path.Combine(CatAssetUpdater.UpdateUriPrefix, path);
+            return result;
+        }
         
         /// <summary>
         /// 根据字节长度获取合适的描述信息

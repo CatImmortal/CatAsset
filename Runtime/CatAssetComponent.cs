@@ -16,7 +16,7 @@ namespace CatAsset.Runtime
 
         [Header("资源包卸载延迟")]
         public float UnloadDelayTime = 30f;
-        
+
         private void Awake()
         {
             CatAssetManager.RuntimeMode= RuntimeMode;
