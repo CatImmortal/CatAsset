@@ -14,36 +14,22 @@ namespace CatAsset.Runtime
     /// </summary>
     public class WebRequestTask : BaseTask<WebRequestTask>
     {
-        /// <summary>
-        /// Web请求的uri地址
-        /// </summary>
         private string uri;
-        
-        /// <summary>
-        /// 用户自定义数据
-        /// </summary>
         private object userdata;
-        
-        /// <summary>
-        /// Web请求任务完成回调
-        /// </summary>
         private WebRequestCallback onFinished;
         
-        /// <summary>
-        /// Web请求的异步操作对象
-        /// </summary>
-        private UnityWebRequestAsyncOperation operation;
+        private UnityWebRequestAsyncOperation op;
 
         /// <inheritdoc />
         public override float Progress
         {
             get
             {
-                if (operation == null)
+                if (op == null)
                 {
                     return 0;
                 }
-                return operation.progress;
+                return op.progress;
             }
         }
         
@@ -51,13 +37,13 @@ namespace CatAsset.Runtime
         public override void Run()
         {
             UnityWebRequest uwr = UnityWebRequest.Get(uri);
-            operation = uwr.SendWebRequest();
+            op = uwr.SendWebRequest();
         }
 
         /// <inheritdoc />
         public override void Update()
         {
-            if (!operation.isDone)
+            if (!op.isDone)
             {
                 State = TaskState.Running;
                 return;
@@ -66,20 +52,20 @@ namespace CatAsset.Runtime
             //请求完毕
             State = TaskState.Finished;
 
-            if (operation.webRequest.result != UnityWebRequest.Result.Success)
+            if (op.webRequest.result != UnityWebRequest.Result.Success)
             {
-                onFinished?.Invoke(false, operation.webRequest,userdata);
+                onFinished?.Invoke(false, op.webRequest,userdata);
                 foreach (WebRequestTask task in MergedTasks)
                 {
-                    task.onFinished?.Invoke(false, operation.webRequest,task.userdata);
+                    task.onFinished?.Invoke(false, op.webRequest,task.userdata);
                 }
             }
             else
             {
-                onFinished?.Invoke(true, operation.webRequest,userdata);
+                onFinished?.Invoke(true, op.webRequest,userdata);
                 foreach (WebRequestTask task in MergedTasks)
                 {
-                    task.onFinished?.Invoke(true,operation.webRequest,task.userdata);
+                    task.onFinished?.Invoke(true,op.webRequest,task.userdata);
                 }
             }
         }
@@ -107,7 +93,8 @@ namespace CatAsset.Runtime
             uri = default;
             userdata = default;
             onFinished = default;
-            operation = default;
+            op.webRequest.Dispose();
+            op = default;
         }
     }
 }

@@ -68,20 +68,7 @@ namespace CatAsset.Runtime
             allTaskDict.Remove(task.GUID);
         }
 
-        /// <summary>
-        /// 检查资源是否已准备好
-        /// </summary>
-        private static bool CheckAssetReady(string assetName)
-        {
-            AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
-            if (info == null)
-            {
-                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
-                return false;
-            }
 
-            return true;
-        }
         
         #region 资源清单检查
 
@@ -149,7 +136,60 @@ namespace CatAsset.Runtime
         
         #endregion
 
+        #region 资源更新
+
+        /// <summary>
+        /// 设置资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/BundleRelativePath 为下载地址
+        /// </summary>
+        public static void SetUpdateUriPrefix(string updateUriPrefix)
+        {
+            CatAssetUpdater.UpdateUriPrefix = updateUriPrefix;
+        }
+        
+        /// <summary>
+        /// 更新资源组
+        /// </summary>
+        public static void UpdateGroup(string group, OnBundleUpdated callback)
+        {
+            CatAssetUpdater.UpdateGroup(group,callback);
+        }
+        
+        /// <summary>
+        /// 暂停资源组更新
+        /// </summary>
+        public static void PauseGroupUpdater(string group, bool isPause)
+        {
+            CatAssetUpdater.PauseGroupUpdate(group,isPause);
+        }
+
+        /// <summary>
+        /// 下载资源包
+        /// </summary>
+        internal static void DownloadBundle(GroupUpdater groupUpdater, BundleManifestInfo info,string downloadUri,string localFilePath,DownloadBundleCallback callback)
+        {
+            DownloadBundleTask task =
+                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, groupUpdater, downloadUri, localFilePath, callback);
+            downloadTaskRunner.AddTask(task,TaskPriority.Height);
+        }
+
+        #endregion
+        
         #region 资源加载
+        
+        /// <summary>
+        /// 检查资源是否已准备好
+        /// </summary>
+        private static bool CheckAssetReady(string assetName)
+        {
+            AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
+            if (info == null)
+            {
+                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
+                return false;
+            }
+
+            return true;
+        }
         
         /// <summary>
         /// <para>加载资源</para>
@@ -495,6 +535,36 @@ namespace CatAsset.Runtime
             CatAssetDatabase.AddSceneBindAsset(scene,asset);
         }
         
+        #endregion
+
+        #region 数据获取代理
+
+        /// <summary>
+        /// 获取资源组信息
+        /// </summary>
+        public static GroupInfo GetGroupInfo(string group)
+        {
+            return CatAssetDatabase.GetGroupInfo(group);
+        }
+
+        /// <summary>
+        /// 获取所有资源组信息
+        /// </summary>
+        public static List<GroupInfo> GetAllGroupInfo()
+        {
+            return CatAssetDatabase.GetAllGroupInfo();
+        }
+        
+        /// <summary>
+        /// 获取指定资源组的更新器
+        /// </summary>
+        public static GroupUpdater GetGroupUpdater(string group)
+        {
+            return CatAssetUpdater.GetGroupUpdater(group);
+        }
+
+        
+
         #endregion
     }
 }

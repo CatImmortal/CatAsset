@@ -44,11 +44,11 @@ namespace CatAsset.Runtime
         /// 文件长度
         /// </summary>
         public long Length;
-
+        
         /// <summary>
-        /// 文件Hash
+        /// 文件MD5
         /// </summary>
-        public Hash128 Hash;
+        public string MD5;
 
         /// <summary>
         /// 资源清单信息列表
@@ -62,7 +62,7 @@ namespace CatAsset.Runtime
         
         public bool Equals(BundleManifestInfo other)
         {
-            return RelativePath.Equals(other.RelativePath)  && Length.Equals(other.Length) && Hash.Equals(other.Hash) && Group.Equals(other.Group);
+            return RelativePath.Equals(other.RelativePath)  && Length.Equals(other.Length) && MD5.Equals(other.MD5) && Group.Equals(other.Group);
         }
 
         public override string ToString()

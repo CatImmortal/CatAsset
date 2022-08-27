@@ -16,7 +16,7 @@ namespace CatAsset.Editor
         private void InitGroupInfoView()
         {
             isInitGroupInfoView = true;
-            groupInfoDict = typeof(CatAssetDatabase).GetField("groupInfoDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, GroupInfo>;
+            groupInfoDict = typeof(CatAssetDatabase).GetField(nameof(groupInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, GroupInfo>;
         }
 
         /// <summary>

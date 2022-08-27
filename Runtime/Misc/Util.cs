@@ -1,7 +1,9 @@
-﻿using System;
+﻿
 using System.IO;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using System.Security.Cryptography;
+using System.Text;
+using UnityEngine.Profiling;
 
 namespace CatAsset.Runtime
 {
@@ -15,6 +17,8 @@ namespace CatAsset.Runtime
         private const int oneKB = 1024;
         private const int oneMB = oneKB * 1024;
         private const int oneGB = oneMB * 1024;
+        
+        private static StringBuilder CachedSB = new StringBuilder();
         
         /// <summary>
         /// 获取在只读区下的完整路径
@@ -89,6 +93,31 @@ namespace CatAsset.Runtime
         public static string GetRealInternalRawAssetName(string assetName)
         {
             return assetName.Substring(4);
+        }
+
+
+        /// <summary>
+        /// 获取文件MD5
+        /// </summary>
+        public static string GetFileMD5(string filePath)
+        {
+            Profiler.BeginSample("GetFileMD5");
+            using (FileStream fs = new FileStream(filePath,FileMode.Open))
+            {
+                using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
+                {
+                   byte[] bytes = md5.ComputeHash(fs);
+                   CachedSB.Clear();
+                   foreach (byte b in bytes)
+                   {
+                       CachedSB.Append(b.ToString("x2"));
+                   }
+                   string result = CachedSB.ToString();
+                   Profiler.EndSample();
+                   return result;
+                }
+            }
+          
         }
     }
 }

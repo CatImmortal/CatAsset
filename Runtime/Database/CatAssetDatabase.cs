@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
@@ -237,6 +238,24 @@ namespace CatAsset.Runtime
             }
 
             return groupInfo;
+        }
+
+        /// <summary>
+        /// 获取资源组信息
+        /// </summary>
+        internal static GroupInfo GetGroupInfo(string group)
+        {
+            groupInfoDict.TryGetValue(group, out GroupInfo groupInfo);
+            return groupInfo;
+        }
+
+        /// <summary>
+        /// 获取所有资源组信息
+        /// </summary>
+        internal static List<GroupInfo> GetAllGroupInfo()
+        {
+            List<GroupInfo> groupInfos = groupInfoDict.Values.ToList();
+            return groupInfos;
         }
     }
 }

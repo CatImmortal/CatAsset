@@ -26,5 +26,10 @@
             TotalCount = totalCount;
             TotalLength = totalLength;
         }
+
+        public override string ToString()
+        {
+            return $"VersionCheckResult Error:{Error},TotalCount:{TotalCount},TotalLength:{TotalLength}";
+        }
     }
 }

@@ -124,7 +124,7 @@ namespace CatAsset.Runtime
             switch (loadUnityAssetState)
             {
                 case LoadUnityAssetState.BundleLoading:
-                    //1.检查资源包是否加载结束
+                    //1.资源包加载中
                     CheckStateWithBundleLoading();
                     break;
                 
@@ -134,7 +134,7 @@ namespace CatAsset.Runtime
                     break;
                 
                 case LoadUnityAssetState.DependenciesLoading:
-                    //3.检查依赖资源是否加载结束
+                    //3.依赖资源加载中
                     CheckStateWithDependenciesLoading();
                     break;
                 

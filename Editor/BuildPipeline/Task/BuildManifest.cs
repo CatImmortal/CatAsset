@@ -7,6 +7,7 @@ using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEngine;
 using UnityEngine.Build.Pipeline;
 
+
 namespace CatAsset.Editor
 {
     /// <summary>
@@ -65,9 +66,7 @@ namespace CatAsset.Editor
                 string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = fi.Length;
-
-                BundleDetails details = results.BundleInfos[bundleBuildInfo.RelativePath];
-                bundleManifestInfo.Hash = details.Hash;
+                bundleManifestInfo.MD5 = Runtime.Util.GetFileMD5(fullPath);
                 
                 //资源信息
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
@@ -105,11 +104,10 @@ namespace CatAsset.Editor
                 manifest.Bundles.Add(bundleManifestInfo);
 
                 string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
-                byte[] bytes = File.ReadAllBytes(fullPath);
-                bundleManifestInfo.Length = bytes.Length;
-
-                bundleManifestInfo.Hash = Hash128.Compute(bytes);
-
+                FileInfo fi = new FileInfo(fullPath);
+                bundleManifestInfo.Length = fi.Length;
+                bundleManifestInfo.MD5 = Runtime.Util.GetFileMD5(fullPath);
+                
                 //资源信息
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                 {

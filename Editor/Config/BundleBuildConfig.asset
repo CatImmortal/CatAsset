@@ -12,25 +12,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 10
-  TargetPlatforms: 13000000
+  ManifestVersion: 2
+  TargetPlatforms: 05000000
   Options: 256
   OutputPath: ./AssetBundles
   IsRedundancyAnalyze: 1
-  IsCopyToReadOnlyDirectory: 1
+  IsCopyToReadOnlyDirectory: 0
   CopyGroup: Base
   Directories:
   - DirectoryName: Assets/BundleRes/Image
     BuildRuleName: NAssetToNRawBundle
+    RuleRegex: 
     Group: Base
   - DirectoryName: Assets/BundleRes/PrefabA
     BuildRuleName: NAssetToOneBundle
+    RuleRegex: 
     Group: Base
   - DirectoryName: Assets/BundleRes/PrefabB
     BuildRuleName: NAssetToOneBundle
+    RuleRegex: 
+    Group: Base
+  - DirectoryName: Assets/BundleRes/RegexTest
+    BuildRuleName: NAssetToOneBundle
+    RuleRegex: .*[\.png]$
     Group: Base
   - DirectoryName: Assets/BundleRes/Scene
-    BuildRuleName: NAssetToOneBundle
+    BuildRuleName: NAssetToNBundle
+    RuleRegex: 
     Group: Base
   Bundles:
   - RelativePath: bundleres/image/Img1.jpg
@@ -101,16 +109,33 @@ MonoBehaviour:
     - Name: Assets/BundleRes/PrefabB/B4.prefab
       TypeName: GameObject
       Length: 893
-  - RelativePath: bundleres/scene.bundle
+  - RelativePath: bundleres/regextest.bundle
     DirectoryName: BundleRes
-    BundleName: scene.bundle
+    BundleName: regextest.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 11184
+    AssetsLength: 2097
+    Assets:
+    - Name: Assets/BundleRes/RegexTest/Square.png
+      TypeName: Texture2D
+      Length: 2097
+  - RelativePath: bundleres/scene/new scene_unity.bundle
+    DirectoryName: BundleRes/Scene
+    BundleName: new scene_unity.bundle
+    Group: Base
+    IsRaw: 0
+    AssetsLength: 5592
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
       TypeName: SceneAsset
       Length: 5592
+  - RelativePath: bundleres/scene/new scene2_unity.bundle
+    DirectoryName: BundleRes/Scene
+    BundleName: new scene2_unity.bundle
+    Group: Base
+    IsRaw: 0
+    AssetsLength: 5592
+    Assets:
     - Name: Assets/BundleRes/Scene/New Scene2.unity
       TypeName: SceneAsset
       Length: 5592
