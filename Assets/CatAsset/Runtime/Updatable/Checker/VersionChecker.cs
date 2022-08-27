@@ -100,7 +100,6 @@ namespace CatAsset.Runtime
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.RelativePath);
                 checkInfo.ReadWriteInfo = item;
-                CatAssetUpdater.AddReadWriteManifestInfo(item);
             }
 
             isReadWriteLoaded = true;
@@ -159,19 +158,25 @@ namespace CatAsset.Runtime
                 //三方资源清单未加载完毕
                 return;
             }
-            
+
             //需要更新的所有资源包的数量与长度
             int totalCount = 0;
             long totalLength = 0;
-            
-            //是否重新需要生成读写区资源清单
-            bool needGenerateManifest = false;
 
             foreach (KeyValuePair<string,CheckInfo> pair in checkInfoDict)
             {
                 CheckInfo checkInfo = pair.Value;
                 checkInfo.RefreshState();
 
+                if (checkInfo.State != CheckState.Disuse)
+                {
+                    //添加资源组的远端资源包信息
+                    GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.RemoteInfo.Group);
+                    groupInfo.AddRemoteBundle(checkInfo.RemoteInfo.RelativePath);
+                    groupInfo.RemoteCount++;
+                    groupInfo.RemoteLength += checkInfo.RemoteInfo.Length;
+                }
+                
                 switch (checkInfo.State)
                 {
 
@@ -179,15 +184,35 @@ namespace CatAsset.Runtime
                         //需要更新
                         totalCount++;
                         totalLength += checkInfo.RemoteInfo.Length;
+
+                        GroupUpdater groupUpdater = CatAssetUpdater.GetOrAddGroupUpdater(checkInfo.RemoteInfo.Group);
+                        groupUpdater.AddUpdateBundle(checkInfo.RemoteInfo);
+                        groupUpdater.TotalCount++;
+                        groupUpdater.TotalLength += checkInfo.RemoteInfo.Length;
+                        
                         break;
                     
                     case CheckState.InReadWrite:
                         //不需要更新 最新版本存在于读写区
+                        
+                        GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.ReadWriteInfo.Group);
+                        groupInfo.AddLocalBundle(checkInfo.ReadWriteInfo.RelativePath);
+                        groupInfo.LocalCount++;
+                        groupInfo.LocalLength += checkInfo.ReadWriteInfo.Length;
+                        
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.ReadWriteInfo,true);
+                        CatAssetUpdater.AddReadWriteManifestInfo(checkInfo.ReadWriteInfo);
+                        
                         break;
                     
                     case CheckState.InReadOnly:
                         //不需要更新 最新版本存在于只读区
+
+                        groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.ReadOnlyInfo.Group);
+                        groupInfo.AddLocalBundle(checkInfo.ReadOnlyInfo.RelativePath);
+                        groupInfo.LocalCount++;
+                        groupInfo.LocalLength += checkInfo.ReadOnlyInfo.Length;
+                        
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.ReadOnlyInfo,false);
                         break;
                 }
@@ -198,21 +223,12 @@ namespace CatAsset.Runtime
                     Debug.Log($"删除读写区资源:{checkInfo.Name}");
                     string path = Util.GetReadWritePath(checkInfo.Name);
                     File.Delete(path);
-                    CatAssetUpdater.RemoveReadWriteManifestInfo(checkInfo.ReadWriteInfo);
-                    
-                    //删除过读写区资源 需要重新生成
-                    needGenerateManifest = true;
-
                 }
             }
 
-            if (needGenerateManifest)
-            {
-                CatAssetUpdater.GenerateReadWriteManifest();
-            }
             
             //调用版本检查完毕回调
-            VersionCheckResult result = new VersionCheckResult(null,totalCount, totalLength);
+            VersionCheckResult result = new VersionCheckResult(string.Empty,totalCount, totalLength);
             onVersionChecked?.Invoke(result);
                 
             Clear();

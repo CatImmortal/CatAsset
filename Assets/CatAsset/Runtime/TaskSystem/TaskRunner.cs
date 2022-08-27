@@ -60,7 +60,7 @@ namespace CatAsset.Runtime
                 {
                     if (group.Run())
                     {
-                        //Run调用返回true 意味着需要增加curRunningCount
+                        //Run调用返回true 意味着需要增加curRanCount
                         curRanCount++;
                     }
                 }

@@ -68,10 +68,12 @@ namespace CatAsset.Runtime
             {
 
                 case LoadRawAssetState.Loading:
+                    //加载中
                     CheckStateWithLoading();
                     break;
                 
                 case LoadRawAssetState.Loaded:
+                    //加载结束
                     CheckStateWithLoaded();
                     break;
 

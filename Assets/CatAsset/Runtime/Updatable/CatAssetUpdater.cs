@@ -12,12 +12,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/BundleRelativePath 为下载地址
         /// </summary>
-        public static string UpdateUriPrefix;
+        internal static string UpdateUriPrefix;
         
         /// <summary>
         /// 资源包相对路径->读写区资源包清单信息，用于生成读写区资源清单
         /// </summary>
         private static Dictionary<string, BundleManifestInfo> readWriteManifestInfoDict = new Dictionary<string, BundleManifestInfo>();
+
+        /// <summary>
+        /// 资源组名->资源组对应的资源更新器
+        /// </summary>
+        private static Dictionary<string, GroupUpdater> groupUpdaterDict = new Dictionary<string, GroupUpdater>();
 
         /// <summary>
         /// 添加读写区资源包清单信息
@@ -72,6 +77,78 @@ namespace CatAsset.Runtime
             }
         }
         
-        
+        /// <summary>
+        /// 获取指定资源组的更新器，若不存在则添加
+        /// </summary>
+        internal static GroupUpdater GetOrAddGroupUpdater(string group)
+        {
+            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater updater))
+            {
+                updater = new GroupUpdater();
+                updater.GroupName = group;
+                groupUpdaterDict.Add(group, updater);
+            }
+            return updater;
+        }
+
+        /// <summary>
+        /// 获取指定资源组的更新器
+        /// </summary>
+        internal static GroupUpdater GetGroupUpdater(string group)
+        {
+            groupUpdaterDict.TryGetValue(group, out GroupUpdater updater);
+            return updater;
+        }
+
+        /// <summary>
+        /// 删除指定资源组的更新器
+        /// </summary>
+        internal static void RemoveGroupUpdater(string group)
+        {
+            groupUpdaterDict.Remove(group);
+        }
+
+        /// <summary>
+        /// 更新资源组
+        /// </summary>
+        internal static void UpdateGroup(string group,OnBundleUpdated callback)
+        {
+            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
+            {
+                Debug.LogError($"更新失败，没有找到该资源组的资源更新器：{group}");
+                return;
+            }
+            
+            //更新指定资源组
+            groupUpdater.UpdateGroup(callback);
+        }
+
+        /// <summary>
+        /// 暂停资源组更新
+        /// </summary>
+        internal static void PauseGroupUpdate(string group, bool isPause)
+        {
+            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
+            {
+                Debug.LogError($"暂停失败，没有找到该资源组的更新器：{group}");
+                return;
+            }
+
+            //暂停指定资源组更新器
+            if (isPause)
+            {
+                if (groupUpdater.State == GroupUpdaterState.Running)
+                {
+                    groupUpdater.State = GroupUpdaterState.Paused;
+                }
+            }
+            else
+            {
+                if (groupUpdater.State == GroupUpdaterState.Paused)
+                {
+                    groupUpdater.State = GroupUpdaterState.Running;
+                }
+            }
+        }
     }
 }

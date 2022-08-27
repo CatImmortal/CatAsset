@@ -19,7 +19,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 页签
         /// </summary>
-        private string[] tabs = { "资源信息", "任务信息","更新器信息","资源组信息" };
+        private string[] tabs = { "资源信息", "任务信息" ,"资源组信息" ,"更新器信息"};
 
 
         [MenuItem("CatAsset/打开运行时信息窗口", priority = 1)]
@@ -41,8 +41,8 @@ namespace CatAsset.Editor
                     //窗口打开期间，每次运行游戏都重置下数据
                     isInitRuntimeInfoView = false;
                     isInitTaskInfoView = false;
-                    // isInitUpdateInfoView = false;
                     isInitGroupInfoView = false;
+                    isInitGroupUpdaterInfoView= false;
                     break;
                 case PlayModeStateChange.EnteredPlayMode:
                     break;
@@ -83,13 +83,13 @@ namespace CatAsset.Editor
                 case 1:
                     DrawTaskInfoView();
                     break;
-                //
-                // case 2:
-                //     DrawUpdateInfoView();
-                //     break;
-                //
-                case 3:
+                
+                case 2:
                     DrawGroupInfoView();
+                    break;
+                
+                case 3:
+                    DrawGroupUpdaterInfoView();
                     break;
             }
 

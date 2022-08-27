@@ -108,6 +108,7 @@ namespace CatAsset.Runtime
             }
             catch (Exception e)
             {
+                //任务出现异常 视为任务结束处理
                 task.State = TaskState.Finished;
                 throw;
             }

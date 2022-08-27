@@ -18,8 +18,6 @@ namespace CatAsset.Runtime
         /// </summary>
         private enum LoadBundleStatus
         {
-            None,
-
             /// <summary>
             /// 资源包加载中
             /// </summary>

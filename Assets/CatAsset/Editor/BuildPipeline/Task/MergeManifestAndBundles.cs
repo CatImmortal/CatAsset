@@ -46,6 +46,7 @@ namespace CatAsset.Editor
                 }
                 if (mainManifest == null)
                 {
+                    //没有主资源清单 不需要合并
                     return ReturnCode.SuccessNotRun;
                 }
             
