@@ -5,12 +5,12 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadAssetCallback(bool success, LoadAssetResult result, object userdata);
+    public delegate void LoadAssetCallback<in T>(bool success, T asset,LoadAssetResult result, object userdata);
 
     /// <summary>
     /// 资源包资源加载任务
     /// </summary>
-    public class LoadBundleAssetTask : BaseTask<LoadBundleAssetTask>
+    public class LoadBundleAssetTask<T> : BaseTask<LoadBundleAssetTask<T>>
     {
         /// <summary>
         /// 资源包资源加载状态
@@ -51,7 +51,7 @@ namespace CatAsset.Runtime
         }
         
         protected object Userdata;
-        private LoadAssetCallback onFinished;
+        private LoadAssetCallback<T> onFinished;
         
         protected AssetRuntimeInfo AssetRuntimeInfo;
         protected BundleRuntimeInfo BundleRuntimeInfo;
@@ -60,7 +60,7 @@ namespace CatAsset.Runtime
 
         private int totalDependencyCount;
         private int loadFinishDependencyCount;
-        private LoadAssetCallback onDependencyLoadedCallback;
+        private LoadAssetCallback<Object> onDependencyLoadedCallback;
 
 
         private LoadBundleAssetState loadBundleAssetState;
@@ -186,13 +186,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 依赖资源加载完毕的回调
         /// </summary>
-        private void OnDependencyLoaded(bool success, LoadAssetResult result, object userdata)
+        private void OnDependencyLoaded(bool success, Object asset,LoadAssetResult result, object userdata)
         {
             loadFinishDependencyCount++;
 
             if (success)
             {
-                object asset = result.GetAsset();
                 AssetRuntimeInfo dependencyAssetInfo = CatAssetDatabase.GetAssetRuntimeInfo(asset);
                 BundleRuntimeInfo dependencyBundleInfo =
                     CatAssetDatabase.GetBundleRuntimeInfo(dependencyAssetInfo.BundleManifest.RelativePath);
@@ -238,8 +237,7 @@ namespace CatAsset.Runtime
                 totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
                 foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    CatAssetManager.InternalLoadAsset(dependency, null, AssetCategory.InternalBundleAsset,
-                        onDependencyLoadedCallback);
+                    CatAssetManager.InternalLoadAsset(dependency, null, onDependencyLoadedCallback);
                 }
             }
         }
@@ -333,7 +331,7 @@ namespace CatAsset.Runtime
         /// </summary>
         protected virtual void LoadAsync()
         {
-            Operation = BundleRuntimeInfo.Bundle.LoadAssetAsync(Name, AssetRuntimeInfo.AssetManifest.Type);
+            Operation = BundleRuntimeInfo.Bundle.LoadAssetAsync(Name, typeof(T));
         }
 
         /// <summary>
@@ -367,18 +365,19 @@ namespace CatAsset.Runtime
             if (success)
             {
                 LoadAssetResult result = new LoadAssetResult(AssetRuntimeInfo.Asset, AssetCategory.InternalBundleAsset);
+                T asset = result.GetAsset<T>();
                 
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(true, result, Userdata);
-                    foreach (LoadBundleAssetTask task in MergedTasks)
+                    onFinished?.Invoke(true, asset,result, Userdata);
+                    foreach (LoadBundleAssetTask<T> task in MergedTasks)
                     {
                         if (!task.NeedCancel)
                         {
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadAsset一定增加1个资源的引用计数
                             AssetRuntimeInfo.AddRefCount();
-                            task.onFinished?.Invoke(true, result, task.Userdata);
+                            task.onFinished?.Invoke(true, asset,result, task.Userdata);
                         }
                    
                     }
@@ -390,13 +389,13 @@ namespace CatAsset.Runtime
                     bool needUnload = true;
 
                     //只是主任务被取消了 未取消的已合并任务还需要继续处理
-                    foreach (LoadBundleAssetTask task in MergedTasks)
+                    foreach (LoadBundleAssetTask<T> task in MergedTasks)
                     {
                         if (!task.NeedCancel)
                         {
                             needUnload = false;
                             AssetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(true, result, task.Userdata);
+                            task.onFinished?.Invoke(true, asset,result, task.Userdata);
                         }
                     }
 
@@ -418,14 +417,14 @@ namespace CatAsset.Runtime
             {
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(false, default, Userdata);
+                    onFinished?.Invoke(false, default,default, Userdata);
                 }
                 
-                foreach (LoadBundleAssetTask task in MergedTasks)
+                foreach (LoadBundleAssetTask<T> task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(false,default, task.Userdata);
+                        task.onFinished?.Invoke(false,default,default, task.Userdata);
                     }
                 }
                 
@@ -439,10 +438,10 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建资源加载任务的对象
         /// </summary>
-        public static LoadBundleAssetTask Create(TaskRunner owner, string name, object userdata,
-            LoadAssetCallback callback)
+        public static LoadBundleAssetTask<T> Create(TaskRunner owner, string name, object userdata,
+            LoadAssetCallback<T> callback)
         {
-            LoadBundleAssetTask task = ReferencePool.Get<LoadBundleAssetTask>();
+            LoadBundleAssetTask<T> task = ReferencePool.Get<LoadBundleAssetTask<T>>();
             task.CreateBase(owner, name);
 
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);

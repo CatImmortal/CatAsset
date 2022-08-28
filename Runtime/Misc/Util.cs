@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.IO;
 using UnityEngine;
 using System.Security.Cryptography;
@@ -70,31 +71,63 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 获取编辑器资源模式下的资源类别
+        /// </summary>
+        public static AssetCategory GetAssetCategoryWithEditorMode(string assetName, Type assetType)
+        {
+            if (assetName.StartsWith("Assets/"))
+            {
+                if (typeof(UnityEngine.Object).IsAssignableFrom(assetType) || assetType == typeof(object))
+                {
+                    //编辑器资源模式下
+                    //资源名以Assets/开头
+                    //并且以UnityEngine.Object及其派生类型或object为加载类型 
+                    //都视为内置资源包资源进行加载
+                    return AssetCategory.InternalBundleAsset;
+                }
+                else
+                {
+                    return AssetCategory.InternalRawAsset;
+                }
+            }
+            else
+            {
+                return AssetCategory.ExternalRawAsset;
+            }
+        }
+        
+        /// <summary>
         /// 获取资源类别
         /// </summary>
         public static AssetCategory GetAssetCategory(string assetName)
         {
             if (assetName.StartsWith("Assets/"))
             {
-                return AssetCategory.InternalBundleAsset;
+                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
+                if (assetRuntimeInfo == null)
+                {
+                    Debug.LogError($"GetAssetCategory调用失败，{assetName}的AssetRuntimeInfo为空");
+                    return default;
+                }
+                
+                if (!assetRuntimeInfo.BundleManifest.IsRaw)
+                {
+                    return AssetCategory.InternalBundleAsset;
+                }
+                else
+                {
+                    return AssetCategory.InternalRawAsset;
+                }
+              
             }
-
-            if (assetName.StartsWith("raw:Assets/"))
+            else
             {
-                return AssetCategory.InternalRawAsset;
+                return AssetCategory.ExternalRawAsset;
             }
 
-            return AssetCategory.ExternalRawAsset;
-        }
-        
-        /// <summary>
-        /// 获取内置原生资源的真实资源名
-        /// </summary>
-        public static string GetRealInternalRawAssetName(string assetName)
-        {
-            return assetName.Substring(4);
-        }
 
+           
+        }
 
         /// <summary>
         /// 获取文件MD5

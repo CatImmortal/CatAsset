@@ -5,6 +5,8 @@
     /// </summary>
     public enum AssetCategory
     {
+        None,
+        
         /// <summary>
         /// 内置资源包资源
         /// </summary>

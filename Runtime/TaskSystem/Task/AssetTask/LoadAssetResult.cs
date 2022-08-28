@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 自定义资源转换方法的原型
     /// </summary>
-    public delegate object CustomRawAssetConverter(byte[] rawAsset);
+    public delegate object CustomRawAssetConverter(byte[] bytes);
     
     /// <summary>
     /// 资源加载结果
@@ -30,7 +30,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 已加载的资源实例
+        /// 获取已加载的资源实例
         /// </summary>
         public object GetAsset()
         {
@@ -48,10 +48,16 @@ namespace CatAsset.Runtime
             }
 
             Type type = typeof(T);
+            
+            if (type == typeof(object))
+            {
+                return (T)asset;
+            }
+            
             switch (Category)
             {
                 case AssetCategory.InternalBundleAsset:
-                    if (type.IsSubclassOf(typeof(UnityEngine.Object)))
+                    if (typeof(UnityEngine.Object).IsAssignableFrom(type))
                     {
                         return (T) asset;
                     }

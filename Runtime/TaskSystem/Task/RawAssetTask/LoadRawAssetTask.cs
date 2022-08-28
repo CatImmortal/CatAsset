@@ -8,7 +8,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 原生资源加载任务
     /// </summary>
-    public class LoadRawAssetTask : BaseTask<LoadRawAssetTask>
+    public class LoadRawAssetTask<T> : BaseTask<LoadRawAssetTask<T>>
     {
         /// <summary>
         /// 原生资源加载状态
@@ -30,7 +30,7 @@ namespace CatAsset.Runtime
 
         private AssetCategory category;
         private object userdata;
-        private LoadAssetCallback onFinished;
+        private LoadAssetCallback<T> onFinished;
 
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
@@ -124,21 +124,22 @@ namespace CatAsset.Runtime
             {
                 //加载成功
                 LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
+                T asset = result.GetAsset<T>();
                 
                 if (!needCancel)
                 {
                     assetRuntimeInfo.AddRefCount();
                     
-                    onFinished?.Invoke(true, result, userdata);
+                    onFinished?.Invoke(true, asset, result, userdata);
                     
-                    foreach (LoadRawAssetTask task in MergedTasks)
+                    foreach (LoadRawAssetTask<T> task in MergedTasks)
                     {
                         if (!task.needCancel)
                         {
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadRawAsset一定增加1个资源的引用计数
                             assetRuntimeInfo.AddRefCount();
-                            task.onFinished?.Invoke(true, result, task.userdata);
+                            task.onFinished?.Invoke(true, asset,result, task.userdata);
                         }
                    
                     }
@@ -149,13 +150,13 @@ namespace CatAsset.Runtime
                     bool needUnload = true;
                     
                     //只是主任务被取消了 未取消的已合并任务还需要继续处理
-                    foreach (LoadRawAssetTask task in MergedTasks)
+                    foreach (LoadRawAssetTask<T> task in MergedTasks)
                     {
                         if (!task.needCancel)
                         {
                             needUnload = false;
                             assetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(true, result, task.userdata);
+                            task.onFinished?.Invoke(true, asset,result, task.userdata);
                         }
                     }
 
@@ -171,14 +172,14 @@ namespace CatAsset.Runtime
                 //加载失败
                 if (!needCancel)
                 {
-                    onFinished?.Invoke(false,default,userdata);
+                    onFinished?.Invoke(false,default,default,userdata);
                 }
                 
-                foreach (LoadRawAssetTask task in MergedTasks)
+                foreach (LoadRawAssetTask<T> task in MergedTasks)
                 {
                     if (!task.needCancel)
                     {
-                        task.onFinished?.Invoke(false,default,task.userdata);
+                        task.onFinished?.Invoke(false,default,default,task.userdata);
                     }
                 }
             }
@@ -187,9 +188,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建原生资源加载任务的对象
         /// </summary>
-        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,object userdata,LoadAssetCallback callback)
+        public static LoadRawAssetTask<T> Create(TaskRunner owner, string name,AssetCategory category,object userdata,LoadAssetCallback<T> callback)
         {
-            LoadRawAssetTask task = ReferencePool.Get<LoadRawAssetTask>();
+            LoadRawAssetTask<T> task = ReferencePool.Get<LoadRawAssetTask<T>>();
             task.CreateBase(owner,name);
             
             task.category = category;
