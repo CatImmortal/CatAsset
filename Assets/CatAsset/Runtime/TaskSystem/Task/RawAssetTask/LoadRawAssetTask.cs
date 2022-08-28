@@ -27,7 +27,8 @@ namespace CatAsset.Runtime
             /// </summary>
             Loaded = 2,
         }
-        
+
+        private AssetCategory category;
         private object userdata;
         private LoadAssetCallback onFinished;
 
@@ -122,10 +123,13 @@ namespace CatAsset.Runtime
             if (assetRuntimeInfo.Asset != null)
             {
                 //加载成功
+                LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
+                
                 if (!needCancel)
                 {
                     assetRuntimeInfo.AddRefCount();
-                    onFinished?.Invoke(true, assetRuntimeInfo.Asset, userdata);
+                    
+                    onFinished?.Invoke(true, result, userdata);
                     
                     foreach (LoadRawAssetTask task in MergedTasks)
                     {
@@ -134,7 +138,7 @@ namespace CatAsset.Runtime
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadRawAsset一定增加1个资源的引用计数
                             assetRuntimeInfo.AddRefCount();
-                            task.onFinished?.Invoke(true, assetRuntimeInfo.Asset, task.userdata);
+                            task.onFinished?.Invoke(true, result, task.userdata);
                         }
                    
                     }
@@ -151,7 +155,7 @@ namespace CatAsset.Runtime
                         {
                             needUnload = false;
                             assetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(true, assetRuntimeInfo.Asset, task.userdata);
+                            task.onFinished?.Invoke(true, result, task.userdata);
                         }
                     }
 
@@ -167,14 +171,14 @@ namespace CatAsset.Runtime
                 //加载失败
                 if (!needCancel)
                 {
-                    onFinished?.Invoke(false,null,userdata);
+                    onFinished?.Invoke(false,default,userdata);
                 }
                 
                 foreach (LoadRawAssetTask task in MergedTasks)
                 {
                     if (!task.needCancel)
                     {
-                        task.onFinished?.Invoke(false,null,task.userdata);
+                        task.onFinished?.Invoke(false,default,task.userdata);
                     }
                 }
             }
@@ -183,11 +187,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建原生资源加载任务的对象
         /// </summary>
-        public static LoadRawAssetTask Create(TaskRunner owner, string name,object userdata,LoadAssetCallback callback)
+        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,object userdata,LoadAssetCallback callback)
         {
             LoadRawAssetTask task = ReferencePool.Get<LoadRawAssetTask>();
             task.CreateBase(owner,name);
             
+            task.category = category;
             task.userdata = userdata;
             task.onFinished = callback;
             task.assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
@@ -202,6 +207,7 @@ namespace CatAsset.Runtime
         {
             base.Clear();
 
+            category = default;
             userdata = default;
             onFinished = default;
 
