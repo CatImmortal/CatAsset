@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -50,9 +51,26 @@ namespace CatAsset.Runtime
 
         static CatAssetManager()
         {
-            RegisterCustomRawAssetConverter(typeof(Texture2D),(asset =>
+            RegisterCustomRawAssetConverter(typeof(Texture2D),(bytes =>
             {
-                return null;
+                Texture2D texture2D = new Texture2D(0, 0);
+                texture2D.LoadImage(bytes);
+                return texture2D;
+            }));
+            
+            RegisterCustomRawAssetConverter(typeof(Sprite),(bytes =>
+            {
+                Texture2D texture2D = new Texture2D(0, 0);
+                texture2D.LoadImage(bytes);
+                Sprite sp = Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), Vector2.zero);
+                return sp;
+            }));
+            
+            RegisterCustomRawAssetConverter(typeof(TextAsset),(bytes =>
+            {
+                string text = Encoding.UTF8.GetString(bytes);
+                TextAsset textAsset = new TextAsset(text);
+                return textAsset;
             }));
         }
         
@@ -218,52 +236,55 @@ namespace CatAsset.Runtime
 
             return true;
         }
-        
+
         /// <summary>
-        /// <para>加载资源</para>
-        /// <para>资源类别判断规则：</para>
-        /// <para>1.内置Unity资源的assetName以"Assets/"开头</para>
-        /// <para>2.内置原生资源的assetName以"raw:Assets/"开头</para>
-        /// <para>3.否则视为外置原生资源，固定从读写区进行加载</para>
+        /// 加载资源
         /// </summary>
-        public static int LoadAsset(string assetName, object userdata, LoadAssetCallback callback,
+        public static int LoadAsset(string assetName, object userdata, LoadAssetCallback<object> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            AssetCategory category = Util.GetAssetCategory(assetName);
-            if (category == AssetCategory.InternalRawAsset)
-            {
-                //内置原生资源需要去掉"raw:"
-                assetName = Util.GetRealInternalRawAssetName(assetName);
-            }
-            
-            return InternalLoadAsset(assetName, userdata, category, callback, priority);
+            return LoadAsset<object>(assetName, userdata, callback, priority);
+        }
+        
+        /// <summary>
+        /// 加载资源
+        /// </summary>
+        public static int LoadAsset<T>(string assetName, object userdata, LoadAssetCallback<T> callback,
+            TaskPriority priority = TaskPriority.Middle)
+        {
+            return InternalLoadAsset(assetName, userdata, callback, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        internal static int InternalLoadAsset(string assetName, object userdata,AssetCategory category, LoadAssetCallback callback,
+        internal static int InternalLoadAsset<T>(string assetName, object userdata, LoadAssetCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-
+            AssetCategory category;
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
+                category = Util.GetAssetCategoryWithEditorMode(assetName, typeof(T));
+                
                 object asset;
-
                 try
                 {
                     if (category == AssetCategory.InternalBundleAsset)
                     {
                         //加载资源包资源
-                        asset = UnityEditor.AssetDatabase.LoadAssetAtPath<Object>(assetName);
+                        Type assetType = typeof(T);
+                        if (assetType == typeof(object))
+                        {
+                            assetType = typeof(Object);
+                        }
+                        asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName,assetType);
                     }
                     else
                     {   
                         //加载原生资源
                         if (category == AssetCategory.ExternalRawAsset)
                         {
-                            //编辑器资源模式下 加载外置原生资源 需要给出带读写区路径的完整assetName
                             assetName = Util.GetReadWritePath(assetName);
                         }
                     
@@ -272,16 +293,17 @@ namespace CatAsset.Runtime
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false, default, userdata);
+                    callback?.Invoke(false, default,default, userdata);
                     throw;
                 }
-
+                
                 LoadAssetResult result = new LoadAssetResult(asset, category);
-                callback?.Invoke(true, result, userdata);
+                callback?.Invoke(true, result.GetAsset<T>(),result, userdata);
                 return default;
             }
 #endif
 
+            category = Util.GetAssetCategory(assetName);
             switch (category)
             {
 
@@ -290,10 +312,10 @@ namespace CatAsset.Runtime
                     //加载资源包资源
                     if (!CheckAssetReady(assetName))
                     {
-                        callback?.Invoke(false, default, userdata);
+                        callback?.Invoke(false, default,default, userdata);
                         return default;
                     }
-                    LoadBundleAssetTask loadBundleAssetTask = LoadBundleAssetTask.Create(loadTaskRunner, assetName, userdata, callback);
+                    LoadBundleAssetTask<T> loadBundleAssetTask = LoadBundleAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
                     loadTaskRunner.AddTask(loadBundleAssetTask, priority);
                     return loadBundleAssetTask.GUID;
                 
@@ -302,10 +324,10 @@ namespace CatAsset.Runtime
                     //加载内置原生资源
                     if (!CheckAssetReady(assetName))
                     {
-                        callback?.Invoke(false, default, userdata);
+                        callback?.Invoke(false, default,default, userdata);
                         return default;
                     }
-                    LoadRawAssetTask loadRawAssetTask = LoadRawAssetTask.Create(loadTaskRunner,assetName,category,userdata,callback);
+                    LoadRawAssetTask<T> loadRawAssetTask = LoadRawAssetTask<T>.Create(loadTaskRunner,assetName,category,userdata,callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
             
                     return loadRawAssetTask.GUID;
@@ -314,7 +336,7 @@ namespace CatAsset.Runtime
                     
                     //加载外置原生资源
                     CatAssetDatabase.GetOrAddAssetRuntimeInfo(assetName);
-                    loadRawAssetTask = LoadRawAssetTask.Create(loadTaskRunner,assetName,category,userdata,callback);
+                    loadRawAssetTask = LoadRawAssetTask<T>.Create(loadTaskRunner,assetName,category,userdata,callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
             
                     return loadRawAssetTask.GUID;
@@ -342,9 +364,10 @@ namespace CatAsset.Runtime
                 List<LoadAssetResult> assets = new List<LoadAssetResult>();
                 foreach (string assetName in assetNames)
                 {
-                    LoadAsset(assetName, null, ((success, asset, o) =>
+                    LoadAsset(assetName, null, ((success, asset,result, o) =>
                     {
-                        assets.Add(asset);
+                        assets.Add(result);
+                        
                         if (assets.Count == assetNames.Count)
                         {
                             //编辑器模式下是以同步的方式加载所有资源的 所以这里的asset顺序是和assetNames给出的顺序可以对上的
@@ -436,11 +459,11 @@ namespace CatAsset.Runtime
             {
                 if (asset is Object unityObj)
                 {
-                    Debug.LogError($"要卸载的资源未加载过：{unityObj.name}");
+                    Debug.LogError($"要卸载的资源未加载过：{unityObj.name}，类型为{asset.GetType()}");
                 }
                 else
                 {
-                    Debug.LogError("要卸载的资源未加载过");
+                    Debug.LogError($"要卸载的资源未加载过，类型为{asset.GetType()}");
                 }
 
                 return;

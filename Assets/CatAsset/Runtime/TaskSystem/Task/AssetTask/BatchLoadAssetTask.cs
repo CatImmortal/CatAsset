@@ -17,10 +17,10 @@ namespace CatAsset.Runtime
         private List<string> assetNames;
         private BatchLoadAssetCallback onFinished;
 
-        private LoadAssetCallback onAssetLoadedCallback;
+        private LoadAssetCallback<object> onAssetLoadedCallback;
         private int loadedAssetCount;
         private List<LoadAssetResult> loadedAssets;
-        private List<LoadAssetResult> loadSuccessAssets = new List<LoadAssetResult>();
+        private List<object> loadSuccessAssets = new List<object>();
         
         private bool needCancel;
 
@@ -56,13 +56,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源加载结束的回调
         /// </summary>
-        private void OnAssetLoaded(bool success, LoadAssetResult result, object userdata)
+        private void OnAssetLoaded(bool success, object asset,LoadAssetResult result, object userdata)
         {
             loadedAssetCount++;
-            
             if (success)
             {
-                loadSuccessAssets.Add(result);
+                loadSuccessAssets.Add(asset);
             }
             
             if (loadedAssetCount != assetNames.Count)
@@ -78,15 +77,8 @@ namespace CatAsset.Runtime
             //保证资源顺序和加载顺序一致
             foreach (string assetName in assetNames)
             {
-                string realAssetName = assetName;
                 AssetCategory category = Util.GetAssetCategory(assetName);
-                if (category == AssetCategory.InternalRawAsset)
-                {
-                    //内置原生资源需要去掉"raw:"
-                    realAssetName = Util.GetRealInternalRawAssetName(assetName);
-                }
-                
-                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(realAssetName);
+                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
                 loadedAssets.Add(new LoadAssetResult(assetRuntimeInfo.Asset, category));
             }
 
@@ -97,11 +89,10 @@ namespace CatAsset.Runtime
             }
             else
             {
-                //被取消了
-                foreach (LoadAssetResult loadSuccessAsset in loadSuccessAssets)
+                //被取消了 卸载加载成功的资源
+                foreach (object loadSuccessAsset in loadSuccessAssets)
                 {
-                    object asset = loadSuccessAsset.GetAsset();
-                    CatAssetManager.UnloadAsset(asset);
+                    CatAssetManager.UnloadAsset(loadSuccessAsset);
                 }
             }
         }

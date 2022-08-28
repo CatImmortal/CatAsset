@@ -76,11 +76,6 @@ namespace CatAsset.Editor
                         Name = assetBuildInfo.Name,
                         Length = assetBuildInfo.Length,
                     };
-                    if (!bundleManifestInfo.IsScene && !bundleManifestInfo.IsRaw)
-                    {
-                        //非场景和非原生资源才写入资源类型信息
-                        assetManifestInfo.Type = assetBuildInfo.Type;
-                    }
 
                     bundleManifestInfo.Assets.Add(assetManifestInfo);
 

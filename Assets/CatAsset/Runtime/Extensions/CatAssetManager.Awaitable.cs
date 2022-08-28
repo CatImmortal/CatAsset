@@ -29,18 +29,17 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset(assetName, null, (success, result, userdata) =>
+            LoadAsset<T>(assetName, null, (success, asset,result, userdata) =>
             {
                 if (success && target != null)
                 {
-                    object asset = result.GetAsset();
-                    if (asset is Object unityObj)
+                    if (result.Category == AssetCategory.InternalBundleAsset)
                     {
-                        BindToGameObject(target,unityObj);
+                        BindToGameObject(target,result.GetAsset<Object>());
                     }
                     else
                     {
-                        BindToGameObject(target,(byte[])asset);
+                        BindToGameObject(target,result.GetAsset<byte[]>());
                     }
                 }
 
@@ -56,12 +55,11 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset(assetName, null, (success, result, userdata) =>
+            LoadAsset(assetName, null, (success,asset, result, userdata) =>
             {
-                object asset = result.GetAsset();
                 if (success && target != default)
                 {
-                    BindToScene(target,asset);
+                    BindToScene(target,result.GetAsset());
                 }
                 tcs.SetResult(result.GetAsset<T>());
                
@@ -84,13 +82,13 @@ namespace CatAsset.Runtime
                         object asset = result.GetAsset();
                         if (asset != null)
                         {
-                            if (asset is Object unityObj)
+                            if (result.Category == AssetCategory.InternalBundleAsset)
                             {
-                                BindToGameObject(target,unityObj);
+                                BindToGameObject(target,result.GetAsset<Object>());
                             }
                             else
                             {
-                                BindToGameObject(target,(byte[])asset);
+                                BindToGameObject(target,result.GetAsset<byte[]>());
                             }
                         }
                     }

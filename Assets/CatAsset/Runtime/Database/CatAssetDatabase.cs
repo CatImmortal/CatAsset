@@ -123,7 +123,6 @@ namespace CatAsset.Runtime
                 assetRuntimeInfo.AssetManifest = new AssetManifestInfo
                 {
                     Name = assetName,
-                    Type = typeof(byte[])
                 };
                 assetRuntimeInfo.BundleManifest = new BundleManifestInfo
                 {
