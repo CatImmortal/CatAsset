@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源加载任务完成回调的原型
     /// </summary>
-    public delegate void BatchLoadAssetCallback(List<object> assets, object userdata);
+    public delegate void BatchLoadAssetCallback(List<LoadAssetResult> assets, object userdata);
     
     /// <summary>
     /// 批量资源加载任务
@@ -19,8 +19,8 @@ namespace CatAsset.Runtime
 
         private LoadAssetCallback onAssetLoadedCallback;
         private int loadedAssetCount;
-        private List<object> loadedAssets;
-        private List<object> loadSuccessAssets = new List<object>();
+        private List<LoadAssetResult> loadedAssets;
+        private List<LoadAssetResult> loadSuccessAssets = new List<LoadAssetResult>();
         
         private bool needCancel;
 
@@ -56,13 +56,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源加载结束的回调
         /// </summary>
-        private void OnAssetLoaded(bool success, object asset, object userdata)
+        private void OnAssetLoaded(bool success, LoadAssetResult result, object userdata)
         {
             loadedAssetCount++;
             
             if (success)
             {
-                loadSuccessAssets.Add(asset);
+                loadSuccessAssets.Add(result);
             }
             
             if (loadedAssetCount != assetNames.Count)
@@ -86,8 +86,8 @@ namespace CatAsset.Runtime
                     realAssetName = Util.GetRealInternalRawAssetName(assetName);
                 }
                 
-                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(realAssetName); 
-                loadedAssets.Add(assetRuntimeInfo.Asset);
+                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(realAssetName);
+                loadedAssets.Add(new LoadAssetResult(assetRuntimeInfo.Asset, category));
             }
 
             //无需处理已合并任务 因为按照现在的设计 批量加载任务，就算是资源名列表相同，也不会判断为重复任务的
@@ -98,9 +98,10 @@ namespace CatAsset.Runtime
             else
             {
                 //被取消了
-                foreach (object loadSuccessAsset in loadSuccessAssets)
+                foreach (LoadAssetResult loadSuccessAsset in loadSuccessAssets)
                 {
-                    CatAssetManager.UnloadAsset(loadSuccessAsset);
+                    object asset = loadSuccessAsset.GetAsset();
+                    CatAssetManager.UnloadAsset(asset);
                 }
             }
         }
@@ -117,7 +118,7 @@ namespace CatAsset.Runtime
             task.CreateBase(owner,name);
             task.userdata = userdata;
             task.assetNames = assetNames;
-            task.loadedAssets = new List<object>();
+            task.loadedAssets = new List<LoadAssetResult>();
             task.onFinished = callback;
             
             return task;

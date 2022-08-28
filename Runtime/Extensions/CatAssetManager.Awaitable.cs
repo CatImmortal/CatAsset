@@ -26,13 +26,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<object> AwaitLoadAsset(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
+        public static Task<T> AwaitLoadAsset<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            LoadAsset(assetName, null, (success, asset, userdata) =>
+            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
+            LoadAsset(assetName, null, (success, result, userdata) =>
             {
                 if (success && target != null)
                 {
+                    object asset = result.GetAsset();
                     if (asset is Object unityObj)
                     {
                         BindToGameObject(target,unityObj);
@@ -43,7 +44,7 @@ namespace CatAsset.Runtime
                     }
                 }
 
-                tcs.SetResult(asset);
+                tcs.SetResult(result.GetAsset<T>());
                
             }, priority);
             return tcs.Task;
@@ -52,16 +53,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<object> AwaitLoadAsset(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
+        public static Task<T> AwaitLoadAsset<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            LoadAsset(assetName, null, (success, asset, userdata) =>
+            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
+            LoadAsset(assetName, null, (success, result, userdata) =>
             {
+                object asset = result.GetAsset();
                 if (success && target != default)
                 {
                     BindToScene(target,asset);
                 }
-                tcs.SetResult(asset);
+                tcs.SetResult(result.GetAsset<T>());
                
             }, priority);
             return tcs.Task;
@@ -70,15 +72,16 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源(可等待)
         /// </summary>
-        public static Task<List<object>> AwaitBatchLoadAsset(List<string> assetNames,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
+        public static Task<List<LoadAssetResult>> AwaitBatchLoadAsset(List<string> assetNames,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
-            TaskCompletionSource<List<object>> tcs = new TaskCompletionSource<List<object>>();
+            TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAsset(assetNames, null, (assets, userdata) =>
             {
                 if (target != null)
                 {
-                    foreach (object asset in assets)
+                    foreach (LoadAssetResult result in assets)
                     {
+                        object asset = result.GetAsset();
                         if (asset != null)
                         {
                             if (asset is Object unityObj)
@@ -103,15 +106,16 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源(可等待)
         /// </summary>
-        public static Task<List<object>> AwaitBatchLoadAsset(List<string> assetNames,Scene target = default,TaskPriority priority = TaskPriority.Middle)
+        public static Task<List<LoadAssetResult>> AwaitBatchLoadAsset(List<string> assetNames,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
-            TaskCompletionSource<List<object>> tcs = new TaskCompletionSource<List<object>>();
+            TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAsset(assetNames, null, (assets, userdata) =>
             {
                 if (target != default)
                 {
-                    foreach (object asset in assets)
+                    foreach (LoadAssetResult result in assets)
                     {
+                        object asset = result.GetAsset();
                         if (asset != null)
                         {
                             BindToScene(target, asset);

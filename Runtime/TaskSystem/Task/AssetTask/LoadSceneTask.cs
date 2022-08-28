@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 场景加载任务
     /// </summary>
-    public class LoadSceneTask : LoadUnityAssetTask
+    public class LoadSceneTask : LoadBundleAssetTask
     {
         private LoadSceneCallback onFinished;
         private Scene loadedScene;

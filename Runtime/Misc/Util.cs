@@ -76,7 +76,7 @@ namespace CatAsset.Runtime
         {
             if (assetName.StartsWith("Assets/"))
             {
-                return AssetCategory.InternalUnityAsset;
+                return AssetCategory.InternalBundleAsset;
             }
 
             if (assetName.StartsWith("raw:Assets/"))

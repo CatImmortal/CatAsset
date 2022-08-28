@@ -6,9 +6,9 @@
     public enum AssetCategory
     {
         /// <summary>
-        /// 内置Unity资源
+        /// 内置资源包资源
         /// </summary>
-        InternalUnityAsset,
+        InternalBundleAsset,
         
         /// <summary>
         /// 内置原生资源
