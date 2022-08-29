@@ -32,7 +32,7 @@ public class UpdatableExample : MonoBehaviour
         UnityWebRequestAsyncOperation op = uwr.SendWebRequest();
         op.completed += (obj) =>
         {
-            if (op.webRequest.isNetworkError || op.webRequest.isHttpError)
+            if (op.webRequest.result == UnityWebRequest.Result.ConnectionError || op.webRequest.result == UnityWebRequest.Result.ProtocolError)
             {
                 Debug.Log("读取远端最新版本号失败：" + op.webRequest.error);
                 return;
@@ -43,7 +43,7 @@ public class UpdatableExample : MonoBehaviour
 
             //根据平台，整包版本和资源版本设置资源更新uri的前缀
             string uriPrefix = $"{AssetServerIP}/StandaloneWindows/{Application.version}_{manifestVersion}";
-            CatAssetManager.SetUpdateUriPrefix(uriPrefix);
+            CatAssetManager.UpdateUriPrefix = uriPrefix;
             Debug.Log($"读取远端最新版本号成功，资源更新地址为：{uriPrefix}");
 
             //检查资源版本

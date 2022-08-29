@@ -52,7 +52,7 @@ namespace CatAsset.Runtime
             //请求完毕
             State = TaskState.Finished;
 
-            if (op.webRequest.result != UnityWebRequest.Result.Success)
+            if (op.webRequest.result == UnityWebRequest.Result.ConnectionError || op.webRequest.result == UnityWebRequest.Result.ProtocolError)
             {
                 onFinished?.Invoke(false, op.webRequest,userdata);
                 foreach (WebRequestTask task in MergedTasks)

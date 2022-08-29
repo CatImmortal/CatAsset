@@ -91,7 +91,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (op.webRequest.result != UnityWebRequest.Result.Success)
+            if (op.webRequest.result == UnityWebRequest.Result.ConnectionError || op.webRequest.result == UnityWebRequest.Result.ProtocolError)
             {
                 //下载失败 重试
                 if (RetryDownload())
