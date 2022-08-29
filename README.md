@@ -25,9 +25,9 @@ Unity AssetBundle资源管理框架
 
 - **支持编辑器调试窗口，可快速查看相关信息（点击上方工具栏CatAsset/打开资源包构建窗口或CatAsset/打开运行时信息窗口）**
 
-  ![](ImageRes\Image_01.png)
+  ![](https://github.com/CatImmortal/CatAsset/raw/main/ImageRes/Image_01.png)
 
-  ![](ImageRes\Image_02.png)
+  ![](https://github.com/CatImmortal/CatAsset/raw/main/ImageRes/Image_02.png)
 
   
 
