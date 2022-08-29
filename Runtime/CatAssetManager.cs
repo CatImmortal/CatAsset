@@ -49,6 +49,26 @@ namespace CatAsset.Runtime
         /// </summary>
         public static float UnloadDelayTime { get; set; }
 
+        /// <summary>
+        /// 单帧最大任务运行数量
+        /// </summary>
+        public static int MaxTaskRunCount
+        {
+            set
+            {
+                loadTaskRunner.MaxRunCount = value;
+                downloadTaskRunner.MaxRunCount = value;
+            }
+        }
+
+        /// <summary>
+        /// 设置资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/BundleRelativePath 为下载地址
+        /// </summary>
+        public static string UpdateUriPrefix
+        {
+            set => CatAssetUpdater.UpdateUriPrefix = value;
+        }
+
         static CatAssetManager()
         {
             RegisterCustomRawAssetConverter(typeof(Texture2D),(bytes =>
@@ -83,7 +103,7 @@ namespace CatAsset.Runtime
             loadTaskRunner.Update();
             downloadTaskRunner.Update();
         }
-        
+
         /// <summary>
         /// 添加任务id与任务的关联
         /// </summary>
@@ -227,14 +247,6 @@ namespace CatAsset.Runtime
         #region 资源更新
 
         /// <summary>
-        /// 设置资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/BundleRelativePath 为下载地址
-        /// </summary>
-        public static void SetUpdateUriPrefix(string updateUriPrefix)
-        {
-            CatAssetUpdater.UpdateUriPrefix = updateUriPrefix;
-        }
-        
-        /// <summary>
         /// 更新资源组
         /// </summary>
         public static void UpdateGroup(string group, OnBundleUpdated callback)
@@ -285,7 +297,7 @@ namespace CatAsset.Runtime
         public static int LoadAsset(string assetName, object userdata, LoadAssetCallback<object> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            return LoadAsset<object>(assetName, userdata, callback, priority);
+            return InternalLoadAsset(assetName, userdata, callback, priority);
         }
         
         /// <summary>

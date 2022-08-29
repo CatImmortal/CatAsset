@@ -30,9 +30,9 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 单帧最大任务运行次数
+        /// 单帧最大任务运行数量
         /// </summary>
-        public int MaxRunCount { get; set; } = int.MaxValue;
+        public int MaxRunCount { get; set; } = 10;
 
         /// <summary>
         /// 添加任务
