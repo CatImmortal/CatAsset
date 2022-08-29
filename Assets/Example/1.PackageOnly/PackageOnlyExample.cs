@@ -22,6 +22,7 @@ public class PackageOnlyExample : MonoBehaviour
             {
                 return;
             }
+            Debug.Log("按A实例化预制体");
             inited = true;
         });
     }
