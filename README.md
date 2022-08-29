@@ -1,7 +1,7 @@
 # 简介
-Unity AssetBundle资源管理框架
+Unity资源管理框架
 
-提供了对AssetBundle的构建、更新、加载、卸载的一站式资源包管理
+提供了对AssetBundle及原生资源的构建、更新、加载、卸载的一站式资源包管理
 
 
 
@@ -33,13 +33,11 @@ Unity AssetBundle资源管理框架
 
 - **支持3种类别的资源，并以一套加载、卸载、更新接口进行管理**
 
-  1. 内置资源包资源（使用CatAsset构建，从AssetBundle中加载的资源，如Prefab、Scene文件等，内置资源包资源支持从外部导入，从而实现AssetBundle类型的Mod文件加载功能）
+  1. 内置资源包资源（在Unity工程中使用CatAsset构建，从AssetBundle中加载的资源，如Prefab、Scene文件等，内置资源包资源支持从读写区导入，从而实现AssetBundle类型的Mod文件加载功能）
 
-  2. 内置原生资源（使用CatAsset构建，不基于AssetBundle而是直接加载其二进制数据的资源，如DLL、Lua文件等）
+  2. 内置原生资源（在Unity工程中使用CatAsset构建，不基于AssetBundle而是直接加载其二进制数据的资源，如DLL、Lua文件等）
 
   3. 外置原生资源（不使用CatAsset构建，直接从读写区加载其二进制数据的资源，如玩家自定义的图片、文本等）
-
-     
 
      
 
