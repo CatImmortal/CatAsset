@@ -45,9 +45,9 @@ namespace CatAsset.Runtime
         private static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
 
         /// <summary>
-        /// 使用资源清单进行初始化
+        /// 使用安装包资源清单进行初始化
         /// </summary>
-        internal static void InitManifest(CatAssetManifest manifest)
+        internal static void InitPackageManifest(CatAssetManifest manifest)
         {
             bundleRuntimeInfoDict.Clear();
             assetRuntimeInfoDict.Clear();
@@ -97,9 +97,9 @@ namespace CatAsset.Runtime
 
 
         /// <summary>
-        /// 获取资源运行时信息，若不存在则添加（主要用于外置原生资源）
+        /// 尝试创建外置原生资源的运行时信息
         /// </summary>
-        internal static AssetRuntimeInfo GetOrAddAssetRuntimeInfo(string assetName)
+        internal static AssetRuntimeInfo TryCreateExternalRawAssetRuntimeInfo(string assetName)
         {
             if (!assetRuntimeInfoDict.TryGetValue(assetName,out AssetRuntimeInfo assetRuntimeInfo))
             {

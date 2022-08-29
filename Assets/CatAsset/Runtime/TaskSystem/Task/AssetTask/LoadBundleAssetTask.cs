@@ -293,7 +293,7 @@ namespace CatAsset.Runtime
             {
                 //资源加载失败
                 
-                //清空引用计数，删除使用记录
+                //减少引用计数
                 AssetRuntimeInfo.SubRefCount();
                 
                 //卸载已加载好的依赖 清除引用记录

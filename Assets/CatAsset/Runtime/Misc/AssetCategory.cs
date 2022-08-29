@@ -16,7 +16,7 @@
         /// 内置原生资源
         /// </summary>
         InternalRawAsset,
-        
+
         /// <summary>
         /// 外置原生资源
         /// </summary>
