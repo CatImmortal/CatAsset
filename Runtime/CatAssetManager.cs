@@ -202,9 +202,9 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 从外部导入内置资源包
+        /// 从外部导入内置资源
         /// </summary>
-        public static void ImportInternalBundle(string manifestPath,Action<bool> callback,string bundleRelativePathPrefix = null)
+        public static void ImportInternalAsset(string manifestPath,Action<bool> callback,string bundleRelativePathPrefix = null)
         {
             manifestPath = Util.GetReadWritePath(manifestPath);
             WebRequestTask task = WebRequestTask.Create(loadTaskRunner, manifestPath, manifestPath, callback,
@@ -214,7 +214,7 @@ namespace CatAsset.Runtime
 
                     if (!success)
                     {
-                        Debug.LogError($"资源包资源清单导入失败:{uwr.error}");
+                        Debug.LogError($"内置资源导入失败:{uwr.error}");
                         onChecked?.Invoke(false);
                     }
                     else
@@ -234,7 +234,7 @@ namespace CatAsset.Runtime
                             CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo,true);
                         }
                         
-                        Debug.Log("资源包资源清单导入完毕");
+                        Debug.Log("内置资源导入完毕");
                         onChecked?.Invoke(true);
                     }
                 });
