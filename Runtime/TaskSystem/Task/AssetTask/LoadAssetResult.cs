@@ -14,7 +14,7 @@ namespace CatAsset.Runtime
     public struct LoadAssetResult
     {
         /// <summary>
-        /// 已加载的资源实例
+        /// 已加载的原始资源实例
         /// </summary>
         private object asset;
 
@@ -30,7 +30,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 获取已加载的资源实例
+        /// 获取已加载的原始资源实例
         /// </summary>
         public object GetAsset()
         {
