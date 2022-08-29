@@ -77,56 +77,52 @@ namespace CatAsset.Runtime
         {
             if (assetName.StartsWith("Assets/"))
             {
+                //资源名以Assets/开头
                 if (typeof(UnityEngine.Object).IsAssignableFrom(assetType) || assetType == typeof(object))
                 {
-                    //编辑器资源模式下
-                    //资源名以Assets/开头
-                    //并且以UnityEngine.Object及其派生类型或object为加载类型 
+                    //以UnityEngine.Object及其派生类型或object为加载类型 
                     //都视为内置资源包资源进行加载
                     return AssetCategory.InternalBundleAsset;
                 }
                 else
                 {
+                    //否则视为内置原生资源加载
                     return AssetCategory.InternalRawAsset;
                 }
             }
             else
             {
+                //资源名不以Assets/开头 视为外置原生资源加载
                 return AssetCategory.ExternalRawAsset;
             }
         }
-        
+
         /// <summary>
         /// 获取资源类别
         /// </summary>
         public static AssetCategory GetAssetCategory(string assetName)
         {
-            if (assetName.StartsWith("Assets/"))
+            if (!assetName.StartsWith("Assets/"))
             {
-                AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
-                if (assetRuntimeInfo == null)
-                {
-                    Debug.LogError($"GetAssetCategory调用失败，{assetName}的AssetRuntimeInfo为空");
-                    return default;
-                }
-                
-                if (!assetRuntimeInfo.BundleManifest.IsRaw)
-                {
-                    return AssetCategory.InternalBundleAsset;
-                }
-                else
-                {
-                    return AssetCategory.InternalRawAsset;
-                }
-              
-            }
-            else
-            {
+                //资源名不以Assets/开头 是外置原生资源
                 return AssetCategory.ExternalRawAsset;
             }
 
+            AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
+            if (assetRuntimeInfo == null)
+            {
+                Debug.LogError($"GetAssetCategory调用失败，资源{assetName}的AssetRuntimeInfo为空");
+                return default;
+            }
 
-           
+            if (assetRuntimeInfo.BundleManifest.IsRaw)
+            {
+                //内置原生资源
+                return AssetCategory.InternalRawAsset;
+            }
+
+            //内置资源包资源
+            return AssetCategory.InternalBundleAsset;
         }
 
         /// <summary>

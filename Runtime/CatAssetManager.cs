@@ -72,6 +72,7 @@ namespace CatAsset.Runtime
                 TextAsset textAsset = new TextAsset(text);
                 return textAsset;
             }));
+            
         }
         
         /// <summary>
@@ -147,7 +148,7 @@ namespace CatAsset.Runtime
                         CatAssetManifest manifest =
                             CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
                         
-                        CatAssetDatabase.InitManifest(manifest);
+                        CatAssetDatabase.InitPackageManifest(manifest);
                         
                         Debug.Log("单机模式资源清单检查完毕");
                         onChecked?.Invoke(true);
@@ -178,6 +179,47 @@ namespace CatAsset.Runtime
         {
             WebRequestTask task = WebRequestTask.Create(downloadTaskRunner,path,path,null,callback);
             downloadTaskRunner.AddTask(task,TaskPriority.VeryHeight);
+        }
+
+        /// <summary>
+        /// 从外部导入内置资源包
+        /// </summary>
+        public static void ImportInternalBundle(string manifestPath,Action<bool> callback,string bundleRelativePathPrefix = null)
+        {
+            manifestPath = Util.GetReadWritePath(manifestPath);
+            WebRequestTask task = WebRequestTask.Create(loadTaskRunner, manifestPath, manifestPath, callback,
+                (success, uwr, userdata) =>
+                {
+                    Action<bool> onChecked = (Action<bool>) userdata;
+
+                    if (!success)
+                    {
+                        Debug.LogError($"资源包资源清单导入失败:{uwr.error}");
+                        onChecked?.Invoke(false);
+                    }
+                    else
+                    {
+                        CatAssetManifest manifest =
+                            CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+
+                        foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
+                        {
+                            if (!string.IsNullOrEmpty(bundleRelativePathPrefix))
+                            {
+                                //为资源包相对路径添加额外前缀
+                                bundleManifestInfo.RelativePath = Path.Combine(bundleRelativePathPrefix,
+                                    bundleManifestInfo.RelativePath);
+                            }
+                            
+                            CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo,true);
+                        }
+                        
+                        Debug.Log("资源包资源清单导入完毕");
+                        onChecked?.Invoke(true);
+                    }
+                });
+
+            loadTaskRunner.AddTask(task, TaskPriority.VeryHeight);
         }
         
         #endregion
@@ -304,39 +346,28 @@ namespace CatAsset.Runtime
 #endif
 
             category = Util.GetAssetCategory(assetName);
+            if (category == AssetCategory.ExternalRawAsset)
+            {
+                CatAssetDatabase.TryCreateExternalRawAssetRuntimeInfo(assetName);
+            }
+            
             switch (category)
             {
+                case AssetCategory.None:
+                    callback?.Invoke(false, default,default, userdata);
+                    return default;
 
                 case AssetCategory.InternalBundleAsset:
-                    
-                    //加载资源包资源
-                    if (!CheckAssetReady(assetName))
-                    {
-                        callback?.Invoke(false, default,default, userdata);
-                        return default;
-                    }
+                    //加载内置资源包资源
                     LoadBundleAssetTask<T> loadBundleAssetTask = LoadBundleAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
                     loadTaskRunner.AddTask(loadBundleAssetTask, priority);
                     return loadBundleAssetTask.GUID;
                 
+                
                 case AssetCategory.InternalRawAsset:
-                    
-                    //加载内置原生资源
-                    if (!CheckAssetReady(assetName))
-                    {
-                        callback?.Invoke(false, default,default, userdata);
-                        return default;
-                    }
-                    LoadRawAssetTask<T> loadRawAssetTask = LoadRawAssetTask<T>.Create(loadTaskRunner,assetName,category,userdata,callback);
-                    loadTaskRunner.AddTask(loadRawAssetTask, priority);
-            
-                    return loadRawAssetTask.GUID;
-
                 case AssetCategory.ExternalRawAsset:
-                    
-                    //加载外置原生资源
-                    CatAssetDatabase.GetOrAddAssetRuntimeInfo(assetName);
-                    loadRawAssetTask = LoadRawAssetTask<T>.Create(loadTaskRunner,assetName,category,userdata,callback);
+                    //加载原生资源
+                    LoadRawAssetTask<T> loadRawAssetTask = LoadRawAssetTask<T>.Create(loadTaskRunner,assetName,category,userdata,callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
             
                     return loadRawAssetTask.GUID;
