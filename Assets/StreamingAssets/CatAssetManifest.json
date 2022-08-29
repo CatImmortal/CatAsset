@@ -1,59 +1,7 @@
 {
 	"GameVersion":"0.1",
-	"ManifestVersion":2,
+	"ManifestVersion":1,
 	"Bundles":[
-		{
-			"RelativePath":"bundleres/chapter1.bundle",
-			"Directory":"BundleRes",
-			"BundleName":"chapter1.bundle",
-			"Group":"Chapter1",
-			"Length":1865,
-			"MD5":"c840e4b09a339ef1931c77af56469200",
-			"Assets":[
-				{
-					"Name":"Assets/BundleRes/Chapter1/B1.prefab",
-					"Length":893
-				},
-				{
-					"Name":"Assets/BundleRes/Chapter1/B2.prefab",
-					"Length":893
-				},
-				{
-					"Name":"Assets/BundleRes/Chapter1/B3.prefab",
-					"Length":893
-				},
-				{
-					"Name":"Assets/BundleRes/Chapter1/B4.prefab",
-					"Length":893
-				}
-			]
-		},
-		{
-			"RelativePath":"bundleres/chpater2.bundle",
-			"Directory":"BundleRes",
-			"BundleName":"chpater2.bundle",
-			"Group":"Chapter2",
-			"Length":1874,
-			"MD5":"1e57ecec772d649d0e07c84a5d0d2780",
-			"Assets":[
-				{
-					"Name":"Assets/BundleRes/Chpater2/B1.prefab",
-					"Length":893
-				},
-				{
-					"Name":"Assets/BundleRes/Chpater2/B2.prefab",
-					"Length":893
-				},
-				{
-					"Name":"Assets/BundleRes/Chpater2/B3.prefab",
-					"Length":893
-				},
-				{
-					"Name":"Assets/BundleRes/Chpater2/B4.prefab",
-					"Length":893
-				}
-			]
-		},
 		{
 			"RelativePath":"bundleres/prefaba.bundle",
 			"Directory":"BundleRes",
