@@ -9,34 +9,32 @@ namespace CatAsset.Runtime
     public class AssetBinder : MonoBehaviour
     {
         [SerializeField]
-        private List<Object> bindAssets = new List<Object>();
+        private List<Object> bindingAssets = new List<Object>();
 
-        private List<byte[]> bindRawAssets = new List<byte[]>();
+        private List<byte[]> bindingRawAssets = new List<byte[]>();
 
         /// <summary>
         /// 绑定资源
         /// </summary>
-        public void BindTo(Object asset)
+        public void BindTo(object asset)
         {
-            bindAssets.Add(asset);
-        }
-
-        /// <summary>
-        /// 绑定原生资源
-        /// </summary>
-        public void BindTo(byte[] rawAsset)
-        {
-            bindRawAssets.Add(rawAsset);
+            if (asset is Object unityObj)
+            {
+                bindingAssets.Add(unityObj);
+            }else if (asset is byte[] rawAsset)
+            {
+                bindingRawAssets.Add(rawAsset);
+            }
         }
 
         private void OnDestroy()
         {
-            foreach (Object asset in bindAssets)
+            foreach (Object asset in bindingAssets)
             {
                 CatAssetManager.UnloadAsset(asset);
             }
 
-            foreach (byte[] rawAsset in bindRawAssets)
+            foreach (byte[] rawAsset in bindingRawAssets)
             {
                 CatAssetManager.UnloadAsset(rawAsset);
             }
