@@ -33,14 +33,7 @@ namespace CatAsset.Runtime
             {
                 if (success && target != null)
                 {
-                    if (result.Category == AssetCategory.InternalBundleAsset)
-                    {
-                        BindToGameObject(target,result.GetAsset<Object>());
-                    }
-                    else
-                    {
-                        BindToGameObject(target,result.GetAsset<byte[]>());
-                    }
+                    BindToGameObject(target, result.GetAsset());
                 }
 
                 tcs.SetResult(result.GetAsset<T>());
@@ -82,14 +75,7 @@ namespace CatAsset.Runtime
                         object asset = result.GetAsset();
                         if (asset != null)
                         {
-                            if (result.Category == AssetCategory.InternalBundleAsset)
-                            {
-                                BindToGameObject(target,result.GetAsset<Object>());
-                            }
-                            else
-                            {
-                                BindToGameObject(target,result.GetAsset<byte[]>());
-                            }
+                            BindToGameObject(target,asset);
                         }
                     }
                 }

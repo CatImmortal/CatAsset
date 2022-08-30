@@ -66,6 +66,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static string UpdateUriPrefix
         {
+            get => CatAssetUpdater.UpdateUriPrefix;
             set => CatAssetUpdater.UpdateUriPrefix = value;
         }
 
@@ -211,7 +212,7 @@ namespace CatAsset.Runtime
                 (success, uwr, userdata) =>
                 {
                     Action<bool> onChecked = (Action<bool>) userdata;
-
+                
                     if (!success)
                     {
                         Debug.LogError($"内置资源导入失败:{uwr.error}");
@@ -226,6 +227,7 @@ namespace CatAsset.Runtime
                         {
                             if (!string.IsNullOrEmpty(bundleRelativePathPrefix))
                             {
+                                
                                 //为资源包相对路径添加额外前缀
                                 bundleManifestInfo.RelativePath = Path.Combine(bundleRelativePathPrefix,
                                     bundleManifestInfo.RelativePath);
@@ -608,19 +610,10 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
         /// </summary>
-        public static void BindToGameObject(GameObject target,Object asset)
+        public static void BindToGameObject(GameObject target, object asset)
         {
             AssetBinder assetBinder = target.GetOrAddComponent<AssetBinder>();
             assetBinder.BindTo(asset);
-        }
-        
-        /// <summary>
-        /// 将原生资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的原生资源
-        /// </summary>
-        public static void BindToGameObject(GameObject target,byte[] rawAsset)
-        {
-            AssetBinder assetBinder = target.GetOrAddComponent<AssetBinder>();
-            assetBinder.BindTo(rawAsset);
         }
 
         /// <summary>
