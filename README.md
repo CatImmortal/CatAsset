@@ -23,7 +23,7 @@ Unity资源管理框架
 
   
 
-- **支持编辑器调试窗口，可快速查看相关信息（点击上方工具栏CatAsset/打开资源包构建窗口或CatAsset/打开运行时信息窗口）**
+- **内置编辑器调试窗口，可快速查看相关信息（点击上方工具栏CatAsset/打开资源包构建窗口或CatAsset/打开运行时信息窗口）**
 
   ![](https://github.com/CatImmortal/CatAsset/raw/main/ImageRes/Image_01.png)
 
@@ -31,7 +31,7 @@ Unity资源管理框架
 
   
 
-- **支持3种类别的资源，并以一套加载、卸载、更新接口进行管理**
+- **支持3种类别的资源，并以同一套构建、更新、加载、卸载接口进行管理**
 
   1. 内置资源包资源（在Unity工程中使用CatAsset构建，从AssetBundle中加载的资源，如Prefab、Scene文件等）
 
