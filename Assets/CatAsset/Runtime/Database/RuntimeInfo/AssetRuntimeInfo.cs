@@ -46,7 +46,7 @@ namespace CatAsset.Runtime
                 //添加到资源包的已使用资源集合中
                 BundleRuntimeInfo bundleRuntimeInfo =
                     CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
-                bundleRuntimeInfo.UseAsset(this);
+                bundleRuntimeInfo.StartUseAsset(this);
             }
             
             RefCount += count;

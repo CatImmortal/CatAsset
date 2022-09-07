@@ -15,10 +15,6 @@ namespace CatAsset.Editor
         /// </summary>
         public string Name;
 
-        /// <summary>
-        /// 资源类型名
-        /// </summary>
-        public string TypeName;
 
         private Type type;
         /// <summary>
@@ -34,7 +30,6 @@ namespace CatAsset.Editor
         public AssetBuildInfo(string name)
         {
             Name = name;
-            TypeName = Type.Name;
             Length = new FileInfo(name).Length;
         }
 

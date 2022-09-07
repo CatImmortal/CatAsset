@@ -64,9 +64,9 @@ namespace CatAsset.Runtime
         public HashSet<BundleRuntimeInfo> DependencyBundles { get; } = new HashSet<BundleRuntimeInfo>();
 
         /// <summary>
-        /// 使用资源
+        /// 开始使用资源
         /// </summary>
-        public void UseAsset(AssetRuntimeInfo assetRuntimeInfo)
+        public void StartUseAsset(AssetRuntimeInfo assetRuntimeInfo)
         {
             UsedAssets.Add(assetRuntimeInfo);
         }

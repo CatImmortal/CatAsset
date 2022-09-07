@@ -59,7 +59,7 @@
                 return;
             }
             
-            //此资源包存在于远端也存在于本地，但不是最新版本，需要删掉读写区那份（如果存在）并更新
+            //此资源包存在于远端，但本地不是最新版本或本地不存在，需要删掉读写区那份（如果存在）并更新
             State = CheckState.NeedUpdate;
             NeedRemove = ReadWriteInfo != null;
         }
