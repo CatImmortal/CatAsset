@@ -58,7 +58,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 检查只读区区资源清单
+        /// 检查只读区资源清单
         /// </summary>
         private static void CheckReadOnlyManifest(bool success, UnityWebRequest uwr, object userdata)
         {
@@ -163,6 +163,8 @@ namespace CatAsset.Runtime
             int totalCount = 0;
             long totalLength = 0;
 
+            bool needGenerateReadWriteManifest = false;
+
             foreach (KeyValuePair<string,CheckInfo> pair in checkInfoDict)
             {
                 CheckInfo checkInfo = pair.Value;
@@ -223,9 +225,16 @@ namespace CatAsset.Runtime
                     Debug.Log($"删除读写区资源:{checkInfo.Name}");
                     string path = Util.GetReadWritePath(checkInfo.Name);
                     File.Delete(path);
+
+                    needGenerateReadWriteManifest = true;
                 }
             }
 
+            if (needGenerateReadWriteManifest)
+            {
+                //删除过读写区资源 需要重新生成读写区资源清单
+                CatAssetUpdater.GenerateReadWriteManifest();
+            }
             
             //调用版本检查完毕回调
             VersionCheckResult result = new VersionCheckResult(string.Empty,totalCount, totalLength);

@@ -221,7 +221,7 @@ namespace CatAsset.Runtime
             State = TaskState.Waiting;
             
             //这里要在确认资源包已加载后，就马上增加资源的引用计数和使用记录
-            //防止在依赖资源加载过程中意外的触发了资源包的卸载
+            //防止在依赖资源加载过程中其他地方意外的触发了资源包的卸载
             AssetRuntimeInfo.AddRefCount();
 
             if (AssetRuntimeInfo.AssetManifest.Dependencies == null)

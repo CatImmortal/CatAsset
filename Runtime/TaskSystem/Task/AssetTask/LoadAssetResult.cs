@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CatAsset.Runtime
 {
     /// <summary>
-    /// 自定义资源转换方法的原型
+    /// 自定义原生资源转换方法的原型
     /// </summary>
     public delegate object CustomRawAssetConverter(byte[] bytes);
     

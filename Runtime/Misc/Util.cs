@@ -130,7 +130,6 @@ namespace CatAsset.Runtime
         /// </summary>
         public static string GetFileMD5(string filePath)
         {
-            Profiler.BeginSample("GetFileMD5");
             using (FileStream fs = new FileStream(filePath,FileMode.Open))
             {
                 using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
@@ -142,7 +141,6 @@ namespace CatAsset.Runtime
                        CachedSB.Append(b.ToString("x2"));
                    }
                    string result = CachedSB.ToString();
-                   Profiler.EndSample();
                    return result;
                 }
             }
