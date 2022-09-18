@@ -39,6 +39,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private List<PoolObject> unusedPoolObjectList = new List<PoolObject>();
 
+        private List<PoolObject> waitRemoveObjectList = new List<PoolObject>();
 
         public GameObjectPool(GameObject template, float expireTime, Transform root)
         {
@@ -53,6 +54,25 @@ namespace CatAsset.Runtime
         /// </summary>
         public void OnUpdate(float deltaTime)
         {
+            foreach (KeyValuePair<GameObject,PoolObject> pair in poolObjectDict)
+            {
+                if (pair.Value.Target == null)
+                {
+                    //Target被意外销毁了 要移除掉
+                    waitRemoveObjectList.Add(pair.Value);
+                }
+            }
+            if (waitRemoveObjectList.Count > 0)
+            {
+                foreach (PoolObject obj in waitRemoveObjectList)
+                {
+                    poolObjectDict.Remove(obj.Target);
+                    unusedPoolObjectList.Remove(obj);
+                }
+                waitRemoveObjectList.Clear();
+            }
+
+            //遍历未被使用的池对象
             for (int i = unusedPoolObjectList.Count - 1; i >= 0; i--)
             {
                 PoolObject poolObject = unusedPoolObjectList[i];
@@ -67,6 +87,7 @@ namespace CatAsset.Runtime
                 }
             }
 
+            //判断当前对象池是否正在使用中
             if (poolObjectDict.Count == 0)
             {
                 UnusedTimer += deltaTime;

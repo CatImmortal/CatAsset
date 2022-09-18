@@ -28,12 +28,12 @@ namespace CatAsset.Editor
             {
                 if (GUILayout.Button("刷新", GUILayout.Width(100)))
                 {
-                    bundleBuildConfg.RefreshBundleBuildInfos();
+                    bundleBuildConfig.RefreshBundleBuildInfos();
                 }
 
                 if (GUILayout.Button("全部展开", GUILayout.Width(100)))
                 {
-                    foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfg.Bundles)
+                    foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfig.Bundles)
                     {
                         foldOutDict[bundleBuildInfo.RelativePath] = true;
                     }
@@ -41,7 +41,7 @@ namespace CatAsset.Editor
 
                 if (GUILayout.Button("全部收起", GUILayout.Width(100)))
                 {
-                    foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfg.Bundles)
+                    foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfig.Bundles)
                     {
                         foldOutDict[bundleBuildInfo.RelativePath] = false;
                     }
@@ -49,15 +49,15 @@ namespace CatAsset.Editor
                 
                 if (GUILayout.Button("检测资源循环依赖",GUILayout.Width(150)))
                 {
-                    LoopDependencyAnalyzer.AnalyzeAsset(bundleBuildConfg.Bundles);
+                    LoopDependencyAnalyzer.AnalyzeAsset(bundleBuildConfig.Bundles);
                 }
                 
                 if (GUILayout.Button("检测资源包循环依赖",GUILayout.Width(150)))
                 {
-                    LoopDependencyAnalyzer.AnalyzeBundle(bundleBuildConfg.Bundles);
+                    LoopDependencyAnalyzer.AnalyzeBundle(bundleBuildConfig.Bundles);
                 }
                     
-                bundleBuildConfg.IsRedundancyAnalyze = GUILayout.Toggle(bundleBuildConfg.IsRedundancyAnalyze, "冗余分析", GUILayout.Width(100));
+                bundleBuildConfig.IsRedundancyAnalyze = GUILayout.Toggle(bundleBuildConfig.IsRedundancyAnalyze, "冗余分析", GUILayout.Width(100));
             }
 
 
@@ -68,7 +68,7 @@ namespace CatAsset.Editor
                 scrollPos = sv.scrollPosition;
                 
                 
-                foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfg.Bundles)
+                foreach (BundleBuildInfo bundleBuildInfo in bundleBuildConfig.Bundles)
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {

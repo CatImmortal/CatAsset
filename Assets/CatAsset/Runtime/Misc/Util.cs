@@ -18,9 +18,9 @@ namespace CatAsset.Runtime
         private const int oneKB = 1024;
         private const int oneMB = oneKB * 1024;
         private const int oneGB = oneMB * 1024;
-        
+
         private static StringBuilder CachedSB = new StringBuilder();
-        
+
         /// <summary>
         /// 获取在只读区下的完整路径
         /// </summary>
@@ -29,8 +29,8 @@ namespace CatAsset.Runtime
             string result = Path.Combine(Application.streamingAssetsPath, path);
             return result;
         }
-        
-        
+
+
         /// <summary>
         /// 获取在读写区下的完整路径
         /// </summary>
@@ -48,7 +48,7 @@ namespace CatAsset.Runtime
             string result = Path.Combine(CatAssetUpdater.UpdateUriPrefix, path);
             return result;
         }
-        
+
         /// <summary>
         /// 根据字节长度获取合适的描述信息
         /// </summary>
@@ -75,12 +75,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public static AssetCategory GetAssetCategoryWithEditorMode(string assetName, Type assetType)
         {
-            if (assetName.StartsWith("Assets/"))
+            if (assetName.StartsWith("Assets/") || assetName.StartsWith("Packages/"))
             {
-                //资源名以Assets/开头
+                //资源名以Assets/ 或 Packages/开头
                 if (typeof(UnityEngine.Object).IsAssignableFrom(assetType) || assetType == typeof(object))
                 {
-                    //以UnityEngine.Object及其派生类型或object为加载类型 
+                    //以UnityEngine.Object及其派生类型或object为加载类型
                     //都视为内置资源包资源进行加载
                     return AssetCategory.InternalBundleAsset;
                 }
@@ -102,9 +102,9 @@ namespace CatAsset.Runtime
         /// </summary>
         public static AssetCategory GetAssetCategory(string assetName)
         {
-            if (!assetName.StartsWith("Assets/"))
+            if (!assetName.StartsWith("Assets/") && !assetName.StartsWith("Packages/"))
             {
-                //资源名不以Assets/开头 是外置原生资源
+                //资源名不以Assets/ 和 Packages/开头 是外置原生资源
                 return AssetCategory.ExternalRawAsset;
             }
 
@@ -144,7 +144,7 @@ namespace CatAsset.Runtime
                    return result;
                 }
             }
-          
+
         }
     }
 }
