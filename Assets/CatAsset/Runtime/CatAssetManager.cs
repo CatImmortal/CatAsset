@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using CatJson;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -72,30 +73,29 @@ namespace CatAsset.Runtime
 
         static CatAssetManager()
         {
-            RegisterCustomRawAssetConverter(typeof(Texture2D),(bytes =>
+            RegisterCustomRawAssetConverter(typeof(Texture2D), (bytes =>
             {
                 Texture2D texture2D = new Texture2D(0, 0);
                 texture2D.LoadImage(bytes);
                 return texture2D;
             }));
-            
-            RegisterCustomRawAssetConverter(typeof(Sprite),(bytes =>
+
+            RegisterCustomRawAssetConverter(typeof(Sprite), (bytes =>
             {
                 Texture2D texture2D = new Texture2D(0, 0);
                 texture2D.LoadImage(bytes);
                 Sprite sp = Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), Vector2.zero);
                 return sp;
             }));
-            
-            RegisterCustomRawAssetConverter(typeof(TextAsset),(bytes =>
+
+            RegisterCustomRawAssetConverter(typeof(TextAsset), (bytes =>
             {
                 string text = Encoding.UTF8.GetString(bytes);
                 TextAsset textAsset = new TextAsset(text);
                 return textAsset;
             }));
-            
         }
-        
+
         /// <summary>
         /// 轮询CatAsset资源管理器
         /// </summary>
@@ -110,9 +110,9 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void AddTaskGUID(ITask task)
         {
-            allTaskDict.Add(task.GUID,task);
+            allTaskDict.Add(task.GUID, task);
         }
-        
+
         /// <summary>
         /// 删除任务id与任务的关联
         /// </summary>
@@ -137,7 +137,7 @@ namespace CatAsset.Runtime
             converterDict.TryGetValue(type, out CustomRawAssetConverter converter);
             return converter;
         }
-        
+
         #region 资源清单检查
 
         /// <summary>
@@ -167,10 +167,10 @@ namespace CatAsset.Runtime
                     else
                     {
                         CatAssetManifest manifest =
-                            CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
-                        
+                            JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+
                         CatAssetDatabase.InitPackageManifest(manifest);
-                        
+
                         Debug.Log("单机模式资源清单检查完毕");
                         onChecked?.Invoke(true);
                     }
@@ -189,30 +189,31 @@ namespace CatAsset.Runtime
                 Debug.LogError("Updatable模式下才能调用CheckVersion");
                 return;
             }
-            
+
             VersionChecker.CheckVersion(onVersionChecked);
         }
-        
+
         /// <summary>
         /// 检查可更新模式下指定路径的资源清单
         /// </summary>
-        internal static void CheckUpdatableManifest(string path,WebRequestCallback callback)
+        internal static void CheckUpdatableManifest(string path, WebRequestCallback callback)
         {
-            WebRequestTask task = WebRequestTask.Create(downloadTaskRunner,path,path,null,callback);
-            downloadTaskRunner.AddTask(task,TaskPriority.VeryHeight);
+            WebRequestTask task = WebRequestTask.Create(downloadTaskRunner, path, path, null, callback);
+            downloadTaskRunner.AddTask(task, TaskPriority.VeryHeight);
         }
 
         /// <summary>
         /// 从外部导入内置资源
         /// </summary>
-        public static void ImportInternalAsset(string manifestPath,Action<bool> callback,string bundleRelativePathPrefix = null)
+        public static void ImportInternalAsset(string manifestPath, Action<bool> callback,
+            string bundleRelativePathPrefix = null)
         {
             manifestPath = Util.GetReadWritePath(manifestPath);
             WebRequestTask task = WebRequestTask.Create(loadTaskRunner, manifestPath, manifestPath, callback,
                 (success, uwr, userdata) =>
                 {
                     Action<bool> onChecked = (Action<bool>) userdata;
-                
+
                     if (!success)
                     {
                         Debug.LogError($"内置资源导入失败:{uwr.error}");
@@ -221,21 +222,20 @@ namespace CatAsset.Runtime
                     else
                     {
                         CatAssetManifest manifest =
-                            CatJson.JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+                            JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
                         foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
                         {
                             if (!string.IsNullOrEmpty(bundleRelativePathPrefix))
                             {
-                                
                                 //为资源包相对路径添加额外前缀
                                 bundleManifestInfo.RelativePath = Path.Combine(bundleRelativePathPrefix,
                                     bundleManifestInfo.RelativePath);
                             }
-                            
-                            CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo,true);
+
+                            CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo, true);
                         }
-                        
+
                         Debug.Log("内置资源导入完毕");
                         onChecked?.Invoke(true);
                     }
@@ -243,7 +243,7 @@ namespace CatAsset.Runtime
 
             loadTaskRunner.AddTask(task, TaskPriority.VeryHeight);
         }
-        
+
         #endregion
 
         #region 资源更新
@@ -253,31 +253,33 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void UpdateGroup(string group, OnBundleUpdated callback)
         {
-            CatAssetUpdater.UpdateGroup(group,callback);
+            CatAssetUpdater.UpdateGroup(group, callback);
         }
-        
+
         /// <summary>
         /// 暂停资源组更新
         /// </summary>
         public static void PauseGroupUpdater(string group, bool isPause)
         {
-            CatAssetUpdater.PauseGroupUpdate(group,isPause);
+            CatAssetUpdater.PauseGroupUpdate(group, isPause);
         }
 
         /// <summary>
         /// 下载资源包
         /// </summary>
-        internal static void DownloadBundle(GroupUpdater groupUpdater, BundleManifestInfo info,string downloadUri,string localFilePath,DownloadBundleCallback callback)
+        internal static void DownloadBundle(GroupUpdater groupUpdater, BundleManifestInfo info, string downloadUri,
+            string localFilePath, DownloadBundleCallback callback)
         {
             DownloadBundleTask task =
-                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, groupUpdater, downloadUri, localFilePath, callback);
-            downloadTaskRunner.AddTask(task,TaskPriority.Height);
+                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, groupUpdater, downloadUri,
+                    localFilePath, callback);
+            downloadTaskRunner.AddTask(task, TaskPriority.Height);
         }
 
         #endregion
-        
+
         #region 资源加载
-        
+
         /// <summary>
         /// 检查资源是否已准备好
         /// </summary>
@@ -301,7 +303,7 @@ namespace CatAsset.Runtime
         {
             return InternalLoadAsset(assetName, userdata, callback, priority);
         }
-        
+
         /// <summary>
         /// 加载资源
         /// </summary>
@@ -322,7 +324,7 @@ namespace CatAsset.Runtime
             if (IsEditorMode)
             {
                 category = Util.GetAssetCategoryWithEditorMode(assetName, typeof(T));
-                
+
                 object asset;
                 try
                 {
@@ -334,27 +336,28 @@ namespace CatAsset.Runtime
                         {
                             assetType = typeof(Object);
                         }
-                        asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName,assetType);
+
+                        asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, assetType);
                     }
                     else
-                    {   
+                    {
                         //加载原生资源
                         if (category == AssetCategory.ExternalRawAsset)
                         {
                             assetName = Util.GetReadWritePath(assetName);
                         }
-                    
+
                         asset = File.ReadAllBytes(assetName);
                     }
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false, default,default, userdata);
+                    callback?.Invoke(false, default, default, userdata);
                     throw;
                 }
-                
+
                 LoadAssetResult result = new LoadAssetResult(asset, category);
-                callback?.Invoke(true, result.GetAsset<T>(),result, userdata);
+                callback?.Invoke(true, result.GetAsset<T>(), result, userdata);
                 return default;
             }
 #endif
@@ -364,55 +367,57 @@ namespace CatAsset.Runtime
             {
                 CatAssetDatabase.TryCreateExternalRawAssetRuntimeInfo(assetName);
             }
-            
+
             switch (category)
             {
                 case AssetCategory.None:
-                    callback?.Invoke(false, default,default, userdata);
+                    callback?.Invoke(false, default, default, userdata);
                     return default;
 
                 case AssetCategory.InternalBundleAsset:
                     //加载内置资源包资源
-                    LoadBundleAssetTask<T> loadBundleAssetTask = LoadBundleAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
+                    LoadBundleAssetTask<T> loadBundleAssetTask =
+                        LoadBundleAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
                     loadTaskRunner.AddTask(loadBundleAssetTask, priority);
                     return loadBundleAssetTask.GUID;
-                
-                
+
+
                 case AssetCategory.InternalRawAsset:
                 case AssetCategory.ExternalRawAsset:
                     //加载原生资源
-                    LoadRawAssetTask<T> loadRawAssetTask = LoadRawAssetTask<T>.Create(loadTaskRunner,assetName,category,userdata,callback);
+                    LoadRawAssetTask<T> loadRawAssetTask =
+                        LoadRawAssetTask<T>.Create(loadTaskRunner, assetName, category, userdata, callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
-            
+
                     return loadRawAssetTask.GUID;
             }
-            
-            return default;
 
+            return default;
         }
 
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static int BatchLoadAsset(List<string> assetNames, object userdata, BatchLoadAssetCallback callback, TaskPriority priority = TaskPriority.Middle)
+        public static int BatchLoadAsset(List<string> assetNames, object userdata, BatchLoadAssetCallback callback,
+            TaskPriority priority = TaskPriority.Middle)
         {
             if (assetNames == null || assetNames.Count == 0)
             {
                 Debug.LogError("批量加载资源失败，资源名列表为空");
-                callback?.Invoke(null,userdata);
+                callback?.Invoke(null, userdata);
                 return default;
             }
-            
+
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
                 List<LoadAssetResult> assets = new List<LoadAssetResult>();
                 foreach (string assetName in assetNames)
                 {
-                    LoadAsset(assetName, null, ((success, asset,result, o) =>
+                    LoadAsset(assetName, null, ((success, asset, result, o) =>
                     {
                         assets.Add(result);
-                        
+
                         if (assets.Count == assetNames.Count)
                         {
                             //编辑器模式下是以同步的方式加载所有资源的 所以这里的asset顺序是和assetNames给出的顺序可以对上的
@@ -424,12 +429,13 @@ namespace CatAsset.Runtime
                 return default;
             }
 #endif
-            
-            BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,$"{nameof(BatchLoadAsset)} - {TaskRunner.GUIDFactory + 1}",assetNames,userdata,callback);
-            loadTaskRunner.AddTask(task,priority);
+
+            BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,
+                $"{nameof(BatchLoadAsset)} - {TaskRunner.GUIDFactory + 1}", assetNames, userdata, callback);
+            loadTaskRunner.AddTask(task, priority);
             return task.GUID;
         }
-        
+
         /// <summary>
         /// 加载场景
         /// </summary>
@@ -460,7 +466,7 @@ namespace CatAsset.Runtime
                 callback?.Invoke(false, default, userdata);
                 return default;
             }
-            
+
             LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
 
@@ -472,12 +478,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void CancelTask(int guid)
         {
-            if (allTaskDict.TryGetValue(guid,out ITask task))
+            if (allTaskDict.TryGetValue(guid, out ITask task))
             {
                 task.Cancel();
             }
         }
-        
+
         #endregion
 
         #region 资源卸载
@@ -499,7 +505,7 @@ namespace CatAsset.Runtime
             }
 
             AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(asset);
-            
+
             if (info == null)
             {
                 if (asset is Object unityObj)
@@ -513,7 +519,7 @@ namespace CatAsset.Runtime
 
                 return;
             }
-            
+
 
             InternalUnloadAsset(info);
         }
@@ -536,7 +542,7 @@ namespace CatAsset.Runtime
             }
 
             AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(scene);
-            
+
             if (info == null)
             {
                 Debug.LogError($"要卸载的场景未加载过：{scene.path}");
@@ -567,7 +573,7 @@ namespace CatAsset.Runtime
         {
             //减少引用计数
             assetRuntimeInfo.SubRefCount();
-            
+
             if (assetRuntimeInfo.IsUnused())
             {
                 //引用计数为0
@@ -581,7 +587,6 @@ namespace CatAsset.Runtime
                     }
                 }
             }
-            
         }
 
         /// <summary>
@@ -599,7 +604,8 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void UnloadRawAsset(BundleRuntimeInfo bundleRuntimeInfo, AssetRuntimeInfo assetRuntimeInfo)
         {
-            UnloadRawAssetTask task = UnloadRawAssetTask.Create(loadTaskRunner,bundleRuntimeInfo.Manifest.RelativePath,assetRuntimeInfo);
+            UnloadRawAssetTask task = UnloadRawAssetTask.Create(loadTaskRunner, bundleRuntimeInfo.Manifest.RelativePath,
+                assetRuntimeInfo);
             loadTaskRunner.AddTask(task, TaskPriority.Low);
         }
 
@@ -619,11 +625,11 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
         /// </summary>
-        public static void BindToScene(Scene scene,object asset)
+        public static void BindToScene(Scene scene, object asset)
         {
-            CatAssetDatabase.AddSceneBindAsset(scene,asset);
+            CatAssetDatabase.AddSceneBindAsset(scene, asset);
         }
-        
+
         #endregion
 
         #region 数据获取代理
@@ -643,7 +649,7 @@ namespace CatAsset.Runtime
         {
             return CatAssetDatabase.GetAllGroupInfo();
         }
-        
+
         /// <summary>
         /// 获取指定资源组的更新器
         /// </summary>
@@ -651,7 +657,7 @@ namespace CatAsset.Runtime
         {
             return CatAssetUpdater.GetGroupUpdater(group);
         }
-        
+
         #endregion
     }
 }

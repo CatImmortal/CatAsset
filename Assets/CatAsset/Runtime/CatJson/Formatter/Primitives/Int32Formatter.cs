@@ -8,15 +8,15 @@ namespace CatJson
     public class Int32Formatter : BaseJsonFormatter<int>
     {
         /// <inheritdoc />
-        public override void ToJson(int value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, int value, Type type, Type realType, int depth)
         {
-            TextUtil.Append(value.ToString());
+            parser.Append(value.ToString());
         }
 
         /// <inheritdoc />
-        public override int ParseJson(Type type, Type realType)
+        public override int ParseJson(JsonParser parser, Type type, Type realType)
         {
-            RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.Number);
+            RangeString rs = parser.Lexer.GetNextTokenByType(TokenType.Number);
             return rs.AsInt();
         }
     }

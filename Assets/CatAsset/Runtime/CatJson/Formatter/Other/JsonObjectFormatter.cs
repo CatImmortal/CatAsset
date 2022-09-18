@@ -9,9 +9,9 @@ namespace CatJson
     public class JsonObjectFormatter : BaseJsonFormatter<JsonObject>
     {
         /// <inheritdoc />
-        public override void ToJson(JsonObject value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, JsonObject value, Type type, Type realType, int depth)
         {
-            TextUtil.AppendLine("{");
+            parser.AppendLine("{");
 
             if (value.ValueDict != null)
             {
@@ -19,35 +19,35 @@ namespace CatJson
                 foreach (KeyValuePair<string, JsonValue> item in value.ValueDict)
                 {
                     
-                    TextUtil.Append("\"", depth);
-                    TextUtil.Append(item.Key);
-                    TextUtil.Append("\"");
+                    parser.Append("\"", depth);
+                    parser.Append(item.Key);
+                    parser.Append("\"");
 
-                    TextUtil.Append(":");
+                    parser.Append(":");
 
-                    JsonParser.ToJson(item.Value,depth + 1);
+                    parser.ToJson(item.Value,depth + 1);
 
                     if (index < value.ValueDict.Count-1)
                     {
-                        TextUtil.AppendLine(",");
+                        parser.AppendLine(",");
                     }
                     index++;
                 }
             }
 
-            TextUtil.AppendLine(string.Empty);
-            TextUtil.Append("}", depth - 1);
+            parser.AppendLine(string.Empty);
+            parser.Append("}", depth - 1);
         }
 
         /// <inheritdoc />
-        public override JsonObject ParseJson(Type type, Type realType)
+        public override JsonObject ParseJson(JsonParser parser, Type type, Type realType)
         {
             JsonObject obj = new JsonObject();
 
-            ParserHelper.ParseJsonObjectProcedure(obj, default, default, (userdata1, _, _, key) =>
+            ParserHelper.ParseJsonObjectProcedure(parser, obj, default, default, (localParser, userdata1, userdata2, userdata3, key) =>
             {
                 JsonObject localObj = (JsonObject) userdata1;
-                JsonValue value = JsonParser.ParseJson<JsonValue>();
+                JsonValue value = localParser.ParseJson<JsonValue>();
                 localObj[key.ToString()] = value;
             });
 

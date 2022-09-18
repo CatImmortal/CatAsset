@@ -8,16 +8,16 @@ namespace CatJson
     public class UInt32Formatter : BaseJsonFormatter<uint>
     {
         /// <inheritdoc />
-        public override void ToJson(uint value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, uint value, Type type, Type realType, int depth)
         {
-            TextUtil.Append(value.ToString());
+            parser.Append(value.ToString());
         }
 
         /// <inheritdoc />
-        public override uint ParseJson(Type type, Type realType)
+        public override uint ParseJson(JsonParser parser, Type type, Type realType)
         {
-            RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.Number);
-            return uint.Parse(rs.AsSpan());
+            RangeString rs = parser.Lexer.GetNextTokenByType(TokenType.Number);
+            return rs.AsUInt();
         }
     }
 }

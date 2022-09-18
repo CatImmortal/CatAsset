@@ -9,32 +9,32 @@ namespace CatJson
     public class ColorFormatter : BaseJsonFormatter<Color>
     {
         /// <inheritdoc />
-        public override void ToJson(Color value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, Color value, Type type, Type realType, int depth)
         {
 
-            TextUtil.Append('{');
-            TextUtil.Append(value.r.ToString());
-            TextUtil.Append(", ");
-            TextUtil.Append(value.g.ToString());
-            TextUtil.Append(", ");
-            TextUtil.Append(value.b.ToString());
-            TextUtil.Append(", ");
-            TextUtil.Append(value.a.ToString());
-            TextUtil.Append('}');
+            parser.Append('{');
+            parser.Append(value.r.ToString());
+            parser.Append(", ");
+            parser.Append(value.g.ToString());
+            parser.Append(", ");
+            parser.Append(value.b.ToString());
+            parser.Append(", ");
+            parser.Append(value.a.ToString());
+            parser.Append('}');
         }
 
         /// <inheritdoc />
-        public override Color ParseJson(Type type, Type realType)
+        public override Color ParseJson(JsonParser parser, Type type, Type realType)
         {
-            JsonParser.Lexer.GetNextTokenByType(TokenType.LeftBrace);
-            float r = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Comma);
-            float g = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Comma);
-            float b = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Comma);
-            float a = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.RightBrace);
+            parser.Lexer.GetNextTokenByType(TokenType.LeftBrace);
+            float r = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.Comma);
+            float g = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.Comma);
+            float b = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.Comma);
+            float a = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.RightBrace);
             return new Color(r, g, b, a);
         }
     }

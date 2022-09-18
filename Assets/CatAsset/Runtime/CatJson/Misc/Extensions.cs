@@ -8,18 +8,26 @@ namespace CatJson
         /// <summary>
         /// 将此对象序列化为Json文本
         /// </summary>
-        public static string ToJson<T>(this T self)
+        public static string ToJson<T>(this T self,JsonParser parser = null)
         {
-            string json = JsonParser.ToJson(self);
+            if (parser == null)
+            {
+                parser = JsonParser.Default;
+            }
+            string json = parser.ToJson(self);
             return json;
         }
 
         /// <summary>
         /// 将Json文本反序列化为指定类型的对象
         /// </summary>
-        public static T ParseJson<T>(this string self)
+        public static T ParseJson<T>(this string self,JsonParser parser = null)
         {
-            T result = JsonParser.ParseJson<T>(self);
+            if (parser == null)
+            {
+                parser = JsonParser.Default;
+            }
+            T result =  parser.ParseJson<T>(self);
             return result;
         }
     }

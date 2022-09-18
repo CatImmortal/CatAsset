@@ -8,19 +8,19 @@ namespace CatJson
     public class EnumFormatter : IJsonFormatter
     {
         /// <inheritdoc />
-        public void ToJson(object value, Type type, Type realType, int depth)
+        public void ToJson(JsonParser parser, object value, Type type, Type realType, int depth)
         {
-            Type underlyingType = realType.GetEnumUnderlyingType();
-            JsonParser.InternalToJson(value,underlyingType,underlyingType,depth,false);
+            parser.Append('\"');
+            parser.Append(value.ToString());
+            parser.Append('\"');
         }
 
         /// <inheritdoc />
-        public object ParseJson(Type type, Type realType)
+        public object ParseJson(JsonParser parser, Type type, Type realType)
         {
-            Type underlyingType = realType.GetEnumUnderlyingType();
-            object result = JsonParser.InternalParseJson(underlyingType, underlyingType, false);
-            object obj = Enum.ToObject(realType, result);
-            return obj;
+            RangeString rs = parser.Lexer.GetNextTokenByType(TokenType.String);
+            object enumOBj = Enum.Parse(realType,rs.ToString());
+            return enumOBj;
         }
     }
 }

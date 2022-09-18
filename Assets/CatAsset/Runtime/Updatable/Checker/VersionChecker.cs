@@ -69,7 +69,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+            CatAssetManifest manifest = JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
@@ -94,7 +94,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+            CatAssetManifest manifest = JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
@@ -121,7 +121,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            CatAssetManifest manifest = JsonParser.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+            CatAssetManifest manifest = JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
 
             foreach (BundleManifestInfo item in manifest.Bundles)
             {

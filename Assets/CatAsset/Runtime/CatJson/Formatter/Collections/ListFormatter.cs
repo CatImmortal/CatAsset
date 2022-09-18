@@ -10,9 +10,9 @@ namespace CatJson
     public class ListFormatter : BaseJsonFormatter<IList>
     {
         /// <inheritdoc />
-        public override void ToJson(IList value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, IList value, Type type, Type realType, int depth)
         {
-            TextUtil.AppendLine("[");
+            parser.AppendLine("[");
             Type listType = type;
             if (!listType.IsGenericType)
             {
@@ -23,27 +23,27 @@ namespace CatJson
             for (int i = 0; i < value.Count; i++)
             {
                 object element = value[i];
-                TextUtil.AppendTab(depth);
+                parser.AppendTab(depth);
                 if (element == null)
                 {
-                    TextUtil.Append("null");
+                    parser.Append("null");
                 }
                 else
                 {
-                    JsonParser.InternalToJson(element,elementType,null,depth + 1);
+                    parser.InternalToJson(element,elementType,null,depth + 1);
                 }
                 if (i < value.Count - 1)
                 {
-                    TextUtil.AppendLine(",");
+                    parser.AppendLine(",");
                 }
                  
             }
-            TextUtil.AppendLine(string.Empty);
-            TextUtil.Append("]", depth - 1);
+            parser.AppendLine(string.Empty);
+            parser.Append("]", depth - 1);
         }
 
         /// <inheritdoc />
-        public override IList ParseJson(Type type, Type realType)
+        public override IList ParseJson(JsonParser parser, Type type, Type realType)
         {
             IList list = (IList)TypeUtil.CreateInstance(realType);
             
@@ -54,12 +54,12 @@ namespace CatJson
             }
             Type elementType = TypeUtil.GetArrayOrListElementType(listType);
             
-            ParserHelper.ParseJsonArrayProcedure(list, elementType, (userdata1, userdata2) =>
+            ParserHelper.ParseJsonArrayProcedure(parser,list, elementType, (userdata1, userdata2) =>
             {
                 IList localList = (IList) userdata1;
                 Type localElementType = (Type) userdata2;
                 
-                object value = JsonParser.InternalParseJson(localElementType);
+                object value = parser.InternalParseJson(localElementType);
                 localList.Add(value);
             });
 

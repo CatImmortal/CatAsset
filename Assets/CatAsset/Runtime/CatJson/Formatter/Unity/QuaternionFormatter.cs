@@ -9,31 +9,31 @@ namespace CatJson
     public class QuaternionFormatter : BaseJsonFormatter<Quaternion>
     {
         /// <inheritdoc />
-        public override void ToJson(Quaternion value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, Quaternion value, Type type, Type realType, int depth)
         {
-            TextUtil.Append('{');
-            TextUtil.Append(value.x.ToString());
-            TextUtil.Append(", ");
-            TextUtil.Append(value.y.ToString());
-            TextUtil.Append(", ");
-            TextUtil.Append(value.z.ToString());
-            TextUtil.Append(", ");
-            TextUtil.Append(value.w.ToString());
-            TextUtil.Append('}');
+            parser.Append('{');
+            parser.Append(value.x.ToString());
+            parser.Append(", ");
+            parser.Append(value.y.ToString());
+            parser.Append(", ");
+            parser.Append(value.z.ToString());
+            parser.Append(", ");
+            parser.Append(value.w.ToString());
+            parser.Append('}');
         }
 
         /// <inheritdoc />
-        public override Quaternion ParseJson(Type type, Type realType)
+        public override Quaternion ParseJson(JsonParser parser, Type type, Type realType)
         {
-            JsonParser.Lexer.GetNextTokenByType(TokenType.LeftBrace);
-            float x = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Comma);
-            float y = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Comma);
-            float z = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Comma);
-            float w = JsonParser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
-            JsonParser.Lexer.GetNextTokenByType(TokenType.RightBrace);
+            parser.Lexer.GetNextTokenByType(TokenType.LeftBrace);
+            float x = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.Comma);
+            float y = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.Comma);
+            float z = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.Comma);
+            float w = parser.Lexer.GetNextTokenByType(TokenType.Number).AsFloat();
+            parser.Lexer.GetNextTokenByType(TokenType.RightBrace);
             return new Quaternion(x,y,z,w);
         }
     }

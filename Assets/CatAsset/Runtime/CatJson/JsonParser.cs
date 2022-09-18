@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 
 namespace CatJson
@@ -8,8 +9,9 @@ namespace CatJson
     /// <summary>
     /// Json解析器
     /// </summary>
-    public static class JsonParser
+    public class JsonParser
     {
+        
         static JsonParser()
         {
 #if FUCK_LUA
@@ -21,19 +23,9 @@ namespace CatJson
         }
 
         /// <summary>
-        /// Json词法分析器
+        /// 默认Json解析器对象
         /// </summary>
-        public static JsonLexer Lexer { get; } = new JsonLexer();
-
-        /// <summary>
-        /// 序列化时是否开启格式化
-        /// </summary>
-        public static bool IsFormat { get; set; } = true;
-
-        /// <summary>
-        /// 序列化时是否忽略默认值
-        /// </summary>
-        public static bool IgnoreDefaultValue { get; set; } = true;
+        public static JsonParser Default { get; } = new JsonParser();
         
         private static NullFormatter nullFormatter = new NullFormatter();
         private static EnumFormatter enumFormatter = new EnumFormatter();
@@ -115,16 +107,56 @@ namespace CatJson
         {
             TypeMetaDataManager.AddIgnoreMember(type,memberName);
         }
+        
+        /// <summary>
+        /// 设置字段的自定义JsonKey
+        /// </summary>
+        public static void SetJsonKey(Type type, string key, FieldInfo fi)
+        {
+            TypeMetaDataManager.SetJsonKey(type,key,fi);
+        }
+        
+        /// <summary>
+        /// 设置属性的自定义JsonKey
+        /// </summary>
+        public static void SetJsonKey(Type type,string key, PropertyInfo pi)
+        {
+            TypeMetaDataManager.SetJsonKey(type,key,pi);
+        }
+
+        /// <summary>
+        /// Json词法分析器
+        /// </summary>
+        internal JsonLexer Lexer { get; } = new JsonLexer();
+        
+        internal StringBuilder CachedSB { get; } = new StringBuilder();
+        
+        /// <summary>
+        /// 序列化时是否开启格式化
+        /// </summary>
+        public bool IsFormat { get; set; } = true;
+
+        /// <summary>
+        /// 序列化时是否忽略默认值
+        /// </summary>
+        public bool IgnoreDefaultValue { get; set; } = true;
+
+        /// <summary>
+        /// 是否进行多态序列化/反序列化
+        /// </summary>
+        public bool IsPolymorphic { get; set; } = true;
+        
+      
 
         /// <summary>
         /// 将指定类型的对象序列化为Json文本
         /// </summary>
-        public static string ToJson<T>(T obj)
+        public string ToJson<T>(T obj)
         {
             InternalToJson(obj, typeof(T));
 
-            string json = TextUtil.CachedSB.ToString();
-            TextUtil.CachedSB.Clear();
+            string json = CachedSB.ToString();
+            CachedSB.Clear();
 
             return json;
         }
@@ -132,12 +164,12 @@ namespace CatJson
         /// <summary>
         /// 将指定类型的对象序列化为Json文本
         /// </summary>
-        public static string ToJson(object obj, Type type)
+        public string ToJson(object obj, Type type)
         {
             InternalToJson(obj, type);
 
-            string json = TextUtil.CachedSB.ToString();
-            TextUtil.CachedSB.Clear();
+            string json = CachedSB.ToString();
+            CachedSB.Clear();
 
             return json;
         }
@@ -146,7 +178,7 @@ namespace CatJson
         /// <summary>
         /// 将指定类型的对象序列化为Json文本
         /// </summary>
-        internal static void ToJson<T>(T obj, int depth)
+        internal void ToJson<T>(T obj, int depth)
         {
             InternalToJson(obj, typeof(T),null, depth);
         }
@@ -155,11 +187,11 @@ namespace CatJson
         /// <summary>
         /// 将指定类型的对象序列化为Json文本
         /// </summary>
-        internal static void InternalToJson(object obj, Type type, Type realType = null, int depth = 1,bool checkPolymorphic = true)
+        internal void InternalToJson(object obj, Type type, Type realType = null, int depth = 1,bool checkPolymorphic = true)
         {
             if (obj == null)
             {
-                nullFormatter.ToJson(null,type,null, depth);
+                nullFormatter.ToJson(this, null,type,null, depth);
                 return;
             }
 
@@ -173,13 +205,14 @@ namespace CatJson
             {
                 realType = TypeUtil.GetType(obj,type);
             }
-            
+
+            checkPolymorphic = checkPolymorphic && IsPolymorphic;
             if (checkPolymorphic && !TypeUtil.TypeEquals(type,realType))
             {
                 //开启了多态序列化检测
                 //并且定义类型和真实类型不一致
                 //就要进行多态序列化
-                polymorphicFormatter.ToJson(obj,type,realType,depth);
+                polymorphicFormatter.ToJson(this, obj,type,realType,depth);
                 return;;
             }
 
@@ -188,7 +221,7 @@ namespace CatJson
                 if (formatterDict.TryGetValue(realType, out IJsonFormatter formatter))
                 {
                     //使用通常的formatter处理
-                    formatter.ToJson(obj,type,realType, depth);
+                    formatter.ToJson(this, obj,type,realType, depth);
                     return;
                 }
             }
@@ -197,7 +230,7 @@ namespace CatJson
                 if (formatterDict.TryGetValue(realType.GetGenericTypeDefinition(), out IJsonFormatter formatter))
                 {
                     //使用泛型类型formatter处理
-                    formatter.ToJson(obj,type,realType,depth);
+                    formatter.ToJson(this, obj,type,realType,depth);
                     return;
                 }
             }
@@ -215,26 +248,26 @@ namespace CatJson
             if (obj is Enum e)
             {
                 //使用枚举formatter处理
-                enumFormatter.ToJson(e, type, realType, depth);
+                enumFormatter.ToJson(this, e, type, realType, depth);
                 return;
             }
             
             if (obj is Array array)
             {
                 //使用数组formatter处理
-                arrayFormatter.ToJson(array,type,realType, depth);
+                arrayFormatter.ToJson(this, array,type,realType, depth);
                 return;
             }
             
             
             //使用反射formatter处理
-            reflectionFormatter.ToJson(obj,type,realType,depth);
+            reflectionFormatter.ToJson(this, obj,type,realType,depth);
         }
         
         /// <summary>
         /// 将Json文本反序列化为指定类型的对象
         /// </summary>
-        public static T ParseJson<T>(string json)
+        public T ParseJson<T>(string json)
         {
             Lexer.SetJsonText(json);
 
@@ -248,7 +281,7 @@ namespace CatJson
         /// <summary>
         /// 将Json文本反序列化为指定类型的对象
         /// </summary>
-        public static object ParseJson(string json, Type type)
+        public object ParseJson(string json, Type type)
         {
             Lexer.SetJsonText(json);
             
@@ -262,7 +295,7 @@ namespace CatJson
         /// <summary>
         /// 将Json文本反序列化为指定类型的对象
         /// </summary>
-        internal static T ParseJson<T>()
+        internal T ParseJson<T>()
         {
             return (T) InternalParseJson(typeof(T));
         }
@@ -270,14 +303,14 @@ namespace CatJson
         /// <summary>
         /// 将Json文本反序列化为指定类型的对象
         /// </summary>
-        internal static object InternalParseJson(Type type,Type realType = null,bool checkPolymorphic = true)
+        internal object InternalParseJson(Type type,Type realType = null,bool checkPolymorphic = true)
         {
             if (Lexer.LookNextTokenType() == TokenType.Null)
             {
-                return nullFormatter.ParseJson(type,null);
+                return nullFormatter.ParseJson(this, type,null);
             }
 
-            if (realType == null && !ParserHelper.TryParseRealType(type,out realType))
+            if (realType == null && !ParserHelper.TryParseRealType(this,type,out realType))
             {
                 //未传入realType并且读取不到realType，就把type作为realType使用
                 //这里不能直接赋值type，因为type有可能是一个包装了主工程类型的ILRuntimeWrapperType
@@ -292,17 +325,17 @@ namespace CatJson
             {
                 //开启了多态检查并且type和realType不一致
                 //进行多态处理
-                result = polymorphicFormatter.ParseJson(type, realType);
+                result = polymorphicFormatter.ParseJson(this, type, realType);
             }
             else if (formatterDict.TryGetValue(realType, out IJsonFormatter formatter))
             {
                 //使用通常的formatter处理
-                result = formatter.ParseJson(type, realType);
+                result = formatter.ParseJson(this, type, realType);
             }
             else if (realType.IsGenericType && formatterDict.TryGetValue(realType.GetGenericTypeDefinition(), out formatter))
             {
                 //使用泛型类型formatter处理
-                result = formatter.ParseJson(type,realType);
+                result = formatter.ParseJson(this, type,realType);
             }
 #if FUCK_LUA
             else if (type is ILRuntime.Reflection.ILRuntimeType ilrtType && ilrtType.ILType.IsEnum)
@@ -314,17 +347,17 @@ namespace CatJson
             else if (realType.IsEnum)
             {
                 //使用枚举formatter处理
-                result = enumFormatter.ParseJson(type, realType);
+                result = enumFormatter.ParseJson(this, type, realType);
             }
             else if (realType.IsArray)
             {
                 //使用数组formatter处理
-                result = arrayFormatter.ParseJson(type,realType);
+                result = arrayFormatter.ParseJson(this, type,realType);
             }
             else
             {
                 //使用反射formatter处理
-                result = reflectionFormatter.ParseJson(type,realType);
+                result = reflectionFormatter.ParseJson(this, type,realType);
             }
 
             if (result is IJsonParserCallbackReceiver receiver)
@@ -336,7 +369,78 @@ namespace CatJson
             return result;
         }
 
+        /// <summary>
+        /// 跳过一个Json值
+        /// </summary>
+        internal void JumpJsonValue()
+        {
+            formatterDict[typeof(JsonValue)].ParseJson(this, null, null);
+        }
        
+        public void Append( char c, int tabNum = 0)
+        {
+            if (tabNum > 0 && IsFormat)
+            {
+                AppendTab(tabNum);
+            }
+           
+            CachedSB.Append(c);
+        }
+
+        
+        public void Append(string str,int tabNum = 0)
+        {
+            if (tabNum > 0 && IsFormat)
+            {
+                AppendTab(tabNum);
+            }
+           
+            CachedSB.Append(str);
+        }
+        
+        public void Append(RangeString rs,int tabNum = 0)
+        {
+            if (tabNum > 0 && IsFormat)
+            {
+                AppendTab(tabNum);
+            }
+
+            for (int i = 0; i < rs.Length; i++)
+            {
+                CachedSB.Append(rs[i]);
+            }
+            
+           
+        }
+        
+        public void AppendTab(int tabNum)
+        {
+            if (!IsFormat)
+            {
+                return;
+            }
+            for (int i = 0; i < tabNum; i++)
+            {
+                CachedSB.Append('\t');
+            }
+        }
+
+        public void AppendLine(string str, int tabNum = 0)
+        {
+            if (tabNum > 0 && IsFormat)
+            {
+                AppendTab(tabNum);
+            }
+
+            if (IsFormat)
+            {
+                CachedSB.AppendLine(str);
+            }
+            else
+            {
+                CachedSB.Append(str);
+            }
+        }
     }
 
 }

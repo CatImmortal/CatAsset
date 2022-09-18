@@ -38,7 +38,7 @@ public class UpdatableExample : MonoBehaviour
                 return;
             }
 
-            JsonObject jo = JsonParser.ParseJson<JsonObject>(op.webRequest.downloadHandler.text);
+            JsonObject jo = JsonParser.Default.ParseJson<JsonObject>(op.webRequest.downloadHandler.text);
             int manifestVersion = (int) jo["ManifestVersion"];
 
             //根据平台，整包版本和资源版本设置资源更新uri的前缀

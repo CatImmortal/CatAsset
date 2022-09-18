@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System;
 
 namespace CatJson
@@ -8,65 +8,11 @@ namespace CatJson
     /// </summary>
     public static class TextUtil
     {
-        public static StringBuilder CachedSB { get; } = new StringBuilder();
 
         /// <summary>
         /// 当前平台的换行符长度
         /// </summary>
         public static  int NewLineLength => Environment.NewLine.Length;
-
-
-
-        
-        public static void Append(char c, int tabNum = 0)
-        {
-            if (tabNum > 0 && JsonParser.IsFormat)
-            {
-                AppendTab(tabNum);
-            }
-           
-            CachedSB.Append(c);
-        }
-
-        
-        public static void Append(string str,int tabNum = 0)
-        {
-            if (tabNum > 0 && JsonParser.IsFormat)
-            {
-                AppendTab(tabNum);
-            }
-           
-            CachedSB.Append(str);
-        }
-        
-        public static void AppendTab(int tabNum)
-        {
-            if (!JsonParser.IsFormat)
-            {
-                return;
-            }
-            for (int i = 0; i < tabNum; i++)
-            {
-                CachedSB.Append('\t');
-            }
-        }
-
-        public static void AppendLine(string str, int tabNum = 0)
-        {
-            if (tabNum > 0 && JsonParser.IsFormat)
-            {
-                AppendTab(tabNum);
-            }
-
-            if (JsonParser.IsFormat)
-            {
-                CachedSB.AppendLine(str);
-            }
-            else
-            {
-                CachedSB.Append(str);
-            }
-        }
 
 
         /// <summary>

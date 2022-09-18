@@ -10,12 +10,12 @@ namespace CatJson
         /// <summary>
         /// 将对象序列化为Json文本
         /// </summary>
-        void ToJson(object value, Type type, Type realType, int depth);
+        void ToJson(JsonParser parser, object value, Type type, Type realType, int depth);
         
         /// <summary>
         /// 将Json文本反序列化为对象
         /// </summary>
-        object ParseJson(Type type, Type realType);
+        object ParseJson(JsonParser parser, Type type, Type realType);
     }
 }
 

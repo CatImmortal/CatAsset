@@ -34,7 +34,7 @@ namespace CatJson
         
         public override string ToString()
         {
-            string json = JsonParser.ToJson(this);
+            string json = JsonParser.Default.ToJson(this);
             return json;
         }
     }

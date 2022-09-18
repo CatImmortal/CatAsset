@@ -9,17 +9,17 @@ namespace CatJson
     public class Hash128Formatter : BaseJsonFormatter<Hash128>
     {
         /// <inheritdoc />
-        public override void ToJson(Hash128 value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, Hash128 value, Type type, Type realType, int depth)
         {
-            TextUtil.Append('\"');
-            TextUtil.Append(value.ToString());
-            TextUtil.Append('\"');
+            parser.Append('\"');
+            parser.Append(value.ToString());
+            parser.Append('\"');
         }
 
         /// <inheritdoc />
-        public override Hash128 ParseJson(Type type, Type realType)
+        public override Hash128 ParseJson(JsonParser parser, Type type, Type realType)
         {
-            RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.String);
+            RangeString rs = parser.Lexer.GetNextTokenByType(TokenType.String);
             return Hash128.Parse(rs.ToString());
         }
     }
