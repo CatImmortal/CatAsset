@@ -109,7 +109,27 @@ namespace CatJson
                 return ilrtType.ILType.Instantiate();
             }
 #endif
-            return Activator.CreateInstance(type);
+            object obj;
+
+            try
+            {
+                obj = Activator.CreateInstance(type);
+            }
+            catch (Exception e)
+            {
+                if (e is MissingMethodException)
+                {
+                    //没有无参构造 使用任意有参构造
+                    obj = TypeMetaDataManager.CreateInstanceWithParamCtor(type);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return obj;
+
         }
 
         /// <summary>
@@ -204,6 +224,25 @@ namespace CatJson
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>);
         }
 
+        /// <summary>
+        /// 获取字典key的类型
+        /// </summary>
+        public static Type GetDictKeyType(Type dictType)
+        {                       
+            Type keyType;
+#if FUCK_LUA
+            if (dictType is ILRuntimeWrapperType wt)
+            {
+                keyType = wt.CLRType.GenericArguments[0].Value.ReflectionType;
+            }
+            else         
+#endif
+            {
+                keyType = dictType.GetGenericArguments()[0];
+            }
+            return keyType;
+        }
+        
         /// <summary>
         /// 获取字典value的类型
         /// </summary>

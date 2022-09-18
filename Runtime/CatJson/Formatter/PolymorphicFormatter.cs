@@ -18,32 +18,32 @@ namespace CatJson
         private const string objectKey = "<>Object";
         
         /// <inheritdoc />
-        public void ToJson(object value, Type type, Type realType, int depth)
+        public void ToJson(JsonParser parser, object value, Type type, Type realType, int depth)
         {
-            TextUtil.AppendLine("{");
+            parser.AppendLine("{");
                 
             //写入真实类型
-            TextUtil.Append("\"", depth);
-            TextUtil.Append(RealTypeKey);
-            TextUtil.Append("\"");
-            TextUtil.Append(":");
-            TextUtil.Append(TypeUtil.GetTypeString(realType));
+            parser.Append("\"", depth);
+            parser.Append(RealTypeKey);
+            parser.Append("\"");
+            parser.Append(":");
+            parser.Append(TypeUtil.GetTypeString(realType));
                 
-            TextUtil.AppendLine(",");
+            parser.AppendLine(",");
                 
             //写入对象的json文本
-            TextUtil.Append("\"", depth);
-            TextUtil.Append(objectKey);
-            TextUtil.Append("\"");
-            TextUtil.Append(":");
-            JsonParser.InternalToJson(value,type,realType,depth + 1,false);
+            parser.Append("\"", depth);
+            parser.Append(objectKey);
+            parser.Append("\"");
+            parser.Append(":");
+            parser.InternalToJson(value,type,realType,depth + 1,false);
                 
-            TextUtil.AppendLine(string.Empty);
-            TextUtil.Append("}", depth);
+            parser.AppendLine(string.Empty);
+            parser.Append("}", depth);
         }
 
         /// <inheritdoc />
-        public object ParseJson(Type type, Type realType)
+        public object ParseJson(JsonParser parser, Type type, Type realType)
         {
            
             //{
@@ -56,19 +56,19 @@ namespace CatJson
             //}
             
             //跳过,
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Comma);
+            parser.Lexer.GetNextTokenByType(TokenType.Comma);
             
             //跳过"<>Object"
-            JsonParser.Lexer.GetNextTokenByType(TokenType.String);
+            parser.Lexer.GetNextTokenByType(TokenType.String);
             
             //跳过 :
-            JsonParser.Lexer.GetNextTokenByType(TokenType.Colon);
+            parser.Lexer.GetNextTokenByType(TokenType.Colon);
             
             //读取被多态序列化的对象的Json文本并反序列化
-            object obj = JsonParser.InternalParseJson(type,realType,false);
+            object obj = parser.InternalParseJson(type,realType,false);
             
             //跳过}
-            JsonParser.Lexer.GetNextTokenByType(TokenType.RightBrace);
+            parser.Lexer.GetNextTokenByType(TokenType.RightBrace);
 
             
             

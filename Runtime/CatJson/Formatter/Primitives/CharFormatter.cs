@@ -8,17 +8,17 @@ namespace CatJson
     public class CharFormatter : BaseJsonFormatter<char>
     {
         /// <inheritdoc />
-        public override void ToJson(char value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, char value, Type type, Type realType, int depth)
         {
-            TextUtil.Append('\"');
-            TextUtil.Append(value);
-            TextUtil.Append('\"');
+            parser.Append('\"');
+            parser.Append(value);
+            parser.Append('\"');
         }
 
         /// <inheritdoc />
-        public override char ParseJson(Type type, Type realType)
+        public override char ParseJson(JsonParser parser, Type type, Type realType)
         {
-            RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.String);
+            RangeString rs = parser.Lexer.GetNextTokenByType(TokenType.String);
             return rs[0];
         }
     }

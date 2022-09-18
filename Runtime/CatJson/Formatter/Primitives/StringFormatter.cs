@@ -9,28 +9,30 @@ namespace CatJson
     public class StringFormatter : BaseJsonFormatter<string>
     {
         /// <inheritdoc />
-        public override void ToJson(string value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, string value, Type type, Type realType, int depth)
         {
-            TextUtil.Append('\"');
+            parser.Append('\"');
             for (int i = 0; i < value.Length; i++)
             {
-               TextUtil.CachedSB.Append(value[i]);
+                if (value[i] == '\\' || value[i] == '\"')
+                {
+                    //特殊处理包含\字符或"字符的情况，要在前面额外多写入一个\，这样在ParseJson的时候才能被正确解析
+                    parser.CachedSB.Append('\\');
+                }
 
-               if (value[i] == '\\')
-               {
-                   //特殊处理包含\字符的情况，要额外多写入一个\，这样在ParseJson的时候才能被正确解析
-                   TextUtil.CachedSB.Append('\\');
-               }
+                parser.CachedSB.Append(value[i]);
+                
             }
-            TextUtil.Append('\"');
+
+            parser.Append('\"');
             
           
         }
 
         /// <inheritdoc />
-        public override string ParseJson(Type type, Type realType)
+        public override string ParseJson(JsonParser parser, Type type, Type realType)
         {
-            RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.String);
+            RangeString rs = parser.Lexer.GetNextTokenByType(TokenType.String);
             return rs.ToString();
         }
     }

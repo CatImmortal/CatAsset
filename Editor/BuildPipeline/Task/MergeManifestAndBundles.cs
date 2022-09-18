@@ -42,7 +42,7 @@ namespace CatAsset.Editor
                 if (File.Exists(mainManifestPath))
                 {
                     string json = File.ReadAllText(mainManifestPath);
-                    mainManifest = CatJson.JsonParser.ParseJson<CatAssetManifest>(json);
+                    mainManifest = CatJson.JsonParser.Default.ParseJson<CatAssetManifest>(json);
                 }
                 if (mainManifest == null)
                 {

@@ -8,16 +8,16 @@ namespace CatJson
     public class DoubleFormatter : BaseJsonFormatter<double>
     {
         /// <inheritdoc />
-        public override void ToJson(double value, Type type, Type realType, int depth)
+        public override void ToJson(JsonParser parser, double value, Type type, Type realType, int depth)
         {
-            TextUtil.Append(value.ToString());
+            parser.Append(value.ToString());
         }
 
         /// <inheritdoc />
-        public override double ParseJson(Type type, Type realType)
+        public override double ParseJson(JsonParser parser, Type type, Type realType)
         {
-            RangeString rs = JsonParser.Lexer.GetNextTokenByType(TokenType.Number);
-            return double.Parse(rs.AsSpan());
+            RangeString rs = parser.Lexer.GetNextTokenByType(TokenType.Number);
+            return rs.AsDouble();
         }
     }
 }

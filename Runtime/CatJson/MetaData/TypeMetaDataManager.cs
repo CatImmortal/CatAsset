@@ -17,7 +17,7 @@ namespace CatJson
         /// <summary>
         /// 类型元数据字典
         /// </summary>
-        private static Dictionary<Type, TypeMetaData> metaDataDict = new Dictionary<Type, TypeMetaData>();
+        private static readonly Dictionary<Type, TypeMetaData> metaDataDict = new Dictionary<Type, TypeMetaData>();
 
         /// <summary>
         /// 获取指定类型的元数据，若不存在则创建
@@ -36,16 +36,34 @@ namespace CatJson
         /// <summary>
         /// 添加指定类型需要忽略的成员
         /// </summary>
-        public static void AddIgnoreMember(Type type, string memberName)
+        internal static void AddIgnoreMember(Type type, string memberName)
         {
             TypeMetaData metaData = GetOrAddMetaData(type);
             metaData.AddIgnoreMember(memberName);
+        }
+        
+        /// <summary>
+        /// 设置字段的自定义JsonKey
+        /// </summary>
+        internal static void SetJsonKey(Type type, string key, FieldInfo fi)
+        {
+            TypeMetaData metaData = GetOrAddMetaData(type);
+            metaData.SetJsonKey(key,fi);
+        }
+        
+        /// <summary>
+        /// 设置属性的自定义JsonKey
+        /// </summary>
+        internal static void SetJsonKey(Type type,string key, PropertyInfo pi)
+        {
+            TypeMetaData metaData = GetOrAddMetaData(type);
+            metaData.SetJsonKey(key,pi);
         }
 
         /// <summary>
         /// 是否序列化此类型下的默认值字段/属性
         /// </summary>
-        public static bool IsCareDefaultValue(Type type)
+        internal static bool IsCareDefaultValue(Type type)
         {
             TypeMetaData metaData = GetOrAddMetaData(type);
             return metaData.IsCareDefaultValue;
@@ -54,7 +72,7 @@ namespace CatJson
         /// <summary>
         /// 获取指定类型的字段信息
         /// </summary>
-        public static Dictionary<RangeString, FieldInfo> GetFieldInfos(Type type)
+        internal static Dictionary<RangeString, FieldInfo> GetFieldInfos(Type type)
         {
             TypeMetaData metaData = GetOrAddMetaData(type);
             return metaData.FieldInfos;
@@ -63,10 +81,19 @@ namespace CatJson
         /// <summary>
         /// 获取指定类型的属性信息
         /// </summary>
-        public static Dictionary<RangeString, PropertyInfo> GetPropertyInfos(Type type)
+        internal static Dictionary<RangeString, PropertyInfo> GetPropertyInfos(Type type)
         {
             TypeMetaData metaData = GetOrAddMetaData(type);
             return metaData.PropertyInfos;
+        }
+
+        /// <summary>
+        /// 创建指定类型的实例（使用任意有参构造）
+        /// </summary>
+        internal static object CreateInstanceWithParamCtor(Type type)
+        {
+            TypeMetaData metaData = GetOrAddMetaData(type);
+            return metaData.CreateInstanceWithParamCtor();
         }
     }
 }

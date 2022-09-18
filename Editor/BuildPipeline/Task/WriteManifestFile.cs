@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using CatAsset.Runtime;
+using CatJson;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Injector;
 using UnityEditor.Build.Pipeline.Interfaces;
@@ -23,7 +24,7 @@ namespace CatAsset.Editor
             CatAssetManifest manifest = manifestParam.Manifest;
                 
             //写入清单文件json
-            string json = CatJson.JsonParser.ToJson(manifest);
+            string json = JsonParser.Default.ToJson(manifest);
             using (StreamWriter sw = new StreamWriter(Path.Combine(writePath, CatAsset.Runtime.Util.ManifestFileName)))
             {
                 sw.Write(json);

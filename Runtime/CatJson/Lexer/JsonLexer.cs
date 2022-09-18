@@ -109,7 +109,8 @@ namespace CatJson
             }
 
             //扫描字面量 分隔符
-            switch (json[CurIndex])
+            char c = json[CurIndex];
+            switch (c)
             {
                 case 'n':
                     type = TokenType.Null;
@@ -150,7 +151,7 @@ namespace CatJson
             }
 
             //扫描数字
-            if (char.IsDigit(json[CurIndex]) || json[CurIndex] == '-')
+            if (char.IsDigit(c) || c == '-')
             {
                 RangeString rs = ScanNumber();
                 type = TokenType.Number;
@@ -158,14 +159,14 @@ namespace CatJson
             }
 
             //扫描字符串
-            if (json[CurIndex] == '"')
+            if (c == '"')
             {
                 RangeString rs = ScanString();
                 type = TokenType.String;
                 return rs;
             }
             
-            ThrowLexerException($"json解析失败，当前字符:{json[CurIndex]}");
+            ThrowLexerException($"json解析失败，当前字符:{c}");
             return default;
         }
 
