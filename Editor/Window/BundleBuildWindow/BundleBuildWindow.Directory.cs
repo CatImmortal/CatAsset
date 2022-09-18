@@ -31,9 +31,9 @@ namespace CatAsset.Editor
 
             EditorGUILayout.Space();
 
-            for (int i = 0; i < bundleBuildConfg.Directories.Count; i++)
+            for (int i = 0; i < bundleBuildConfig.Directories.Count; i++)
             {
-                BundleBuildDirectory directory = bundleBuildConfg.Directories[i];
+                BundleBuildDirectory directory = bundleBuildConfig.Directories[i];
 
                 using (new EditorGUILayout.HorizontalScope())
                 {
@@ -71,14 +71,14 @@ namespace CatAsset.Editor
             {
                 foreach (int index in needRemoveDirectories)
                 {
-                    bundleBuildConfg.Directories.RemoveAt(index);
+                    bundleBuildConfig.Directories.RemoveAt(index);
                 }
                 needRemoveDirectories.Clear();
             }
             
             if (EditorGUI.EndChangeCheck())
             {
-                EditorUtility.SetDirty(bundleBuildConfg);
+                EditorUtility.SetDirty(bundleBuildConfig);
                 AssetDatabase.SaveAssets();
             }
 

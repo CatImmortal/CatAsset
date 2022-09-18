@@ -33,8 +33,8 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("游戏版本号：" + Application.version, GUILayout.Width(200));
 
                 EditorGUILayout.LabelField("资源清单版本号：", GUILayout.Width(100));
-                bundleBuildConfg.ManifestVersion =
-                    EditorGUILayout.IntField(bundleBuildConfg.ManifestVersion, GUILayout.Width(50));
+                bundleBuildConfig.ManifestVersion =
+                    EditorGUILayout.IntField(bundleBuildConfig.ManifestVersion, GUILayout.Width(50));
             }
 
             EditorGUILayout.Space();
@@ -47,18 +47,18 @@ namespace CatAsset.Editor
 
                     using (EditorGUILayout.ToggleGroupScope toggle =
                            new EditorGUILayout.ToggleGroupScope(targetPlatform.ToString(),
-                               bundleBuildConfg.TargetPlatforms.Contains(targetPlatform)))
+                               bundleBuildConfig.TargetPlatforms.Contains(targetPlatform)))
                     {
                         if (toggle.enabled)
                         {
-                            if (!bundleBuildConfg.TargetPlatforms.Contains(targetPlatform))
+                            if (!bundleBuildConfig.TargetPlatforms.Contains(targetPlatform))
                             {
-                                bundleBuildConfg.TargetPlatforms.Add(targetPlatform);
+                                bundleBuildConfig.TargetPlatforms.Add(targetPlatform);
                             }
                         }
                         else
                         {
-                            bundleBuildConfg.TargetPlatforms.Remove(targetPlatform);
+                            bundleBuildConfig.TargetPlatforms.Remove(targetPlatform);
                         }
                     }
                 }
@@ -66,20 +66,20 @@ namespace CatAsset.Editor
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("选择资源包构建设置：");
-            bundleBuildConfg.Options =
-                (BuildAssetBundleOptions) EditorGUILayout.EnumFlagsField(bundleBuildConfg.Options);
+            bundleBuildConfig.Options =
+                (BuildAssetBundleOptions) EditorGUILayout.EnumFlagsField(bundleBuildConfig.Options);
 
             EditorGUILayout.Space();
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUILayout.Label("资源包构建输出根目录：", GUILayout.Width(150));
-                bundleBuildConfg.OutputPath = GUILayout.TextField(bundleBuildConfg.OutputPath);
+                bundleBuildConfig.OutputPath = GUILayout.TextField(bundleBuildConfig.OutputPath);
                 if (GUILayout.Button("选择目录", GUILayout.Width(100)))
                 {
-                    string folder = EditorUtility.OpenFolderPanel("选择资源包构建输出根目录", bundleBuildConfg.OutputPath, "");
+                    string folder = EditorUtility.OpenFolderPanel("选择资源包构建输出根目录", bundleBuildConfig.OutputPath, "");
                     if (folder != string.Empty)
                     {
-                        bundleBuildConfg.OutputPath = folder;
+                        bundleBuildConfig.OutputPath = folder;
                     }
                 }
             }
@@ -97,15 +97,15 @@ namespace CatAsset.Editor
 
             using (EditorGUILayout.ToggleGroupScope toggle =
                    new EditorGUILayout.ToggleGroupScope("资源包构建目标平台只有1个时，在构建完成后将其复制到StreamingAssets目录下",
-                       bundleBuildConfg.IsCopyToReadOnlyDirectory))
+                       bundleBuildConfig.IsCopyToReadOnlyDirectory))
             {
-                bundleBuildConfg.IsCopyToReadOnlyDirectory = toggle.enabled;
+                bundleBuildConfig.IsCopyToReadOnlyDirectory = toggle.enabled;
             }
 
-            if (bundleBuildConfg.IsCopyToReadOnlyDirectory)
+            if (bundleBuildConfig.IsCopyToReadOnlyDirectory)
             {
                 EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：");
-                bundleBuildConfg.CopyGroup = EditorGUILayout.TextField(bundleBuildConfg.CopyGroup);
+                bundleBuildConfig.CopyGroup = EditorGUILayout.TextField(bundleBuildConfig.CopyGroup);
             }
             
           
@@ -117,32 +117,32 @@ namespace CatAsset.Editor
                 if (GUILayout.Button("构建资源包", GUILayout.Width(200)))
                 {
                     //检查是否选中至少一个平台
-                    if (bundleBuildConfg.TargetPlatforms.Count == 0)
+                    if (bundleBuildConfig.TargetPlatforms.Count == 0)
                     {
                         EditorUtility.DisplayDialog("提示", "至少要选择一个平台", "确认");
                         return;
                     }
 
                     //先刷新下资源包构建信息
-                    bundleBuildConfg.RefreshBundleBuildInfos();
+                    bundleBuildConfig.RefreshBundleBuildInfos();
 
                     //处理多个平台
-                    foreach (BuildTarget targetPlatform in bundleBuildConfg.TargetPlatforms)
+                    foreach (BuildTarget targetPlatform in bundleBuildConfig.TargetPlatforms)
                     {
                         if (!buildRawBundleOnly)
                         {
-                            BuildPipeline.BuildBundles(bundleBuildConfg, targetPlatform);
+                            BuildPipeline.BuildBundles(bundleBuildConfig, targetPlatform);
                         }
                         else
                         {
                             //仅构建原生资源包
-                            BuildPipeline.BuildRawBundles(bundleBuildConfg,targetPlatform);
+                            BuildPipeline.BuildRawBundles(bundleBuildConfig,targetPlatform);
                         }
                        
                     }
 
-                    bundleBuildConfg.ManifestVersion++;
-                    EditorUtility.SetDirty(bundleBuildConfg);
+                    bundleBuildConfig.ManifestVersion++;
+                    EditorUtility.SetDirty(bundleBuildConfig);
                     AssetDatabase.SaveAssets();
                     AssetDatabase.Refresh();
 
@@ -154,7 +154,7 @@ namespace CatAsset.Editor
 
             if (EditorGUI.EndChangeCheck())
             {
-                EditorUtility.SetDirty(bundleBuildConfg);
+                EditorUtility.SetDirty(bundleBuildConfig);
                 AssetDatabase.SaveAssets();
             }
         }
