@@ -75,9 +75,9 @@ namespace CatAsset.Runtime
         /// </summary>
         public static AssetCategory GetAssetCategoryWithEditorMode(string assetName, Type assetType)
         {
-            if (assetName.StartsWith("Assets/") || assetName.StartsWith("Packages/"))
+            if (assetName.StartsWith("Assets/"))
             {
-                //资源名以Assets/ 或 Packages/开头
+                //资源名以Assets/开头
                 if (typeof(UnityEngine.Object).IsAssignableFrom(assetType) || assetType == typeof(object))
                 {
                     //以UnityEngine.Object及其派生类型或object为加载类型
