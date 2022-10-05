@@ -59,7 +59,19 @@ namespace CatAsset.Runtime
                 case AssetCategory.InternalBundleAsset:
                     if (typeof(UnityEngine.Object).IsAssignableFrom(type))
                     {
-                        return (T) asset;
+                        if (type == typeof(Sprite) && asset is Texture2D tex)
+                        {
+                            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+                            return (T) (object) sprite;
+                        }
+                        else if (type == typeof(Texture2D) && asset is Sprite sprite)
+                        {
+                            return (T)(object)sprite.texture;
+                        }
+                        else
+                        {
+                            return (T) asset;
+                        }
                     }
                     else
                     {
