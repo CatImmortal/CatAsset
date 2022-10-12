@@ -17,6 +17,8 @@ QQ交流群：762036315
 
 - **资源包构建管线基于Unity最新的ScriptableBuildPipline所搭建，拥有比旧的内置构建管线更快的构建速度**
 
+  *因此需要使用者自行在项目package manager中安装scriptableBuildPipline包，否则会有缺失代码的编译报错*
+
   
 
 - **提供循环依赖分析与冗余资源分析**
