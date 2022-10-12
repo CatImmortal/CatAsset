@@ -28,6 +28,7 @@ namespace CatAsset.Runtime
             loadedScene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             if (loadedScene != default)
             {
+                SceneManager.SetActiveScene(loadedScene);
                 CatAssetDatabase.SetSceneInstance(loadedScene,AssetRuntimeInfo);
             }
         }

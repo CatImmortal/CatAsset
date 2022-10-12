@@ -449,7 +449,9 @@ namespace CatAsset.Runtime
                 {
                     SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).completed += (op) =>
                     {
-                        callback?.Invoke(true, SceneManager.GetSceneByPath(sceneName), userdata);
+                        Scene scene = SceneManager.GetSceneByPath(sceneName);
+                        SceneManager.SetActiveScene(scene);
+                        callback?.Invoke(true, scene, userdata);
                     };
                 }
                 catch (Exception e)
@@ -482,6 +484,19 @@ namespace CatAsset.Runtime
             {
                 task.Cancel();
             }
+        }
+        
+        /// <summary>
+        /// 获取任务进度
+        /// </summary>
+        public static float GetTaskProgress(int guid)
+        {
+            if (allTaskDict.TryGetValue(guid, out ITask task))
+            {
+                return task.Progress;
+            }
+
+            return -1;
         }
 
         #endregion
