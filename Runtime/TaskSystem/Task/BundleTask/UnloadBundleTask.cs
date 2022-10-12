@@ -65,7 +65,11 @@ namespace CatAsset.Runtime
             bundleRuntimeInfo.DependencyBundles.Clear();
             
             //卸载资源包
+#if UNITY_2021_1_OR_NEWER
             bundleRuntimeInfo.Bundle.UnloadAsync(true);
+#else
+            bundleRuntimeInfo.Bundle.Unload(true);
+#endif
             bundleRuntimeInfo.Bundle = null;
             
             Debug.Log($"已卸载资源包:{bundleRuntimeInfo.Manifest.RelativePath}");
