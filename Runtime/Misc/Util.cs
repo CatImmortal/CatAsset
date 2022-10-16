@@ -82,7 +82,7 @@ namespace CatAsset.Runtime
                 {
                     //以UnityEngine.Object及其派生类型或object为加载类型
                     //都视为内置资源包资源进行加载
-                    return AssetCategory.InternalBundleAsset;
+                    return AssetCategory.InternalBundledAsset;
                 }
                 else
                 {
@@ -122,7 +122,7 @@ namespace CatAsset.Runtime
             }
 
             //内置资源包资源
-            return AssetCategory.InternalBundleAsset;
+            return AssetCategory.InternalBundledAsset;
         }
 
         /// <summary>

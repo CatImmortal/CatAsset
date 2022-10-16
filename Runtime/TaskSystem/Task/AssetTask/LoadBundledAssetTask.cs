@@ -10,7 +10,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包资源加载任务
     /// </summary>
-    public class LoadBundleAssetTask<T> : BaseTask<LoadBundleAssetTask<T>>
+    public class LoadBundledAssetTask<T> : BaseTask<LoadBundledAssetTask<T>>
     {
         /// <summary>
         /// 资源包资源加载状态
@@ -82,7 +82,7 @@ namespace CatAsset.Runtime
             }
         }
         
-        public LoadBundleAssetTask()
+        public LoadBundledAssetTask()
         {
             onBundleLoadedCallback = OnBundleLoaded;
             onDependencyLoadedCallback = OnDependencyLoaded;
@@ -364,13 +364,13 @@ namespace CatAsset.Runtime
         {
             if (success)
             {
-                LoadAssetResult result = new LoadAssetResult(AssetRuntimeInfo.Asset, AssetCategory.InternalBundleAsset);
+                LoadAssetResult result = new LoadAssetResult(AssetRuntimeInfo.Asset, AssetCategory.InternalBundledAsset);
                 T asset = result.GetAsset<T>();
                 
                 if (!NeedCancel)
                 {
                     onFinished?.Invoke(true, asset,result, Userdata);
-                    foreach (LoadBundleAssetTask<T> task in MergedTasks)
+                    foreach (LoadBundledAssetTask<T> task in MergedTasks)
                     {
                         if (!task.NeedCancel)
                         {
@@ -389,7 +389,7 @@ namespace CatAsset.Runtime
                     bool needUnload = true;
 
                     //只是主任务被取消了 未取消的已合并任务还需要继续处理
-                    foreach (LoadBundleAssetTask<T> task in MergedTasks)
+                    foreach (LoadBundledAssetTask<T> task in MergedTasks)
                     {
                         if (!task.NeedCancel)
                         {
@@ -420,7 +420,7 @@ namespace CatAsset.Runtime
                     onFinished?.Invoke(false, default,default, Userdata);
                 }
                 
-                foreach (LoadBundleAssetTask<T> task in MergedTasks)
+                foreach (LoadBundledAssetTask<T> task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
@@ -438,10 +438,10 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建资源加载任务的对象
         /// </summary>
-        public static LoadBundleAssetTask<T> Create(TaskRunner owner, string name, object userdata,
+        public static LoadBundledAssetTask<T> Create(TaskRunner owner, string name, object userdata,
             LoadAssetCallback<T> callback)
         {
-            LoadBundleAssetTask<T> task = ReferencePool.Get<LoadBundleAssetTask<T>>();
+            LoadBundledAssetTask<T> task = ReferencePool.Get<LoadBundledAssetTask<T>>();
             task.CreateBase(owner, name);
 
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);

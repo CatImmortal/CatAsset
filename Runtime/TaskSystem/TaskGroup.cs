@@ -9,22 +9,17 @@ namespace CatAsset.Runtime
     /// </summary>
     public class TaskGroup
     {
-        
-        private List<ITask> runningTasks = new List<ITask>();
-        
-        private List<ITask> waitAddTasks = new List<ITask>();
-        
-        private List<int> waitRemoveTasks = new List<int>();
+        private static List<ITask> tempTaskList = new List<ITask>();
 
         /// <summary>
-        /// 主任务字典，与主任务同名的任务会进行合并
+        /// 任务列表
         /// </summary>
-        private Dictionary<string, ITask> mainTaskDict = new Dictionary<string, ITask>();
+        private List<ITask> mainTaskList = new List<ITask>();
 
         /// <summary>
-        /// 下一个要运行的任务索引
+        /// 当前任务索引
         /// </summary>
-        private int nextRunningTaskIndex;
+        private int curTaskIndex;
         
         /// <summary>
         /// 此任务组的优先级
@@ -34,7 +29,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 任务组是否能运行
         /// </summary>
-        public bool CanRun => nextRunningTaskIndex < runningTasks.Count;
+        public bool CanRun => curTaskIndex < tempTaskList.Count;
 
         public TaskGroup(TaskPriority priority)
         {
@@ -46,54 +41,55 @@ namespace CatAsset.Runtime
         /// </summary>
         public void AddTask(ITask task)
         {
-            waitAddTasks.Add(task);
-        }
-        
-        /// <summary>
-        /// 添加任务（会合并重复任务）
-        /// </summary>
-        private void InternalAddTask(ITask task)
-        {
-            if (mainTaskDict.TryGetValue(task.Name,out ITask mainTask))
-            {
-                mainTask.MergeTask(task);
-            }
-            else
-            {
-                mainTaskDict.Add(task.Name,task);
-                runningTasks.Add(task);
-            }
+            mainTaskList.Add(task);
+            task.Group = this;
         }
 
         /// <summary>
-        /// 运行前调用
+        /// 移除任务
+        /// </summary>
+        public void RemoveTask(ITask task)
+        {
+            mainTaskList.Remove(task);
+            task.Group = null;
+        }
+
+        /// <summary>
+        /// 任务组运行前
         /// </summary>
         public void PreRun()
         {
-            //添加需要添加的任务
-            if (waitAddTasks.Count > 0)
+            if (mainTaskList.Count > 0)
             {
-                for (int i = 0; i < waitAddTasks.Count; i++)
+                foreach (ITask task in mainTaskList)
                 {
-                    ITask task = waitAddTasks[i];
-                    InternalAddTask(task);
+                    tempTaskList.Add(task);
                 }
-                waitAddTasks.Clear();
             }
-
-          
         }
 
+        /// <summary>
+        /// 任务组运行后
+        /// </summary>
+        public void PostRun()
+        {
+            if (tempTaskList.Count > 0)
+            {
+                tempTaskList.Clear();
+            }
+            curTaskIndex = 0;
+        }
+        
         /// <summary>
         /// 运行任务组
         /// </summary>
         public bool Run()
         {
 
-            int index = nextRunningTaskIndex;
-            nextRunningTaskIndex++;
+            int index = curTaskIndex;
+            curTaskIndex++;
             
-            ITask task = runningTasks[index];
+            ITask task = tempTaskList[index];
 
             try
             {
@@ -118,7 +114,9 @@ namespace CatAsset.Runtime
                 {
                     case TaskState.Finished:
                         //任务运行结束 需要删除
-                        waitRemoveTasks.Add(index);
+                        RemoveTask(task);
+                        TaskRunner.MainTaskDict.Remove(task.Name);
+                        ReferencePool.Release(task);
                         break;
                 };
             }
@@ -133,32 +131,7 @@ namespace CatAsset.Runtime
             return false;
 
         }
-        
-        /// <summary>
-        /// 运行后调用
-        /// </summary>
-        public void PostRun()
-        {
-            nextRunningTaskIndex = 0;
-            
-            //移除需要移除的任务
-            if (waitRemoveTasks.Count > 0)
-            {
-                for (int i = waitRemoveTasks.Count - 1; i >= 0; i--)
-                {
-                    int removeIndex = waitRemoveTasks[i];
-                    ITask task = runningTasks[removeIndex];
-                    
-                    //Debug.Log($"移除任务:{task}");
-                    runningTasks.RemoveAt(removeIndex);
-                    mainTaskDict.Remove(task.Name);
-                    ReferencePool.Release(task);
-                }
 
-                waitRemoveTasks.Clear();
-            }
-        }
-        
 
         
         

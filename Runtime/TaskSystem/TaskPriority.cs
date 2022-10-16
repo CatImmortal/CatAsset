@@ -3,7 +3,7 @@
     /// <summary>
     /// 任务优先级
     /// </summary>
-    public enum TaskPriority
+    public enum TaskPriority : int
     {
         /// <summary>
         /// 非常低
