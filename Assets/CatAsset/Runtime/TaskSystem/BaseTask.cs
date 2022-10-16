@@ -9,14 +9,17 @@ namespace CatAsset.Runtime
     public abstract class BaseTask<T> : ITask where T : ITask
     {
         /// <inheritdoc />
-        public TaskRunner Owner { get; private set; }
-
-        /// <inheritdoc />
-        public int GUID { get; protected set; }
+        public int ID { get; protected set; }
         
         /// <inheritdoc />
         public string Name { get; private set; }
-
+        
+        /// <inheritdoc />
+        public TaskRunner Owner { get; private set; }
+        
+        /// <inheritdoc />
+        public TaskGroup Group { get; set; }
+        
         /// <inheritdoc />
         public TaskState State { get; set; }
         
@@ -60,18 +63,19 @@ namespace CatAsset.Runtime
         protected void CreateBase(TaskRunner owner,string name)
         {
             Owner = owner;
-            GUID = ++TaskRunner.GUIDFactory;
-            CatAssetManager.AddTaskGUID(this);
+            ID = ++TaskRunner.TaskIDFactory;
+            TaskRunner.TaskIDDict.Add(ID,this);
             Name = name;
         }
         
         /// <inheritdoc />
         public virtual void Clear()
         {
-            Owner = default;
-            CatAssetManager.RemoveTaskGUID(this);
-            GUID = default;
+            TaskRunner.TaskIDDict.Remove(ID);
+            ID = default;
             Name = default;
+            Owner = default;
+            Group = default;
             State = default;
             foreach (T task in MergedTasks)
             {

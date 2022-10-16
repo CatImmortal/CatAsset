@@ -24,10 +24,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private static TaskRunner downloadTaskRunner = new TaskRunner();
 
-        /// <summary>
-        /// 任务id->任务
-        /// </summary>
-        private static Dictionary<int, ITask> allTaskDict = new Dictionary<int, ITask>();
+
 
         /// <summary>
         /// 资源类型->自定义原生资源转换方法
@@ -104,23 +101,7 @@ namespace CatAsset.Runtime
             loadTaskRunner.Update();
             downloadTaskRunner.Update();
         }
-
-        /// <summary>
-        /// 添加任务id与任务的关联
-        /// </summary>
-        internal static void AddTaskGUID(ITask task)
-        {
-            allTaskDict.Add(task.GUID, task);
-        }
-
-        /// <summary>
-        /// 删除任务id与任务的关联
-        /// </summary>
-        internal static void RemoveTaskGUID(ITask task)
-        {
-            allTaskDict.Remove(task.GUID);
-        }
-
+        
         /// <summary>
         /// 注册自定义原生资源转换方法
         /// </summary>
@@ -328,7 +309,7 @@ namespace CatAsset.Runtime
                 object asset;
                 try
                 {
-                    if (category == AssetCategory.InternalBundleAsset)
+                    if (category == AssetCategory.InternalBundledAsset)
                     {
                         //加载资源包资源
                         Type assetType = typeof(T);
@@ -374,12 +355,12 @@ namespace CatAsset.Runtime
                     callback?.Invoke(false, default, default, userdata);
                     return default;
 
-                case AssetCategory.InternalBundleAsset:
+                case AssetCategory.InternalBundledAsset:
                     //加载内置资源包资源
-                    LoadBundleAssetTask<T> loadBundleAssetTask =
-                        LoadBundleAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
-                    loadTaskRunner.AddTask(loadBundleAssetTask, priority);
-                    return loadBundleAssetTask.GUID;
+                    LoadBundledAssetTask<T> loadBundledAssetTask =
+                        LoadBundledAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
+                    loadTaskRunner.AddTask(loadBundledAssetTask, priority);
+                    return loadBundledAssetTask.ID;
 
 
                 case AssetCategory.InternalRawAsset:
@@ -389,7 +370,7 @@ namespace CatAsset.Runtime
                         LoadRawAssetTask<T>.Create(loadTaskRunner, assetName, category, userdata, callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
 
-                    return loadRawAssetTask.GUID;
+                    return loadRawAssetTask.ID;
             }
 
             return default;
@@ -431,9 +412,9 @@ namespace CatAsset.Runtime
 #endif
 
             BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,
-                $"{nameof(BatchLoadAsset)} - {TaskRunner.GUIDFactory + 1}", assetNames, userdata, callback);
+                $"{nameof(BatchLoadAsset)} - {TaskRunner.TaskIDFactory + 1}", assetNames, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
-            return task.GUID;
+            return task.ID;
         }
 
         /// <summary>
@@ -472,7 +453,7 @@ namespace CatAsset.Runtime
             LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, userdata, callback);
             loadTaskRunner.AddTask(task, priority);
 
-            return task.GUID;
+            return task.ID;
         }
 
         /// <summary>
@@ -480,7 +461,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void CancelTask(int guid)
         {
-            if (allTaskDict.TryGetValue(guid, out ITask task))
+            if (TaskRunner.TaskIDDict.TryGetValue(guid, out ITask task))
             {
                 task.Cancel();
             }
@@ -491,7 +472,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static float GetTaskProgress(int guid)
         {
-            if (allTaskDict.TryGetValue(guid, out ITask task))
+            if (TaskRunner.TaskIDDict.TryGetValue(guid, out ITask task))
             {
                 return task.Progress;
             }

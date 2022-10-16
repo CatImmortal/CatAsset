@@ -56,7 +56,7 @@ namespace CatAsset.Runtime
             
             switch (Category)
             {
-                case AssetCategory.InternalBundleAsset:
+                case AssetCategory.InternalBundledAsset:
                     if (typeof(UnityEngine.Object).IsAssignableFrom(type))
                     {
                         if (type == typeof(Sprite) && asset is Texture2D tex)

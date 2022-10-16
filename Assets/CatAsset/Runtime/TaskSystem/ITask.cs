@@ -6,19 +6,25 @@
     public interface ITask : IReference
     {
         /// <summary>
-        /// 持有者
+        /// id
         /// </summary>
-        TaskRunner Owner { get; }
-        
-        /// <summary>
-        /// 全局id
-        /// </summary>
-        int GUID { get; }
+        int ID { get; }
         
         /// <summary>
         /// 名称
         /// </summary>
         string Name { get; }
+        
+        /// <summary>
+        /// 持有者
+        /// </summary>
+        TaskRunner Owner { get; }
+        
+        /// <summary>
+        /// 任务组
+        /// </summary>
+        TaskGroup Group { get; set; }
+
         
         /// <summary>
         /// 状态

@@ -10,7 +10,7 @@
         /// <summary>
         /// 内置资源包资源
         /// </summary>
-        InternalBundleAsset,
+        InternalBundledAsset,
         
         /// <summary>
         /// 内置原生资源
