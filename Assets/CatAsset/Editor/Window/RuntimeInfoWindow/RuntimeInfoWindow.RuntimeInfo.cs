@@ -177,7 +177,7 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"|  资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(100));
                 EditorGUILayout.LabelField($"|  使用中资源数：{bundleRuntimeInfo.UsedAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(150));
                 EditorGUILayout.LabelField($"|  文件长度：{Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(150));
-                EditorGUILayout.LabelField($"|  上游资源包的数量：{bundleRuntimeInfo.DependencyLink.UpStream.Count}",GUILayout.Width(150));
+                EditorGUILayout.LabelField($"|  上游资源包数量：{bundleRuntimeInfo.DependencyLink.UpStream.Count}",GUILayout.Width(150));
                 if (GUILayout.Button("查看上游资源包", GUILayout.Width(100)))
                 {
                     if (bundleRuntimeInfo.DependencyLink.UpStream.Count > 0)
@@ -240,8 +240,8 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"|  长度：{Runtime.Util.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}", GUILayout.Width(100));
                 EditorGUILayout.LabelField($"|  引用计数：{assetRuntimeInfo.UseCount}", GUILayout.Width(100));
 
-                EditorGUILayout.LabelField($"|  引用资源的数量：{assetRuntimeInfo.UpStream.Count}", GUILayout.Width(150));
-                if (GUILayout.Button("查看引用资源", GUILayout.Width(100)))
+                EditorGUILayout.LabelField($"|  上游资源数量：{assetRuntimeInfo.UpStream.Count}", GUILayout.Width(150));
+                if (GUILayout.Button("查看上游资源", GUILayout.Width(100)))
                 {
                     if (assetRuntimeInfo.UpStream.Count > 0)
                     {
