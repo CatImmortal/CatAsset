@@ -24,7 +24,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Update()
         {
-            if (assetRuntimeInfo.RefCount > 0)
+            if (assetRuntimeInfo.UseCount > 0)
             {
                 //被重新使用了 不进行卸载了
                 State = TaskState.Finished;

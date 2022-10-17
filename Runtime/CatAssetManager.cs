@@ -568,7 +568,7 @@ namespace CatAsset.Runtime
         private static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
         {
             //减少引用计数
-            assetRuntimeInfo.SubRefCount();
+            assetRuntimeInfo.SubUseCount();
 
             if (assetRuntimeInfo.IsUnused())
             {

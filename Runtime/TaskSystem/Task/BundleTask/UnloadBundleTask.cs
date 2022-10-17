@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
 
         public override void Update()
         {
-            if (bundleRuntimeInfo.UsedAssets.Count > 0 || bundleRuntimeInfo.RefBundles.Count > 0)
+            if (bundleRuntimeInfo.UsedAssets.Count > 0 || bundleRuntimeInfo.DependencyLink.UpStream.Count > 0)
             {
                 //被重新使用了 不进行卸载了
                 State = TaskState.Finished;
@@ -51,18 +51,18 @@ namespace CatAsset.Runtime
                 }
             }
 
-            //删除依赖的其他资源包的被引用记录
-            foreach (BundleRuntimeInfo dependencyBundleInfo in bundleRuntimeInfo.DependencyBundles)
+            //删除此资源包被下游资源包所记录的上游信息
+            foreach (BundleRuntimeInfo downStreamBundle in bundleRuntimeInfo.DependencyLink.DownStream)
             {
-                dependencyBundleInfo.RemoveRefBundle(bundleRuntimeInfo);
-                if (dependencyBundleInfo.CanUnload())
+                downStreamBundle.RemoveUpStream(bundleRuntimeInfo);
+                if (downStreamBundle.CanUnload())
                 {
-                    //依赖的其他资源包可以卸载了
-                    UnloadBundleTask task = Create(Owner,dependencyBundleInfo.Manifest.RelativePath,dependencyBundleInfo);
+                    //下游资源包可以卸载了
+                    UnloadBundleTask task = Create(Owner,downStreamBundle.Manifest.RelativePath,downStreamBundle);
                     Owner.AddTask(task, TaskPriority.Low);
                 }
             }
-            bundleRuntimeInfo.DependencyBundles.Clear();
+            bundleRuntimeInfo.ClearDownStream();
             
             //卸载资源包
 #if UNITY_2021_1_OR_NEWER

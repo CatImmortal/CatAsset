@@ -51,17 +51,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 当前使用中的资源集合，这里面的资源的引用计数都大于0
         /// </summary>
-        public HashSet<AssetRuntimeInfo> UsedAssets { get; } = new HashSet<AssetRuntimeInfo>();
+        public readonly HashSet<AssetRuntimeInfo> UsedAssets = new HashSet<AssetRuntimeInfo>();
 
         /// <summary>
-        /// 引用了此资源包的资源包集合
+        /// 资源包依赖链
         /// </summary>
-        public HashSet<BundleRuntimeInfo> RefBundles{ get; } = new HashSet<BundleRuntimeInfo>();
-        
-        /// <summary>
-        /// 此资源包依赖的资源包集合
-        /// </summary>
-        public HashSet<BundleRuntimeInfo> DependencyBundles { get; } = new HashSet<BundleRuntimeInfo>();
+        public readonly BundleDependencyLink DependencyLink = new BundleDependencyLink();
 
         /// <summary>
         /// 开始使用资源
@@ -96,35 +91,43 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 添加引用了此资源包的资源包
+        /// 添加上游资源包（依赖此资源包的资源包）
         /// </summary>
-        public void AddRefBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        public void AddUpStream(BundleRuntimeInfo bundleRuntimeInfo)
         {
-            RefBundles.Add(bundleRuntimeInfo);
+            DependencyLink.UpStream.Add(bundleRuntimeInfo);
         }
 
         /// <summary>
-        /// 移除引用了此资源包的资源包
+        /// 移除上游资源包（依赖此资源包的资源包）
         /// </summary>
-        public void RemoveRefBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        public void RemoveUpStream(BundleRuntimeInfo bundleRuntimeInfo)
         {
-            RefBundles.Remove(bundleRuntimeInfo);
+            DependencyLink.UpStream.Remove(bundleRuntimeInfo);
         }
 
         /// <summary>
-        /// 添加此资源包依赖的资源包
+        /// 添加下游资源包（此资源包依赖的资源包）
         /// </summary>
-        public void AddDependencyBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        public void AddDownStream(BundleRuntimeInfo bundleRuntimeInfo)
         {
-            DependencyBundles.Add(bundleRuntimeInfo);
+            DependencyLink.DownStream.Add(bundleRuntimeInfo);
         }
 
         /// <summary>
-        /// 移除此资源包依赖的资源包
+        /// 移除下游资源包（此资源包依赖的资源包）
         /// </summary>
-        public void RemoveDependencyBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        public void RemoveDownStream(BundleRuntimeInfo bundleRuntimeInfo)
         {
-            DependencyBundles.Remove(bundleRuntimeInfo);
+            DependencyLink.DownStream.Remove(bundleRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 清空下游资源包（此资源包依赖的资源包）
+        /// </summary>
+        public void ClearDownStream()
+        {
+            DependencyLink.DownStream.Clear();
         }
         
         /// <summary>
@@ -132,7 +135,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public bool CanUnload()
         {
-            return UsedAssets.Count == 0 && RefBundles.Count == 0;
+            return UsedAssets.Count == 0 && DependencyLink.UpStream.Count == 0;
         }
 
         public int CompareTo(BundleRuntimeInfo other)
