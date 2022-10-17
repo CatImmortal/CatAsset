@@ -127,7 +127,7 @@ namespace CatAsset.Runtime
                 
                 if (!needCancel)
                 {
-                    assetRuntimeInfo.AddRefCount();
+                    assetRuntimeInfo.AddUseCount();
                     
                     onFinished?.Invoke(true, asset, result);
                     
@@ -137,7 +137,7 @@ namespace CatAsset.Runtime
                         {
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadRawAsset一定增加1个资源的引用计数
-                            assetRuntimeInfo.AddRefCount();
+                            assetRuntimeInfo.AddUseCount();
                             task.onFinished?.Invoke(true, asset,result);
                         }
                    
@@ -154,7 +154,7 @@ namespace CatAsset.Runtime
                         if (!task.needCancel)
                         {
                             needUnload = false;
-                            assetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
+                            assetRuntimeInfo.AddUseCount();  //增加已合并任务带来的引用计数
                             task.onFinished?.Invoke(true, asset,result);
                         }
                     }

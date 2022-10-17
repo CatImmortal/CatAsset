@@ -91,12 +91,12 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Run()
         {
-            if (AssetRuntimeInfo.RefCount > 0)
+            if (AssetRuntimeInfo.UseCount > 0)
             {
                 //资源已加载好 且正在使用中
                 //无需考虑操作依赖资源的引用计数与引用记录
                 //直接增加自身引用计数然后转移到DependenciesLoaded状态即可
-                AssetRuntimeInfo.AddRefCount();
+                AssetRuntimeInfo.AddUseCount();
                 loadBundleAssetState = LoadBundleAssetState.DependenciesLoaded;
                 return;
             }
@@ -195,14 +195,14 @@ namespace CatAsset.Runtime
                 BundleRuntimeInfo dependencyBundleInfo =
                     CatAssetDatabase.GetBundleRuntimeInfo(dependencyAssetInfo.BundleManifest.RelativePath);
 
-                //添加到依赖资源的被引用记录
-                dependencyAssetInfo.AddRefAsset(AssetRuntimeInfo);
+                //添加到依赖资源的上游
+                dependencyAssetInfo.AddUpStream(AssetRuntimeInfo);
                 
                 if (!dependencyBundleInfo.Equals(BundleRuntimeInfo))
                 {
-                    //依赖了其他资源包的资源 需要添加到依赖资源包的被引用记录中，以及所属资源包的依赖记录中
-                    dependencyBundleInfo.AddRefBundle(BundleRuntimeInfo);
-                    BundleRuntimeInfo.AddDependencyBundle(dependencyBundleInfo);
+                    //依赖了其他资源包的资源 需要记录此资源所属资源包和所依赖的其他资源包的上下游关系
+                    dependencyBundleInfo.AddUpStream(BundleRuntimeInfo);
+                    BundleRuntimeInfo.AddDownStream(dependencyBundleInfo);
                 }
             }
         }
@@ -220,8 +220,8 @@ namespace CatAsset.Runtime
             State = TaskState.Waiting;
             
             //这里要在确认资源包已加载后，就马上增加资源的引用计数和使用记录
-            //防止在依赖资源加载过程中其他地方意外的触发了资源包的卸载
-            AssetRuntimeInfo.AddRefCount();
+            //防止在依赖资源加载完成前 其他地方意外的触发了资源包的卸载
+            AssetRuntimeInfo.AddUseCount();
 
             if (AssetRuntimeInfo.AssetManifest.Dependencies == null)
             {
@@ -293,9 +293,9 @@ namespace CatAsset.Runtime
                 //资源加载失败
                 
                 //减少引用计数
-                AssetRuntimeInfo.SubRefCount();
+                AssetRuntimeInfo.SubUseCount();
                 
-                //卸载已加载好的依赖 清除引用记录
+                //卸载已加载好的依赖 清除上游记录
                 if (totalDependencyCount > 0)
                 {
                     foreach (string dependencyName in AssetRuntimeInfo.AssetManifest.Dependencies)
@@ -304,7 +304,7 @@ namespace CatAsset.Runtime
                         if (dependencyInfo.Asset != null)
                         {
                             //将已加载的依赖都卸载一遍
-                            dependencyInfo.RemoveRefAsset(AssetRuntimeInfo);
+                            dependencyInfo.RemoveUpStream(AssetRuntimeInfo);
                             CatAssetManager.UnloadAsset(dependencyInfo.Asset);
                         }
                     }
@@ -375,7 +375,7 @@ namespace CatAsset.Runtime
                         {
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadAsset一定增加1个资源的引用计数
-                            AssetRuntimeInfo.AddRefCount();
+                            AssetRuntimeInfo.AddUseCount();
                             task.onFinished?.Invoke(true, asset,result);
                         }
                    
@@ -393,7 +393,7 @@ namespace CatAsset.Runtime
                         if (!task.NeedCancel)
                         {
                             needUnload = false;
-                            AssetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
+                            AssetRuntimeInfo.AddUseCount();  //增加已合并任务带来的引用计数
                             task.onFinished?.Invoke(true, asset,result);
                         }
                     }
@@ -401,7 +401,7 @@ namespace CatAsset.Runtime
                     if (!needUnload)
                     {
                        //至少有一个需要这个资源的已合并任务 那就只需要将主任务增加的那1个引用计数减去就行
-                       AssetRuntimeInfo.SubRefCount();
+                       AssetRuntimeInfo.SubUseCount();
                     }
                     else
                     {

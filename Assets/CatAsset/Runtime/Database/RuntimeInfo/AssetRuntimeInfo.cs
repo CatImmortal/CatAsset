@@ -28,17 +28,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 引用计数
         /// </summary>
-        public int RefCount { get; private set; }
+        public int UseCount { get; private set; }
 
         /// <summary>
-        /// 引用了此资源的资源集合
+        /// 上游资源集合（依赖此资源的资源）
         /// </summary>
-        public HashSet<AssetRuntimeInfo> RefAssets { get; } = new HashSet<AssetRuntimeInfo>();
+        public readonly HashSet<AssetRuntimeInfo> UpStream = new HashSet<AssetRuntimeInfo>();
 
         /// <summary>
         /// 增加引用计数
         /// </summary>
-        public void AddRefCount(int count = 1)
+        public void AddUseCount(int count = 1)
         {
             if (IsUnused())
             {
@@ -49,21 +49,21 @@ namespace CatAsset.Runtime
                 bundleRuntimeInfo.StartUseAsset(this);
             }
             
-            RefCount += count;
+            UseCount += count;
         }
 
         /// <summary>
         /// 减少引用计数
         /// </summary>
-        public void SubRefCount(int count = 1)
+        public void SubUseCount(int count = 1)
         {
-            if (RefCount == 0)
+            if (UseCount == 0)
             {
                 Debug.LogError($"尝试减少引用计数为0的资源的引用计数:{this}");
                 return;
             }
 
-            RefCount -= count;
+            UseCount -= count;
 
             if (IsUnused())
             {
@@ -80,32 +80,31 @@ namespace CatAsset.Runtime
         /// </summary>
         public bool IsUnused()
         {
-            return RefCount == 0;
+            return UseCount == 0;
         }
 
         /// <summary>
-        /// 添加引用了此资源的资源
+        /// 添加上游资源（依赖此资源的资源）
         /// </summary>
-        /// <param name="assetRuntimeInfo"></param>
-        public void AddRefAsset(AssetRuntimeInfo assetRuntimeInfo)
+        public void AddUpStream(AssetRuntimeInfo assetRuntimeInfo)
         {
             if (Asset == null)
             {
                 return;
             }
-            RefAssets.Add(assetRuntimeInfo);
+            UpStream.Add(assetRuntimeInfo);
         }
 
         /// <summary>
-        /// 移除引用了此资源的资源
+        /// 移除上游资源（依赖此资源的资源）
         /// </summary>
-        public void RemoveRefAsset(AssetRuntimeInfo assetRuntimeInfo)
+        public void RemoveUpStream(AssetRuntimeInfo assetRuntimeInfo)
         {
             if (Asset == null)
             {
                 return;
             }
-            RefAssets.Remove(assetRuntimeInfo);
+            UpStream.Remove(assetRuntimeInfo);
         }
         
         public int CompareTo(AssetRuntimeInfo other)
