@@ -34,8 +34,8 @@ public class PackageOnlyExample : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.A))
             {
 
-                CatAssetManager.LoadAsset<GameObject>("Assets/BundleRes/PrefabA/A1.prefab", null, ((success, asset,
-                    result, userdata) =>
+                CatAssetManager.LoadAsset<GameObject>("Assets/BundleRes/PrefabA/A1.prefab", ((success, asset,
+                    result) =>
                 {
                     if (success)
                     {
@@ -47,8 +47,8 @@ public class PackageOnlyExample : MonoBehaviour
                     }
                 }));
 
-                CatAssetManager.LoadAsset<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", null, (
-                    (success, asset, result, userdata) =>
+                CatAssetManager.LoadAsset<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", (
+                    (success, asset, result) =>
                     {
                         if (success)
                         {

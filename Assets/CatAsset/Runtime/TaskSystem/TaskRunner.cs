@@ -17,7 +17,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 任务id->任务
         /// </summary>
-        internal static readonly Dictionary<int, ITask> TaskIDDict = new Dictionary<int, ITask>();
+        internal static readonly Dictionary<int, ITask>TaskIDDict = new Dictionary<int, ITask>();
         
         /// <summary>
         /// 任务名->主任务

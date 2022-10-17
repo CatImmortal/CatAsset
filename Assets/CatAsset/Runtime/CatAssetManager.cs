@@ -279,25 +279,25 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAsset(string assetName, object userdata, LoadAssetCallback<object> callback,
+        public static int LoadAsset(string assetName,LoadAssetCallback<object> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            return InternalLoadAsset(assetName, userdata, callback, priority);
+            return InternalLoadAsset(assetName, callback, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAsset<T>(string assetName, object userdata, LoadAssetCallback<T> callback,
+        public static int LoadAsset<T>(string assetName,LoadAssetCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            return InternalLoadAsset(assetName, userdata, callback, priority);
+            return InternalLoadAsset(assetName, callback, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        internal static int InternalLoadAsset<T>(string assetName, object userdata, LoadAssetCallback<T> callback,
+        internal static int InternalLoadAsset<T>(string assetName, LoadAssetCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
             AssetCategory category;
@@ -333,12 +333,12 @@ namespace CatAsset.Runtime
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false, default, default, userdata);
+                    callback?.Invoke(false, default, default);
                     throw;
                 }
 
                 LoadAssetResult result = new LoadAssetResult(asset, category);
-                callback?.Invoke(true, result.GetAsset<T>(), result, userdata);
+                callback?.Invoke(true, result.GetAsset<T>(), result);
                 return default;
             }
 #endif
@@ -352,13 +352,13 @@ namespace CatAsset.Runtime
             switch (category)
             {
                 case AssetCategory.None:
-                    callback?.Invoke(false, default, default, userdata);
+                    callback?.Invoke(false, default, default);
                     return default;
 
                 case AssetCategory.InternalBundledAsset:
                     //加载内置资源包资源
                     LoadBundledAssetTask<T> loadBundledAssetTask =
-                        LoadBundledAssetTask<T>.Create(loadTaskRunner, assetName, userdata, callback);
+                        LoadBundledAssetTask<T>.Create(loadTaskRunner, assetName, callback);
                     loadTaskRunner.AddTask(loadBundledAssetTask, priority);
                     return loadBundledAssetTask.ID;
 
@@ -367,7 +367,7 @@ namespace CatAsset.Runtime
                 case AssetCategory.ExternalRawAsset:
                     //加载原生资源
                     LoadRawAssetTask<T> loadRawAssetTask =
-                        LoadRawAssetTask<T>.Create(loadTaskRunner, assetName, category, userdata, callback);
+                        LoadRawAssetTask<T>.Create(loadTaskRunner, assetName, category,callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
 
                     return loadRawAssetTask.ID;
@@ -379,13 +379,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static int BatchLoadAsset(List<string> assetNames, object userdata, BatchLoadAssetCallback callback,
+        public static int BatchLoadAsset(List<string> assetNames, BatchLoadAssetCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
             if (assetNames == null || assetNames.Count == 0)
             {
                 Debug.LogError("批量加载资源失败，资源名列表为空");
-                callback?.Invoke(null, userdata);
+                callback?.Invoke(null);
                 return default;
             }
 
@@ -395,14 +395,14 @@ namespace CatAsset.Runtime
                 List<LoadAssetResult> assets = new List<LoadAssetResult>();
                 foreach (string assetName in assetNames)
                 {
-                    LoadAsset(assetName, null, ((success, asset, result, o) =>
+                    LoadAsset(assetName, ((success, asset, result) =>
                     {
                         assets.Add(result);
 
                         if (assets.Count == assetNames.Count)
                         {
                             //编辑器模式下是以同步的方式加载所有资源的 所以这里的asset顺序是和assetNames给出的顺序可以对上的
-                            callback(assets, userdata);
+                            callback(assets);
                         }
                     }));
                 }
@@ -412,7 +412,7 @@ namespace CatAsset.Runtime
 #endif
 
             BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,
-                $"{nameof(BatchLoadAsset)} - {TaskRunner.TaskIDFactory + 1}", assetNames, userdata, callback);
+                $"{nameof(BatchLoadAsset)} - {TaskRunner.TaskIDFactory + 1}", assetNames, callback);
             loadTaskRunner.AddTask(task, priority);
             return task.ID;
         }
@@ -420,7 +420,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static int LoadScene(string sceneName, object userdata, LoadSceneCallback callback,
+        public static int LoadScene(string sceneName, LoadSceneCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
 #if UNITY_EDITOR
@@ -432,12 +432,12 @@ namespace CatAsset.Runtime
                     {
                         Scene scene = SceneManager.GetSceneByPath(sceneName);
                         SceneManager.SetActiveScene(scene);
-                        callback?.Invoke(true, scene, userdata);
+                        callback?.Invoke(true, scene);
                     };
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false, default, userdata);
+                    callback?.Invoke(false, default);
                     throw;
                 }
 
@@ -446,11 +446,11 @@ namespace CatAsset.Runtime
 #endif
             if (!CheckAssetReady(sceneName))
             {
-                callback?.Invoke(false, default, userdata);
+                callback?.Invoke(false, default);
                 return default;
             }
 
-            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, userdata, callback);
+            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, callback);
             loadTaskRunner.AddTask(task, priority);
 
             return task.ID;
@@ -459,9 +459,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 取消任务
         /// </summary>
-        public static void CancelTask(int guid)
+        public static void CancelTask(int taskID)
         {
-            if (TaskRunner.TaskIDDict.TryGetValue(guid, out ITask task))
+            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out ITask task))
             {
                 task.Cancel();
             }
@@ -470,9 +470,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取任务进度
         /// </summary>
-        public static float GetTaskProgress(int guid)
+        public static float GetTaskProgress(int taskID)
         {
-            if (TaskRunner.TaskIDDict.TryGetValue(guid, out ITask task))
+            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out ITask task))
             {
                 return task.Progress;
             }

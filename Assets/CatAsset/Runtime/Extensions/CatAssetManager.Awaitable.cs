@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset<T>(assetName, null, (success, asset,result, userdata) =>
+            LoadAsset<T>(assetName, (success, asset,result) =>
             {
                 if (success && target != null)
                 {
@@ -48,7 +48,7 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset(assetName, null, (success,asset, result, userdata) =>
+            LoadAsset(assetName, (success,asset, result) =>
             {
                 if (success && target != default)
                 {
@@ -66,7 +66,7 @@ namespace CatAsset.Runtime
         public static Task<List<LoadAssetResult>> AwaitBatchLoadAsset(List<string> assetNames,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
-            BatchLoadAsset(assetNames, null, (assets, userdata) =>
+            BatchLoadAsset(assetNames, (assets) =>
             {
                 if (target != null)
                 {
@@ -93,7 +93,7 @@ namespace CatAsset.Runtime
         public static Task<List<LoadAssetResult>> AwaitBatchLoadAsset(List<string> assetNames,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
-            BatchLoadAsset(assetNames, null, (assets, userdata) =>
+            BatchLoadAsset(assetNames, (assets) =>
             {
                 if (target != default)
                 {
@@ -120,10 +120,9 @@ namespace CatAsset.Runtime
         {
             TaskCompletionSource<Scene> tcs = new TaskCompletionSource<Scene>();
 
-            LoadScene(sceneName, tcs, (success, scene, userdata) =>
+            LoadScene(sceneName, (success, scene) =>
             {
-                TaskCompletionSource<Scene> localTcs = (TaskCompletionSource<Scene>)userdata;
-                localTcs.SetResult(scene);
+                tcs.SetResult(scene);
             });
             
             return tcs.Task;

@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 场景加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadSceneCallback(bool success, Scene scene, object userdata);
+    public delegate void LoadSceneCallback(bool success, Scene scene);
     
     /// <summary>
     /// 场景加载任务
@@ -46,7 +46,7 @@ namespace CatAsset.Runtime
             {
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(true, loadedScene, Userdata);
+                    onFinished?.Invoke(true, loadedScene);
                 }
                 else
                 {
@@ -58,7 +58,7 @@ namespace CatAsset.Runtime
                         if (!task.NeedCancel)
                         {
                             index = i;
-                            task.onFinished?.Invoke(true,loadedScene,task.Userdata);
+                            task.onFinished?.Invoke(true,loadedScene);
                             break;
                         }
                     }
@@ -80,7 +80,7 @@ namespace CatAsset.Runtime
                 {
                     if (!task.NeedCancel)
                     {
-                        CatAssetManager.LoadScene(task.Name,task.Userdata,task.onFinished);
+                        CatAssetManager.LoadScene(task.Name,task.onFinished);
                     }
                 }
             }
@@ -88,14 +88,14 @@ namespace CatAsset.Runtime
             {
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(false, default, Userdata);
+                    onFinished?.Invoke(false, default);
                 }
                 
                 foreach (LoadSceneTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(false, default, task.Userdata);
+                        task.onFinished?.Invoke(false, default);
                     }
                        
                 }
@@ -107,7 +107,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建场景加载任务的对象
         /// </summary>
-        public static LoadSceneTask Create(TaskRunner owner, string name,object userdata,LoadSceneCallback callback)
+        public static LoadSceneTask Create(TaskRunner owner, string name,LoadSceneCallback callback)
         {
             LoadSceneTask task = ReferencePool.Get<LoadSceneTask>();
             task.CreateBase(owner,name);
@@ -115,7 +115,6 @@ namespace CatAsset.Runtime
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
-            task.Userdata = userdata;
             task.onFinished = callback;
 
             return task;
