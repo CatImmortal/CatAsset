@@ -6,7 +6,7 @@
     public interface ITask : IReference
     {
         /// <summary>
-        /// id
+        /// 编号
         /// </summary>
         int ID { get; }
         
@@ -24,7 +24,6 @@
         /// 任务组
         /// </summary>
         TaskGroup Group { get; set; }
-
         
         /// <summary>
         /// 状态

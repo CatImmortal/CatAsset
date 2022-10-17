@@ -6,14 +6,13 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源加载任务完成回调的原型
     /// </summary>
-    public delegate void BatchLoadAssetCallback(List<LoadAssetResult> assets, object userdata);
+    public delegate void BatchLoadAssetCallback(List<LoadAssetResult> assets);
     
     /// <summary>
     /// 批量资源加载任务
     /// </summary>
     public class BatchLoadAssetTask : BaseTask<BatchLoadAssetTask>
     {
-        private object userdata;
         private List<string> assetNames;
         private BatchLoadAssetCallback onFinished;
 
@@ -39,7 +38,7 @@ namespace CatAsset.Runtime
             State = TaskState.Waiting;
             foreach (string assetName in assetNames)
             {
-                CatAssetManager.LoadAsset(assetName, null, onAssetLoadedCallback);
+                CatAssetManager.LoadAsset(assetName, onAssetLoadedCallback);
             }
         }
 
@@ -56,7 +55,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源加载结束的回调
         /// </summary>
-        private void OnAssetLoaded(bool success, object asset,LoadAssetResult result, object userdata)
+        private void OnAssetLoaded(bool success, object asset,LoadAssetResult result)
         {
             loadedAssetCount++;
             if (success)
@@ -85,7 +84,7 @@ namespace CatAsset.Runtime
             //无需处理已合并任务 因为按照现在的设计 批量加载任务，就算是资源名列表相同，也不会判断为重复任务的
             if (!needCancel)
             {
-                onFinished?.Invoke(loadedAssets,this.userdata);
+                onFinished?.Invoke(loadedAssets);
             }
             else
             {
@@ -98,20 +97,19 @@ namespace CatAsset.Runtime
         }
 
 
-        
+
         /// <summary>
         /// 创建批量资源加载任务的对象
         /// </summary>
-        public static BatchLoadAssetTask Create(TaskRunner owner, string name, List<string> assetNames,object userdata, 
+        public static BatchLoadAssetTask Create(TaskRunner owner, string name, List<string> assetNames,
             BatchLoadAssetCallback callback)
         {
             BatchLoadAssetTask task = ReferencePool.Get<BatchLoadAssetTask>();
-            task.CreateBase(owner,name);
-            task.userdata = userdata;
+            task.CreateBase(owner, name);
             task.assetNames = assetNames;
             task.loadedAssets = new List<LoadAssetResult>();
             task.onFinished = callback;
-            
+
             return task;
         }
 
@@ -120,7 +118,6 @@ namespace CatAsset.Runtime
             base.Clear();
 
             assetNames = default;
-            userdata = default;
             onFinished = default;
 
             loadedAssets = default;

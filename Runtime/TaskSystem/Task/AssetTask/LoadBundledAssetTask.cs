@@ -5,7 +5,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadAssetCallback<in T>(bool success, T asset,LoadAssetResult result, object userdata);
+    public delegate void LoadAssetCallback<in T>(bool success, T asset,LoadAssetResult result);
 
     /// <summary>
     /// 资源包资源加载任务
@@ -50,7 +50,6 @@ namespace CatAsset.Runtime
             AssetLoaded = 6,
         }
         
-        protected object Userdata;
         private LoadAssetCallback<T> onFinished;
         
         protected AssetRuntimeInfo AssetRuntimeInfo;
@@ -186,7 +185,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 依赖资源加载完毕的回调
         /// </summary>
-        private void OnDependencyLoaded(bool success, Object asset,LoadAssetResult result, object userdata)
+        private void OnDependencyLoaded(bool success, Object asset,LoadAssetResult result)
         {
             loadFinishDependencyCount++;
 
@@ -237,7 +236,7 @@ namespace CatAsset.Runtime
                 totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
                 foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    CatAssetManager.InternalLoadAsset(dependency, null, onDependencyLoadedCallback);
+                    CatAssetManager.InternalLoadAsset(dependency,onDependencyLoadedCallback);
                 }
             }
         }
@@ -369,7 +368,7 @@ namespace CatAsset.Runtime
                 
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(true, asset,result, Userdata);
+                    onFinished?.Invoke(true, asset,result);
                     foreach (LoadBundledAssetTask<T> task in MergedTasks)
                     {
                         if (!task.NeedCancel)
@@ -377,7 +376,7 @@ namespace CatAsset.Runtime
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadAsset一定增加1个资源的引用计数
                             AssetRuntimeInfo.AddRefCount();
-                            task.onFinished?.Invoke(true, asset,result, task.Userdata);
+                            task.onFinished?.Invoke(true, asset,result);
                         }
                    
                     }
@@ -395,7 +394,7 @@ namespace CatAsset.Runtime
                         {
                             needUnload = false;
                             AssetRuntimeInfo.AddRefCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(true, asset,result, task.Userdata);
+                            task.onFinished?.Invoke(true, asset,result);
                         }
                     }
 
@@ -417,14 +416,14 @@ namespace CatAsset.Runtime
             {
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(false, default,default, Userdata);
+                    onFinished?.Invoke(false, default,default);
                 }
                 
                 foreach (LoadBundledAssetTask<T> task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(false,default,default, task.Userdata);
+                        task.onFinished?.Invoke(false,default,default);
                     }
                 }
                 
@@ -438,7 +437,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建资源加载任务的对象
         /// </summary>
-        public static LoadBundledAssetTask<T> Create(TaskRunner owner, string name, object userdata,
+        public static LoadBundledAssetTask<T> Create(TaskRunner owner, string name,
             LoadAssetCallback<T> callback)
         {
             LoadBundledAssetTask<T> task = ReferencePool.Get<LoadBundledAssetTask<T>>();
@@ -447,7 +446,6 @@ namespace CatAsset.Runtime
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
-            task.Userdata = userdata;
             task.onFinished = callback;
 
             return task;
@@ -457,8 +455,7 @@ namespace CatAsset.Runtime
         public override void Clear()
         {
             base.Clear();
-
-            Userdata = default;
+            
             onFinished = default;
             AssetRuntimeInfo = default;
             BundleRuntimeInfo = default;
