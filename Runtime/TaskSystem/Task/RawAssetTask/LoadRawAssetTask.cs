@@ -95,11 +95,12 @@ namespace CatAsset.Runtime
 
             if (success)
             {
-                assetRuntimeInfo.Asset = uwr.downloadHandler.data;
+                byte[] rawAsset = uwr.downloadHandler.data;
+                assetRuntimeInfo.Asset = rawAsset;
                 if (assetRuntimeInfo.AssetManifest.Length == default)
                 {
-                    assetRuntimeInfo.AssetManifest.Length = uwr.downloadHandler.data.Length;
-                    bundleRuntimeInfo.Manifest.Length = uwr.downloadHandler.data.Length;
+                    assetRuntimeInfo.AssetManifest.Length = rawAsset.Length;
+                    bundleRuntimeInfo.Manifest.Length = rawAsset.Length;
                 }
                 
                 CatAssetDatabase.SetAssetInstance(assetRuntimeInfo.Asset,assetRuntimeInfo);
