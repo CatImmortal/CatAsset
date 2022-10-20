@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
@@ -16,21 +18,22 @@ namespace CatAsset.Editor
         /// <summary>
         /// 要排除的文件后缀名集合
         /// </summary>
-        public static readonly HashSet<string> ExcludeSet = new HashSet<string>();
+        public static readonly HashSet<string> ExcludeSet = new HashSet<string>()
+        {
+            ".meta",
+            ".cs",
+            ".asmdef",
+            ".giparams",
+            ".so",
+            ".dll",
+            ".cginc",
+        };
 
         /// <summary>
         /// 默认资源组
         /// </summary>
         public const string DefaultGroup = "Base";
         
-
-        static Util()
-        {
-            ExcludeSet.Add(".meta");
-            ExcludeSet.Add(".cs");
-            ExcludeSet.Add(".asmdef");
-            ExcludeSet.Add(".giparams");
-        }
 
         [MenuItem("CatAsset/将所有场景添加到BuildSetting中", priority = 2)]
         private static void BuildAllScenes()
@@ -237,6 +240,25 @@ namespace CatAsset.Editor
             dirInfo.Delete();
         }
 
+        /// <summary>
+        /// 是否为有效资源
+        /// </summary>
+        public static bool IsValidAsset(string assetName)
+        {
+            string fileExtension = Path.GetExtension(assetName);
+            if (ExcludeSet.Contains(fileExtension))
+            {
+                return false;
+            }
+            Type type = AssetDatabase.GetMainAssetTypeAtPath(assetName);
+            if (type == typeof(LightingDataAsset))
+            {
+                return false;
+            }
+
+            return true;
+
+        }
 
     }
 }

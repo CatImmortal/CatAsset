@@ -38,12 +38,13 @@ namespace CatAsset.Editor
                 
                 foreach (FileInfo file in files)
                 {
-                    if (Util.ExcludeSet.Contains(file.Extension))
+                    string assetName = Util.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
+                    
+                    if (!Util.IsValidAsset(assetName))
                     {
                         continue;
                     }
                     
-                    string assetName = Util.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
                     if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(assetName,ruleRegex))
                     {
                         continue;
