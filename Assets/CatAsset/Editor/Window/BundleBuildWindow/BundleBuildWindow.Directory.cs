@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Editor
 {
@@ -41,8 +42,11 @@ namespace CatAsset.Editor
                     GUILayout.Label($"[{i}]", GUILayout.Width(20));
                     
                     //绘制目录名
-                    directory.DirectoryName = EditorGUILayout.TextField(directory.DirectoryName);
-
+                    EditorGUI.BeginDisabledGroup(true);
+                    Object directoryObj = AssetDatabase.LoadAssetAtPath<Object>(directory.DirectoryName);
+                    EditorGUILayout.ObjectField(directoryObj, typeof(Object),false);
+                    EditorGUI.EndDisabledGroup();
+                    
                     //绘制构建规则名
                     string[] ruleNames = GetRuleNames();
                     ruleNameDict.TryGetValue(directory.BuildRuleName, out int index);
