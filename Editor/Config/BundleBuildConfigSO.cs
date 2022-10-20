@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -38,7 +39,7 @@ namespace CatAsset.Editor
         /// 是否进行共享资源分析
         /// </summary>
         public bool IsSharedAssetAnalyze = true;
-        
+
         /// <summary>
         /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到只读目录下
         /// </summary>
@@ -81,9 +82,7 @@ namespace CatAsset.Editor
         {
 
             Bundles.Clear();
-            assetBuildInfoDict.Clear();
-            bundleBuildInfoDict.Clear();
-            
+
             float stepNum = 6f;
             int curStep = 1;
 
@@ -110,7 +109,6 @@ namespace CatAsset.Editor
                     EditorUtility.DisplayProgressBar("刷新资源包构建信息", "进行共享资源分析...", curStep / stepNum);
                     SharedAssetAnalyze();
                 }
-
                 curStep++;
 
                 //在将隐式依赖转换为显式构建资源后，可能出现场景资源和非场景资源被放进了同一个资源包的情况
@@ -128,7 +126,12 @@ namespace CatAsset.Editor
             finally
             {
                 EditorUtility.ClearProgressBar();
+                assetBuildInfoDict.Clear();
+                bundleBuildInfoDict.Clear();
             }
+            
+            //筛选出资源数不为0的资源包
+            Bundles = Bundles.Where((info => info.Assets.Count > 0)).ToList();
             
             //刷新资源包的总资源长度
             RefreshBundleLength();
@@ -139,11 +142,11 @@ namespace CatAsset.Editor
             {
                 bundleBuildInfo.Assets.Sort();
             }
-            
+
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
 
-            
+
             Debug.Log("资源包构建信息刷新完毕");
 
 
@@ -154,15 +157,12 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitRuleDict()
         {
-            Type[] types = typeof(BundleBuildConfigSO).Assembly.GetTypes();
+            ruleDict.Clear();
+            TypeCache.TypeCollection types = TypeCache.GetTypesDerivedFrom<IBundleBuildRule>();
             foreach (Type type in types)
             {
-                if (!type.IsInterface && typeof(IBundleBuildRule).IsAssignableFrom(type) &&
-                    !ruleDict.ContainsKey(type.Name))
-                {
-                    IBundleBuildRule rule = (IBundleBuildRule) Activator.CreateInstance(type);
-                    ruleDict.Add(type.Name, rule);
-                }
+                IBundleBuildRule rule = (IBundleBuildRule) Activator.CreateInstance(type);
+                ruleDict.Add(type.Name, rule);
             }
         }
 
@@ -171,7 +171,6 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitBundleBuildInfo(bool isRaw)
         {
-         
             for (int i = 0; i < Directories.Count; i++)
             {
                 BundleBuildDirectory bundleBuildDirectory = Directories[i];
@@ -181,23 +180,23 @@ namespace CatAsset.Editor
                 {
                     //获取根据构建规则形成的资源包构建信息列表
                     List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
-                    
+
                     //添加映射信息
                     foreach (BundleBuildInfo bundleBuildInfo in bundles)
                     {
                         bundleBuildInfoDict.Add(bundleBuildInfo.RelativePath,bundleBuildInfo);
-                
+
                         foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                         {
                             assetBuildInfoDict.Add(assetBuildInfo.Name,assetBuildInfo);
                         }
                     }
-                    
+
                     Bundles.AddRange(bundles);
                 }
             }
 
-            
+
         }
 
         /// <summary>
@@ -205,7 +204,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void ImplicitDependencyToExplicitBuildAsset()
         {
-            
+
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
                 //隐式依赖集合
@@ -260,7 +259,7 @@ namespace CatAsset.Editor
 
             //共享资源构建信息的集合
             HashSet<AssetBuildInfo> sharedAssetBuildInfos = new HashSet<AssetBuildInfo>();
-            
+
             foreach (AssetBuildInfo assetBuildInfo in assetBuildInfoDict.Values)
             {
                 //检查依赖列表
@@ -287,22 +286,23 @@ namespace CatAsset.Editor
                 oldBundleBuildInfo.Assets.Remove(assetBuildInfo);
                 assetBuildInfo.BundleRelativePath = null;
 
-                //使用共享资源所在文件夹作为资源包名
+                //使用共享资源所在目录作为资源包名
                 string assetName = assetBuildInfo.Name;
                 FileInfo fi = new FileInfo(assetName);
                 string fileName = fi.Name;
                 string parentDirectoryName = fi.Directory.Name;
                 string bundleName = $"shared_{parentDirectoryName}.bundle";
-                string directoryName = assetName.Replace("Assets/",string.Empty).Replace($"/{parentDirectoryName}/{fileName}",String.Empty);
+                string directoryName = assetName.Replace("Assets/",string.Empty).Replace($"{parentDirectoryName}/{fileName}",String.Empty);
+                directoryName = directoryName.TrimEnd('/');  //末尾可能多出来个/，要删除
                 string bundleRelativePath = $"{directoryName}/{bundleName}";
                 string group = Util.DefaultGroup;  //TODO:共享资源包先分进Base组，后续支持单资源包标记多资源组后再改
-                
+
                 if (!sharedBundleDict.TryGetValue(bundleRelativePath,out BundleBuildInfo bundleBuildInfo))
                 {
                     bundleBuildInfo = new BundleBuildInfo(directoryName, bundleName, group, false);
                     Bundles.Add(bundleBuildInfo);
-                    sharedBundleDict.Add(bundleBuildInfo.RelativePath, bundleBuildInfo);
-                    bundleBuildInfoDict.Add(bundleBuildInfo.RelativePath,bundleBuildInfo);
+                    sharedBundleDict.Add(bundleRelativePath, bundleBuildInfo);
+                    bundleBuildInfoDict.Add(bundleRelativePath,bundleBuildInfo);
                 }
 
                 assetBuildInfo.BundleRelativePath = bundleRelativePath;
@@ -388,7 +388,7 @@ namespace CatAsset.Editor
                 bundleBuildInfo.RefreshAssetsLength();
             }
         }
-        
+
         /// <summary>
         /// 检查资源包构建目录是否可被添加
         /// </summary>
