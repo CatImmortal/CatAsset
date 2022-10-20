@@ -57,7 +57,7 @@ namespace CatAsset.Editor
                     LoopDependencyAnalyzer.AnalyzeBundle(bundleBuildConfig.Bundles);
                 }
                     
-                bundleBuildConfig.IsRedundancyAnalyze = GUILayout.Toggle(bundleBuildConfig.IsRedundancyAnalyze, "冗余分析", GUILayout.Width(100));
+                bundleBuildConfig.IsSharedAssetAnalyze = GUILayout.Toggle(bundleBuildConfig.IsSharedAssetAnalyze, "共享资源分析", GUILayout.Width(100));
             }
 
 

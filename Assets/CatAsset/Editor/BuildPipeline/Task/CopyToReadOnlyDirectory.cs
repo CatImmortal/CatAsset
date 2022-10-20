@@ -69,11 +69,11 @@ namespace CatAsset.Editor
 
                     string fullPath = CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.RelativePath);
 
-                    //冗余资源包没有bundleManifestInfo.Directory
+                    //共享资源包没有bundleManifestInfo.Directory
                     if (!string.IsNullOrEmpty(bundleManifestInfo.Directory))
                     {
                         string fullDirectory =
-                            CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.Directory.ToLower());
+                            CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.Directory);
                         if (!Directory.Exists(fullDirectory))
                         {
                             //StreamingAssets下的目录不存在则创建

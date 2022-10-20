@@ -54,7 +54,7 @@ namespace CatAsset.Editor
                     string bundleName;
                     if (!isRaw)
                     { 
-                        bundleName = file.Name.Replace('.','_').ToLower() + ".bundle"; 
+                        bundleName = file.Name.Replace('.','_') + ".bundle"; 
                     }
                     else
                     {
@@ -66,7 +66,7 @@ namespace CatAsset.Editor
                         new BundleBuildInfo(directoryName,bundleName, group, isRaw);
                     
                     
-                     bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName));
+                     bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName,bundleBuildInfo.RelativePath));
                     
                     result.Add(bundleBuildInfo);
                     

@@ -69,12 +69,12 @@ namespace CatAsset.Editor
             int firstIndex = targetDirectory.IndexOf("/");
             int lastIndex = targetDirectory.LastIndexOf("/");
             string directoryName = targetDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);
-            string bundleName = targetDirectory.Substring(lastIndex + 1).ToLower() + ".bundle"; //以构建目录名作为资源包名
+            string bundleName = targetDirectory.Substring(lastIndex + 1) + ".bundle"; //以构建目录名作为资源包名
             
             BundleBuildInfo bundleBuildInfo = new BundleBuildInfo(directoryName,bundleName,group,false);
             for (int i = 0; i < assetNames.Count; i++)
             {
-                AssetBuildInfo assetBuildInfo = new AssetBuildInfo(assetNames[i]);
+                AssetBuildInfo assetBuildInfo = new AssetBuildInfo(assetNames[i],bundleBuildInfo.RelativePath);
                 bundleBuildInfo.Assets.Add(assetBuildInfo);
             }
 

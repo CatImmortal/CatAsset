@@ -15,6 +15,10 @@ namespace CatAsset.Editor
         /// </summary>
         public string Name;
 
+        /// <summary>
+        /// 所在资源包的相对路径
+        /// </summary>
+        public string BundleRelativePath;
 
         private Type type;
         /// <summary>
@@ -27,9 +31,10 @@ namespace CatAsset.Editor
         /// </summary>
         public long Length;
         
-        public AssetBuildInfo(string name)
+        public AssetBuildInfo(string name,string bundleRelativePath)
         {
             Name = name;
+            BundleRelativePath = bundleRelativePath;
             Length = new FileInfo(name).Length;
         }
 
