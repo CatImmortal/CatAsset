@@ -166,7 +166,7 @@ namespace CatAsset.Editor
         /// </summary>
         public static List<string> GetDependencies(string assetName,bool recursive = true)
         {
-            List<string> result  = null;
+            List<string> result  = new List<string>();
             
             string[] dependencies = AssetDatabase.GetDependencies(assetName,recursive);
 
@@ -175,13 +175,12 @@ namespace CatAsset.Editor
                 return result;
             }
 
-            result = new List<string>();
-        
             for (int i = 0; i < dependencies.Length; i++)
             {
                 string dependencyName = dependencies[i];
                 if (dependencyName == assetName || dependencyName.EndsWith(".cs"))
                 {
+                    //过滤自身与cs代码文件
                     continue;
                 }
 

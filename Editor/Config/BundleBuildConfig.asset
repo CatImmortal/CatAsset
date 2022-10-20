@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 3
+  ManifestVersion: 6
   TargetPlatforms: 05000000
   Options: 256
   OutputPath: ./AssetBundles
-  IsRedundancyAnalyze: 1
-  IsCopyToReadOnlyDirectory: 0
+  IsSharedAssetAnalyze: 1
+  IsCopyToReadOnlyDirectory: 1
   CopyGroup: Base
   Directories:
   - DirectoryName: Assets/BundleRes/Chapter1
@@ -45,83 +45,80 @@ MonoBehaviour:
     RuleRegex: 
     Group: Base
   Bundles:
-  - RelativePath: bundleres/chapter1.bundle
+  - RelativePath: BundleRes/chapter1.bundle
     DirectoryName: BundleRes
     BundleName: chapter1.bundle
     Group: Chapter1
     IsRaw: 0
-    AssetsLength: 3572
+    AssetsLength: 3704
     Assets:
     - Name: Assets/BundleRes/Chapter1/B1.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/chapter1.bundle
+      Length: 926
     - Name: Assets/BundleRes/Chapter1/B2.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/chapter1.bundle
+      Length: 926
     - Name: Assets/BundleRes/Chapter1/B3.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/chapter1.bundle
+      Length: 926
     - Name: Assets/BundleRes/Chapter1/B4.prefab
-      TypeName: GameObject
-      Length: 893
-  - RelativePath: bundleres/chpater2.bundle
+      BundleRelativePath: BundleRes/chapter1.bundle
+      Length: 926
+  - RelativePath: BundleRes/chpater2.bundle
     DirectoryName: BundleRes
     BundleName: chpater2.bundle
     Group: Chapter2
     IsRaw: 0
-    AssetsLength: 3572
+    AssetsLength: 3704
     Assets:
     - Name: Assets/BundleRes/Chpater2/B1.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/chpater2.bundle
+      Length: 926
     - Name: Assets/BundleRes/Chpater2/B2.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/chpater2.bundle
+      Length: 926
     - Name: Assets/BundleRes/Chpater2/B3.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/chpater2.bundle
+      Length: 926
     - Name: Assets/BundleRes/Chpater2/B4.prefab
-      TypeName: GameObject
-      Length: 893
-  - RelativePath: bundleres/prefaba.bundle
+      BundleRelativePath: BundleRes/chpater2.bundle
+      Length: 926
+  - RelativePath: BundleRes/prefaba.bundle
     DirectoryName: BundleRes
     BundleName: prefaba.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 5638
+    AssetsLength: 5830
     Assets:
     - Name: Assets/BundleRes/PrefabA/A1.prefab
-      TypeName: GameObject
-      Length: 1409
+      BundleRelativePath: BundleRes/prefaba.bundle
+      Length: 1457
     - Name: Assets/BundleRes/PrefabA/A2.prefab
-      TypeName: GameObject
-      Length: 1409
+      BundleRelativePath: BundleRes/prefaba.bundle
+      Length: 1457
     - Name: Assets/BundleRes/PrefabA/A3.prefab
-      TypeName: GameObject
-      Length: 1409
+      BundleRelativePath: BundleRes/prefaba.bundle
+      Length: 1457
     - Name: Assets/BundleRes/PrefabA/A4.prefab
-      TypeName: GameObject
-      Length: 1411
-  - RelativePath: bundleres/prefabb.bundle
+      BundleRelativePath: BundleRes/prefaba.bundle
+      Length: 1459
+  - RelativePath: BundleRes/prefabb.bundle
     DirectoryName: BundleRes
     BundleName: prefabb.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 3572
+    AssetsLength: 2778
     Assets:
-    - Name: Assets/BundleRes/PrefabB/B1.prefab
-      TypeName: GameObject
-      Length: 893
     - Name: Assets/BundleRes/PrefabB/B2.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/prefabb.bundle
+      Length: 926
     - Name: Assets/BundleRes/PrefabB/B3.prefab
-      TypeName: GameObject
-      Length: 893
+      BundleRelativePath: BundleRes/prefabb.bundle
+      Length: 926
     - Name: Assets/BundleRes/PrefabB/B4.prefab
-      TypeName: GameObject
-      Length: 893
-  - RelativePath: bundleres/rawtext/rawText1.txt
+      BundleRelativePath: BundleRes/prefabb.bundle
+      Length: 926
+  - RelativePath: BundleRes/RawText/rawText1.txt
     DirectoryName: BundleRes/RawText
     BundleName: rawText1.txt
     Group: Base
@@ -129,25 +126,35 @@ MonoBehaviour:
     AssetsLength: 17
     Assets:
     - Name: Assets/BundleRes/RawText/rawText1.txt
-      TypeName: TextAsset
+      BundleRelativePath: BundleRes/RawText/rawText1.txt
       Length: 17
-  - RelativePath: bundleres/scene/new scene_unity.bundle
+  - RelativePath: BundleRes/Scene/new scene_unity.bundle
     DirectoryName: BundleRes/Scene
     BundleName: new scene_unity.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 5592
+    AssetsLength: 5801
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
-      TypeName: SceneAsset
-      Length: 5592
-  - RelativePath: bundleres/scene/new scene2_unity.bundle
+      BundleRelativePath: BundleRes/Scene/new scene_unity.bundle
+      Length: 5801
+  - RelativePath: BundleRes/Scene/new scene2_unity.bundle
     DirectoryName: BundleRes/Scene
     BundleName: new scene2_unity.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 5592
+    AssetsLength: 5801
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene2.unity
-      TypeName: SceneAsset
-      Length: 5592
+      BundleRelativePath: BundleRes/Scene/new scene2_unity.bundle
+      Length: 5801
+  - RelativePath: BundleRes/shared_prefabb.bundle
+    DirectoryName: BundleRes
+    BundleName: shared_prefabb.bundle
+    Group: Base
+    IsRaw: 0
+    AssetsLength: 926
+    Assets:
+    - Name: Assets/BundleRes/PrefabB/B1.prefab
+      BundleRelativePath: BundleRes/shared_PrefabB.bundle
+      Length: 926

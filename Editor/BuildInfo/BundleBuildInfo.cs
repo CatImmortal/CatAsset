@@ -52,10 +52,15 @@ namespace CatAsset.Editor
             BundleName = bundleName;
             Group = group;
             IsRaw = isRaw;
+
+            if (!isRaw)
+            {
+                BundleName = BundleName.ToLower();
+            }
             
             if (!string.IsNullOrEmpty(DirectoryName))
             {
-                RelativePath = $"{DirectoryName.ToLower()}/{BundleName}";
+                RelativePath = $"{DirectoryName}/{BundleName}";
             }
             else
             {
