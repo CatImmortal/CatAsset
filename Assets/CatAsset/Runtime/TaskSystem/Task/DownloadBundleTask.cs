@@ -23,8 +23,10 @@ namespace CatAsset.Runtime
         
         private string localTempFilePath;
         private UnityWebRequestAsyncOperation op;
-      
 
+        private ulong oldFileLength;
+        private ulong downloadedBytes;
+        
         private const int maxRetryCount = 3;
         private int retriedCount;
         
@@ -37,7 +39,7 @@ namespace CatAsset.Runtime
                 {
                     return 0;
                 }
-                return op.progress;
+                return op.webRequest.downloadProgress;
             }
         }
         
@@ -50,27 +52,24 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            //开始位置
-            int startLength = 0;
+            //旧文件长度
+            oldFileLength = 0;
             
             //先检查本地是否已存在临时下载文件
             if (File.Exists(localTempFilePath))
             {
-                using (FileStream fs = File.OpenWrite(localTempFilePath))
-                {
-                    //检查已下载的字节数
-                    fs.Seek(0, SeekOrigin.End);
-                    startLength = (int)fs.Length;
-                }
+                //检查已下载的字节数
+                FileInfo fi = new FileInfo(localTempFilePath);
+                oldFileLength = (ulong)fi.Length;
             }
             
             UnityWebRequest uwr = new UnityWebRequest(downloadUri);
-            if (startLength > 0)
+            if (oldFileLength > 0)
             {
                 //处理断点续传
-                uwr.SetRequestHeader("Range", $"bytes={{{startLength}}}-");
+                uwr.SetRequestHeader("Range", $"bytes={oldFileLength}-");
             }
-            uwr.downloadHandler = new DownloadHandlerFile(localTempFilePath, startLength > 0);
+            uwr.downloadHandler = new DownloadHandlerFile(localTempFilePath, oldFileLength > 0);
             op = uwr.SendWebRequest();
         }
 
@@ -88,6 +87,7 @@ namespace CatAsset.Runtime
             {
                 //下载中
                 State = TaskState.Running;
+                downloadedBytes = oldFileLength + op.webRequest.downloadedBytes;
                 return;
             }
 
@@ -198,9 +198,13 @@ namespace CatAsset.Runtime
             localFilePath = default;
             onFinished = default;
             
+            localTempFilePath = default;
             op.webRequest.Dispose();
             op = default;
-            localTempFilePath = default;
+
+            oldFileLength = default;
+            downloadedBytes = default;
+            
             retriedCount = default;
         }
     }
