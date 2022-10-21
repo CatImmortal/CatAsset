@@ -36,9 +36,9 @@ namespace CatAsset.Editor
         public string OutputPath = "./AssetBundles";
 
         /// <summary>
-        /// 是否进行共享资源分析
+        /// 是否进行冗余资源分析
         /// </summary>
-        public bool IsSharedAssetAnalyze = true;
+        public bool IsRedundancyAnalyze = true;
 
         /// <summary>
         /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到只读目录下
@@ -64,16 +64,6 @@ namespace CatAsset.Editor
         /// 资源包构建规则名->资源包构建规则接口实例
         /// </summary>
         private Dictionary<string, IBundleBuildRule> ruleDict = new Dictionary<string, IBundleBuildRule>();
-
-        /// <summary>
-        /// 资源名 -> 资源构建信息
-        /// </summary>
-        private Dictionary<string, AssetBuildInfo> assetBuildInfoDict = new Dictionary<string, AssetBuildInfo>();
-
-        /// <summary>
-        /// 资源包相对路径 -> 资源包构建信息
-        /// </summary>
-        private Dictionary<string, BundleBuildInfo> bundleBuildInfoDict = new Dictionary<string, BundleBuildInfo>();
 
         /// <summary>
         /// 刷新资源包构建信息
@@ -103,11 +93,13 @@ namespace CatAsset.Editor
                 ImplicitDependencyToExplicitBuildAsset();
                 curStep++;
 
-                if (IsSharedAssetAnalyze)
+                //上一步执行后可能出现同一个隐式依赖被转换为了不同资源包的显式构建资源
+                //因此可能出现了资源冗余的情况
+                if (IsRedundancyAnalyze)
                 {
-                    //进行共享资源分析
-                    EditorUtility.DisplayProgressBar("刷新资源包构建信息", "进行共享资源分析...", curStep / stepNum);
-                    SharedAssetAnalyze();
+                    //进行冗余资源分析
+                    EditorUtility.DisplayProgressBar("刷新资源包构建信息", "进行冗余资源分析...", curStep / stepNum);
+                    RedundancyAssetAnalyze();
                 }
                 curStep++;
 
@@ -126,8 +118,6 @@ namespace CatAsset.Editor
             finally
             {
                 EditorUtility.ClearProgressBar();
-                assetBuildInfoDict.Clear();
-                bundleBuildInfoDict.Clear();
             }
             
             //筛选出资源数不为0的资源包
@@ -180,18 +170,6 @@ namespace CatAsset.Editor
                 {
                     //获取根据构建规则形成的资源包构建信息列表
                     List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
-
-                    //添加映射信息
-                    foreach (BundleBuildInfo bundleBuildInfo in bundles)
-                    {
-                        bundleBuildInfoDict.Add(bundleBuildInfo.RelativePath,bundleBuildInfo);
-
-                        foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
-                        {
-                            assetBuildInfoDict.Add(assetBuildInfo.Name,assetBuildInfo);
-                        }
-                    }
-
                     Bundles.AddRange(bundles);
                 }
             }
@@ -204,38 +182,49 @@ namespace CatAsset.Editor
         /// </summary>
         private void ImplicitDependencyToExplicitBuildAsset()
         {
+            //被显式构建的资源集合
+            HashSet<string> explicitBuildAssetSet = new HashSet<string>();
+            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            {
+                foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
+                {
+                    string assetName = assetBuildInfo.Name;
+                    explicitBuildAssetSet.Add(assetName);
+                }
+            }
 
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
                 //隐式依赖集合
+                //这里使用HashSet 防止出现当资源包A中的资源a,b，同时隐式依赖资源c时，c被implicitDependencies.Add两次导致重复的问题
                 HashSet<string> implicitDependencies = new HashSet<string>();
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
-                    string assetName = assetBuildInfo.Name;
-
                     //检查依赖列表
+                    string assetName = assetBuildInfo.Name;
                     List<string> dependencies = Util.GetDependencies(assetName);
+                    
                     foreach (string dependency in dependencies)
                     {
-                        if (!assetBuildInfoDict.ContainsKey(dependency))
+                        if (!explicitBuildAssetSet.Contains(dependency))
                         {
-                            //被显式构建资源所依赖，并且没有被显式构建的资源，就是隐式依赖
+                            //被显式构建资源依赖，并且没有被显式构建的，就是隐式依赖
                             implicitDependencies.Add(dependency);
                         }
                     }
                 }
-
+                
                 //将隐式依赖转为显式构建资源
-                //如果A包和B包同时隐式依赖资源x，那么只会将x构建进其中一个包里，而不是2个资源包都有份
                 foreach (string implicitDependency in implicitDependencies)
                 {
-                    AssetBuildInfo assetBuildInfo =
-                        new AssetBuildInfo(implicitDependency, bundleBuildInfo.RelativePath);
-                    bundleBuildInfo.Assets.Add(assetBuildInfo);
-                    assetBuildInfoDict.Add(assetBuildInfo.Name,assetBuildInfo);
+                    bundleBuildInfo.Assets.Add(new AssetBuildInfo(implicitDependency));
                 }
+
             }
+
+            
+
         }
 
         /// <summary>
@@ -243,70 +232,10 @@ namespace CatAsset.Editor
         /// </summary>
         private void RedundancyAssetAnalyze()
         {
-            // List<BundleBuildInfo> redundancyBundles = RedundancyAssetAnalyzer.Analyze(Bundles);
-            // foreach (BundleBuildInfo redundancyBundle in redundancyBundles)
-            // {
-            //     Bundles.Add(redundancyBundle);
-            // }
-        }
-
-        /// <summary>
-        /// 共享资源分析
-        /// </summary>
-        private void SharedAssetAnalyze()
-        {
-            //若A包的资源x，还被B包依赖，那么x就是共享资源，需要被提取到share bundle中
-
-            //共享资源构建信息的集合
-            HashSet<AssetBuildInfo> sharedAssetBuildInfos = new HashSet<AssetBuildInfo>();
-
-            foreach (AssetBuildInfo assetBuildInfo in assetBuildInfoDict.Values)
+            List<BundleBuildInfo> redundancyBundles = RedundancyAssetAnalyzer.Analyze(Bundles);
+            foreach (BundleBuildInfo redundancyBundle in redundancyBundles)
             {
-                //检查依赖列表
-                string assetName = assetBuildInfo.Name;
-                List<string> dependencies = Util.GetDependencies(assetName,false);
-
-                foreach (string dependency in dependencies)
-                {
-                    AssetBuildInfo dependencyAssetBuildInfo = assetBuildInfoDict[dependency];
-                    if (dependencyAssetBuildInfo.BundleRelativePath != assetBuildInfo.BundleRelativePath)
-                    {
-                        sharedAssetBuildInfos.Add(dependencyAssetBuildInfo);
-                    }
-                }
-            }
-
-            //共享资源的资源包构建信息
-            Dictionary<string, BundleBuildInfo> sharedBundleDict = new Dictionary<string, BundleBuildInfo>();
-
-            foreach (AssetBuildInfo assetBuildInfo in sharedAssetBuildInfos)
-            {
-                //先把共享资源从原来的资源包中分离
-                BundleBuildInfo oldBundleBuildInfo = bundleBuildInfoDict[assetBuildInfo.BundleRelativePath];
-                oldBundleBuildInfo.Assets.Remove(assetBuildInfo);
-                assetBuildInfo.BundleRelativePath = null;
-
-                //使用共享资源所在目录作为资源包名
-                string assetName = assetBuildInfo.Name;
-                FileInfo fi = new FileInfo(assetName);
-                string fileName = fi.Name;
-                string parentDirectoryName = fi.Directory.Name;
-                string bundleName = $"shared_{parentDirectoryName}.bundle";
-                string directoryName = assetName.Replace("Assets/",string.Empty).Replace($"{parentDirectoryName}/{fileName}",String.Empty);
-                directoryName = directoryName.TrimEnd('/');  //末尾可能多出来个/，要删除
-                string bundleRelativePath = $"{directoryName}/{bundleName}";
-                string group = Util.DefaultGroup;  //TODO:共享资源包先分进Base组，后续支持单资源包标记多资源组后再改
-
-                if (!sharedBundleDict.TryGetValue(bundleRelativePath,out BundleBuildInfo bundleBuildInfo))
-                {
-                    bundleBuildInfo = new BundleBuildInfo(directoryName, bundleName, group, false);
-                    Bundles.Add(bundleBuildInfo);
-                    sharedBundleDict.Add(bundleRelativePath, bundleBuildInfo);
-                    bundleBuildInfoDict.Add(bundleRelativePath,bundleBuildInfo);
-                }
-
-                assetBuildInfo.BundleRelativePath = bundleRelativePath;
-                bundleBuildInfo.Assets.Add(assetBuildInfo);
+                Bundles.Add(redundancyBundle);
             }
         }
 

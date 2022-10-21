@@ -16,7 +16,7 @@ MonoBehaviour:
   TargetPlatforms: 05000000
   Options: 256
   OutputPath: ./AssetBundles
-  IsSharedAssetAnalyze: 1
+  IsRedundancyAnalyze: 1
   IsCopyToReadOnlyDirectory: 1
   CopyGroup: Base
   Directories:
@@ -53,16 +53,12 @@ MonoBehaviour:
     AssetsLength: 3704
     Assets:
     - Name: Assets/BundleRes/Chapter1/B1.prefab
-      BundleRelativePath: BundleRes/chapter1.bundle
       Length: 926
     - Name: Assets/BundleRes/Chapter1/B2.prefab
-      BundleRelativePath: BundleRes/chapter1.bundle
       Length: 926
     - Name: Assets/BundleRes/Chapter1/B3.prefab
-      BundleRelativePath: BundleRes/chapter1.bundle
       Length: 926
     - Name: Assets/BundleRes/Chapter1/B4.prefab
-      BundleRelativePath: BundleRes/chapter1.bundle
       Length: 926
   - RelativePath: BundleRes/chpater2.bundle
     DirectoryName: BundleRes
@@ -72,16 +68,12 @@ MonoBehaviour:
     AssetsLength: 3704
     Assets:
     - Name: Assets/BundleRes/Chpater2/B1.prefab
-      BundleRelativePath: BundleRes/chpater2.bundle
       Length: 926
     - Name: Assets/BundleRes/Chpater2/B2.prefab
-      BundleRelativePath: BundleRes/chpater2.bundle
       Length: 926
     - Name: Assets/BundleRes/Chpater2/B3.prefab
-      BundleRelativePath: BundleRes/chpater2.bundle
       Length: 926
     - Name: Assets/BundleRes/Chpater2/B4.prefab
-      BundleRelativePath: BundleRes/chpater2.bundle
       Length: 926
   - RelativePath: BundleRes/prefaba.bundle
     DirectoryName: BundleRes
@@ -91,32 +83,27 @@ MonoBehaviour:
     AssetsLength: 5830
     Assets:
     - Name: Assets/BundleRes/PrefabA/A1.prefab
-      BundleRelativePath: BundleRes/prefaba.bundle
       Length: 1457
     - Name: Assets/BundleRes/PrefabA/A2.prefab
-      BundleRelativePath: BundleRes/prefaba.bundle
       Length: 1457
     - Name: Assets/BundleRes/PrefabA/A3.prefab
-      BundleRelativePath: BundleRes/prefaba.bundle
       Length: 1457
     - Name: Assets/BundleRes/PrefabA/A4.prefab
-      BundleRelativePath: BundleRes/prefaba.bundle
       Length: 1459
   - RelativePath: BundleRes/prefabb.bundle
     DirectoryName: BundleRes
     BundleName: prefabb.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 2778
+    AssetsLength: 3704
     Assets:
+    - Name: Assets/BundleRes/PrefabB/B1.prefab
+      Length: 926
     - Name: Assets/BundleRes/PrefabB/B2.prefab
-      BundleRelativePath: BundleRes/prefabb.bundle
       Length: 926
     - Name: Assets/BundleRes/PrefabB/B3.prefab
-      BundleRelativePath: BundleRes/prefabb.bundle
       Length: 926
     - Name: Assets/BundleRes/PrefabB/B4.prefab
-      BundleRelativePath: BundleRes/prefabb.bundle
       Length: 926
   - RelativePath: BundleRes/RawText/rawText1.txt
     DirectoryName: BundleRes/RawText
@@ -126,7 +113,6 @@ MonoBehaviour:
     AssetsLength: 17
     Assets:
     - Name: Assets/BundleRes/RawText/rawText1.txt
-      BundleRelativePath: BundleRes/RawText/rawText1.txt
       Length: 17
   - RelativePath: BundleRes/Scene/new scene_unity.bundle
     DirectoryName: BundleRes/Scene
@@ -136,7 +122,6 @@ MonoBehaviour:
     AssetsLength: 5801
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
-      BundleRelativePath: BundleRes/Scene/new scene_unity.bundle
       Length: 5801
   - RelativePath: BundleRes/Scene/new scene2_unity.bundle
     DirectoryName: BundleRes/Scene
@@ -146,15 +131,4 @@ MonoBehaviour:
     AssetsLength: 5801
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene2.unity
-      BundleRelativePath: BundleRes/Scene/new scene2_unity.bundle
       Length: 5801
-  - RelativePath: BundleRes/shared_prefabb.bundle
-    DirectoryName: BundleRes
-    BundleName: shared_prefabb.bundle
-    Group: Base
-    IsRaw: 0
-    AssetsLength: 926
-    Assets:
-    - Name: Assets/BundleRes/PrefabB/B1.prefab
-      BundleRelativePath: BundleRes/shared_PrefabB.bundle
-      Length: 926
