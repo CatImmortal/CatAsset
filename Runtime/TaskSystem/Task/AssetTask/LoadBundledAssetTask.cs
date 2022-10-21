@@ -94,7 +94,7 @@ namespace CatAsset.Runtime
             if (AssetRuntimeInfo.UseCount > 0)
             {
                 //资源已加载好 且正在使用中
-                //无需考虑操作依赖资源的引用计数与引用记录
+                //无需考虑操作依赖资源的引用计数
                 //直接增加自身引用计数然后转移到DependenciesLoaded状态即可
                 AssetRuntimeInfo.AddUseCount();
                 loadBundleAssetState = LoadBundleAssetState.DependenciesLoaded;
