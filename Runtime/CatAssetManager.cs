@@ -428,7 +428,11 @@ namespace CatAsset.Runtime
             {
                 try
                 {
-                    SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive).completed += (op) =>
+                    LoadSceneParameters param = new LoadSceneParameters();
+                    param.loadSceneMode = LoadSceneMode.Additive;
+               
+                    AsyncOperation op = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);
+                    op.completed += operation =>
                     {
                         Scene scene = SceneManager.GetSceneByPath(sceneName);
                         SceneManager.SetActiveScene(scene);
@@ -525,6 +529,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void UnloadScene(Scene scene)
         {
+            if (!scene.IsValid() || !scene.isLoaded)
+            {
+                return;
+            }
+            
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
@@ -532,11 +541,6 @@ namespace CatAsset.Runtime
                 return;
             }
 #endif
-            if (scene == default)
-            {
-                return;
-            }
-
             AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(scene);
 
             if (info == null)
