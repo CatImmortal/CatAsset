@@ -67,7 +67,7 @@ namespace CatAsset.Editor
                         new BundleBuildInfo(directoryName,bundleName, group, isRaw);
                     
                     
-                     bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName,bundleBuildInfo.RelativePath));
+                     bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName));
                     
                     result.Add(bundleBuildInfo);
                     
