@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
   ManifestVersion: 6
-  TargetPlatforms: 05000000
+  TargetPlatforms: 13000000
   Options: 256
   OutputPath: ./AssetBundles
   IsRedundancyAnalyze: 1
