@@ -33,28 +33,7 @@ namespace CatAsset.Editor
         /// 默认资源组
         /// </summary>
         public const string DefaultGroup = "Base";
-        
 
-        [MenuItem("CatAsset/将所有场景添加到BuildSetting中", priority = 2)]
-        private static void BuildAllScenes()
-        {
-            List<string> sceneNames = new List<string>();
-            string[] sceneGuids = AssetDatabase.FindAssets("t:Scene", new []{"Assets"});
-            foreach (string sceneGuid in sceneGuids)
-            {
-                string sceneName = AssetDatabase.GUIDToAssetPath(sceneGuid);
-                sceneNames.Add(sceneName);
-            }
-
-            List<EditorBuildSettingsScene> scenes = new List<EditorBuildSettingsScene>();
-            foreach (string sceneName in sceneNames)
-            {
-                scenes.Add(new EditorBuildSettingsScene(sceneName, true));
-            }
-
-            EditorBuildSettings.scenes = scenes.ToArray();
-        }
-        
         [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 3)]
         private static void OpenAssetBundleOutputPath()
         {

@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>
     {
         /// <summary>
-        /// 所在资源包清单信息
+        /// 所属资源包的清单信息
         /// </summary>
         public BundleManifestInfo BundleManifest;
 
