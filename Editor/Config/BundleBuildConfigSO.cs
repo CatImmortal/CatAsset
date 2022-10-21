@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace CatAsset.Editor
 {
@@ -76,21 +77,35 @@ namespace CatAsset.Editor
             float stepNum = 6f;
             int curStep = 1;
 
+            void ProfileTime(Action action,Stopwatch sw,string name)
+            {
+                sw.Restart();
+                action?.Invoke();
+                sw.Stop();
+                sw.Reset();
+                Debug.Log($"{name}执行完毕，耗时：{sw.Elapsed.TotalSeconds}秒");
+            }
+            
             try
             {
+                Stopwatch sw = new Stopwatch();
+                
                 //初始化资源包构建规则
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "初始化资源包构建规则...", curStep / stepNum);
-                InitRuleDict();
+                ProfileTime(InitRuleDict,sw,"初始化资源包构建规则");
                 curStep++;
 
+
+              
                 //根据构建规则初始化资源包构建信息
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "初始化资源包构建信息...", curStep / stepNum);
-                InitBundleBuildInfo(false);
+                ProfileTime((() => {InitBundleBuildInfo(false);}),sw,"初始化资源包构建信息");
                 curStep++;
 
+                
                 //将隐式依赖都转换为显式构建资源
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "将隐式依赖都转换为显式构建资源...", curStep / stepNum);
-                ImplicitDependencyToExplicitBuildAsset();
+                ProfileTime(ImplicitDependencyToExplicitBuildAsset,sw,"将隐式依赖都转换为显式构建资源");
                 curStep++;
 
                 //上一步执行后可能出现同一个隐式依赖被转换为了不同资源包的显式构建资源
@@ -99,21 +114,24 @@ namespace CatAsset.Editor
                 {
                     //进行冗余资源分析
                     EditorUtility.DisplayProgressBar("刷新资源包构建信息", "进行冗余资源分析...", curStep / stepNum);
-                    RedundancyAssetAnalyze();
+                    ProfileTime(RedundancyAssetAnalyze,sw,"进行冗余资源分析");
+
                 }
                 curStep++;
 
                 //在将隐式依赖转换为显式构建资源后，可能出现场景资源和非场景资源被放进了同一个资源包的情况
                 //而这是Unity不允许的，会在BuildBundle时报错，所以需要在这一步将其拆开
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "分割场景资源包中的非场景资源...", curStep / stepNum);
-                SplitSceneBundle();
+                ProfileTime(SplitSceneBundle,sw,"分割场景资源包中的非场景资源");
                 curStep++;
+
 
                 //根据构建规则初始化原生资源包构建信息
                 //如果出现普通资源包中的资源依赖原生资源，那么需要冗余一份原生资源到普通资源包中，因为本质上原生资源是没有资源包的
                 //所以这里将原生资源包的构建放到最后处理，这样通过前面的隐式依赖转换为显式构建资源这一步就可以达成原生资源在依赖它的普通资源包中的冗余了
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "初始化原生资源包构建信息...", curStep / stepNum);
-                InitBundleBuildInfo(true);
+                ProfileTime((() => { InitBundleBuildInfo(true);}),sw,"初始化原生资源包构建信息");
+
             }
             finally
             {
@@ -142,6 +160,8 @@ namespace CatAsset.Editor
 
         }
 
+
+        
         /// <summary>
         /// 初始化资源包构建规则字典
         /// </summary>
