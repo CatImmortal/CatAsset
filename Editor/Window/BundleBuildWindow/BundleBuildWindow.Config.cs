@@ -17,10 +17,10 @@ namespace CatAsset.Editor
         /// </summary>
         private List<BuildTarget> targetPlatforms = new List<BuildTarget>()
         {
-            BuildTarget.StandaloneWindows,
             BuildTarget.StandaloneWindows64,
             BuildTarget.Android,
             BuildTarget.iOS,
+            BuildTarget.WebGL,
         };
 
 
