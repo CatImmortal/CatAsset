@@ -75,14 +75,10 @@ namespace CatAsset.Editor
                         //绘制展开箭头
                         foldOutDict.TryGetValue(bundleBuildInfo.RelativePath, out bool foldOut);
                         foldOutDict[bundleBuildInfo.RelativePath] = EditorGUILayout.Foldout(foldOut, bundleBuildInfo.RelativePath);
-
-
-                        using (new EditorGUILayout.HorizontalScope())
-                        {
-                            EditorGUILayout.LabelField("|  资源组：" + bundleBuildInfo.Group,GUILayout.Width(100));
-                            EditorGUILayout.LabelField("|  资源数：" + bundleBuildInfo.Assets.Count,GUILayout.Width(100));
-                            EditorGUILayout.LabelField("|  总长度：" + Runtime.Util.GetByteLengthDesc(bundleBuildInfo.AssetsLength),GUILayout.Width(200));
-                        }
+                        
+                        EditorGUILayout.LabelField("资源组：" + bundleBuildInfo.Group,GUILayout.Width(150));
+                        EditorGUILayout.LabelField("资源数：" + bundleBuildInfo.Assets.Count,GUILayout.Width(100));
+                        EditorGUILayout.LabelField("总长度：" + Runtime.Util.GetByteLengthDesc(bundleBuildInfo.AssetsLength),GUILayout.Width(200));
                         
                     }
                     
@@ -103,31 +99,13 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawAsset(AssetBuildInfo assetBuildInfo)
         {
-
-            Type assetType = assetBuildInfo.Type;
-
-            GUIContent content = new GUIContent();
-
-            if (assetType != typeof(Texture2D))
-            {
-                paramObjs[0] = assetType;
-                content.image = (Texture2D)findTextureByTypeMI.Invoke(null,paramObjs);
-            }
-            else
-            {
-                content.image = EditorGUIUtility.FindTexture(assetBuildInfo.Name);
-            }
-
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("", GUILayout.Width(30));
-                EditorGUILayout.LabelField(content, GUILayout.Width(20));
-                EditorGUILayout.LabelField(assetBuildInfo.Name, GUILayout.Width(400));
-                EditorGUILayout.LabelField($"|  长度：{Runtime.Util.GetByteLengthDesc(assetBuildInfo.Length)}", GUILayout.Width(200));
-                if (GUILayout.Button("选中", GUILayout.Width(50)))
-                {
-                    Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetBuildInfo.Name,assetBuildInfo.Type);
-                }
+                EditorGUILayout.LabelField("\t" + assetBuildInfo.Name);
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.ObjectField(AssetDatabase.LoadAssetAtPath<Object>(assetBuildInfo.Name), typeof(Object),false);
+                EditorGUI.EndDisabledGroup();
+                EditorGUILayout.LabelField($"\t长度：{Runtime.Util.GetByteLengthDesc(assetBuildInfo.Length)}");
             }
            
         }

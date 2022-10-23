@@ -1,4 +1,6 @@
 ﻿using System;
+using UnityEditor;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Editor
 {
@@ -9,9 +11,9 @@ namespace CatAsset.Editor
     public class BundleBuildDirectory : IComparable<BundleBuildDirectory>
     {
         /// <summary>
-        /// 目录名
+        /// 目录对象
         /// </summary>
-        public string DirectoryName;
+        public Object DirectoryObj;
         
         /// <summary>
         /// 构建规则名
@@ -28,10 +30,14 @@ namespace CatAsset.Editor
         /// </summary>
         public string Group;
 
+        /// <summary>
+        /// 目录名
+        /// </summary>
+        public string DirectoryName => AssetDatabase.GetAssetPath(DirectoryObj);
 
         public BundleBuildDirectory(string directoryName, string buildRuleName, string ruleRegex, string group)
         {
-            DirectoryName = directoryName;
+            DirectoryObj = AssetDatabase.LoadAssetAtPath<Object>(directoryName);
             BuildRuleName = buildRuleName;
             RuleRegex = ruleRegex;
             Group = group;
@@ -39,6 +45,7 @@ namespace CatAsset.Editor
 
         public int CompareTo(BundleBuildDirectory other)
         {
+            //return DirectoryName.CompareTo(other.DirectoryName);
             return DirectoryName.CompareTo(other.DirectoryName);
         }
     }
