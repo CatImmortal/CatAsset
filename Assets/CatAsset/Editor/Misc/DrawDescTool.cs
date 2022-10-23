@@ -38,6 +38,7 @@ namespace CatAsset.Editor
                 if (BundleBuildConfigSO.Instance.DirectoryDict.TryGetValue(path,out BundleBuildDirectory bbd))
                 {
                     //绘制资源组在文件夹后面
+                    //string desc = $"{bbd.Group}|{bbd.BuildRuleName}";
                     string desc = bbd.Group;
                     DrawDesc(desc,selectionRect,dirColor);
                 }

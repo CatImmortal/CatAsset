@@ -102,8 +102,6 @@ namespace CatAsset.Editor
         {
 
             Bundles.Clear();
-            DirectoryDict.Clear();
-            AssetToBundleDict.Clear();
 
             float stepNum = 6f;
             int curStep = 1;
@@ -374,10 +372,13 @@ namespace CatAsset.Editor
         /// </summary>
         public void RefreshDict()
         {
+            DirectoryDict.Clear();
+            AssetToBundleDict.Clear();
+            
             //收集映射信息
             foreach (BundleBuildDirectory item in Directories)
             {
-                DirectoryDict.Add(item.DirectoryName,item);
+                DirectoryDict[item.DirectoryName] = item;
             }
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
