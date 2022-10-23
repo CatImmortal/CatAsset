@@ -20,6 +20,10 @@ MonoBehaviour:
   IsCopyToReadOnlyDirectory: 1
   CopyGroup: Base
   Directories:
+  - DirectoryObj: {fileID: 102900000, guid: 8ec4bc1dd478dad4eb93b7cbbf2e84d2, type: 3}
+    BuildRuleName: NAssetToNBundle
+    RuleRegex: 
+    Group: Base
   - DirectoryObj: {fileID: 102900000, guid: 30fa06d01ac125747a7588bc1cbcd1c8, type: 3}
     BuildRuleName: NAssetToOneBundle
     RuleRegex: 
@@ -29,6 +33,10 @@ MonoBehaviour:
     RuleRegex: 
     Group: Base
   - DirectoryObj: {fileID: 102900000, guid: 1cec1ff63c363df46904108f5ec5e3aa, type: 3}
+    BuildRuleName: NAssetToOneBundle
+    RuleRegex: 
+    Group: Base
+  - DirectoryObj: {fileID: 102900000, guid: d6ea6b3c99a9fe84ebf55ddbf96e1bd9, type: 3}
     BuildRuleName: NAssetToOneBundle
     RuleRegex: 
     Group: Base
