@@ -79,11 +79,11 @@ namespace CatAsset.Editor
 
             void ProfileTime(Action action,Stopwatch sw,string name)
             {
-                sw.Restart();
+                //sw.Restart();
                 action?.Invoke();
-                sw.Stop();
-                sw.Reset();
-                Debug.Log($"{name}执行完毕，耗时：{sw.Elapsed.TotalSeconds}秒");
+                // sw.Stop();
+                // sw.Reset();
+                //Debug.Log($"{name}执行完毕，耗时：{sw.Elapsed.TotalSeconds}秒");
             }
             
             try

@@ -38,7 +38,7 @@ namespace CatAsset.Editor
 
                 foreach (FileInfo file in files)
                 {
-                    string assetDir = Util.FullNameToAssetName(file.Directory.FullName);
+                    string assetDir = Util.FullNameToAssetName(file.Directory.FullName);//Assets/xxx/
                     if (Util.IsChildDirectory(assetDir,buildDirectory))
                     {
                         //跳过子构建目录
@@ -57,8 +57,7 @@ namespace CatAsset.Editor
                         continue;
                     }
                     
-                    string assetsDir = Util.FullNameToAssetName(file.Directory.FullName); //Assets/xxx
-                    string directoryName = assetsDir.Substring(assetsDir.IndexOf("/") + 1); //去掉Assets/
+                    string directoryName = assetDir.Substring(assetDir.IndexOf("/") + 1); //去掉Assets/
                     string bundleName;
                     if (!isRaw)
                     { 

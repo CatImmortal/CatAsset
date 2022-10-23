@@ -73,10 +73,11 @@ namespace CatAsset.Editor
                 return null;
             }
 
+            //Assets/xxx/yyy
             int firstIndex = buildDirectory.IndexOf("/");
             int lastIndex = buildDirectory.LastIndexOf("/");
-            string directoryName = buildDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);
-            string bundleName = buildDirectory.Substring(lastIndex + 1) + ".bundle"; //以构建目录名作为资源包名
+            string directoryName = buildDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);  //xxx
+            string bundleName = buildDirectory.Substring(lastIndex + 1) + ".bundle"; //以构建目录名作为资源包名 yyy.bundle
             
             BundleBuildInfo bundleBuildInfo = new BundleBuildInfo(directoryName,bundleName,group,false);
             for (int i = 0; i < assetNames.Count; i++)
