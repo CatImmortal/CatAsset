@@ -25,7 +25,8 @@ namespace CatAsset.Editor
             BuildTargetGroup group = UnityEditor.BuildPipeline.GetBuildTargetGroup(targetPlatform);
 
             BundleBuildParameters parameters = new BundleBuildParameters(targetPlatform, group, fullOutputPath);
-
+            parameters.WriteLinkXML = true;
+            
             //是否全量构建
             if ((bundleBuildConfig.Options & BuildAssetBundleOptions.ForceRebuildAssetBundle) != 0)
             {
