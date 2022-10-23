@@ -239,5 +239,17 @@ namespace CatAsset.Editor
 
         }
 
+        /// <summary>
+        /// 是否为指定资源包构建目录的子目录
+        /// </summary>
+        public static bool IsChildDirectory(string dir,string buildDir)
+        {
+            if (dir != buildDir && dir.StartsWith(buildDir))
+            {
+                return true;
+            }
+            return false;
+        }
+
     }
 }
