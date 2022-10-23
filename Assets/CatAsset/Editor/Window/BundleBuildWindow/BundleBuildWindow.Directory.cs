@@ -42,9 +42,9 @@ namespace CatAsset.Editor
                     GUILayout.Label($"[{i}]", GUILayout.Width(20));
                     
                     //绘制目录名
+                    EditorGUILayout.LabelField(directory.DirectoryName);
                     EditorGUI.BeginDisabledGroup(true);
-                    Object directoryObj = AssetDatabase.LoadAssetAtPath<Object>(directory.DirectoryName);
-                    EditorGUILayout.ObjectField(directoryObj, typeof(Object),false);
+                    EditorGUILayout.ObjectField(directory.DirectoryObj, typeof(Object),false);
                     EditorGUI.EndDisabledGroup();
                     
                     //绘制构建规则名
