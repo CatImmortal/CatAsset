@@ -23,6 +23,9 @@ namespace CatAsset.Editor
         /// </summary>
         private readonly List<int> needRemoveDirectories = new List<int>();
         
+
+        
+
         /// <summary>
         /// 绘制资源包构建目录界面
         /// </summary>

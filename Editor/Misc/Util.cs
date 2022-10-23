@@ -37,7 +37,7 @@ namespace CatAsset.Editor
         [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 3)]
         private static void OpenAssetBundleOutputPath()
         {
-            Open(GetConfigAsset<BundleBuildConfigSO>().OutputPath);
+            Open(BundleBuildConfigSO.Instance.OutputPath);
         }
         
 
@@ -53,8 +53,6 @@ namespace CatAsset.Editor
             Open(Application.persistentDataPath);
         }
 
-
-        
         /// <summary>
         /// 打开指定目录
         /// </summary>
@@ -75,7 +73,7 @@ namespace CatAsset.Editor
         [MenuItem("Assets/添加为资源包构建目录（可多选）", false)]
         private static void AddToBundleBuildDirectory()
         {
-            BundleBuildConfigSO config = GetConfigAsset<BundleBuildConfigSO>();
+            BundleBuildConfigSO config = BundleBuildConfigSO.Instance;
 
             foreach (string guid in Selection.assetGUIDs)
             {
@@ -107,32 +105,19 @@ namespace CatAsset.Editor
         }
         
         
-        
-        /// <summary>
-        /// 获取SO配置
-        /// </summary>
-        public static T GetConfigAsset<T>() where T : ScriptableObject
+        [MenuItem("Assets/刷新资源包构建信息")]
+        private static void RefreshBundleBuildInfo()
         {
-
-            string typeName = typeof(T).Name;
-            string[] paths = AssetDatabase.FindAssets("t:" + typeName);
-            if (paths.Length == 0)
+            if (BundleBuildConfigSO.Instance != null)
             {
-                Debug.LogError("不存在" + typeName);
-                return null;
+                BundleBuildConfigSO.Instance.RefreshBundleBuildInfos();
             }
-            if (paths.Length > 1)
-            {
-                Debug.LogError(typeName + "数量大于1");
-                return null;
-
-            }
-            string path = AssetDatabase.GUIDToAssetPath(paths[0]);
-            T config = AssetDatabase.LoadAssetAtPath<T>(path);
-
-            return config;
         }
 
+        
+        
+
+  
         /// <summary>
         /// 将完整目录/文件名转换为Assets开头的目录/文件名
         /// </summary>
