@@ -67,7 +67,7 @@ namespace CatAsset.Editor
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("选择资源包构建设置：");
             bundleBuildConfig.Options =
-                (BuildAssetBundleOptions) EditorGUILayout.EnumFlagsField(bundleBuildConfig.Options);
+                (BundleBuildOptions) EditorGUILayout.EnumFlagsField(bundleBuildConfig.Options);
 
             EditorGUILayout.Space();
             using (new EditorGUILayout.HorizontalScope())
