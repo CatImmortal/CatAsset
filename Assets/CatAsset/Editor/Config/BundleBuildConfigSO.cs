@@ -124,10 +124,10 @@ namespace CatAsset.Editor
                 ProfileTime(InitRuleDict,sw,"初始化资源包构建规则");
                 curStep++;
 
-
-              
+                
                 //根据构建规则初始化资源包构建信息
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "初始化资源包构建信息...", curStep / stepNum);
+                RefreshDirectoryDict();  //这里要在第一次调用InitBundleBuildInfo前刷新构建目录映射，因为会在判断子构建目录时使用
                 ProfileTime((() => {InitBundleBuildInfo(false);}),sw,"初始化资源包构建信息");
                 curStep++;
 
@@ -167,26 +167,23 @@ namespace CatAsset.Editor
                 EditorUtility.ClearProgressBar();
             }
             
-            //筛选出资源数不为0的资源包
-            Bundles = Bundles.Where((info => info.Assets.Count > 0)).ToList();
+            //移除空资源包
+            RemoveEmptyBundle();
             
             //刷新资源包的总资源长度
             RefreshBundleLength();
             
-            //最后给资源包和资源列表排下序
-            Bundles.Sort();
-            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
-            {
-                bundleBuildInfo.Assets.Sort();
-            }
+            //给资源包和资源列表排下序
+            SortBundles();
+
+            //刷新映射
+            RefreshAssetToBundleDict();
             
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
 
 
             Debug.Log("资源包构建信息刷新完毕");
-
-            RefreshDict();
         }
 
         
@@ -356,6 +353,21 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
+        /// 移除空资源包
+        /// </summary>
+        private void RemoveEmptyBundle()
+        {
+            for (int i = Bundles.Count - 1; i >= 0; i--)
+            {
+                BundleBuildInfo bundleBuildInfo = Bundles[i];
+                if (bundleBuildInfo.Assets.Count == 0)
+                {
+                    Bundles.RemoveAt(i);
+                }
+            }
+        }
+        
+        /// <summary>
         /// 刷新资源包的总资源长度
         /// </summary>
         private void RefreshBundleLength()
@@ -365,6 +377,18 @@ namespace CatAsset.Editor
                 bundleBuildInfo.RefreshAssetsLength();
             }
         }
+
+        /// <summary>
+        /// 排序资源包列表
+        /// </summary>
+        private void SortBundles()
+        {
+            Bundles.Sort();
+            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            {
+                bundleBuildInfo.Assets.Sort();
+            }
+        }
         
         
         /// <summary>
@@ -372,14 +396,22 @@ namespace CatAsset.Editor
         /// </summary>
         public void RefreshDict()
         {
+            RefreshDirectoryDict();
+            RefreshAssetToBundleDict();
+        }
+
+        public void RefreshDirectoryDict()
+        {
             DirectoryDict.Clear();
-            AssetToBundleDict.Clear();
-            
-            //收集映射信息
             foreach (BundleBuildDirectory item in Directories)
             {
                 DirectoryDict[item.DirectoryName] = item;
             }
+        }
+
+        public void RefreshAssetToBundleDict()
+        {
+            AssetToBundleDict.Clear();
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)

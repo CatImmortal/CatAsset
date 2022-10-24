@@ -24,6 +24,11 @@ namespace CatAsset.Editor
                 {
                     //每个一级目录构建成一个资源包
                     string assetsDir = Util.FullNameToAssetName(topDirInfo.FullName);
+                    if (Util.IsChildDirectory(assetsDir,bundleBuildDirectory.DirectoryName))
+                    {
+                        //跳过子构建目录
+                        continue;
+                    }
                     BundleBuildInfo info = GetNAssetToOneBundle(assetsDir,bundleBuildDirectory.RuleRegex, bundleBuildDirectory.Group);
                     result.Add(info);
                 }
