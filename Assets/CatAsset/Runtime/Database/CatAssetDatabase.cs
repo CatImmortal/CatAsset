@@ -126,7 +126,6 @@ namespace CatAsset.Runtime
                 };
                 assetRuntimeInfo.BundleManifest = new BundleManifestInfo
                 {
-                    RelativePath = assetName,
                     Directory = dir,
                     BundleName = name,
                     Group = string.Empty,

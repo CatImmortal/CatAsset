@@ -48,7 +48,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包构建设置
         /// </summary>
-        public BundleBuildOptions Options = BundleBuildOptions.WriteLinkXML & BundleBuildOptions.AppendMD5 & BundleBuildOptions.ChunkBasedCompression;
+        public BundleBuildOptions Options = BundleBuildOptions.WriteLinkXML & BundleBuildOptions.ChunkBasedCompression;
 
         /// <summary>
         /// 资源包构建输出目录

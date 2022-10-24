@@ -103,7 +103,7 @@ namespace CatAsset.Runtime
             {
                 //创建下载文件的任务
                 string localFilePath = Util.GetReadWritePath(info.RelativePath);
-                string downloadUri = Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath);
+                string downloadUri = Util.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath));
                 CatAssetManager.DownloadBundle(this,info,downloadUri,localFilePath,onBundleDownloaded);
             }
             

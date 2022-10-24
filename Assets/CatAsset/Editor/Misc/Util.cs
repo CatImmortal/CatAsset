@@ -121,19 +121,6 @@ namespace CatAsset.Editor
         }
 
         
-        
-
-  
-        /// <summary>
-        /// 将完整目录/文件名转换为Assets开头的目录/文件名
-        /// </summary>
-        public static string FullNameToAssetName(string fullName)
-        {
-            int assetsIndex = fullName.IndexOf("Assets\\");
-            string assetsDir = fullName.Substring(assetsIndex).Replace('\\', '/');
-            return assetsDir;
-        }
-        
         /// <summary>
         /// 获取排除了自身和csharp代码文件的依赖资源列表
         /// </summary>
@@ -161,6 +148,44 @@ namespace CatAsset.Editor
             }
 
             return result;
+        }
+
+
+        /// <summary>
+        /// 是否为有效资源
+        /// </summary>
+        public static bool IsValidAsset(string assetName)
+        {
+            string fileExtension = Path.GetExtension(assetName);
+            if (string.IsNullOrEmpty(fileExtension))
+            {
+                return false;
+            }
+
+            if (ExcludeSet.Contains(fileExtension))
+            {
+                return false;
+            }
+
+            Type type = AssetDatabase.GetMainAssetTypeAtPath(assetName);
+            if (type == typeof(LightingDataAsset))
+            {
+                return false;
+            }
+
+            return true;
+
+        }
+
+
+        /// <summary>
+        /// 将完整目录/文件名转换为Assets开头的目录/文件名
+        /// </summary>
+        public static string FullNameToAssetName(string fullName)
+        {
+            int assetsIndex = fullName.IndexOf("Assets\\");
+            string assetsDir = fullName.Substring(assetsIndex).Replace('\\', '/');
+            return assetsDir;
         }
 
         /// <summary>
@@ -210,29 +235,6 @@ namespace CatAsset.Editor
             dirInfo.Delete();
         }
 
-        /// <summary>
-        /// 是否为有效资源
-        /// </summary>
-        public static bool IsValidAsset(string assetName)
-        {
-            string fileExtension = Path.GetExtension(assetName);
-            if (string.IsNullOrEmpty(fileExtension))
-            {
-                return false;
-            }
-            if (ExcludeSet.Contains(fileExtension))
-            {
-                return false;
-            }
-            Type type = AssetDatabase.GetMainAssetTypeAtPath(assetName);
-            if (type == typeof(LightingDataAsset))
-            {
-                return false;
-            }
-
-            return true;
-
-        }
 
         /// <summary>
         /// childDir是否为构建目录parentDir的子构建目录
@@ -259,6 +261,8 @@ namespace CatAsset.Editor
 
             return false;
         }
+        
+
 
     }
 }

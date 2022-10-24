@@ -22,11 +22,20 @@ namespace CatAsset.Runtime
         private static StringBuilder CachedSB = new StringBuilder();
 
         /// <summary>
+        /// 获取规范的路径
+        /// </summary>
+        public static string GetRegularPath(string path)
+        {
+            return path.Replace('\\', '/');
+        }
+
+
+        /// <summary>
         /// 获取在只读区下的完整路径
         /// </summary>
         public static string GetReadOnlyPath(string path)
         {
-            string result = Path.Combine(Application.streamingAssetsPath, path);
+            string result = GetRegularPath(Path.Combine(Application.streamingAssetsPath, path));
             return result;
         }
 
@@ -36,7 +45,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static string GetReadWritePath(string path)
         {
-            string result = Path.Combine(Application.persistentDataPath, path);
+            string result = GetRegularPath(Path.Combine(Application.persistentDataPath, path));
             return result;
         }
 
@@ -45,7 +54,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static string GetRemotePath(string path)
         {
-            string result = Path.Combine(CatAssetUpdater.UpdateUriPrefix, path);
+            string result = GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, path));
             return result;
         }
 

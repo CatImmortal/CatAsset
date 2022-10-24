@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 6
+  ManifestVersion: 3
   TargetPlatforms: 13000000
-  Options: 13
+  Options: 9
   OutputPath: ./AssetBundles
   IsRedundancyAnalyze: 1
   IsCopyToReadOnlyDirectory: 1
@@ -23,11 +23,11 @@ MonoBehaviour:
   - DirectoryObj: {fileID: 102900000, guid: 30fa06d01ac125747a7588bc1cbcd1c8, type: 3}
     BuildRuleName: NAssetToOneBundle
     RuleRegex: 
-    Group: Base
+    Group: Chapter1
   - DirectoryObj: {fileID: 102900000, guid: 6eb4a8b392a514541a05bf070f7287f4, type: 3}
     BuildRuleName: NAssetToOneBundle
     RuleRegex: 
-    Group: Base
+    Group: Chapter2
   - DirectoryObj: {fileID: 102900000, guid: 1cec1ff63c363df46904108f5ec5e3aa, type: 3}
     BuildRuleName: NAssetToOneBundle
     RuleRegex: 
@@ -48,7 +48,7 @@ MonoBehaviour:
   - RelativePath: BundleRes/chapter1.bundle
     DirectoryName: BundleRes
     BundleName: chapter1.bundle
-    Group: Base
+    Group: Chapter1
     IsRaw: 0
     AssetsLength: 3704
     Assets:
@@ -63,7 +63,7 @@ MonoBehaviour:
   - RelativePath: BundleRes/chpater2.bundle
     DirectoryName: BundleRes
     BundleName: chpater2.bundle
-    Group: Base
+    Group: Chapter2
     IsRaw: 0
     AssetsLength: 3704
     Assets:
