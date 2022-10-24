@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using CatAsset.Runtime;
-using CatJson;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Injector;
 using UnityEditor.Build.Pipeline.Interfaces;
+using UnityEngine;
 
 namespace CatAsset.Editor
 {
@@ -24,11 +24,15 @@ namespace CatAsset.Editor
             CatAssetManifest manifest = manifestParam.Manifest;
                 
             //写入清单文件json
-            string json = JsonParser.Default.ToJson(manifest);
+            string json = JsonUtility.ToJson(manifest,true);
             using (StreamWriter sw = new StreamWriter(Path.Combine(writePath, CatAsset.Runtime.Util.ManifestFileName)))
             {
                 sw.Write(json);
             }
+
+            var tempManifest = JsonUtility.FromJson<CatAssetManifest>(json);
+            string tempJson = JsonUtility.ToJson(tempManifest, true);
+            Debug.Log(tempJson);
 
             return ReturnCode.Success;
         }

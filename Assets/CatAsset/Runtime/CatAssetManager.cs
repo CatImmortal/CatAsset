@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using CatJson;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -147,9 +146,7 @@ namespace CatAsset.Runtime
                     }
                     else
                     {
-                        CatAssetManifest manifest =
-                            JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
-
+                        CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
                         CatAssetDatabase.InitPackageManifest(manifest);
 
                         Debug.Log("单机模式资源清单检查完毕");
@@ -202,8 +199,7 @@ namespace CatAsset.Runtime
                     }
                     else
                     {
-                        CatAssetManifest manifest =
-                            JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
+                        CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
 
                         foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
                         {

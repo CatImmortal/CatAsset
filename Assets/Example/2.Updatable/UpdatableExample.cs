@@ -2,12 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using CatAsset.Runtime;
-using CatJson;
 using UnityEngine;
 using UnityEngine.Networking;
 
+public class WebVersion
+{
+    public string GameVersion;
+    public int ManifestVersion;
+}
+
 public class UpdatableExample : MonoBehaviour
 {
+    
     /// <summary>
     /// 资源服务器地址
     /// </summary>
@@ -38,8 +44,8 @@ public class UpdatableExample : MonoBehaviour
                 return;
             }
 
-            JsonObject jo = JsonParser.Default.ParseJson<JsonObject>(op.webRequest.downloadHandler.text);
-            int manifestVersion = (int) jo["ManifestVersion"];
+            WebVersion webVersion = JsonUtility.FromJson<WebVersion>(op.webRequest.downloadHandler.text);
+            int manifestVersion = webVersion.ManifestVersion;
 
             //根据平台，整包版本和资源版本设置资源更新uri的前缀
             string uriPrefix = $"{AssetServerIP}/StandaloneWindows/{Application.version}_{manifestVersion}";

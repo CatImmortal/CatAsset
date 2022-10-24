@@ -8,6 +8,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// Bundle清单信息
     /// </summary>
+    [Serializable]
     public class BundleManifestInfo : IComparable<BundleManifestInfo>,IEquatable<BundleManifestInfo>
     {
         /// <summary>

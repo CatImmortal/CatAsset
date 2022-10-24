@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using CatJson;
 using UnityEngine;
 namespace CatAsset.Runtime
 {
@@ -65,7 +64,7 @@ namespace CatAsset.Runtime
             manifest.Bundles = bundleInfos;
 
             //写入清单文件json
-            string json = JsonParser.Default.ToJson(manifest);
+            string json = JsonUtility.ToJson(manifest, true);
             string path = Util.GetReadWritePath(Util.ManifestFileName);
             if (File.Exists(path))
             {

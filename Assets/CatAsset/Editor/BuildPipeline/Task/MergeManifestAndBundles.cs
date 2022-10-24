@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Injector;
 using UnityEditor.Build.Pipeline.Interfaces;
+using UnityEngine;
 
 namespace CatAsset.Editor
 {
@@ -42,7 +43,7 @@ namespace CatAsset.Editor
                 if (File.Exists(mainManifestPath))
                 {
                     string json = File.ReadAllText(mainManifestPath);
-                    mainManifest = CatJson.JsonParser.Default.ParseJson<CatAssetManifest>(json);
+                    mainManifest = JsonUtility.FromJson<CatAssetManifest>(json);
                 }
                 if (mainManifest == null)
                 {
