@@ -24,10 +24,7 @@ namespace CatAsset.Editor
             {
                 //此构建规则只返回一个资源包
                 BundleBuildInfo info = GetNAssetToOneBundle(bundleBuildDirectory.DirectoryName,bundleBuildDirectory.RuleRegex, bundleBuildDirectory.Group);
-                if (info != null)
-                {
-                    result.Add(info);
-                }
+                result.Add(info);
             }
 
             return result;
@@ -53,7 +50,6 @@ namespace CatAsset.Editor
                 }
                 
                 string assetName = Util.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
-
                 if (!Util.IsValidAsset(assetName))
                 {
                     continue;
@@ -65,12 +61,6 @@ namespace CatAsset.Editor
                 }
                 
                 assetNames.Add(assetName);
-            }
-
-            if (assetNames.Count == 0)
-            {
-                //是空目录
-                return null;
             }
 
             //Assets/xxx/yyy

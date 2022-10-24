@@ -210,6 +210,10 @@ namespace CatAsset.Editor
         public static bool IsValidAsset(string assetName)
         {
             string fileExtension = Path.GetExtension(assetName);
+            if (string.IsNullOrEmpty(fileExtension))
+            {
+                return false;
+            }
             if (ExcludeSet.Contains(fileExtension))
             {
                 return false;
@@ -225,14 +229,28 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 是否为指定资源包构建目录的子目录
+        /// childDir是否为构建目录parentDir的子构建目录
         /// </summary>
-        public static bool IsChildDirectory(string dir,string buildDir)
+        public static bool IsChildDirectory(string childDir,string parentDir)
         {
-            if (dir != buildDir && dir.StartsWith(buildDir))
+            if (childDir == parentDir)
             {
+                //两个目录名一致 
+                return false;
+            }
+
+            if (!BundleBuildConfigSO.Instance.DirectoryDict.ContainsKey(childDir))
+            {
+                //childDir不是被指定的构建目录
+                return false;
+            }
+
+            if (childDir.StartsWith(parentDir))
+            {
+                //childDir是parentDir的子构建目录
                 return true;
             }
+
             return false;
         }
 

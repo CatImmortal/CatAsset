@@ -46,11 +46,11 @@ namespace CatAsset.Editor
                     }
                     
                     string assetName = Util.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
-                    
                     if (!Util.IsValidAsset(assetName))
                     {
                         continue;
                     }
+                    
                     
                     if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(assetName,ruleRegex))
                     {
