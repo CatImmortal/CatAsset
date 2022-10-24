@@ -30,10 +30,6 @@ namespace CatAsset.Editor
                 sw.Write(json);
             }
 
-            var tempManifest = JsonUtility.FromJson<CatAssetManifest>(json);
-            string tempJson = JsonUtility.ToJson(tempManifest, true);
-            Debug.Log(tempJson);
-
             return ReturnCode.Success;
         }
 

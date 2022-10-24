@@ -53,7 +53,6 @@ namespace CatAsset.Editor
             {
                 BundleManifestInfo bundleManifestInfo = new BundleManifestInfo()
                 {
-                    RelativePath = bundleBuildInfo.RelativePath,
                     Directory = bundleBuildInfo.DirectoryName,
                     BundleName = bundleBuildInfo.BundleName,
                     Group = bundleBuildInfo.Group,
@@ -89,7 +88,6 @@ namespace CatAsset.Editor
             {
                 BundleManifestInfo bundleManifestInfo = new BundleManifestInfo()
                 {
-                    RelativePath = bundleBuildInfo.RelativePath,
                     Directory = bundleBuildInfo.DirectoryName,
                     BundleName = bundleBuildInfo.BundleName,
                     Group = bundleBuildInfo.Group,

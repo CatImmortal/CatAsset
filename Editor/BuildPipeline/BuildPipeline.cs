@@ -36,6 +36,10 @@ namespace CatAsset.Editor
             IList<IBuildTask> taskList = DefaultBuildTasks.Create(DefaultBuildTasks.Preset.AssetBundleCompatible);
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
+            if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.AppendMD5))
+            {
+                taskList.Add(new AppendMD5());
+            }
             taskList.Add(new WriteManifestFile());
             if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
             {
@@ -74,6 +78,10 @@ namespace CatAsset.Editor
             IList<IBuildTask> taskList = new List<IBuildTask>();
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
+            if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.AppendMD5))
+            {
+                taskList.Add(new AppendMD5());
+            }
             taskList.Add(new MergeManifestAndBundles());
             taskList.Add(new WriteManifestFile());
             if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)

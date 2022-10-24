@@ -205,9 +205,9 @@ namespace CatAsset.Runtime
                         {
                             if (!string.IsNullOrEmpty(bundleRelativePathPrefix))
                             {
-                                //为资源包相对路径添加额外前缀
-                                bundleManifestInfo.RelativePath = Path.Combine(bundleRelativePathPrefix,
-                                    bundleManifestInfo.RelativePath);
+                                //为资源包目录名添加额外前缀
+                                bundleManifestInfo.Directory = Util.GetRegularPath(Path.Combine(bundleRelativePathPrefix,
+                                    bundleManifestInfo.Directory));
                             }
 
                             CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo, true);
