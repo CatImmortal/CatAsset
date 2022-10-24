@@ -1,12 +1,12 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace CatAsset.Runtime
 {
     /// <summary>
     /// CatAsset资源清单
     /// </summary>
+    [Serializable]
     public class CatAssetManifest
     {
         /// <summary>

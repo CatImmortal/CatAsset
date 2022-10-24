@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using CatJson;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -69,8 +68,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            CatAssetManifest manifest = JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
-
+            CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.RelativePath);
@@ -94,8 +92,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            CatAssetManifest manifest = JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
-
+            CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.RelativePath);
@@ -121,8 +118,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            CatAssetManifest manifest = JsonParser.Default.ParseJson<CatAssetManifest>(uwr.downloadHandler.text);
-
+            CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.RelativePath);

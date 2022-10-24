@@ -8,6 +8,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源清单信息
     /// </summary>
+    [Serializable]
     public class AssetManifestInfo : IComparable<AssetManifestInfo>,IEquatable<AssetManifestInfo>
     {
         /// <summary>
