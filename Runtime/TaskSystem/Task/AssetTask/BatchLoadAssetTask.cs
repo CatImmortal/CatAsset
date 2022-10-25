@@ -55,10 +55,10 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源加载结束的回调
         /// </summary>
-        private void OnAssetLoaded(bool success, object asset,LoadAssetResult result)
+        private void OnAssetLoaded(object asset,LoadAssetResult result)
         {
             loadedAssetCount++;
-            if (success)
+            if (asset != null)
             {
                 loadSuccessAssets.Add(asset);
             }
