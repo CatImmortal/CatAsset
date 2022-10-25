@@ -275,25 +275,25 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAsset(string assetName,LoadAssetCallback<object> callback,
+        public static int LoadAssetAsync(string assetName,LoadAssetCallback<object> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            return InternalLoadAsset(assetName, callback, priority);
+            return InternalLoadAssetAsync(assetName, callback, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAsset<T>(string assetName,LoadAssetCallback<T> callback,
+        public static int LoadAssetAsync<T>(string assetName,LoadAssetCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            return InternalLoadAsset(assetName, callback, priority);
+            return InternalLoadAssetAsync(assetName, callback, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        internal static int InternalLoadAsset<T>(string assetName, LoadAssetCallback<T> callback,
+        internal static int InternalLoadAssetAsync<T>(string assetName, LoadAssetCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
             AssetCategory category;
@@ -375,7 +375,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static int BatchLoadAsset(List<string> assetNames, BatchLoadAssetCallback callback,
+        public static int BatchLoadAssetAsync(List<string> assetNames, BatchLoadAssetCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
             if (assetNames == null || assetNames.Count == 0)
@@ -391,14 +391,14 @@ namespace CatAsset.Runtime
                 List<LoadAssetResult> assets = new List<LoadAssetResult>();
                 foreach (string assetName in assetNames)
                 {
-                    LoadAsset(assetName, ((asset, result) =>
+                    LoadAssetAsync(assetName, ((asset, result) =>
                     {
                         assets.Add(result);
 
                         if (assets.Count == assetNames.Count)
                         {
                             //编辑器模式下是以同步的方式加载所有资源的 所以这里的asset顺序是和assetNames给出的顺序可以对上的
-                            callback(assets);
+                            callback?.Invoke(assets);
                         }
                     }));
                 }
@@ -408,7 +408,7 @@ namespace CatAsset.Runtime
 #endif
 
             BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,
-                $"{nameof(BatchLoadAsset)} - {TaskRunner.TaskIDFactory + 1}", assetNames, callback);
+                $"{nameof(BatchLoadAssetAsync)} - {TaskRunner.TaskIDFactory + 1}", assetNames, callback);
             loadTaskRunner.AddTask(task, priority);
             return task.ID;
         }
@@ -416,7 +416,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static int LoadScene(string sceneName, LoadSceneCallback callback,
+        public static int LoadSceneAsync(string sceneName, LoadSceneCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
 #if UNITY_EDITOR

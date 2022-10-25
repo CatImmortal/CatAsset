@@ -236,7 +236,7 @@ namespace CatAsset.Runtime
                 totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
                 foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    CatAssetManager.InternalLoadAsset(dependency,onDependencyLoadedCallback);
+                    CatAssetManager.InternalLoadAssetAsync(dependency,onDependencyLoadedCallback);
                 }
             }
         }

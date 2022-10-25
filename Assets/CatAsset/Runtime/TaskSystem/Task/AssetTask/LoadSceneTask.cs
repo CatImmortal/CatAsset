@@ -80,7 +80,7 @@ namespace CatAsset.Runtime
                 {
                     if (!task.NeedCancel)
                     {
-                        CatAssetManager.LoadScene(task.Name,task.onFinished);
+                        CatAssetManager.LoadSceneAsync(task.Name,task.onFinished);
                     }
                 }
             }
