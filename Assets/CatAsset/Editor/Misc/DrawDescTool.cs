@@ -61,20 +61,31 @@ namespace CatAsset.Editor
         private static void DrawDesc(string desc,Rect selectionRect,Color descColor)
         {
 
+            if (selectionRect.height > 16)
+            {
+                //图标视图
+                return;
+            }
+            
             GUIStyle label = EditorStyles.label;
             GUIContent content = new GUIContent(desc);
-            float width = label.CalcSize(content).x + 10;
-                        
+           
+         
             Rect pos = selectionRect;
+
+            //只在列表视图绘制
+            float width = label.CalcSize(content).x + 10;
             pos.x = pos.xMax - width;  //绘制在最右边
             pos.width = width;
             pos.yMin++;
-                        
+            
             Color color = GUI.color;
-            GUI.color = descColor; //
+            GUI.color = descColor;
             GUI.DrawTexture(pos, EditorGUIUtility.whiteTexture);
             GUI.color = color;
             GUI.Label(pos, desc);
+            
+            
         }
     }
 }
