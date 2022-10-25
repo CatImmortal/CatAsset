@@ -38,7 +38,7 @@ namespace CatAsset.Runtime
             State = TaskState.Waiting;
             foreach (string assetName in assetNames)
             {
-                CatAssetManager.LoadAsset(assetName, onAssetLoadedCallback);
+                CatAssetManager.LoadAssetAsync(assetName, onAssetLoadedCallback);
             }
         }
 
