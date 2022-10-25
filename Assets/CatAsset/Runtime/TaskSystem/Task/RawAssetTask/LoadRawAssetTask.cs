@@ -130,7 +130,7 @@ namespace CatAsset.Runtime
                 {
                     assetRuntimeInfo.AddUseCount();
                     
-                    onFinished?.Invoke(true, asset, result);
+                    onFinished?.Invoke(asset, result);
                     
                     foreach (LoadRawAssetTask<T> task in MergedTasks)
                     {
@@ -139,7 +139,7 @@ namespace CatAsset.Runtime
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadRawAsset一定增加1个资源的引用计数
                             assetRuntimeInfo.AddUseCount();
-                            task.onFinished?.Invoke(true, asset,result);
+                            task.onFinished?.Invoke(asset,result);
                         }
                    
                     }
@@ -156,7 +156,7 @@ namespace CatAsset.Runtime
                         {
                             needUnload = false;
                             assetRuntimeInfo.AddUseCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(true, asset,result);
+                            task.onFinished?.Invoke(asset,result);
                         }
                     }
 
@@ -172,14 +172,14 @@ namespace CatAsset.Runtime
                 //加载失败
                 if (!needCancel)
                 {
-                    onFinished?.Invoke(false,default,default);
+                    onFinished?.Invoke(default,default);
                 }
                 
                 foreach (LoadRawAssetTask<T> task in MergedTasks)
                 {
                     if (!task.needCancel)
                     {
-                        task.onFinished?.Invoke(false,default,default);
+                        task.onFinished?.Invoke(default,default);
                     }
                 }
             }

@@ -329,12 +329,12 @@ namespace CatAsset.Runtime
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false, default, default);
+                    callback?.Invoke(default, default);
                     throw;
                 }
 
                 LoadAssetResult result = new LoadAssetResult(asset, category);
-                callback?.Invoke(true, result.GetAsset<T>(), result);
+                callback?.Invoke(result.GetAsset<T>(), result);
                 return default;
             }
 #endif
@@ -348,7 +348,7 @@ namespace CatAsset.Runtime
             switch (category)
             {
                 case AssetCategory.None:
-                    callback?.Invoke(false, default, default);
+                    callback?.Invoke(default, default);
                     return default;
 
                 case AssetCategory.InternalBundledAsset:
@@ -391,7 +391,7 @@ namespace CatAsset.Runtime
                 List<LoadAssetResult> assets = new List<LoadAssetResult>();
                 foreach (string assetName in assetNames)
                 {
-                    LoadAsset(assetName, ((success, asset, result) =>
+                    LoadAsset(assetName, ((asset, result) =>
                     {
                         assets.Add(result);
 

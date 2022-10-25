@@ -29,9 +29,9 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset<T>(assetName, (success, asset,result) =>
+            LoadAsset<T>(assetName, (asset,result) =>
             {
-                if (success && target != null)
+                if (asset != null && target != null)
                 {
                     BindToGameObject(target, result.GetAsset());
                 }
@@ -48,9 +48,9 @@ namespace CatAsset.Runtime
         public static Task<T> AwaitLoadAsset<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAsset(assetName, (success,asset, result) =>
+            LoadAsset(assetName, (asset, result) =>
             {
-                if (success && target != default)
+                if (asset != null && target != default)
                 {
                     BindToScene(target,result.GetAsset());
                 }

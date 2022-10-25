@@ -34,10 +34,10 @@ public class PackageOnlyExample : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.A))
             {
 
-                CatAssetManager.LoadAsset<GameObject>("Assets/BundleRes/PrefabA/A1.prefab", ((success, asset,
+                CatAssetManager.LoadAsset<GameObject>("Assets/BundleRes/PrefabA/A1.prefab", ((asset,
                     result) =>
                 {
-                    if (success)
+                    if (asset != null)
                     {
                         Debug.Log("加载GameObject");
                         go = Instantiate(asset);
@@ -48,9 +48,9 @@ public class PackageOnlyExample : MonoBehaviour
                 }));
 
                 CatAssetManager.LoadAsset<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", (
-                    (success, asset, result) =>
+                    (asset, result) =>
                     {
-                        if (success)
+                        if (asset != null)
                         {
                             Debug.Log($"加载原生资源 文本文件:{asset.text}");
                             

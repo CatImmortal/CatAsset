@@ -78,9 +78,9 @@ public class UpdatableExample : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.S))
             {
                 CatAssetManager.LoadAsset<GameObject>("Assets/BundleRes/Chapter1/B1.prefab", (
-                    (success, asset, result) =>
+                    (asset, result) =>
                     {
-                        if (success)
+                        if (asset != null)
                         {
                             Instantiate(asset);
                         }

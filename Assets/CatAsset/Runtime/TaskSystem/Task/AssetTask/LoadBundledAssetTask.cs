@@ -5,7 +5,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadAssetCallback<in T>(bool success, T asset,LoadAssetResult result);
+    public delegate void LoadAssetCallback<in T>(T asset, LoadAssetResult result);
 
     /// <summary>
     /// 资源包资源加载任务
@@ -185,11 +185,11 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 依赖资源加载完毕的回调
         /// </summary>
-        private void OnDependencyLoaded(bool success, Object asset,LoadAssetResult result)
+        private void OnDependencyLoaded(Object asset,LoadAssetResult result)
         {
             loadFinishDependencyCount++;
 
-            if (success)
+            if (asset != null)
             {
                 AssetRuntimeInfo dependencyAssetInfo = CatAssetDatabase.GetAssetRuntimeInfo(asset);
                 BundleRuntimeInfo dependencyBundleInfo =
@@ -368,7 +368,7 @@ namespace CatAsset.Runtime
                 
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(true, asset,result);
+                    onFinished?.Invoke(asset,result);
                     foreach (LoadBundledAssetTask<T> task in MergedTasks)
                     {
                         if (!task.NeedCancel)
@@ -376,7 +376,7 @@ namespace CatAsset.Runtime
                             //增加已合并任务带来的引用计数
                             //保证1次成功的LoadAsset一定增加1个资源的引用计数
                             AssetRuntimeInfo.AddUseCount();
-                            task.onFinished?.Invoke(true, asset,result);
+                            task.onFinished?.Invoke(asset,result);
                         }
                    
                     }
@@ -394,7 +394,7 @@ namespace CatAsset.Runtime
                         {
                             needUnload = false;
                             AssetRuntimeInfo.AddUseCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(true, asset,result);
+                            task.onFinished?.Invoke(asset,result);
                         }
                     }
 
@@ -416,14 +416,14 @@ namespace CatAsset.Runtime
             {
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(false, default,default);
+                    onFinished?.Invoke(default,default);
                 }
                 
                 foreach (LoadBundledAssetTask<T> task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(false,default,default);
+                        task.onFinished?.Invoke(default,default);
                     }
                 }
                 
