@@ -139,7 +139,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 从池中获取一个游戏对象
         /// </summary>
-        public void GetGameObject(Transform parent, Action<GameObject> callback)
+        public void GetGameObjectAsync(Transform parent, Action<GameObject> callback)
         {
             if (unusedPoolObjectList.Count == 0)
             {

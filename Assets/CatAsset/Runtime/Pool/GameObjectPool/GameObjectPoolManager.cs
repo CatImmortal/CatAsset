@@ -138,7 +138,7 @@ namespace CatAsset.Runtime
                 poolDict.Add(template, pool);
             }
 
-            pool.GetGameObject(parent, callback);
+            pool.GetGameObjectAsync(parent, callback);
         }
 
         /// <summary>
