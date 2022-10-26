@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包加载任务
     /// </summary>
-    public class LoadBundleTask : BaseTask<LoadBundleTask>
+    public class LoadBundleTask : BaseTask
     {
         /// <summary>
         /// 资源包加载状态

@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 原生资源卸载的任务
     /// </summary>
-    public class UnloadRawAssetTask : BaseTask<UnloadRawAssetTask>
+    public class UnloadRawAssetTask : BaseTask
     {
         private AssetRuntimeInfo assetRuntimeInfo;
         private float timer;

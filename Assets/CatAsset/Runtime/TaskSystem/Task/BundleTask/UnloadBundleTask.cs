@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包卸载的任务
     /// </summary>
-    public class UnloadBundleTask : BaseTask<UnloadBundleTask>
+    public class UnloadBundleTask : BaseTask
     {
         private BundleRuntimeInfo bundleRuntimeInfo;
         private float timer;
