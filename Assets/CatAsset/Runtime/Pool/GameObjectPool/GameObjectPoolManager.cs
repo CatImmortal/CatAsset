@@ -216,11 +216,6 @@ namespace CatAsset.Runtime
             
             Prewarm(prefabName,count,0,objects, () =>
             {
-                foreach (GameObject go in objects)
-                {
-                    ReleaseGameObject(prefabName,go);
-                }
-                
                 callback?.Invoke();
             });
         }
@@ -234,6 +229,7 @@ namespace CatAsset.Runtime
             {
                 counter++;
                 objects.Add(go);
+                ReleaseGameObject(prefabName,go);
                 
                 if (counter < count)
                 {
