@@ -31,7 +31,7 @@ namespace CatAsset.Editor
         private static void OpenWindow()
         {
             BundleBuildWindow window = GetWindow<BundleBuildWindow>(false, "资源包构建窗口");
-            window.minSize = new Vector2(800, 600);
+            window.minSize = new Vector2(1000, 600);
 
             if (BundleBuildConfigSO.Instance != null)
             {
