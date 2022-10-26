@@ -338,13 +338,23 @@ namespace CatAsset.Runtime
                 return default;
             }
 #endif
-
+            
             category = Util.GetAssetCategory(assetName);
-            if (category == AssetCategory.ExternalRawAsset)
+            
+            AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
+            if (assetRuntimeInfo.RefCount > 0)
             {
-                CatAssetDatabase.TryCreateExternalRawAssetRuntimeInfo(assetName);
+                //引用计数>0
+                //直接增加引用计数 通知回调
+                assetRuntimeInfo.AddRefCount();
+                
+                LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
+                callback?.Invoke(result.GetAsset<T>(),result);
+                
+                return -1;
             }
-
+            
+            //引用计数=0 需要走一遍资源加载任务的流程
             switch (category)
             {
                 case AssetCategory.None:
@@ -430,7 +440,7 @@ namespace CatAsset.Runtime
                     AsyncOperation op = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);
                     op.completed += operation =>
                     {
-                        Scene scene = SceneManager.GetSceneByPath(sceneName);
+                        Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
                         SceneManager.SetActiveScene(scene);
                         callback?.Invoke(true, scene);
                     };
@@ -537,9 +547,9 @@ namespace CatAsset.Runtime
                 return;
             }
 #endif
-            AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(scene);
+            AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(scene);
 
-            if (info == null)
+            if (assetRuntimeInfo == null)
             {
                 Debug.LogError($"要卸载的场景未加载过：{scene.path}");
                 return;
@@ -550,37 +560,34 @@ namespace CatAsset.Runtime
             SceneManager.UnloadSceneAsync(scene);
 
             //卸载与场景绑定的资源
-            List<AssetRuntimeInfo> assets = CatAssetDatabase.GetSceneBindAssets(scene);
-            if (assets != null)
+            List<AssetRuntimeInfo> bindAssets = CatAssetDatabase.GetSceneBindAssets(scene);
+            if (bindAssets != null)
             {
-                foreach (AssetRuntimeInfo asset in assets)
+                foreach (AssetRuntimeInfo bindAsset in bindAssets)
                 {
-                    UnloadAsset(asset.Asset);
+                    InternalUnloadAsset(bindAsset);
                 }
             }
 
-            InternalUnloadAsset(info);
+            InternalUnloadAsset(assetRuntimeInfo);
         }
 
         /// <summary>
         /// 卸载资源
         /// </summary>
-        private static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
+        internal static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
         {
             //减少引用计数
-            assetRuntimeInfo.SubUseCount();
+            assetRuntimeInfo.SubRefCount();
 
             if (assetRuntimeInfo.IsUnused())
             {
                 //引用计数为0
                 //卸载依赖
-                if (assetRuntimeInfo.AssetManifest.Dependencies != null)
+                foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
-                    {
-                        AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
-                        UnloadAsset(dependencyRuntimeInfo.Asset);
-                    }
+                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                    InternalUnloadAsset(dependencyRuntimeInfo);
                 }
             }
         }

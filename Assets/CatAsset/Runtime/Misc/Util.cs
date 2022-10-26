@@ -114,13 +114,14 @@ namespace CatAsset.Runtime
             if (!assetName.StartsWith("Assets/") && !assetName.StartsWith("Packages/"))
             {
                 //资源名不以Assets/ 和 Packages/开头 是外置原生资源
+                CatAssetDatabase.TryCreateExternalRawAssetRuntimeInfo(assetName);
                 return AssetCategory.ExternalRawAsset;
             }
 
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo == null)
             {
-                Debug.LogError($"GetAssetCategory调用失败，资源{assetName}的AssetRuntimeInfo为空");
+                Debug.LogError($"GetAssetCategory调用失败，{assetName}的AssetRuntimeInfo为空，请检查资源名是否正确");
                 return default;
             }
 
