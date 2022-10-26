@@ -13,7 +13,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包下载任务
     /// </summary>
-    public class DownloadBundleTask : BaseTask<DownloadBundleTask>
+    public class DownloadBundleTask : BaseTask
     {
         private BundleManifestInfo bundleManifestInfo;
         private GroupUpdater groupUpdater;

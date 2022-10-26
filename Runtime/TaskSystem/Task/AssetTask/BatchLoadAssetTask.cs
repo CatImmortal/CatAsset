@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源加载任务
     /// </summary>
-    public class BatchLoadAssetTask : BaseTask<BatchLoadAssetTask>
+    public class BatchLoadAssetTask : BaseTask
     {
         private List<string> assetNames;
         private BatchLoadAssetCallback onFinished;

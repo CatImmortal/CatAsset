@@ -10,7 +10,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包资源加载任务
     /// </summary>
-    public class LoadBundledAssetTask<T> : BaseTask<LoadBundledAssetTask<T>>
+    public class LoadBundledAssetTask<T> : BaseTask
     {
         /// <summary>
         /// 资源包资源加载状态
@@ -350,11 +350,21 @@ namespace CatAsset.Runtime
                     onFinished?.Invoke(default,default);
                 }
                 
-                foreach (LoadBundledAssetTask<T> task in MergedTasks)
+                foreach (ITask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(default,default);
+                        if (task is LoadBundledAssetTask<T> tTask)
+                        {
+                            tTask.onFinished?.Invoke(default,default);
+                        }
+                        else
+                        {
+                            LoadBundledAssetTask<Object> objTask = task as LoadBundledAssetTask<Object>;
+                            objTask.onFinished?.Invoke(default,default);
+                        }
+                        
+                        
                     }
                 }
             }
@@ -377,12 +387,21 @@ namespace CatAsset.Runtime
                     AssetRuntimeInfo.AddRefCount();
                     onFinished?.Invoke(asset,result);
                 }
-                foreach (LoadBundledAssetTask<T> task in MergedTasks)
+                foreach (ITask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
                         AssetRuntimeInfo.AddRefCount();
-                        task.onFinished?.Invoke(asset,result);
+
+                        if (task is LoadBundledAssetTask<T> tTask)
+                        {
+                            tTask.onFinished?.Invoke(asset,result);
+                        }
+                        else
+                        {
+                            LoadBundledAssetTask<Object> objTask = task as LoadBundledAssetTask<Object>;
+                            objTask.onFinished?.Invoke(result.GetAsset<Object>(),result);
+                        }
                     }
                    
                 }
@@ -395,7 +414,7 @@ namespace CatAsset.Runtime
         /// </summary>
         protected bool IsAllCancel()
         {
-            foreach (LoadBundledAssetTask<T> task in MergedTasks)
+            foreach (ITask task in MergedTasks)
             {
                 if (!task.NeedCancel)
                 {

@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 任务基类
     /// </summary>
-    public abstract class BaseTask<T> : ITask where T : ITask
+    public abstract class BaseTask : ITask
     {
         /// <inheritdoc />
         public int ID { get; protected set; }
@@ -26,10 +26,13 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public virtual float Progress { get; }
 
+        /// <inheritdoc />
+        public bool NeedCancel { get; private set; }
+        
         /// <summary>
         /// 已合并的任务列表（同名的任务）
         /// </summary>
-        protected List<T> MergedTasks = new List<T>();
+        protected List<ITask> MergedTasks = new List<ITask>();
         
         /// <inheritdoc />
         public int MergedTaskCount => MergedTasks.Count;
@@ -37,7 +40,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public void MergeTask(ITask task)
         {
-            MergedTasks.Add((T)task);
+            MergedTasks.Add(task);
         }
         
         /// <inheritdoc />
@@ -77,7 +80,7 @@ namespace CatAsset.Runtime
             Owner = default;
             Group = default;
             State = default;
-            foreach (T task in MergedTasks)
+            foreach (ITask task in MergedTasks)
             {
                 ReferencePool.Release(task);
             }

@@ -8,7 +8,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 原生资源加载任务
     /// </summary>
-    public class LoadRawAssetTask<T> : BaseTask<LoadRawAssetTask<T>>
+    public class LoadRawAssetTask<T> : BaseTask
     {
         /// <summary>
         /// 原生资源加载状态

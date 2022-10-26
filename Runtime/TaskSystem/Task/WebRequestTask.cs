@@ -12,7 +12,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// Web请求任务
     /// </summary>
-    public class WebRequestTask : BaseTask<WebRequestTask>
+    public class WebRequestTask : BaseTask
     {
         private string uri;
         private object userdata;
