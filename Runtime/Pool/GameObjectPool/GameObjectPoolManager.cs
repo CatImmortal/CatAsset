@@ -97,11 +97,11 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 使用预制体名从池中获取一个游戏对象
         /// </summary>
-        public static void GetGameObject(string prefabName, Transform parent, Action<GameObject> callback)
+        public static void GetGameObjectAsync(string prefabName, Transform parent, Action<GameObject> callback)
         {
             if (loadedPrefabDict.ContainsKey(prefabName))
             {
-                GetGameObject(loadedPrefabDict[prefabName], parent, callback);
+                GetGameObjectAsync(loadedPrefabDict[prefabName], parent, callback);
                 return;
             }
             
@@ -116,7 +116,7 @@ namespace CatAsset.Runtime
                 loadedPrefabDict[prefabName] = prefab;
                 
                 //这里要先调用GetGameObject 才能保证 poolDict[prefab] 不为空
-                GetGameObject(prefab, parent, callback);
+                GetGameObjectAsync(prefab, parent, callback);
                 
                 //进行资源绑定
                 GameObject root = poolDict[prefab].Root.gameObject;
@@ -127,7 +127,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 使用模板中从池中获取一个游戏对象
         /// </summary>
-        public static void GetGameObject(GameObject template, Transform parent, Action<GameObject> callback)
+        public static void GetGameObjectAsync(GameObject template, Transform parent, Action<GameObject> callback)
         {
             if (!poolDict.TryGetValue(template, out GameObjectPool pool))
             {
@@ -230,7 +230,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private static void Prewarm(string prefabName,int count,int counter, List<GameObject> objects,Action callback)
         {
-            GetGameObject(prefabName,Root,(go =>
+            GetGameObjectAsync(prefabName,Root,(go =>
             {
                 counter++;
                 objects.Add(go);
@@ -266,7 +266,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private static void Prewarm(GameObject template,int count,int counter,Action callback)
         {
-            GetGameObject(template,Root,(go =>
+            GetGameObjectAsync(template,Root,(go =>
             {
                 counter++;
                 ReleaseGameObject(template,go);
