@@ -91,7 +91,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (op.webRequest.result == UnityWebRequest.Result.ConnectionError || op.webRequest.result == UnityWebRequest.Result.ProtocolError)
+            if (op.webRequest.result != UnityWebRequest.Result.Success)
             {
                 //下载失败 重试
                 if (RetryDownload())
@@ -134,7 +134,6 @@ namespace CatAsset.Runtime
                     Debug.LogError($"重试次数达到上限：{Name}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
                     onFinished?.Invoke(false ,bundleManifestInfo);
-                      
                 }
                 
                 return;

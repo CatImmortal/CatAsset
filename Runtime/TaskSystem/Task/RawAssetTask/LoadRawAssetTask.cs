@@ -33,7 +33,7 @@ namespace CatAsset.Runtime
 
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
-        private LoadRawAssetState loadRawAssetState;
+        private LoadRawAssetState loadState;
         private WebRequestCallback onWebRequestCallback;
 
         private bool needCancel;
@@ -49,22 +49,22 @@ namespace CatAsset.Runtime
         {
             if (assetRuntimeInfo.Asset != null)
             {
-                //已加载好了
-                loadRawAssetState = LoadRawAssetState.Loaded;
+                //虽然引用计数为0 但是已加载好了
+                loadState = LoadRawAssetState.Loaded;
                 return;
             }
             
             //未加载过
             WebRequestTask task = WebRequestTask.Create(Owner,bundleRuntimeInfo.LoadPath,bundleRuntimeInfo.LoadPath,null,onWebRequestCallback);
             Owner.AddTask(task,TaskPriority.Middle);
-            loadRawAssetState = LoadRawAssetState.Loading;
+            loadState = LoadRawAssetState.Loading;
             
         }
 
         /// <inheritdoc />
         public override void Update()
         {
-            switch (loadRawAssetState)
+            switch (loadState)
             {
 
                 case LoadRawAssetState.Loading:
@@ -91,7 +91,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private void OnWebRequest(bool success, UnityWebRequest uwr, object userdata)
         {
-            loadRawAssetState = LoadRawAssetState.Loaded;
+            loadState = LoadRawAssetState.Loaded;
 
             if (success)
             {
@@ -120,56 +120,9 @@ namespace CatAsset.Runtime
         {
             State = TaskState.Finished;
 
-            if (assetRuntimeInfo.Asset != null)
+            if (assetRuntimeInfo == null)
             {
-                //加载成功
-                LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
-                T asset = result.GetAsset<T>();
-                
-                if (!needCancel)
-                {
-                    assetRuntimeInfo.AddUseCount();
-                    
-                    onFinished?.Invoke(asset, result);
-                    
-                    foreach (LoadRawAssetTask<T> task in MergedTasks)
-                    {
-                        if (!task.needCancel)
-                        {
-                            //增加已合并任务带来的引用计数
-                            //保证1次成功的LoadRawAsset一定增加1个资源的引用计数
-                            assetRuntimeInfo.AddUseCount();
-                            task.onFinished?.Invoke(asset,result);
-                        }
-                   
-                    }
-                }
-                else
-                {
-                    //被取消了
-                    bool needUnload = true;
-                    
-                    //只是主任务被取消了 未取消的已合并任务还需要继续处理
-                    foreach (LoadRawAssetTask<T> task in MergedTasks)
-                    {
-                        if (!task.needCancel)
-                        {
-                            needUnload = false;
-                            assetRuntimeInfo.AddUseCount();  //增加已合并任务带来的引用计数
-                            task.onFinished?.Invoke(asset,result);
-                        }
-                    }
-
-                    if (needUnload)
-                    {
-                        //没有任何一个需要这个资源的已合并任务 直接卸载了
-                        CatAssetManager.UnloadAsset(assetRuntimeInfo.Asset);
-                    }
-                }
-            }
-            else
-            {
-                //加载失败
+                //资源加载失败
                 if (!needCancel)
                 {
                     onFinished?.Invoke(default,default);
@@ -183,6 +136,50 @@ namespace CatAsset.Runtime
                     }
                 }
             }
+            else
+            {
+                if (IsAllCancel())
+                {
+                    //所有任务都被取消了 这个资源没人要了 直接卸载吧
+                    assetRuntimeInfo.AddRefCount();  //注意这里要先计数+1 才能正确执行后续的卸载流程
+                    CatAssetManager.InternalUnloadAsset(assetRuntimeInfo);
+                    return;
+                }
+                
+                LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
+                T asset = result.GetAsset<T>();
+
+                //加载成功 通知所有未取消的加载任务
+                if (!needCancel)
+                {
+                    assetRuntimeInfo.AddRefCount();
+                    onFinished?.Invoke(asset,result);
+                }
+                foreach (LoadRawAssetTask<T> task in MergedTasks)
+                {
+                    if (!task.needCancel)
+                    {
+                        assetRuntimeInfo.AddRefCount();
+                        task.onFinished?.Invoke(asset,result);
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 是否全部加载任务都被取消了
+        /// </summary>
+        private bool IsAllCancel()
+        {
+            foreach (LoadRawAssetTask<T> task in MergedTasks)
+            {
+                if (!task.needCancel)
+                {
+                    return false;
+                }
+            }
+
+            return needCancel;
         }
         
         /// <summary>
@@ -212,7 +209,7 @@ namespace CatAsset.Runtime
 
             assetRuntimeInfo = default;
             bundleRuntimeInfo = default;
-            loadRawAssetState = default;
+            loadState = default;
 
             needCancel = default;
         }

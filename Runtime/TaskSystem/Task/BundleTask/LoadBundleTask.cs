@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadBundleCallback(bool success,object userdata);
+    public delegate void LoadBundleCallback(bool success);
     
     /// <summary>
     /// 资源包加载任务
@@ -29,12 +29,11 @@ namespace CatAsset.Runtime
             Loaded,
 
         }
-
-        private object userdata;
+        
         private LoadBundleCallback onFinished;
         
         private BundleRuntimeInfo bundleRuntimeInfo;
-        private LoadBundleStatus loadBundleState;
+        private LoadBundleStatus loadState;
         private AssetBundleCreateRequest request;
 
         /// <inheritdoc />
@@ -56,14 +55,14 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Run()
         {
-            loadBundleState = LoadBundleStatus.Loading;
+            loadState = LoadBundleStatus.Loading;
             request =  AssetBundle.LoadFromFileAsync(bundleRuntimeInfo.LoadPath);
         }
 
         /// <inheritdoc />
         public override void Update()
         {
-            switch (loadBundleState)
+            switch (loadState)
             {
                 case LoadBundleStatus.Loading:
                     //加载中
@@ -84,7 +83,7 @@ namespace CatAsset.Runtime
 
             if (request.isDone)
             {
-                loadBundleState = LoadBundleStatus.Loaded;
+                loadState = LoadBundleStatus.Loaded;
                 bundleRuntimeInfo.Bundle = request.assetBundle;
             }
         }
@@ -96,19 +95,19 @@ namespace CatAsset.Runtime
             if (bundleRuntimeInfo.Bundle == null)
             {
                 Debug.LogError($"资源包加载失败：{bundleRuntimeInfo.Manifest}");
-                onFinished?.Invoke(false,userdata);
+                onFinished?.Invoke(false);
                 foreach (LoadBundleTask task in MergedTasks)
                 {
-                    task.onFinished?.Invoke(false,task.userdata);
+                    task.onFinished?.Invoke(false);
                 }
             }
             else
             {
                 //Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
-                onFinished?.Invoke(true,userdata);
+                onFinished?.Invoke(true);
                 foreach (LoadBundleTask task in MergedTasks)
                 {
-                    task.onFinished?.Invoke(true,task.userdata);
+                    task.onFinished?.Invoke(true);
                 }
             }
         }
@@ -121,7 +120,6 @@ namespace CatAsset.Runtime
             LoadBundleTask task = ReferencePool.Get<LoadBundleTask>();
             task.CreateBase(owner,name);
             
-            task.userdata = userdata;
             task.onFinished = callback;
             task.bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(name);
             
@@ -132,12 +130,11 @@ namespace CatAsset.Runtime
         public override void Clear()
         {
             base.Clear();
-
-            userdata = default;
+            
             onFinished = default;
             bundleRuntimeInfo = default;
             request = default;
-            loadBundleState = default;
+            loadState = default;
         }
     }
 }
