@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
@@ -210,6 +211,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void AddSceneBindAsset(Scene scene, object asset)
         {
+            
             if (!sceneBindAssets.TryGetValue(scene.handle,out List<AssetRuntimeInfo> assets))
             {
                 assets = new List<AssetRuntimeInfo>();

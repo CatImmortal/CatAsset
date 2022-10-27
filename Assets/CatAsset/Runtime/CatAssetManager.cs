@@ -283,7 +283,7 @@ namespace CatAsset.Runtime
             int id = InternalLoadAssetAsync(assetName, typeof(object), callback, ((userdata, result) =>
             {
                 LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
-                localCallback?.Invoke(result.GetAsset(),result);
+                localCallback?.Invoke(result.Asset,result);
             }));
             return id;
         }
@@ -297,7 +297,7 @@ namespace CatAsset.Runtime
             int id = InternalLoadAssetAsync(assetName, assetType, callback, ((userdata, result) =>
             {
                 LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
-                localCallback?.Invoke(result.GetAsset(),result);
+                localCallback?.Invoke(result.Asset,result);
             }));
             return id;
         }
@@ -322,6 +322,18 @@ namespace CatAsset.Runtime
         private static int InternalLoadAssetAsync(string assetName, Type assetType,object userdata, InternalLoadAssetCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
+            if (string.IsNullOrEmpty(assetName))
+            {
+                Debug.LogError("资源加载失败，资源名为空");
+                return 0;
+            }
+
+            if (assetType == null)
+            {
+                Debug.LogError("资源加载失败，资源类型为空");
+                return 0;
+            }
+            
             AssetCategory category;
 #if UNITY_EDITOR
             if (IsEditorMode)
@@ -355,7 +367,7 @@ namespace CatAsset.Runtime
 
                 LoadAssetResult result = new LoadAssetResult(asset, category);
                 callback?.Invoke(userdata, result);
-                return default;
+                return 0;
             }
 #endif
             
@@ -371,7 +383,7 @@ namespace CatAsset.Runtime
                 LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
                 callback?.Invoke(userdata,result);
                 
-                return -1;
+                return 0;
             }
             
             //引用计数=0 需要走一遍资源加载任务的流程
@@ -412,7 +424,7 @@ namespace CatAsset.Runtime
             {
                 Debug.LogError("批量加载资源失败，资源名列表为空");
                 callback?.Invoke(null);
-                return default;
+                return 0;
             }
 
 #if UNITY_EDITOR
@@ -433,7 +445,7 @@ namespace CatAsset.Runtime
                     }));
                 }
 
-                return default;
+                return 0;
             }
 #endif
 
@@ -449,6 +461,12 @@ namespace CatAsset.Runtime
         public static int LoadSceneAsync(string sceneName, LoadSceneCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
+            if (string.IsNullOrEmpty(sceneName))
+            {
+                Debug.LogError("场景加载失败，场景名为空");
+                return 0;
+            }
+            
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
@@ -471,13 +489,13 @@ namespace CatAsset.Runtime
                     throw;
                 }
 
-                return default;
+                return 0;
             }
 #endif
             if (!CheckAssetReady(sceneName))
             {
                 callback?.Invoke(false, default);
-                return default;
+                return 0;
             }
 
             LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, callback);
@@ -613,9 +631,9 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 卸载资源包
+        /// 添加卸载资源包任务
         /// </summary>
-        internal static void UnloadBundle(BundleRuntimeInfo bundleRuntimeInfo)
+        internal static void AddUnloadBundleTask(BundleRuntimeInfo bundleRuntimeInfo)
         {
             UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,
                 bundleRuntimeInfo.Manifest.RelativePath, bundleRuntimeInfo);
@@ -623,9 +641,9 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 卸载原生资源
+        /// 添加卸载原生资源任务
         /// </summary>
-        internal static void UnloadRawAsset(BundleRuntimeInfo bundleRuntimeInfo, AssetRuntimeInfo assetRuntimeInfo)
+        internal static void AddUnloadRawAssetTask(BundleRuntimeInfo bundleRuntimeInfo, AssetRuntimeInfo assetRuntimeInfo)
         {
             UnloadRawAssetTask task = UnloadRawAssetTask.Create(loadTaskRunner, bundleRuntimeInfo.Manifest.RelativePath,
                 assetRuntimeInfo);
@@ -641,6 +659,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void BindToGameObject(GameObject target, object asset)
         {
+            if (asset == null)
+            {
+                return;
+            }
+            
             AssetBinder assetBinder = target.GetOrAddComponent<AssetBinder>();
             assetBinder.BindTo(asset);
         }
@@ -650,6 +673,16 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void BindToScene(Scene scene, object asset)
         {
+            if (asset == null)
+            {
+                return;
+            }
+
+            if (!scene.isLoaded)
+            {
+                return;
+            }
+            
             CatAssetDatabase.AddSceneBindAsset(scene, asset);
         }
 
