@@ -120,7 +120,7 @@ namespace CatAsset.Runtime
                 
                 //进行资源绑定
                 GameObject root = poolDict[prefab].Root.gameObject;
-                CatAssetManager.BindToGameObject(root,prefab);
+                root.Bind(result);
             });
         }
 

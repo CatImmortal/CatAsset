@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -26,12 +27,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<T> LoadAssetAsync<T>(string assetName,TaskPriority priority = TaskPriority.Middle)
+        public static Task<ValueTuple<T,LoadAssetResult>> LoadAssetAsync<T>(string assetName,TaskPriority priority = TaskPriority.Middle)
         {
-            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
+            TaskCompletionSource<ValueTuple<T,LoadAssetResult>> tcs = new TaskCompletionSource<ValueTuple<T,LoadAssetResult>>();
             LoadAssetAsync<T>(assetName, (asset,result) =>
             {
-                tcs.SetResult(asset);
+                tcs.SetResult((asset,result));
+               
             }, priority);
             return tcs.Task;
         }
@@ -45,10 +47,12 @@ namespace CatAsset.Runtime
             BatchLoadAssetAsync(assetNames, (assets) =>
             {
                 tcs.SetResult(assets);
+               
             }, priority);
             
             return tcs.Task;
         }
+        
 
         /// <summary>
         /// 加载场景(可等待)

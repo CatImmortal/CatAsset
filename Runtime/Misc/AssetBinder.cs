@@ -18,6 +18,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public void BindTo(object asset)
         {
+            if (asset == null)
+            {
+                return;
+            }
+            
             if (asset is Object unityObj)
             {
                 bindingAssets.Add(unityObj);

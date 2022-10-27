@@ -85,13 +85,13 @@ namespace CatAsset.Runtime
                 //此资源包没有资源在使用中了 并且没有下游资源包 卸载资源包
                 if (!Manifest.IsRaw)
                 {
-                    CatAssetManager.UnloadBundle(this);
+                    CatAssetManager.AddUnloadBundleTask(this);
                 }
                 else
                 {
                     //一个原生资源包只对应一个唯一的原生资源
                     AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(Manifest.Assets[0].Name);
-                    CatAssetManager.UnloadRawAsset(this,assetRuntimeInfo);
+                    CatAssetManager.AddUnloadRawAssetTask(this,assetRuntimeInfo);
                 }
                 
             }

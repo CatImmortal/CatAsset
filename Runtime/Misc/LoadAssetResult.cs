@@ -11,38 +11,32 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源加载结果
     /// </summary>
-    public struct LoadAssetResult
+    public readonly struct LoadAssetResult
     {
         /// <summary>
         /// 已加载的原始资源实例
         /// </summary>
-        private object asset;
+        public readonly object Asset;
 
         /// <summary>
         /// 资源类别
         /// </summary>
-        public AssetCategory Category { get; }
-
+        public readonly AssetCategory Category;
+        
+        
         public LoadAssetResult(object asset, AssetCategory category)
         {
-            this.asset = asset;
+            Asset = asset;
             Category = category;
         }
-
-        /// <summary>
-        /// 获取已加载的原始资源实例
-        /// </summary>
-        public object GetAsset()
-        {
-            return asset;
-        }
+        
 
         /// <summary>
         /// 获取已加载的指定类型资源实例
         /// </summary>
         public T GetAsset<T>()
         {
-            if (asset == null)
+            if (Asset == null)
             {
                 return default;
             }
@@ -51,7 +45,7 @@ namespace CatAsset.Runtime
             
             if (type == typeof(object))
             {
-                return (T)asset;
+                return (T)Asset;
             }
             
             switch (Category)
@@ -59,18 +53,18 @@ namespace CatAsset.Runtime
                 case AssetCategory.InternalBundledAsset:
                     if (typeof(UnityEngine.Object).IsAssignableFrom(type))
                     {
-                        if (type == typeof(Sprite) && asset is Texture2D tex)
+                        if (type == typeof(Sprite) && Asset is Texture2D tex)
                         {
                             Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
                             return (T) (object) sprite;
                         }
-                        else if (type == typeof(Texture2D) && asset is Sprite sprite)
+                        else if (type == typeof(Texture2D) && Asset is Sprite sprite)
                         {
                             return (T)(object)sprite.texture;
                         }
                         else
                         {
-                            return (T) asset;
+                            return (T) Asset;
                         }
                     }
 
@@ -82,7 +76,7 @@ namespace CatAsset.Runtime
 
                     if (type == typeof(byte[]))
                     {
-                        return (T)asset;
+                        return (T)Asset;
                     }
 
                     CustomRawAssetConverter converter = CatAssetManager.GetCustomRawAssetConverter(type);
@@ -92,7 +86,7 @@ namespace CatAsset.Runtime
                         return default;
                     }
 
-                    object convertedAsset = converter((byte[])asset);
+                    object convertedAsset = converter((byte[])Asset);
                     return (T) convertedAsset;
 
             }
