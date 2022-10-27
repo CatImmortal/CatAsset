@@ -13,7 +13,7 @@ namespace CatAsset.Runtime
         private float timer;
         
         /// <inheritdoc />
-        public override float Progress => timer / CatAssetManager.UnloadDelayTime;
+        public override float Progress => timer / CatAssetManager.UnloadBundleDelayTime;
 
         public override void Run()
         {
@@ -30,7 +30,7 @@ namespace CatAsset.Runtime
             }
             
             timer += Time.deltaTime;
-            if (timer < CatAssetManager.UnloadDelayTime)
+            if (timer < CatAssetManager.UnloadBundleDelayTime)
             {
                 //状态修改为Waiting 这样不占用每帧任务处理次数
                 State = TaskState.Waiting;

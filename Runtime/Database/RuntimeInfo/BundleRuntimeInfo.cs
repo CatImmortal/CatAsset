@@ -80,20 +80,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public void CheckLifeCycle()
         {
-            if (UsingAssets.Count == 0 && DependencyLink.DownStream.Count == 0)
+            if (!Manifest.IsRaw && UsingAssets.Count == 0 && DependencyLink.DownStream.Count == 0)
             {
-                //此资源包没有资源在使用中了 并且没有下游资源包 卸载资源包
-                if (!Manifest.IsRaw)
-                {
-                    CatAssetManager.AddUnloadBundleTask(this);
-                }
-                else
-                {
-                    //一个原生资源包只对应一个唯一的原生资源
-                    AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(Manifest.Assets[0].Name);
-                    CatAssetManager.AddUnloadRawAssetTask(this,assetRuntimeInfo);
-                }
-                
+                //此资源包不是原生资源包 没有资源在使用中 没有下游资源包
+                //卸载资源包
+                CatAssetManager.AddUnloadBundleTask(this);
             }
         }
 

@@ -87,7 +87,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 添加上游资源（依赖此资源的资源）
+        /// 添加下游资源（依赖此资源的资源）
         /// </summary>
         public void AddDownStream(AssetRuntimeInfo assetRuntimeInfo)
         {
@@ -99,9 +99,9 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 移除上游资源（依赖此资源的资源）
+        /// 移除下游资源（依赖此资源的资源）
         /// </summary>
-        public void RemoveUpStream(AssetRuntimeInfo assetRuntimeInfo)
+        public void RemoveDownStream(AssetRuntimeInfo assetRuntimeInfo)
         {
             if (Asset == null)
             {
