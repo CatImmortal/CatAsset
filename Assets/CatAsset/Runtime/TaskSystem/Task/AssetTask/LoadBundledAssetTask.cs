@@ -282,7 +282,7 @@ namespace CatAsset.Runtime
             }
             else
             {
-                //资源加载成功
+                //资源加载成功 或 是已加载好的
 
                 //添加依赖链记录
                 foreach (string dependencyName in AssetRuntimeInfo.AssetManifest.Dependencies)
