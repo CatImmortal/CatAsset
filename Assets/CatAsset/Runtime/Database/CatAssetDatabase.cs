@@ -88,6 +88,14 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 获取所有资源包运行时信息
+        /// </summary>
+        internal static Dictionary<string, BundleRuntimeInfo> GetAllBundleRuntimeInfo()
+        {
+            return bundleRuntimeInfoDict;
+        }
+
+        /// <summary>
         /// 获取资源运行时信息
         /// </summary>
         internal static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
