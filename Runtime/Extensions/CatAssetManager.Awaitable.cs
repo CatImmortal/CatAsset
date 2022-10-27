@@ -26,35 +26,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<T> LoadAssetAsync<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
+        public static Task<T> LoadAssetAsync<T>(string assetName,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
             LoadAssetAsync<T>(assetName, (asset,result) =>
             {
-                if (asset != null && target != null)
-                {
-                    BindToGameObject(target, result.GetAsset());
-                }
-
-                tcs.SetResult(result.GetAsset<T>());
-               
-            }, priority);
-            return tcs.Task;
-        }
-        
-        /// <summary>
-        /// 加载资源（可等待）
-        /// </summary>
-        public static Task<T> LoadAssetAsync<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Middle)
-        {
-            TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
-            LoadAssetAsync(assetName, (asset, result) =>
-            {
-                if (asset != null && target != default)
-                {
-                    BindToScene(target,result.GetAsset());
-                }
-                tcs.SetResult(result.GetAsset<T>());
+                tcs.SetResult(asset);
                
             }, priority);
             return tcs.Task;
@@ -63,53 +40,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源(可等待)
         /// </summary>
-        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,GameObject target = null,TaskPriority priority = TaskPriority.Middle)
+        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,TaskPriority priority = TaskPriority.Middle)
         {
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAssetAsync(assetNames, (assets) =>
             {
-                if (target != null)
-                {
-                    foreach (LoadAssetResult result in assets)
-                    {
-                        object asset = result.GetAsset();
-                        if (asset != null)
-                        {
-                            BindToGameObject(target,asset);
-                        }
-                    }
-                }
-                
                 tcs.SetResult(assets);
-               
             }, priority);
             
-            return tcs.Task;
-        }
-        
-        /// <summary>
-        /// 批量加载资源(可等待)
-        /// </summary>
-        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,Scene target = default,TaskPriority priority = TaskPriority.Middle)
-        {
-            TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
-            BatchLoadAssetAsync(assetNames, (assets) =>
-            {
-                if (target != default)
-                {
-                    foreach (LoadAssetResult result in assets)
-                    {
-                        object asset = result.GetAsset();
-                        if (asset != null)
-                        {
-                            BindToScene(target, asset);
-                        }
-                    }
-                }
-                
-                tcs.SetResult(assets);
-               
-            }, priority);
             return tcs.Task;
         }
 
