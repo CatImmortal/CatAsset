@@ -8,6 +8,8 @@ using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
+
+    
     /// <summary>
     /// CatAsset资源管理器
     /// </summary>
@@ -278,7 +280,26 @@ namespace CatAsset.Runtime
         public static int LoadAssetAsync(string assetName,LoadAssetCallback<object> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            return InternalLoadAssetAsync(assetName, callback, priority);
+            int id = InternalLoadAssetAsync(assetName, typeof(object), callback, ((userdata, result) =>
+            {
+                LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
+                localCallback?.Invoke(result.GetAsset(),result);
+            }));
+            return id;
+        }
+        
+        /// <summary>
+        /// 加载资源
+        /// </summary>
+        public static int LoadAssetAsync(string assetName,Type assetType,LoadAssetCallback<object> callback,
+            TaskPriority priority = TaskPriority.Middle)
+        {
+            int id = InternalLoadAssetAsync(assetName, assetType, callback, ((userdata, result) =>
+            {
+                LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
+                localCallback?.Invoke(result.GetAsset(),result);
+            }));
+            return id;
         }
 
         /// <summary>
@@ -287,20 +308,25 @@ namespace CatAsset.Runtime
         public static int LoadAssetAsync<T>(string assetName,LoadAssetCallback<T> callback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            return InternalLoadAssetAsync(assetName, callback, priority);
+            int id = InternalLoadAssetAsync(assetName, typeof(T), callback, ((userdata, result) =>
+            {
+                LoadAssetCallback<T> localCallback = (LoadAssetCallback<T>)userdata;
+                localCallback?.Invoke(result.GetAsset<T>(),result);
+            }));
+            return id;
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        internal static int InternalLoadAssetAsync<T>(string assetName, LoadAssetCallback<T> callback,
+        private static int InternalLoadAssetAsync(string assetName, Type assetType,object userdata, InternalLoadAssetCallback callback,
             TaskPriority priority = TaskPriority.Middle)
         {
             AssetCategory category;
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                category = Util.GetAssetCategoryWithEditorMode(assetName, typeof(T));
+                category = Util.GetAssetCategoryWithEditorMode(assetName,assetType);
 
                 object asset;
                 try
@@ -308,12 +334,6 @@ namespace CatAsset.Runtime
                     if (category == AssetCategory.InternalBundledAsset)
                     {
                         //加载资源包资源
-                        Type assetType = typeof(T);
-                        if (assetType == typeof(object))
-                        {
-                            assetType = typeof(Object);
-                        }
-
                         asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, assetType);
                     }
                     else
@@ -329,12 +349,12 @@ namespace CatAsset.Runtime
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(default, default);
+                    callback?.Invoke(userdata, default);
                     throw;
                 }
 
                 LoadAssetResult result = new LoadAssetResult(asset, category);
-                callback?.Invoke(result.GetAsset<T>(), result);
+                callback?.Invoke(userdata, result);
                 return default;
             }
 #endif
@@ -349,7 +369,7 @@ namespace CatAsset.Runtime
                 assetRuntimeInfo.AddRefCount();
                 
                 LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
-                callback?.Invoke(result.GetAsset<T>(),result);
+                callback?.Invoke(userdata,result);
                 
                 return -1;
             }
@@ -358,13 +378,13 @@ namespace CatAsset.Runtime
             switch (category)
             {
                 case AssetCategory.None:
-                    callback?.Invoke(default, default);
+                    callback?.Invoke(userdata, default);
                     return default;
 
                 case AssetCategory.InternalBundledAsset:
                     //加载内置资源包资源
-                    LoadBundledAssetTask<T> loadBundledAssetTask =
-                        LoadBundledAssetTask<T>.Create(loadTaskRunner, assetName, callback);
+                    LoadBundledAssetTask loadBundledAssetTask =
+                        LoadBundledAssetTask.Create(loadTaskRunner, assetName, assetType,userdata, callback);
                     loadTaskRunner.AddTask(loadBundledAssetTask, priority);
                     return loadBundledAssetTask.ID;
 
@@ -372,8 +392,8 @@ namespace CatAsset.Runtime
                 case AssetCategory.InternalRawAsset:
                 case AssetCategory.ExternalRawAsset:
                     //加载原生资源
-                    LoadRawAssetTask<T> loadRawAssetTask =
-                        LoadRawAssetTask<T>.Create(loadTaskRunner, assetName, category,callback);
+                    LoadRawAssetTask loadRawAssetTask =
+                        LoadRawAssetTask.Create(loadTaskRunner, assetName, category,userdata,callback);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
 
                     return loadRawAssetTask.ID;

@@ -90,7 +90,7 @@ namespace CatAsset.Runtime
                 else
                 {
                     //一个原生资源包只对应一个唯一的原生资源
-                    AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(Manifest.Assets[0]);
+                    AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(Manifest.Assets[0].Name);
                     CatAssetManager.UnloadRawAsset(this,assetRuntimeInfo);
                 }
                 

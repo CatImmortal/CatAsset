@@ -73,12 +73,10 @@ namespace CatAsset.Runtime
                             return (T) asset;
                         }
                     }
-                    else
-                    {
-                        Debug.LogError($"LoadAssetResult.GetAsset<T>调用失败，资源类别为{Category}，但是T为{type}");
-                        return default;
-                    }
-                
+
+                    Debug.LogError($"LoadAssetResult.GetAsset<T>调用失败，资源类别为{Category}，但是T为{type}");
+                    return default;
+
                 case AssetCategory.InternalRawAsset:
                 case AssetCategory.ExternalRawAsset:
 

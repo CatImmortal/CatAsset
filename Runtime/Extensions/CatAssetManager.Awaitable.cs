@@ -32,7 +32,6 @@ namespace CatAsset.Runtime
             LoadAssetAsync<T>(assetName, (asset,result) =>
             {
                 tcs.SetResult(asset);
-               
             }, priority);
             return tcs.Task;
         }

@@ -25,9 +25,6 @@ namespace CatAsset.Runtime
         
         /// <inheritdoc />
         public virtual float Progress { get; }
-
-        /// <inheritdoc />
-        public bool NeedCancel { get; private set; }
         
         /// <summary>
         /// 已合并的任务列表（同名的任务）
