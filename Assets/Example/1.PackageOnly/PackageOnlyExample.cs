@@ -56,7 +56,7 @@ public class PackageOnlyExample : MonoBehaviour
                             
                             //注意这里 原生资源除非是以byte[]类型获取的 否则都是被二次包装的 不是原始资源 不能直接卸载
                             //UnloadAsset需要使用原始二进制数据来卸载 需要调用result.GetAsset()
-                            CatAssetManager.UnloadAsset(result.GetAsset());
+                            CatAssetManager.UnloadAsset(result.Asset);
                         }
                     }));
             }

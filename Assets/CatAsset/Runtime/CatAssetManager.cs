@@ -8,8 +8,6 @@ using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
-
-    
     /// <summary>
     /// CatAsset资源管理器
     /// </summary>
@@ -24,9 +22,7 @@ namespace CatAsset.Runtime
         /// 下载相关任务运行器
         /// </summary>
         private static TaskRunner downloadTaskRunner = new TaskRunner();
-
-
-
+        
         /// <summary>
         /// 资源类型->自定义原生资源转换方法
         /// </summary>
@@ -46,8 +42,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包卸载延迟时间
         /// </summary>
-        public static float UnloadDelayTime { get; set; }
+        public static float UnloadBundleDelayTime { get; set; }
 
+        /// <summary>
+        /// 资源卸载延迟时间
+        /// </summary>
+        public static float UnloadAssetDelayTime { get; set; }
+        
         /// <summary>
         /// 单帧最大任务运行数量
         /// </summary>
@@ -627,11 +628,20 @@ namespace CatAsset.Runtime
                     AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
                     InternalUnloadAsset(dependencyRuntimeInfo);
                 }
+
+                //对于非场景资源包和原生资源 创建卸载任务
+                BundleRuntimeInfo bundleRuntimeInfo =
+                    CatAssetDatabase.GetBundleRuntimeInfo(assetRuntimeInfo.BundleManifest.RelativePath);
+                if (!bundleRuntimeInfo.Manifest.IsScene)
+                {
+                    UnloadAssetTask task = UnloadAssetTask.Create(loadTaskRunner,$"Unload {assetRuntimeInfo.AssetManifest.Name}",assetRuntimeInfo);
+                    loadTaskRunner.AddTask(task,TaskPriority.Low);
+                }
             }
         }
 
         /// <summary>
-        /// 卸载所有未使用的非Prefab资源
+        /// 卸载所有未使用的资源
         /// </summary>
         public static void UnloadUnusedAssets()
         {
@@ -639,9 +649,9 @@ namespace CatAsset.Runtime
             {
                 BundleRuntimeInfo bundleRuntimeInfo = pair.Value;
 
-                if (bundleRuntimeInfo.Bundle == null)
+                if (!bundleRuntimeInfo.Manifest.IsRaw && bundleRuntimeInfo.Bundle == null)
                 {
-                    //跳过未加载的资源包 以及原生资源包
+                    //跳过未加载的资源包
                     continue;
                 }
 
@@ -655,27 +665,41 @@ namespace CatAsset.Runtime
                 {
                     AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
 
-                    //将所有引用计数为0的非Prefab资源都置空 并通过Resources.UnloadAsset卸载
-                    Object asset = (Object)assetRuntimeInfo.Asset;
-                    if (asset != null && assetRuntimeInfo.RefCount == 0 && !(asset is GameObject))
+                    if (assetRuntimeInfo.Asset != null && assetRuntimeInfo.RefCount == 0)
                     {
-                        CatAssetDatabase.RemoveAssetInstance(asset);
-                        
-                        if (asset is Sprite sprite)
+                        CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
+                        if (assetRuntimeInfo.Asset is Object asset)
                         {
-                            //注意 sprite资源得卸载它的texture
-                            Resources.UnloadAsset(sprite.texture);
+                            TryUnloadAssetFromMemory(asset);
                         }
-                        else
-                        {
-                            Resources.UnloadAsset(asset);
-                        }
-                        
                         assetRuntimeInfo.Asset = null;
                     }
+                    
                 }
             }
-            Debug.Log("已卸载所有未使用的非预制体资源");
+            Debug.Log("已卸载所有未使用的资源");
+        }
+
+        /// <summary>
+        /// 尝试将资源包资源从内存卸载
+        /// </summary>
+        internal static void TryUnloadAssetFromMemory(Object asset)
+        {
+            if (asset is GameObject)
+            {
+                //预制体无法通过Resources.UnloadAsset卸载
+                return;
+            }
+            
+            if (asset is Sprite sprite)
+            {
+                //注意 sprite资源得卸载它的texture
+                Resources.UnloadAsset(sprite.texture);
+            }
+            else
+            {
+                Resources.UnloadAsset(asset);
+            }
         }
         
         /// <summary>
@@ -687,16 +711,7 @@ namespace CatAsset.Runtime
                 bundleRuntimeInfo.Manifest.RelativePath, bundleRuntimeInfo);
             loadTaskRunner.AddTask(task, TaskPriority.Low);
         }
-
-        /// <summary>
-        /// 添加卸载原生资源任务
-        /// </summary>
-        internal static void AddUnloadRawAssetTask(BundleRuntimeInfo bundleRuntimeInfo, AssetRuntimeInfo assetRuntimeInfo)
-        {
-            UnloadRawAssetTask task = UnloadRawAssetTask.Create(loadTaskRunner, bundleRuntimeInfo.Manifest.RelativePath,
-                assetRuntimeInfo);
-            loadTaskRunner.AddTask(task, TaskPriority.Low);
-        }
+        
 
         #endregion
 

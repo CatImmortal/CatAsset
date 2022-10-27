@@ -15,16 +15,20 @@ namespace CatAsset.Runtime
         public bool IsEditorMode = true;
 
         [Header("资源包卸载延迟")]
-        public float UnloadDelayTime = 60f;
+        public float UnloadBundleDelayTime = 60f;
 
-        [Header("单帧最大任务运行数量")]
+        [Header("资源卸载延迟")]
+        public float UnloadAssetDelayTime = 60f;
+        
+        [Header("每帧最大任务运行数量")]
         public int MaxTaskRunCount = 30;
         
         private void Awake()
         {
             CatAssetManager.RuntimeMode= RuntimeMode;
             CatAssetManager.IsEditorMode = IsEditorMode;
-            CatAssetManager.UnloadDelayTime = UnloadDelayTime;
+            CatAssetManager.UnloadBundleDelayTime = UnloadBundleDelayTime;
+            CatAssetManager.UnloadAssetDelayTime = UnloadAssetDelayTime;
             CatAssetManager.MaxTaskRunCount = MaxTaskRunCount;
         }
 
