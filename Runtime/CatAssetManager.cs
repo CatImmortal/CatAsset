@@ -631,6 +631,54 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 卸载所有未使用的非Prefab资源
+        /// </summary>
+        public static void UnloadUnusedAssets()
+        {
+            foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
+            {
+                BundleRuntimeInfo bundleRuntimeInfo = pair.Value;
+
+                if (bundleRuntimeInfo.Bundle == null)
+                {
+                    //跳过未加载的资源包 以及原生资源包
+                    continue;
+                }
+
+                if (bundleRuntimeInfo.Manifest.IsScene)
+                {
+                    //跳过场景资源包
+                    continue;
+                }
+                
+                foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
+                {
+                    AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
+
+                    //将所有引用计数为0的非Prefab资源都置空 并通过Resources.UnloadAsset卸载
+                    Object asset = (Object)assetRuntimeInfo.Asset;
+                    if (asset != null && assetRuntimeInfo.RefCount == 0 && !(asset is GameObject))
+                    {
+                        CatAssetDatabase.RemoveAssetInstance(asset);
+                        
+                        if (asset is Sprite sprite)
+                        {
+                            //注意 sprite资源得卸载它的texture
+                            Resources.UnloadAsset(sprite.texture);
+                        }
+                        else
+                        {
+                            Resources.UnloadAsset(asset);
+                        }
+                        
+                        assetRuntimeInfo.Asset = null;
+                    }
+                }
+            }
+            Debug.Log("已卸载所有未使用的非预制体资源");
+        }
+        
+        /// <summary>
         /// 添加卸载资源包任务
         /// </summary>
         internal static void AddUnloadBundleTask(BundleRuntimeInfo bundleRuntimeInfo)
