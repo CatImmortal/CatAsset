@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 场景加载任务
     /// </summary>
-    public class LoadSceneTask : LoadBundledAssetTask<object>
+    public class LoadSceneTask : LoadBundledAssetTask
     {
         private LoadSceneCallback onFinished;
         private Scene loadedScene;
@@ -64,14 +64,14 @@ namespace CatAsset.Runtime
                 //加载失败 通知所有未取消的加载任务
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(default,default);
+                    onFinished?.Invoke(false,default);
                 }
                 
                 foreach (LoadSceneTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(default,default);
+                        task.onFinished?.Invoke(false,default);
                     }
                 }
             }

@@ -20,7 +20,10 @@ namespace CatAsset.Runtime
         public string RelativePath{
             get
             {
-                relativePath = Util.GetRegularPath(Path.Combine(Directory, BundleName));
+                if (relativePath == null)
+                {
+                    relativePath = Util.GetRegularPath(Path.Combine(Directory, BundleName));
+                }
                 return relativePath;
             }
         }

@@ -39,12 +39,7 @@
         /// 已合并任务数量
         /// </summary>
         public int MergedTaskCount { get; }
-        
-        /// <summary>
-        /// 是否需要取消
-        /// </summary>
-        public bool NeedCancel { get; }
-        
+
         /// <summary>
         /// 合并任务
         /// </summary>
