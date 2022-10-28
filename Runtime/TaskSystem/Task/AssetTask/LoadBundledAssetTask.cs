@@ -103,8 +103,18 @@ namespace CatAsset.Runtime
             if (BundleRuntimeInfo.Bundle == null)
             {
                 //资源包未加载
-                LoadBundleTask task = LoadBundleTask.Create(Owner, BundleRuntimeInfo.Manifest.RelativePath, null,
-                    onBundleLoadedCallback);
+                BaseTask task;
+                if (Application.platform == RuntimePlatform.WebGLPlayer)
+                {
+                    //WebGL平台特殊处理下
+                    task = LoadWebBundleTask.Create(Owner, BundleRuntimeInfo.Manifest.RelativePath,
+                        onBundleLoadedCallback);
+                }
+                else
+                {
+                    task = LoadBundleTask.Create(Owner, BundleRuntimeInfo.Manifest.RelativePath,
+                        onBundleLoadedCallback);
+                }
                 Owner.AddTask(task, TaskPriority.Middle);
                 
                 LoadState = LoadBundleAssetState.BundleLoading;

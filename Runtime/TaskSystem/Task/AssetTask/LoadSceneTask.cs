@@ -108,11 +108,11 @@ namespace CatAsset.Runtime
             LoadSceneTask task = ReferencePool.Get<LoadSceneTask>();
             task.CreateBase(owner,name);
 
+            task.onFinished = callback;
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
-            task.onFinished = callback;
-
+            
             return task;
         }
 

@@ -20,7 +20,7 @@ namespace CatAsset.Runtime
         /// 当前任务索引
         /// </summary>
         private int curTaskIndex;
-        
+
         /// <summary>
         /// 此任务组的优先级
         /// </summary>
@@ -79,7 +79,7 @@ namespace CatAsset.Runtime
             }
             curTaskIndex = 0;
         }
-        
+
         /// <summary>
         /// 运行任务组
         /// </summary>
@@ -88,7 +88,7 @@ namespace CatAsset.Runtime
 
             int index = curTaskIndex;
             curTaskIndex++;
-            
+
             ITask task = tempTaskList[index];
 
             try
@@ -106,6 +106,7 @@ namespace CatAsset.Runtime
             {
                 //任务出现异常 视为任务结束处理
                 task.State = TaskState.Finished;
+                Debug.LogError($"任务：{task.Name}，类型：{task.GetType().Name}，出现异常：{e.Message}");
                 throw;
             }
             finally
@@ -115,7 +116,7 @@ namespace CatAsset.Runtime
                     case TaskState.Finished:
                         //任务运行结束 需要删除
                         RemoveTask(task);
-                        TaskRunner.MainTaskDict.Remove(task.Name);
+                        TaskRunner.MainTaskDict[task.Owner].Remove(task.Name);
                         ReferencePool.Release(task);
                         break;
                 };
@@ -133,8 +134,8 @@ namespace CatAsset.Runtime
         }
 
 
-        
-        
-        
+
+
+
     }
 }
