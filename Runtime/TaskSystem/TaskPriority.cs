@@ -6,22 +6,22 @@
     public enum TaskPriority : int
     {
         /// <summary>
-        /// 非常低
+        /// 非常低（资源清单检查）
         /// </summary>
         VeryLow = 0,
         
         /// <summary>
-        /// 低
+        /// 低（主动加载，资源卸载，资源包卸载）
         /// </summary>
         Low = 1,
         
         /// <summary>
-        /// 中
+        /// 中（资源包加载，依赖资源加载，更新的资源包下载）
         /// </summary>
         Middle = 2,
         
         /// <summary>
-        /// 高
+        /// 高（外部导入的资源清单读取）
         /// </summary>
         Height = 3,
         
