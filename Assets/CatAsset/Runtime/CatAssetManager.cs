@@ -19,6 +19,11 @@ namespace CatAsset.Runtime
         private static TaskRunner loadTaskRunner = new TaskRunner();
 
         /// <summary>
+        /// 卸载相关任务运行器
+        /// </summary>
+        private static TaskRunner unloadTaskRunner = new TaskRunner();
+        
+        /// <summary>
         /// 下载相关任务运行器
         /// </summary>
         private static TaskRunner downloadTaskRunner = new TaskRunner();
@@ -101,6 +106,7 @@ namespace CatAsset.Runtime
         public static void Update()
         {
             loadTaskRunner.Update();
+            unloadTaskRunner.Update();
             downloadTaskRunner.Update();
         }
         
@@ -157,7 +163,7 @@ namespace CatAsset.Runtime
                     }
                 });
 
-            loadTaskRunner.AddTask(task, TaskPriority.VeryHeight);
+            loadTaskRunner.AddTask(task, TaskPriority.VeryLow);
         }
 
         /// <summary>
@@ -180,7 +186,7 @@ namespace CatAsset.Runtime
         internal static void CheckUpdatableManifest(string path, WebRequestCallback callback)
         {
             WebRequestTask task = WebRequestTask.Create(downloadTaskRunner, path, path, null, callback);
-            downloadTaskRunner.AddTask(task, TaskPriority.VeryHeight);
+            downloadTaskRunner.AddTask(task, TaskPriority.VeryLow);
         }
 
         /// <summary>
@@ -221,7 +227,7 @@ namespace CatAsset.Runtime
                     }
                 });
 
-            loadTaskRunner.AddTask(task, TaskPriority.VeryHeight);
+            loadTaskRunner.AddTask(task, TaskPriority.Height);
         }
 
         #endregion
@@ -248,12 +254,12 @@ namespace CatAsset.Runtime
         /// 下载资源包
         /// </summary>
         internal static void DownloadBundle(GroupUpdater groupUpdater, BundleManifestInfo info, string downloadUri,
-            string localFilePath, DownloadBundleCallback callback)
+            string localFilePath, DownloadBundleCallback callback,TaskPriority priority = TaskPriority.Middle)
         {
             DownloadBundleTask task =
                 DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, groupUpdater, downloadUri,
                     localFilePath, callback);
-            downloadTaskRunner.AddTask(task, TaskPriority.Height);
+            downloadTaskRunner.AddTask(task, priority);
         }
 
         #endregion
@@ -279,7 +285,7 @@ namespace CatAsset.Runtime
         /// 加载资源
         /// </summary>
         public static int LoadAssetAsync(string assetName,LoadAssetCallback<object> callback,
-            TaskPriority priority = TaskPriority.Middle)
+            TaskPriority priority = TaskPriority.Low)
         {
             int id = InternalLoadAssetAsync(assetName, typeof(object), callback, ((userdata, result) =>
             {
@@ -293,7 +299,7 @@ namespace CatAsset.Runtime
         /// 加载资源
         /// </summary>
         public static int LoadAssetAsync(string assetName,Type assetType,LoadAssetCallback<object> callback,
-            TaskPriority priority = TaskPriority.Middle)
+            TaskPriority priority = TaskPriority.Low)
         {
             int id = InternalLoadAssetAsync(assetName, assetType, callback, ((userdata, result) =>
             {
@@ -307,7 +313,7 @@ namespace CatAsset.Runtime
         /// 加载资源
         /// </summary>
         public static int LoadAssetAsync<T>(string assetName,LoadAssetCallback<T> callback,
-            TaskPriority priority = TaskPriority.Middle)
+            TaskPriority priority = TaskPriority.Low)
         {
             int id = InternalLoadAssetAsync(assetName, typeof(T), callback, ((userdata, result) =>
             {
@@ -321,7 +327,7 @@ namespace CatAsset.Runtime
         /// 加载资源
         /// </summary>
         private static int InternalLoadAssetAsync(string assetName, Type assetType,object userdata, InternalLoadAssetCallback callback,
-            TaskPriority priority = TaskPriority.Middle)
+            TaskPriority priority)
         {
             if (string.IsNullOrEmpty(assetName))
             {
@@ -419,7 +425,7 @@ namespace CatAsset.Runtime
         /// 批量加载资源
         /// </summary>
         public static int BatchLoadAssetAsync(List<string> assetNames, BatchLoadAssetCallback callback,
-            TaskPriority priority = TaskPriority.Middle)
+            TaskPriority priority = TaskPriority.Low)
         {
             if (assetNames == null || assetNames.Count == 0)
             {
@@ -460,7 +466,7 @@ namespace CatAsset.Runtime
         /// 加载场景
         /// </summary>
         public static int LoadSceneAsync(string sceneName, LoadSceneCallback callback,
-            TaskPriority priority = TaskPriority.Middle)
+            TaskPriority priority = TaskPriority.Low)
         {
             if (string.IsNullOrEmpty(sceneName))
             {
@@ -534,7 +540,7 @@ namespace CatAsset.Runtime
         #region 资源卸载
 
         /// <summary>
-        /// 卸载资源
+        /// 卸载资源，注意：asset参数需要是原始资源实例,可以从LoadAssetResult.Asset获取
         /// </summary>
         public static void UnloadAsset(object asset)
         {
@@ -632,21 +638,21 @@ namespace CatAsset.Runtime
                     dependencyRuntimeInfo.RemoveDownStream(assetRuntimeInfo);
                 }
 
-                //对于非场景资源包和原生资源 创建卸载任务
+                //对于非场景 非Prefab的资源 以及原生资源 创建卸载任务
                 BundleRuntimeInfo bundleRuntimeInfo =
                     CatAssetDatabase.GetBundleRuntimeInfo(assetRuntimeInfo.BundleManifest.RelativePath);
-                if (!bundleRuntimeInfo.Manifest.IsScene)
+                if (!bundleRuntimeInfo.Manifest.IsScene && !(assetRuntimeInfo.Asset is GameObject))
                 {
-                    UnloadAssetTask task = UnloadAssetTask.Create(loadTaskRunner,$"Unload {assetRuntimeInfo.AssetManifest.Name}",assetRuntimeInfo);
-                    loadTaskRunner.AddTask(task,TaskPriority.Low);
+                    UnloadAssetTask task = UnloadAssetTask.Create(unloadTaskRunner,assetRuntimeInfo.AssetManifest.Name,assetRuntimeInfo);
+                    unloadTaskRunner.AddTask(task,TaskPriority.Low);
                 }
             }
         }
 
         /// <summary>
-        /// 卸载所有未使用的资源
+        /// 卸载所有未使用的资源，若isQuick为true则是不处理Prefab的快速模式
         /// </summary>
-        public static void UnloadUnusedAssets()
+        public static void UnloadUnusedAssets(bool isQuickMode = true)
         {
             foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
             {
@@ -668,32 +674,48 @@ namespace CatAsset.Runtime
                 {
                     AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
 
-                    if (assetRuntimeInfo.Asset != null && assetRuntimeInfo.RefCount == 0)
+                    if (assetRuntimeInfo.Asset == null || assetRuntimeInfo.RefCount > 0)
+                    {
+                        //资源未加载 或 引用计数>0 跳过
+                        continue;
+                    }
+
+                    if (!isQuickMode)
+                    {
+                        //非快速模式下 只解除引用 不调用Resources.UnloadAsset 等待后面的Resources.UnloadUnusedAssets来卸载
+                        CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
+                        assetRuntimeInfo.Asset = null;
+                        continue;
+                    }
+                  
+                    //快速模式下 只处理非Prefab资源
+                    if (!(assetRuntimeInfo.Asset is GameObject))
                     {
                         CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
-                        if (assetRuntimeInfo.Asset is Object asset)
+                        if (assetRuntimeInfo.Asset is Object unityObj)
                         {
-                            TryUnloadAssetFromMemory(asset);
+                            UnloadAssetFromMemory(unityObj);
                         }
                         assetRuntimeInfo.Asset = null;
                     }
+
                     
                 }
             }
+
+            if (!isQuickMode)
+            {
+                Resources.UnloadUnusedAssets();
+            }
+            
             Debug.Log("已卸载所有未使用的资源");
         }
 
         /// <summary>
-        /// 尝试将资源包资源从内存卸载
+        /// 将资源包资源从内存卸载
         /// </summary>
-        internal static void TryUnloadAssetFromMemory(Object asset)
+        internal static void UnloadAssetFromMemory(Object asset)
         {
-            if (asset is GameObject)
-            {
-                //预制体无法通过Resources.UnloadAsset卸载
-                return;
-            }
-            
             if (asset is Sprite sprite)
             {
                 //注意 sprite资源得卸载它的texture
@@ -710,9 +732,9 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void AddUnloadBundleTask(BundleRuntimeInfo bundleRuntimeInfo)
         {
-            UnloadBundleTask task = UnloadBundleTask.Create(loadTaskRunner,
+            UnloadBundleTask task = UnloadBundleTask.Create(unloadTaskRunner,
                 bundleRuntimeInfo.Manifest.RelativePath, bundleRuntimeInfo);
-            loadTaskRunner.AddTask(task, TaskPriority.Low);
+            unloadTaskRunner.AddTask(task, TaskPriority.Low);
         }
         
 

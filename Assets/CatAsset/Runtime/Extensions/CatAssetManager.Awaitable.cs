@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<ValueTuple<T,LoadAssetResult>> LoadAssetAsync<T>(string assetName,TaskPriority priority = TaskPriority.Middle)
+        public static Task<ValueTuple<T,LoadAssetResult>> LoadAssetAsync<T>(string assetName,TaskPriority priority = TaskPriority.Low)
         {
             TaskCompletionSource<ValueTuple<T,LoadAssetResult>> tcs = new TaskCompletionSource<ValueTuple<T,LoadAssetResult>>();
             LoadAssetAsync<T>(assetName, (asset,result) =>
@@ -41,7 +41,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源(可等待)
         /// </summary>
-        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,TaskPriority priority = TaskPriority.Middle)
+        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,TaskPriority priority = TaskPriority.Low)
         {
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAssetAsync(assetNames, (assets) =>

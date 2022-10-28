@@ -47,7 +47,7 @@ namespace CatAsset.Runtime
             {
                 //资源包资源 还要通过Resources.Unload卸载
                 Object asset = (Object)assetRuntimeInfo.Asset;
-                CatAssetManager.TryUnloadAssetFromMemory(asset);
+                CatAssetManager.UnloadAssetFromMemory(asset);
             }
 
             assetRuntimeInfo.Asset = null;

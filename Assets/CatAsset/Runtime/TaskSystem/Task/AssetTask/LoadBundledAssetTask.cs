@@ -105,7 +105,7 @@ namespace CatAsset.Runtime
                 //资源包未加载
                 LoadBundleTask task = LoadBundleTask.Create(Owner, BundleRuntimeInfo.Manifest.RelativePath, null,
                     onBundleLoadedCallback);
-                Owner.AddTask(task, TaskPriority.Height);
+                Owner.AddTask(task, TaskPriority.Middle);
                 
                 LoadState = LoadBundleAssetState.BundleLoading;
 
@@ -208,7 +208,7 @@ namespace CatAsset.Runtime
             totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
             foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
-                CatAssetManager.LoadAssetAsync(dependency, onDependencyLoadedCallback);
+                CatAssetManager.LoadAssetAsync(dependency, onDependencyLoadedCallback,TaskPriority.Middle);
             }
         }
 
