@@ -291,7 +291,7 @@ namespace CatAsset.Runtime
             {
                 LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
                 localCallback?.Invoke(result.Asset,result);
-            }));
+            }),priority);
             return id;
         }
         
@@ -305,7 +305,7 @@ namespace CatAsset.Runtime
             {
                 LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
                 localCallback?.Invoke(result.Asset,result);
-            }));
+            }),priority);
             return id;
         }
 
@@ -319,7 +319,7 @@ namespace CatAsset.Runtime
             {
                 LoadAssetCallback<T> localCallback = (LoadAssetCallback<T>)userdata;
                 localCallback?.Invoke(result.GetAsset<T>(),result);
-            }));
+            }),priority);
             return id;
         }
 

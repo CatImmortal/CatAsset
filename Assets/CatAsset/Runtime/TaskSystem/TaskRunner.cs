@@ -13,17 +13,18 @@ namespace CatAsset.Runtime
         /// 任务ID工厂
         /// </summary>
         internal static int TaskIDFactory = 0;
-        
+
         /// <summary>
         /// 任务id->任务
         /// </summary>
-        internal static readonly Dictionary<int, ITask>TaskIDDict = new Dictionary<int, ITask>();
-        
+        internal static readonly Dictionary<int, ITask> TaskIDDict = new Dictionary<int, ITask>();
+
         /// <summary>
-        /// 任务名->主任务
+        /// 任务运行器->(任务名->主任务)
         /// </summary>
-        internal static readonly Dictionary<string, ITask> MainTaskDict = new Dictionary<string, ITask>();
-        
+        internal static readonly Dictionary<TaskRunner, Dictionary<string, ITask>> MainTaskDict =
+            new Dictionary<TaskRunner, Dictionary<string, ITask>>();
+
         /// <summary>
         /// 任务组列表
         /// </summary>
@@ -51,7 +52,13 @@ namespace CatAsset.Runtime
         /// </summary>
         public void AddTask(ITask task, TaskPriority priority)
         {
-            if (MainTaskDict.TryGetValue(task.Name,out ITask mainTask))
+            if (!MainTaskDict.TryGetValue(task.Owner,out Dictionary<string, ITask> dict))
+            {
+                dict = new Dictionary<string, ITask>();
+                MainTaskDict.Add(task.Owner,dict);
+            }
+
+            if (dict.TryGetValue(task.Name,out ITask mainTask))
             {
                 //合并同名任务到主任务里
                 mainTask.MergeTask(task);
@@ -64,7 +71,7 @@ namespace CatAsset.Runtime
             }
             else
             {
-                MainTaskDict.Add(task.Name,task);
+                dict.Add(task.Name,task);
                 taskGroups[(int)priority].AddTask(task);
             }
         }
@@ -78,7 +85,7 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-            
+
             Debug.Log($"任务{task.Name}变更优先级：{task.Group.Priority}->{newPriority}");
             task.Group.RemoveTask(task);
             taskGroups[(int)newPriority].AddTask(task);
@@ -91,13 +98,13 @@ namespace CatAsset.Runtime
         {
             //当前运行任务计数器
             int curRunCounter = 0;
-            
+
             for (int i = taskGroups.Count - 1; i >= 0; i--)
             {
                 TaskGroup group = taskGroups[i];
-                
+
                 group.PreRun();
-                
+
                 while (curRunCounter < MaxRunCount && group.CanRun)
                 {
                     if (group.Run())
@@ -106,7 +113,7 @@ namespace CatAsset.Runtime
                         curRunCounter++;
                     }
                 }
-                
+
                 group.PostRun();
             }
         }

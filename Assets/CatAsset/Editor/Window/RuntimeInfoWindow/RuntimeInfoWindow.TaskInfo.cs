@@ -12,7 +12,7 @@ namespace CatAsset.Editor
     {
         private bool isInitTaskInfoView;
         private Vector2 taskInfoScrollPos;
-        private Dictionary<string, ITask> allTasks;
+        private Dictionary<TaskRunner, Dictionary<string, ITask>> allTasks;
 
         /// <summary>
         /// 初始化任务信息界面
@@ -20,9 +20,9 @@ namespace CatAsset.Editor
         private void InitTaskInfoView()
         {
             isInitTaskInfoView = true;
-            
+
             allTasks = typeof(TaskRunner).GetField("MainTaskDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as
-                Dictionary<string, ITask>;
+                Dictionary<TaskRunner, Dictionary<string, ITask>>;
 
         }
 
@@ -35,7 +35,7 @@ namespace CatAsset.Editor
             {
                 InitTaskInfoView();
             }
-            
+
             using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(taskInfoScrollPos))
             {
                 taskInfoScrollPos = sv.scrollPosition;
@@ -48,17 +48,20 @@ namespace CatAsset.Editor
                     EditorGUILayout.LabelField("任务进度");
                     EditorGUILayout.LabelField("已合并任务数");
                 }
-                
-                foreach (KeyValuePair<string, ITask> item in allTasks)
+
+                foreach (KeyValuePair<TaskRunner, Dictionary<string, ITask>> pair in allTasks)
                 {
-                    ITask task = item.Value;
-                    using (new EditorGUILayout.HorizontalScope())
+                    foreach (KeyValuePair<string,ITask> item in pair.Value)
                     {
-                        EditorGUILayout.LabelField(task.Name, GUILayout.Width(position.width / 2));
-                        EditorGUILayout.LabelField(task.GetType().Name);
-                        EditorGUILayout.LabelField(task.State.ToString());
-                        EditorGUILayout.LabelField(task.Progress.ToString("0.00"));
-                        EditorGUILayout.LabelField(task.MergedTaskCount.ToString());
+                        ITask task = item.Value;
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            EditorGUILayout.LabelField(task.Name, GUILayout.Width(position.width / 2));
+                            EditorGUILayout.LabelField(task.GetType().Name);
+                            EditorGUILayout.LabelField(task.State.ToString());
+                            EditorGUILayout.LabelField(task.Progress.ToString("0.00"));
+                            EditorGUILayout.LabelField(task.MergedTaskCount.ToString());
+                        }
                     }
                 }
             }
