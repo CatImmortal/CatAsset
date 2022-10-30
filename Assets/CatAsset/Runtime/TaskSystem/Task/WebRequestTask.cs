@@ -93,7 +93,7 @@ namespace CatAsset.Runtime
             uri = default;
             userdata = default;
             onFinished = default;
-            op.webRequest.Dispose();
+            op?.webRequest.Dispose();
             op = default;
         }
     }

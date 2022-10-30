@@ -198,7 +198,7 @@ namespace CatAsset.Runtime
             onFinished = default;
             
             localTempFilePath = default;
-            op.webRequest.Dispose();
+            op?.webRequest.Dispose();
             op = default;
 
             oldFileLength = default;
