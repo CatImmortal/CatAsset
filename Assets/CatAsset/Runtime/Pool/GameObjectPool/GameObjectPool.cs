@@ -171,6 +171,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public void ReleaseGameObject(GameObject go)
         {
+            if (go == null)
+            {
+                return;
+            }
+            
             if (!poolObjectDict.TryGetValue(go, out PoolObject poolObject))
             {
                 return;

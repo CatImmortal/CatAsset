@@ -64,6 +64,11 @@ namespace CatAsset.Runtime
         public string MD5;
 
         /// <summary>
+        /// 文件Hash值
+        /// </summary>
+        public string Hash;
+
+        /// <summary>
         /// 资源清单信息列表
         /// </summary>
         public List<AssetManifestInfo> Assets = new List<AssetManifestInfo>();
