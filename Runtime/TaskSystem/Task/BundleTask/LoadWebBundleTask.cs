@@ -129,7 +129,7 @@ namespace CatAsset.Runtime
             onFinished = default;
             bundleRuntimeInfo = default;
             loadState = default;
-            op.webRequest.Dispose();
+            op?.webRequest.Dispose();
             op = default;
         }
     }

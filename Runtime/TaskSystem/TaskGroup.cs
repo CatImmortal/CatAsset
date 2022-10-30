@@ -106,7 +106,7 @@ namespace CatAsset.Runtime
             {
                 //任务出现异常 视为任务结束处理
                 task.State = TaskState.Finished;
-                Debug.LogError($"任务：{task.Name}，类型：{task.GetType().Name}，出现异常：{e.Message}");
+                Debug.LogError($"任务：{task.Name}，类型：{task.GetType().Name}，出现异常");
                 throw;
             }
             finally
