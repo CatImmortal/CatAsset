@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using CatAsset.Runtime;
+using UnityEditor;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Injector;
 using UnityEditor.Build.Pipeline.Interfaces;
@@ -66,6 +67,11 @@ namespace CatAsset.Editor
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = fi.Length;
                 bundleManifestInfo.MD5 = Runtime.Util.GetFileMD5(fullPath);
+                if (configParam.TargetPlatform == BuildTarget.WebGL)
+                {
+                    //WebGL平台 记录Hash128用于缓存系统
+                    bundleManifestInfo.Hash = results.BundleInfos[bundleManifestInfo.RelativePath].Hash.ToString();
+                }
                 
                 //资源信息
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
