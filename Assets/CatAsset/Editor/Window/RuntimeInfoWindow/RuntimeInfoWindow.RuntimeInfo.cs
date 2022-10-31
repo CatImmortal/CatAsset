@@ -97,7 +97,7 @@ namespace CatAsset.Editor
                     }
 
 
-                    //没有资源在使用 也没上游资源包 不显示
+                    //没有资源在使用 也没下游资源包 不显示
                     if (bundleRuntimeInfo.UsingAssets.Count == 0 && bundleRuntimeInfo.DependencyLink.DownStream.Count == 0)
                     {
                         continue;
@@ -171,10 +171,11 @@ namespace CatAsset.Editor
                     EditorGUILayout.Space();
                 }
 
-                EditorGUILayout.LabelField($"|  资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(100));
-                EditorGUILayout.LabelField($"|  使用中资源数：{bundleRuntimeInfo.UsingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(150));
-                EditorGUILayout.LabelField($"|  文件长度：{Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(150));
-                EditorGUILayout.LabelField($"|  下游资源包数量：{bundleRuntimeInfo.DependencyLink.DownStream.Count}",GUILayout.Width(150));
+                EditorGUILayout.LabelField($"资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(100));
+                EditorGUILayout.LabelField($"使用中资源数：{bundleRuntimeInfo.UsingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(125));
+                EditorGUILayout.LabelField($"文件长度：{Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"下游资源包数量：{bundleRuntimeInfo.DependencyLink.DownStream.Count}",GUILayout.Width(125));
+                
                 if (GUILayout.Button("查看下游资源包", GUILayout.Width(100)))
                 {
                     if (bundleRuntimeInfo.DependencyLink.DownStream.Count > 0)
@@ -182,7 +183,9 @@ namespace CatAsset.Editor
                         BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyLink.DownStream);
                     }
                 }
-                EditorGUILayout.LabelField($"|  上游资源包数量：{bundleRuntimeInfo.DependencyLink.UpStream.Count}",GUILayout.Width(150));
+                EditorGUILayout.LabelField("", GUILayout.Width(30));
+                
+                EditorGUILayout.LabelField($"上游资源包数量：{bundleRuntimeInfo.DependencyLink.UpStream.Count}",GUILayout.Width(125));
                 if (GUILayout.Button("查看下游资源包", GUILayout.Width(100)))
                 {
                     if (bundleRuntimeInfo.DependencyLink.UpStream.Count > 0)
@@ -191,6 +194,8 @@ namespace CatAsset.Editor
                     }
                 }
             }
+            
+           
         }
 
         /// <summary>
@@ -200,57 +205,30 @@ namespace CatAsset.Editor
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                string assetName = assetRuntimeInfo.AssetManifest.Name;
-
-                //资源图标
-                GUIContent content = new GUIContent();
-                Type assetType;
-                if (assetRuntimeInfo.Asset != null)
-                {
-                    assetType = assetRuntimeInfo.Asset.GetType();
-                }
-                else
-                {
-                    //场景资源
-                    assetType = typeof(SceneAsset);
-                }
-
-                if (assetType != typeof(Texture2D))
-                {
-                    paramObjs[0] = assetType;
-                    content.image = (Texture2D) findTextureByTypeMI.Invoke(null, paramObjs);
-                }
-                else
-                {
-                    content.image = EditorGUIUtility.FindTexture(assetName);
-                }
-
-                EditorGUILayout.LabelField("", GUILayout.Width(30));
-
-                //图标
-                EditorGUILayout.LabelField(content, GUILayout.Width(20));
-
                 //资源名
-                EditorGUILayout.LabelField(assetName, GUILayout.Width(400));
+                EditorGUILayout.LabelField("\t" + assetRuntimeInfo.AssetManifest.Name);
                 
-
-                EditorGUILayout.LabelField($"|  长度：{Runtime.Util.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}", GUILayout.Width(100));
-                EditorGUILayout.LabelField($"|  引用计数：{assetRuntimeInfo.RefCount}", GUILayout.Width(100));
-
-                EditorGUILayout.LabelField($"|  下游资源数量：{assetRuntimeInfo.DownStream.Count}", GUILayout.Width(150));
-                if (GUILayout.Button("查看下游资源", GUILayout.Width(100)))
+                //对象引用
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.ObjectField(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetRuntimeInfo.AssetManifest.Name), typeof(UnityEngine.Object),false);
+                EditorGUI.EndDisabledGroup();
+                
+                //长度
+                EditorGUILayout.LabelField($"\t长度：{Runtime.Util.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}");
+                
+                //引用计数
+                EditorGUILayout.LabelField($"\t引用计数：{assetRuntimeInfo.RefCount}");
+                
+                //下游资源数
+                EditorGUILayout.LabelField($"\t下游资源数量：{assetRuntimeInfo.DownStream.Count}");
+                
+                if (GUILayout.Button("查看下游资源"))
                 {
                     if (assetRuntimeInfo.DownStream.Count > 0)
                     {
                         RefAssetListWindow.OpenWindow(this,assetRuntimeInfo);
                     }
                 }
-                if (GUILayout.Button("选中", GUILayout.Width(100)))
-                {
-                    Selection.activeObject = AssetDatabase.LoadAssetAtPath(assetName, assetType);
-                }
-
-
             }
         }
 

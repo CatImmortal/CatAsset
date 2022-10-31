@@ -9,7 +9,7 @@ namespace CatAsset.Editor
     public static class DrawDescTool
     {
         private static Color dirColor = Color.gray;
-        private static Color assetColor = new Color(0, 0.635f, 0.635f);
+        private static Color assetColor = new Color(0, 0.5f, 0.5f);
         
         [InitializeOnLoadMethod]
         private static void InitializeOnLoadMethod()

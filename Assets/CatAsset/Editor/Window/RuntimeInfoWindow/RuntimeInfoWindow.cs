@@ -26,7 +26,7 @@ namespace CatAsset.Editor
         private static void OpenWindow()
         {
             RuntimeInfoWindow window = GetWindow<RuntimeInfoWindow>(false, "运行时信息窗口");
-            window.minSize = new Vector2(1000, 600);
+            window.minSize = new Vector2(1200, 800);
             window.Show();
             
         }
