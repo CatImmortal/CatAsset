@@ -47,8 +47,8 @@ namespace CatAsset.Runtime
         public override void Run()
         {
             loadState = LoadWebBundleState.Loading;
-            UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(bundleRuntimeInfo.LoadPath,Hash128.Parse(bundleRuntimeInfo.Manifest.Hash));
-            op = request.SendWebRequest();
+            UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(bundleRuntimeInfo.LoadPath,Hash128.Parse(bundleRuntimeInfo.Manifest.Hash));
+            op = uwr.SendWebRequest();
         }
 
         public override void Update()
