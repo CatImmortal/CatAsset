@@ -15,6 +15,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public const string ManifestFileName = "CatAssetManifest.json";
 
+        /// <summary>
+        /// 内置Shader资源包名
+        /// </summary>
+        public const string BuiltInShaderBundleName = "UnityBuiltInShaders.bundle";
+        
         private const int oneKB = 1024;
         private const int oneMB = oneKB * 1024;
         private const int oneGB = oneMB * 1024;

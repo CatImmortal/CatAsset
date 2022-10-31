@@ -69,6 +69,11 @@ namespace CatAsset.Runtime
         public string Hash;
 
         /// <summary>
+        /// 是否依赖内置Shader资源包
+        /// </summary>
+        public bool IsDependencyBuiltInShaderBundle;
+        
+        /// <summary>
         /// 资源清单信息列表
         /// </summary>
         public List<AssetManifestInfo> Assets = new List<AssetManifestInfo>();
