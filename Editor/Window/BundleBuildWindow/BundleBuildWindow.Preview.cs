@@ -101,10 +101,15 @@ namespace CatAsset.Editor
         {
             using (new EditorGUILayout.HorizontalScope())
             {
+                //资源名
                 EditorGUILayout.LabelField("\t" + assetBuildInfo.Name);
+                
+                //对象引用
                 EditorGUI.BeginDisabledGroup(true);
                 EditorGUILayout.ObjectField(AssetDatabase.LoadAssetAtPath<Object>(assetBuildInfo.Name), typeof(Object),false);
                 EditorGUI.EndDisabledGroup();
+                
+                //文件长度
                 EditorGUILayout.LabelField($"\t长度：{Runtime.Util.GetByteLengthDesc(assetBuildInfo.Length)}");
             }
            
