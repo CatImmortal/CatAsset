@@ -5,7 +5,7 @@ using UnityEngine;
 namespace CatAsset.Runtime
 {
     /// <summary>
-    /// 资源包卸载的任务
+    /// 资源包卸载任务
     /// </summary>
     public class UnloadBundleTask : BaseTask
     {
