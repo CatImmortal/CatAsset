@@ -8,26 +8,6 @@ namespace CatAsset.Runtime
     /// </summary>
     public class LoadWebBundleTask : LoadBundleTask
     {
-        /// <summary>
-        /// WebGL资源包加载状态
-        /// </summary>
-        private enum LoadWebBundleState
-        {
-            /// <summary>
-            /// 资源包加载中
-            /// </summary>
-            Loading,
-
-            /// <summary>
-            /// 资源包加载结束
-            /// </summary>
-            Loaded,
-
-        }
-        
-        private LoadBundleCallback onFinished;
-        private BundleRuntimeInfo bundleRuntimeInfo;
-        private LoadWebBundleState loadState;
         private UnityWebRequestAsyncOperation op;
         
         /// <inheritdoc />
@@ -44,79 +24,38 @@ namespace CatAsset.Runtime
             }
         }
         
-        public override void Run()
+        /// <inheritdoc />
+        protected override void LoadAsync()
         {
-            loadState = LoadWebBundleState.Loading;
-            UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(bundleRuntimeInfo.LoadPath,Hash128.Parse(bundleRuntimeInfo.Manifest.Hash));
+            UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(BundleRuntimeInfo.LoadPath,Hash128.Parse(BundleRuntimeInfo.Manifest.Hash));
             op = uwr.SendWebRequest();
         }
 
-        public override void Update()
+        /// <inheritdoc />
+        protected override bool IsLoadDone()
         {
-            switch (loadState)
-            {
-                case LoadWebBundleState.Loading:
-                    //加载中
-                    CheckStateWithLoading();
-                    break;
-                
-                case LoadWebBundleState.Loaded:
-                    //加载结束
-                    CheckStateWithLoaded();
-                    break;
+            return op.webRequest.isDone;
+        }
 
+        /// <inheritdoc />
+        protected override void LoadDone()
+        {
+            if (op.webRequest.result == UnityWebRequest.Result.Success)
+            {
+                BundleRuntimeInfo.Bundle = DownloadHandlerAssetBundle.GetContent(op.webRequest);
             }
         }
-        
-        private void CheckStateWithLoading()
-        {
-            State = TaskState.Running;
 
-            if (op.webRequest.isDone)
-            {
-                loadState = LoadWebBundleState.Loaded;
-
-                if (op.webRequest.result == UnityWebRequest.Result.Success)
-                {
-                    bundleRuntimeInfo.Bundle = DownloadHandlerAssetBundle.GetContent(op.webRequest);
-                }
-            }
-        }
-        
-        private void CheckStateWithLoaded()
-        {
-            State = TaskState.Finished;
-            
-            if (bundleRuntimeInfo.Bundle == null)
-            {
-                Debug.LogError($"WebGL资源包加载失败：{bundleRuntimeInfo.Manifest}，错误信息：{op.webRequest.error}");
-                onFinished?.Invoke(false);
-                foreach (LoadWebBundleTask task in MergedTasks)
-                {
-                    task.onFinished?.Invoke(false);
-                }
-            }
-            else
-            {
-                //Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
-                onFinished?.Invoke(true);
-                foreach (LoadWebBundleTask task in MergedTasks)
-                {
-                    task.onFinished?.Invoke(true);
-                }
-            }
-        }
-        
         /// <summary>
-        /// 创建资源包加载任务的对象
+        /// 创建WebGL资源包加载任务的对象
         /// </summary>
-        public static LoadWebBundleTask Create(TaskRunner owner, string name,LoadBundleCallback callback)
+        public new static LoadWebBundleTask Create(TaskRunner owner, string name,LoadBundleCallback callback)
         {
             LoadWebBundleTask task = ReferencePool.Get<LoadWebBundleTask>();
             task.CreateBase(owner,name);
             
-            task.onFinished = callback;
-            task.bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(name);
+            task.OnFinished = callback;
+            task.BundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(name);
             
             return task;
         }
@@ -126,9 +65,6 @@ namespace CatAsset.Runtime
         {
             base.Clear();
             
-            onFinished = default;
-            bundleRuntimeInfo = default;
-            loadState = default;
             op?.webRequest.Dispose();
             op = default;
         }
