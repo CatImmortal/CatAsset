@@ -11,6 +11,14 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void CheckPackageManifest(Action<bool> callback)
         {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                callback?.Invoke(true);
+                return;
+            }
+#endif
+            
             if (RuntimeMode != RuntimeMode.PackageOnly)
             {
                 Debug.LogError("PackageOnly模式下才能调用CheckPackageManifest");
@@ -48,6 +56,14 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void CheckVersion(OnVersionChecked onVersionChecked)
         {
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                onVersionChecked?.Invoke(new VersionCheckResult(null,0,0));
+                return;
+            }
+#endif
+            
             if (RuntimeMode != RuntimeMode.Updatable)
             {
                 Debug.LogError("Updatable模式下才能调用CheckVersion");

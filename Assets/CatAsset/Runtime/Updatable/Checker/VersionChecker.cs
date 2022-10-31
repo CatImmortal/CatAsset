@@ -111,10 +111,9 @@ namespace CatAsset.Runtime
             if (!success)
             {
                 Debug.LogError($"远端资源清单检查失败:{uwr.error}");
-                VersionCheckResult result = new VersionCheckResult(uwr.error,default,default);
+                VersionCheckResult result = new VersionCheckResult(uwr.error,0,0);
                 onVersionChecked?.Invoke(result);
                 Clear();
-                
                 return;
             }
             
