@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEditor.Build.Pipeline;
@@ -49,6 +50,15 @@ namespace CatAsset.Editor
                 Bundles = new List<BundleManifestInfo>(),
             };
 
+            //增加内置Shader资源包的构建信息
+            string builtInShadersBundleName = "UnityBuiltInShaders.bundle";
+            if (results.BundleInfos.ContainsKey(builtInShadersBundleName))
+            {
+                BundleBuildInfo bundleBuildInfo =
+                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, Util.DefaultGroup, false);
+                infoParam.NormalBundleBuilds.Add(bundleBuildInfo);
+            }
+            
             //创建普通资源包的清单信息
             foreach (BundleBuildInfo bundleBuildInfo in infoParam.NormalBundleBuilds)
             {
@@ -61,16 +71,25 @@ namespace CatAsset.Editor
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
 
-                bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].Name.EndsWith(".unity");
+                if (bundleBuildInfo.Assets.Count > 0)
+                {
+                    bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].Name.EndsWith(".unity");
+                }
 
                 string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = fi.Length;
                 bundleManifestInfo.MD5 = Runtime.Util.GetFileMD5(fullPath);
+                BundleDetails details = results.BundleInfos[bundleManifestInfo.RelativePath];
                 if (configParam.TargetPlatform == BuildTarget.WebGL)
                 {
                     //WebGL平台 记录Hash128用于缓存系统
-                    bundleManifestInfo.Hash = results.BundleInfos[bundleManifestInfo.RelativePath].Hash.ToString();
+                    bundleManifestInfo.Hash = details.Hash.ToString();
+                }
+                if (details.Dependencies.Contains(builtInShadersBundleName))
+                {
+                    //依赖内置Shader资源包
+                    bundleManifestInfo.IsDependencyBuiltInShaderBundle = true;
                 }
                 
                 //资源信息

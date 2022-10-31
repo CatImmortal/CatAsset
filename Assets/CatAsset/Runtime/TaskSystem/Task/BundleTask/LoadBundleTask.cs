@@ -19,6 +19,16 @@ namespace CatAsset.Runtime
         private enum LoadBundleState
         {
             /// <summary>
+            /// 内置Shader资源包加载中
+            /// </summary>
+            BuiltInShaderBundleLoading,
+            
+            /// <summary>
+            /// 内置Shader资源包加载结束
+            /// </summary>
+            BuiltInShaderBundleLoaded,
+            
+            /// <summary>
             /// 资源包加载中
             /// </summary>
             Loading,
@@ -29,7 +39,7 @@ namespace CatAsset.Runtime
             Loaded,
 
         }
-        
+        private LoadBundleCallback onBuiltInShaderBundleLoadedCallback;
         private LoadBundleCallback onFinished;
         private BundleRuntimeInfo bundleRuntimeInfo;
         private LoadBundleState loadState;
@@ -48,14 +58,44 @@ namespace CatAsset.Runtime
                 return request.progress;
             }
         }
-        
-       
-        
+
+        public LoadBundleTask()
+        {
+            onBuiltInShaderBundleLoadedCallback = OnBuiltInShaderBundleLoadedCallback;
+        }
+
         /// <inheritdoc />
         public override void Run()
         {
-            loadState = LoadBundleState.Loading;
-            request =  AssetBundle.LoadFromFileAsync(bundleRuntimeInfo.LoadPath);
+            if (bundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
+            {
+                //此资源包依赖内置Shader资源包
+                BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(Util.BuiltInShaderBundleName);
+                if (builtInShaderBundleRuntimeInfo.Bundle == null)
+                {
+                    //内置Shader资源包未加载 需要加载
+                    BaseTask task;
+                    if (Application.platform == RuntimePlatform.WebGLPlayer)
+                    {
+                        task = LoadWebBundleTask.Create(Owner, builtInShaderBundleRuntimeInfo.Manifest.RelativePath,
+                            onBuiltInShaderBundleLoadedCallback);
+                    }
+                    else
+                    {
+                        task = Create(Owner, builtInShaderBundleRuntimeInfo.Manifest.RelativePath,
+                            onBuiltInShaderBundleLoadedCallback);
+                    }
+                    Owner.AddTask(task, TaskPriority.Middle);
+                    
+                    loadState = LoadBundleState.BuiltInShaderBundleLoading;
+                    return;
+                }
+
+            }
+
+            //此资源包不依赖内置Shader资源包 或内置Shader资源包已加载 直接加载
+            loadState = LoadBundleState.BuiltInShaderBundleLoaded;
+           
         }
 
         /// <inheritdoc />
@@ -63,6 +103,16 @@ namespace CatAsset.Runtime
         {
             switch (loadState)
             {
+                case LoadBundleState.BuiltInShaderBundleLoading:
+                    //内置Shader资源包加载中
+                    CheckStateWithBuiltInShaderBundleLoading();
+                    break;
+                
+                case LoadBundleState.BuiltInShaderBundleLoaded:
+                    //内置Shader资源包加载结束
+                    CheckStateWithBuiltInShaderBundleLoaded();
+                    break;
+                
                 case LoadBundleState.Loading:
                     //加载中
                     CheckStateWithLoading();
@@ -74,6 +124,35 @@ namespace CatAsset.Runtime
                     break;
 
             }
+        }
+        
+        /// <summary>
+        /// 内置Shader资源包加载完毕回调
+        /// </summary>
+        private void OnBuiltInShaderBundleLoadedCallback(bool success)
+        {
+            loadState = LoadBundleState.BuiltInShaderBundleLoaded;
+
+            if (success)
+            {
+                //加载成功 添加依赖链记录
+                BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(Util.BuiltInShaderBundleName);
+                builtInShaderBundleRuntimeInfo.AddDownStream(bundleRuntimeInfo);
+                bundleRuntimeInfo.AddUpStream(builtInShaderBundleRuntimeInfo);
+            }
+        }
+
+        private void CheckStateWithBuiltInShaderBundleLoading()
+        {
+            State = TaskState.Waiting;
+        }
+        
+        private void CheckStateWithBuiltInShaderBundleLoaded()
+        {
+            State = TaskState.Waiting;
+            
+            loadState = LoadBundleState.Loading;
+            request =  AssetBundle.LoadFromFileAsync(bundleRuntimeInfo.LoadPath);
         }
         
         private void CheckStateWithLoading()
@@ -110,6 +189,8 @@ namespace CatAsset.Runtime
                 }
             }
         }
+
+
         
         /// <summary>
         /// 创建资源包加载任务的对象

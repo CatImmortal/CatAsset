@@ -33,7 +33,7 @@ namespace CatAsset.Editor
             BundleBuildContent content = new BundleBuildContent(infoParam.AssetBundleBuilds);
 
             //添加构建任务
-            IList<IBuildTask> taskList = DefaultBuildTasks.Create(DefaultBuildTasks.Preset.AssetBundleCompatible);
+            IList<IBuildTask> taskList = DefaultBuildTasks.Create(DefaultBuildTasks.Preset.AssetBundleBuiltInShaderExtraction);
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.AppendMD5))

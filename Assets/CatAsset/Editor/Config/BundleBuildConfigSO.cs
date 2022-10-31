@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+
 
 namespace CatAsset.Editor
 {
@@ -81,7 +81,7 @@ namespace CatAsset.Editor
         public List<BundleBuildInfo> Bundles;
 
         /// <summary>
-        /// 资源包构建规则名->资源包构建规则接口实例
+        /// 资源包构建规则名 -> 资源包构建规则接口实例
         /// </summary>
         private Dictionary<string, IBundleBuildRule> ruleDict = new Dictionary<string, IBundleBuildRule>();
 
@@ -91,7 +91,7 @@ namespace CatAsset.Editor
         public Dictionary<string, BundleBuildDirectory> DirectoryDict =new Dictionary<string, BundleBuildDirectory>();
         
         /// <summary>
-        /// 资源名 ->资源包构建信息
+        /// 资源名 -> 资源包构建信息
         /// </summary>
         public Dictionary<string, BundleBuildInfo> AssetToBundleDict = new Dictionary<string, BundleBuildInfo>();
 
@@ -153,7 +153,6 @@ namespace CatAsset.Editor
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "分割场景资源包中的非场景资源...", curStep / stepNum);
                 ProfileTime(SplitSceneBundle,sw,"分割场景资源包中的非场景资源");
                 curStep++;
-
 
                 //根据构建规则初始化原生资源包构建信息
                 //如果出现普通资源包中的资源依赖原生资源，那么需要冗余一份原生资源到普通资源包中，因为本质上原生资源是没有资源包的
@@ -237,7 +236,7 @@ namespace CatAsset.Editor
                     explicitBuildAssetSet.Add(assetName);
                 }
             }
-
+            
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
                 //隐式依赖集合
