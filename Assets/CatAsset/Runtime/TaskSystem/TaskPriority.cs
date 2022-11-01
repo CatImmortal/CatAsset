@@ -26,7 +26,7 @@
         Height = 3,
         
         /// <summary>
-        /// 非常高
+        /// 非常高（边玩边下的资源包下载）
         /// </summary>
         VeryHeight = 4,
         

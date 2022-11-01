@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace CatAsset.Runtime
 {
@@ -47,15 +48,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 添加资源包下载任务
         /// </summary>
-        internal static void AddDownloadBundleTask(GroupUpdater groupUpdater, BundleManifestInfo info, string downloadUri,
-            string localFilePath, DownloadBundleCallback callback,TaskPriority priority = TaskPriority.Middle)
+        internal static void AddDownLoadBundleTask(GroupUpdater updater, BundleManifestInfo info,DownloadBundleCallback callback,TaskPriority priority = TaskPriority.Middle)
         {
+            string localFilePath = RuntimeUtil.GetReadWritePath(info.RelativePath);
+            string downloadUri = RuntimeUtil.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath));
+            
             DownloadBundleTask task =
-                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, groupUpdater, downloadUri,
+                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, updater, downloadUri,
                     localFilePath, callback);
             downloadTaskRunner.AddTask(task, priority);
         }
-        
+
 
     }
 }

@@ -170,7 +170,6 @@ namespace CatAsset.Runtime
                     //添加资源组的远端资源包信息
                     GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.RemoteInfo.Group);
                     groupInfo.AddRemoteBundle(checkInfo.RemoteInfo.RelativePath);
-                    groupInfo.RemoteCount++;
                     groupInfo.RemoteLength += checkInfo.RemoteInfo.Length;
                 }
                 
@@ -182,22 +181,22 @@ namespace CatAsset.Runtime
                         totalCount++;
                         totalLength += checkInfo.RemoteInfo.Length;
 
+                        //添加至更新器中
                         GroupUpdater groupUpdater = CatAssetUpdater.GetOrAddGroupUpdater(checkInfo.RemoteInfo.Group);
-                        groupUpdater.AddUpdateBundle(checkInfo.RemoteInfo);
-                        groupUpdater.TotalCount++;
+                        groupUpdater.AddUpdaterBundle(checkInfo.RemoteInfo);
                         groupUpdater.TotalLength += checkInfo.RemoteInfo.Length;
                         
                         break;
                     
                     case CheckState.InReadWrite:
                         //不需要更新 最新版本存在于读写区
-                        
                         GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.ReadWriteInfo.Group);
                         groupInfo.AddLocalBundle(checkInfo.ReadWriteInfo.RelativePath);
-                        groupInfo.LocalCount++;
                         groupInfo.LocalLength += checkInfo.ReadWriteInfo.Length;
                         
+                        //添加运行时信息 表示此资源可从本地加载
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.ReadWriteInfo,true);
+                        //添加读写区清单信息
                         CatAssetUpdater.AddReadWriteManifestInfo(checkInfo.ReadWriteInfo);
                         
                         break;
@@ -207,9 +206,9 @@ namespace CatAsset.Runtime
 
                         groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.ReadOnlyInfo.Group);
                         groupInfo.AddLocalBundle(checkInfo.ReadOnlyInfo.RelativePath);
-                        groupInfo.LocalCount++;
                         groupInfo.LocalLength += checkInfo.ReadOnlyInfo.Length;
                         
+                        //添加运行时信息 表示此资源可从本地加载
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.ReadOnlyInfo,false);
                         break;
                 }

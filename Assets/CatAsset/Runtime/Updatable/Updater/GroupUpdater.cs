@@ -25,35 +25,58 @@ namespace CatAsset.Runtime
         public GroupUpdaterState State { get; internal set; }
         
         /// <summary>
-        /// 需要更新的资源包信息列表
+        /// 资源包下载任务回调
         /// </summary>
-        private List<BundleManifestInfo> updateBundles = new List<BundleManifestInfo>();
+        private DownloadBundleCallback onBundleDownloaded;
+        
+        /// <summary>
+        /// 资源包更新回调(非指定资源包更新)
+        /// </summary>
+        private OnBundleUpdated onBundleUpdated;
 
         /// <summary>
-        /// 已回调的资源包总数
+        /// 资源包 -> 对应资源包更新回调
         /// </summary>
-        private int callbackCount;
+        private Dictionary<BundleManifestInfo, OnBundleUpdated> onBundleUpdatedDict =
+            new Dictionary<BundleManifestInfo, OnBundleUpdated>();
+
+        
+        /// <summary>
+        /// 此更新器的资源包集合（包含待更新的+已更新的）
+        /// </summary>
+        private HashSet<BundleManifestInfo> updaterBundles = new HashSet<BundleManifestInfo>();
+
+        /// <summary>
+        /// 此更新器的资源包总数（包含待更新的+已更新的）
+        /// </summary>
+        public int TotalCount => updaterBundles.Count;
+        
+        /// <summary>
+        /// 此更新器的资源包总长度（包含待更新的+已更新的）
+        /// </summary>
+        public long TotalLength { get; internal set; }
+
+        /// <summary>
+        /// 更新中的资源包集合
+        /// </summary>
+        private HashSet<BundleManifestInfo> updatingBundles = new HashSet<BundleManifestInfo>();
+
+        /// <summary>
+        /// 已更新的资源包集合
+        /// </summary>
+        private HashSet<BundleManifestInfo> updatedBundles = new HashSet<BundleManifestInfo>();
         
         /// <summary>
         /// 已更新的资源包总数
         /// </summary>
-        public int UpdatedCount { get; private set; }
+        public int UpdatedCount => updatedBundles.Count;
 
         /// <summary>
         /// 已更新的资源包总长度
         /// </summary>
         public long UpdatedLength { get; private set; }
-        
-        /// <summary>
-        /// 需要更新的资源包总数
-        /// </summary>
-        public int TotalCount { get; internal set; }
-        
-        /// <summary>
-        /// 需要更新的资源包总长度
-        /// </summary>
-        public long TotalLength { get; internal set; }
 
+        
         /// <summary>
         /// 重新生成一次读写区资源清单所需的下载字节数
         /// </summary>
@@ -64,15 +87,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private long deltaUpdatedLength;
 
-        /// <summary>
-        /// 资源包更新回调
-        /// </summary>
-        private OnBundleUpdated onBundleUpdated;
 
-        /// <summary>
-        /// 资源包下载回调
-        /// </summary>
-        private DownloadBundleCallback onBundleDownloaded;
 
         public GroupUpdater()
         {
@@ -80,34 +95,64 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 添加需要更新的资源包信息
+        /// 添加资源包信息
         /// </summary>
-        internal void AddUpdateBundle(BundleManifestInfo info)
+        internal void AddUpdaterBundle(BundleManifestInfo info)
         {
-            updateBundles.Add(info);
+            updaterBundles.Add(info);
         }
 
         /// <summary>
-        /// 更新资源组
+        /// 更新所有待更新资源包
         /// </summary>
-        internal void UpdateGroup(OnBundleUpdated callback)
+        internal void UpdateBundles(OnBundleUpdated callback,TaskPriority priority = TaskPriority.Middle)
         {
-            if (State != GroupUpdaterState.Free)
+            if (updatingBundles.Count + updatedBundles.Count  == updaterBundles.Count)
             {
-                //非空闲状态 不处理
+                //没有资源需要更新
                 return;
             }
             
             State = GroupUpdaterState.Running;
-            foreach (BundleManifestInfo info in updateBundles)
+            onBundleUpdated += callback;
+            foreach (BundleManifestInfo info in updaterBundles)
             {
-                //创建下载文件的任务
-                string localFilePath = RuntimeUtil.GetReadWritePath(info.RelativePath);
-                string downloadUri = RuntimeUtil.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath));
-                CatAssetManager.AddDownloadBundleTask(this,info,downloadUri,localFilePath,onBundleDownloaded);
+                if (!updatingBundles.Contains(info) && !updatedBundles.Contains(info))
+                {
+                    //不是更新中的 或者已更新的
+                    //添加下载文件的任务
+                    CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,priority);
+                    updatingBundles.Add(info);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 更新指定的资源包
+        /// </summary>
+        internal void UpdateBundle(BundleManifestInfo info, OnBundleUpdated callback,TaskPriority priority = TaskPriority.VeryHeight)
+        {
+            if (!updaterBundles.Contains(info))
+            {
+                //此更新器没有此资源包
+                return;
+            }
+
+            if (updatedBundles.Contains(info))
+            {
+                //此资源包已更新
+                return;
+            }
+
+            if (!updatingBundles.Contains(info))
+            {
+                CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,priority);
+                updatingBundles.Add(info);
             }
             
-            onBundleUpdated = callback;
+            //添加回调
+            onBundleUpdatedDict[info] += callback;
+           
         }
         
         /// <summary>
@@ -115,27 +160,41 @@ namespace CatAsset.Runtime
         /// </summary>
         private void OnBundleDownloaded(bool success, BundleManifestInfo info)
         {
-            callbackCount++;
-            if (callbackCount == TotalCount)
+            //无论是否下载成功 都要从updatingBundles中移除
+            updatingBundles.Remove(info);
+
+            //没有资源需要下载了 改变状态为Free
+            if (updatingBundles.Count == 0)
             {
-                //所有需要下载的资源包都回调过 就将状态改为Free
-                //若此时有下载失败的资源包，导致UpdatedCount < TotalCount，则可通过重新启动此Updater来进行剩余资源包的下载
                 State = GroupUpdaterState.Free;
             }
-
+            
+            OnBundleUpdated callback = onBundleUpdatedDict[info];
+            
             BundleUpdateResult result;
             if (!success)
             {
+                //下载失败
                 Debug.LogError($"更新{info.RelativePath}失败");
+                
                 result = new BundleUpdateResult(false,info.RelativePath,this);
                 onBundleUpdated?.Invoke(result);
+                if (State == GroupUpdaterState.Free)
+                {
+                    onBundleUpdated = null;
+                }
+                
+                if (callback != null)
+                {
+                    onBundleUpdatedDict.Remove(info);
+                    callback.Invoke(result);
+                }
+                
                 return;
             }
 
-            updateBundles.Remove(info);
-            
-            //刷新已下载资源信息
-            UpdatedCount++;
+            //下载成功 刷新已下载资源信息
+            updatedBundles.Add(info);
             UpdatedLength += info.Length;
             deltaUpdatedLength += info.Length;
             
@@ -148,26 +207,35 @@ namespace CatAsset.Runtime
             //刷新资源组本地资源信息
             GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(info.Group);
             groupInfo.AddLocalBundle(info.RelativePath);
-            groupInfo.LocalCount++;
             groupInfo.LocalLength += info.Length;
             
-            bool allDownloaded = UpdatedCount >= TotalCount;
-            if (allDownloaded || deltaUpdatedLength >= generateManifestLength)
+            if (updatingBundles.Count == 0 || deltaUpdatedLength >= generateManifestLength)
             {
-                //资源下载完毕 或者已下载字节数达到要求 就重新生成一次读写区资源清单
+                //没有资源需要下载了 或者已下载字节数达到要求 就重新生成一次读写区资源清单
                 deltaUpdatedLength = 0;
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
 
-            if (allDownloaded)
+            if (UpdatedCount == TotalCount)
             {
                 //该组资源都更新完毕，可以删掉updater了
                 CatAssetUpdater.RemoveGroupUpdater(GroupName);
             }
-            
+
             //调用外部回调
             result = new BundleUpdateResult(true,info.RelativePath,this);
             onBundleUpdated?.Invoke(result);
+            if (State == GroupUpdaterState.Free)
+            {
+                onBundleUpdated = null;
+            }
+            
+            if (callback != null)
+            {
+                onBundleUpdatedDict.Remove(info);
+                callback.Invoke(result);
+            }
+
         }
     }
 }
