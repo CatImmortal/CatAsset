@@ -6,9 +6,6 @@ using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
 {
-    /// <summary>
-    /// 可等待扩展
-    /// </summary>
     public static partial class CatAssetManager
     {
         /// <summary>
@@ -27,14 +24,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<T> LoadAssetAsync<T>(string assetName,GameObject target = null,TaskPriority priority = TaskPriority.Low)
+        public static Task<T> LoadAssetAsync<T>(string assetName,GameObject target,TaskPriority priority = TaskPriority.Low)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
             LoadAssetAsync<T>(assetName, (asset,result) =>
             {
                 if (target != null)
                 {
-                    target.Bind(asset);
+                    target.Bind(result.Asset);
                 }
                 tcs.SetResult(asset);
                
@@ -45,14 +42,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源（可等待）
         /// </summary>
-        public static Task<T> LoadAssetAsync<T>(string assetName,Scene target = default,TaskPriority priority = TaskPriority.Low)
+        public static Task<T> LoadAssetAsync<T>(string assetName,Scene scene,TaskPriority priority = TaskPriority.Low)
         {
             TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
             LoadAssetAsync<T>(assetName, (asset,result) =>
             {
-                if (target != default)
+                if (scene != default)
                 {
-                    target.Bind(result.Asset);
+                    scene.Bind(result.Asset);
                 }
                 tcs.SetResult(asset);
                
@@ -63,7 +60,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源(可等待)
         /// </summary>
-        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,GameObject target = null,TaskPriority priority = TaskPriority.Low)
+        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,GameObject target,TaskPriority priority = TaskPriority.Low)
         {
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAssetAsync(assetNames, (assets) =>
@@ -82,7 +79,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源(可等待)
         /// </summary>
-        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,Scene target = default,TaskPriority priority = TaskPriority.Low)
+        public static Task<List<LoadAssetResult>> BatchLoadAssetAsync(List<string> assetNames,Scene target,TaskPriority priority = TaskPriority.Low)
         {
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAssetAsync(assetNames, (assets) =>

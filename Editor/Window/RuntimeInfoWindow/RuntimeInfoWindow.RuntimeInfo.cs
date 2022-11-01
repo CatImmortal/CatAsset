@@ -186,7 +186,7 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
                 
                 EditorGUILayout.LabelField($"上游资源包数量：{bundleRuntimeInfo.DependencyLink.UpStream.Count}",GUILayout.Width(125));
-                if (GUILayout.Button("查看下游资源包", GUILayout.Width(100)))
+                if (GUILayout.Button("查看上游资源包", GUILayout.Width(100)))
                 {
                     if (bundleRuntimeInfo.DependencyLink.UpStream.Count > 0)
                     {
