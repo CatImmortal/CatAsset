@@ -119,7 +119,7 @@ namespace CatAsset.Runtime
             }
             
             //更新指定资源组
-            groupUpdater.UpdateGroup(callback);
+            groupUpdater.UpdateBundles(callback);
         }
 
         /// <summary>
