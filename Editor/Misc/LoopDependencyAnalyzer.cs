@@ -27,7 +27,7 @@ namespace CatAsset.Editor
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
-                    CheckDependencies(assetBuildInfo.Name, loops, Util.GetDependencies);
+                    CheckDependencies(assetBuildInfo.Name, loops, EditorUtil.GetDependencies);
                 }
             }
 
@@ -99,7 +99,7 @@ namespace CatAsset.Editor
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
-                    List<string> dependencies = Util.GetDependencies(assetBuildInfo.Name, false);
+                    List<string> dependencies = EditorUtil.GetDependencies(assetBuildInfo.Name, false);
 
                     if (dependencies == null)
                     {

@@ -55,9 +55,9 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField(updater.GroupName);
 
                 EditorGUILayout.LabelField(updater.TotalCount.ToString());
-                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(updater.TotalLength));
+                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(updater.TotalLength));
                 EditorGUILayout.LabelField(updater.UpdatedCount.ToString());
-                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(updater.UpdatedLength));
+                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(updater.UpdatedLength));
                 EditorGUILayout.LabelField(updater.State.ToString());
             }
         }

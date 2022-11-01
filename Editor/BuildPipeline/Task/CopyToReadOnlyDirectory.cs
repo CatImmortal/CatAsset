@@ -43,7 +43,7 @@ namespace CatAsset.Editor
                 copyGroupSet = new HashSet<string>(copyGroup.Split(';'));
             }
 
-            Util.CreateEmptyDirectory(Application.streamingAssetsPath);
+            EditorUtil.CreateEmptyDirectory(Application.streamingAssetsPath);
 
             List<BundleManifestInfo> copiedBundles = new List<BundleManifestInfo>();
 
@@ -62,13 +62,12 @@ namespace CatAsset.Editor
 
                 FileInfo fi = new FileInfo(Path.Combine(directory, bundleManifestInfo.RelativePath));
 
-                string fullPath = CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.RelativePath);
+                string fullPath = RuntimeUtil.GetReadOnlyPath(bundleManifestInfo.RelativePath);
 
                 //冗余资源包没有bundleManifestInfo.Directory
                 if (!string.IsNullOrEmpty(bundleManifestInfo.Directory))
                 {
-                    string fullDirectory =
-                        CatAsset.Runtime.Util.GetReadOnlyPath(bundleManifestInfo.Directory);
+                    string fullDirectory = RuntimeUtil.GetReadOnlyPath(bundleManifestInfo.Directory);
                     if (!Directory.Exists(fullDirectory))
                     {
                         //StreamingAssets下的目录不存在则创建

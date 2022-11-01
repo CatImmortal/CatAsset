@@ -51,9 +51,9 @@ namespace CatAsset.Editor
             {
                 EditorGUILayout.LabelField(groupInfo.GroupName);
                 EditorGUILayout.LabelField(groupInfo.RemoteCount.ToString());
-                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(groupInfo.RemoteLength));
+                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(groupInfo.RemoteLength));
                 EditorGUILayout.LabelField(groupInfo.LocalCount.ToString());
-                EditorGUILayout.LabelField(Runtime.Util.GetByteLengthDesc(groupInfo.LocalLength));
+                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(groupInfo.LocalLength));
             }
         }
     }

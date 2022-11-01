@@ -34,7 +34,7 @@ namespace CatAsset.Editor
                 bundleManifestInfo.BundleName = md5BundleName;
 
                 //获取新的相对路径
-                string newRelativePath = Runtime.Util.GetRegularPath(Path.Combine(bundleManifestInfo.Directory,
+                string newRelativePath = RuntimeUtil.GetRegularPath(Path.Combine(bundleManifestInfo.Directory,
                     bundleManifestInfo.BundleName)); 
                     
                 

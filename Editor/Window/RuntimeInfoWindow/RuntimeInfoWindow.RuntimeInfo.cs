@@ -14,11 +14,8 @@ namespace CatAsset.Editor
         private Dictionary<string, BundleRuntimeInfo> bundleRuntimeInfoDict;
         private Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict;
 
-        private Vector2 runtimeInfo;
-
-        private MethodInfo findTextureByTypeMI = typeof(EditorGUIUtility).GetMethod("FindTextureByType", BindingFlags.NonPublic | BindingFlags.Static);
-        private object[] paramObjs = new object[1];
-
+        private Vector2 scrollPos;
+        
         /// <summary>
         /// 是否只显示主动加载的资源
         /// </summary>
@@ -27,7 +24,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包相对路径->是否展开
         /// </summary>
-        private Dictionary<string, bool> foldOutDcit = new Dictionary<string, bool>();
+        private Dictionary<string, bool> foldOutDict = new Dictionary<string, bool>();
 
         /// <summary>
         /// 初始化运行时信息界面
@@ -69,9 +66,9 @@ namespace CatAsset.Editor
                 isOnlyShowActiveLoad = GUILayout.Toggle(isOnlyShowActiveLoad, "只显示主动加载的资源", GUILayout.Width(200));
             }
 
-            using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(runtimeInfo))
+            using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(scrollPos))
             {
-                runtimeInfo = sv.scrollPosition;
+                scrollPos = sv.scrollPosition;
 
                 foreach (KeyValuePair<string, BundleRuntimeInfo> item in bundleRuntimeInfoDict)
                 {
@@ -80,20 +77,20 @@ namespace CatAsset.Editor
                     string bundleRelativePath = item.Key;
                     BundleRuntimeInfo bundleRuntimeInfo = item.Value;
 
-                    if (!foldOutDcit.ContainsKey(bundleRelativePath))
+                    if (!foldOutDict.ContainsKey(bundleRelativePath))
                     {
-                        foldOutDcit.Add(bundleRelativePath, false);
+                        foldOutDict.Add(bundleRelativePath, false);
                     }
 
                     if (isAllFoldOutTrue)
                     {
                         //点击过全部展开
-                        foldOutDcit[bundleRelativePath] = true;
+                        foldOutDict[bundleRelativePath] = true;
                     }
                     else if (isAllFoldOutFalse)
                     {
                         //点击过全部收起
-                        foldOutDcit[bundleRelativePath] = false;
+                        foldOutDict[bundleRelativePath] = false;
                     }
 
 
@@ -127,12 +124,12 @@ namespace CatAsset.Editor
 
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        foldOutDcit[bundleRelativePath] = EditorGUILayout.Foldout(foldOutDcit[bundleRelativePath], bundleRelativePath);
+                        foldOutDict[bundleRelativePath] = EditorGUILayout.Foldout(foldOutDict[bundleRelativePath], bundleRelativePath);
 
                         DrawBundleRuntimeInfo(bundleRuntimeInfo,false);
                     }
 
-                    if (foldOutDcit[bundleRelativePath])
+                    if (foldOutDict[bundleRelativePath])
                     {
                         EditorGUILayout.Space();
 
@@ -173,7 +170,7 @@ namespace CatAsset.Editor
 
                 EditorGUILayout.LabelField($"资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(100));
                 EditorGUILayout.LabelField($"使用中资源数：{bundleRuntimeInfo.UsingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(125));
-                EditorGUILayout.LabelField($"文件长度：{Runtime.Util.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
                 EditorGUILayout.LabelField($"下游资源包数量：{bundleRuntimeInfo.DependencyLink.DownStream.Count}",GUILayout.Width(125));
                 
                 if (GUILayout.Button("查看下游资源包", GUILayout.Width(100)))
@@ -214,7 +211,7 @@ namespace CatAsset.Editor
                 EditorGUI.EndDisabledGroup();
                 
                 //长度
-                EditorGUILayout.LabelField($"\t长度：{Runtime.Util.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}");
+                EditorGUILayout.LabelField($"\t长度：{RuntimeUtil.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}");
                 
                 //引用计数
                 EditorGUILayout.LabelField($"\t引用计数：{assetRuntimeInfo.RefCount}");

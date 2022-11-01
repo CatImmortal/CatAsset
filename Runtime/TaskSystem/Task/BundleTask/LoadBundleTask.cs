@@ -82,7 +82,7 @@ namespace CatAsset.Runtime
             if (BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
             {
                 //此资源包依赖内置Shader资源包
-                BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(Util.BuiltInShaderBundleName);
+                BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
                 if (builtInShaderBundleRuntimeInfo.Bundle == null)
                 {
                     //内置Shader资源包未加载 需要加载
@@ -154,7 +154,7 @@ namespace CatAsset.Runtime
             State = TaskState.Waiting;
             loadState = LoadBundleState.BuiltInShaderBundleLoading;
             
-            BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(Util.BuiltInShaderBundleName);
+            BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
             BaseTask task;
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
@@ -180,7 +180,7 @@ namespace CatAsset.Runtime
             loadState = LoadBundleState.BundleNotLoad;
             
             
-            BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(Util.BuiltInShaderBundleName);
+            BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
             if (builtInShaderBundleRuntimeInfo.Bundle != null)
             {
                 //加载成功 添加依赖链记录

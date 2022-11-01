@@ -25,7 +25,7 @@ namespace CatAsset.Editor
                 
             //写入清单文件json
             string json = JsonUtility.ToJson(manifest,true);
-            using (StreamWriter sw = new StreamWriter(Path.Combine(writePath, CatAsset.Runtime.Util.ManifestFileName)))
+            using (StreamWriter sw = new StreamWriter(Path.Combine(writePath, RuntimeUtil.ManifestFileName)))
             {
                 sw.Write(json);
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
@@ -11,9 +12,9 @@ using Debug = UnityEngine.Debug;
 namespace CatAsset.Editor
 {
     /// <summary>
-    /// 工具类
+    /// 编辑器工具类
     /// </summary>
-    public static class Util
+    public static class EditorUtil
     {
         /// <summary>
         /// 要排除的文件后缀名集合
@@ -120,6 +121,23 @@ namespace CatAsset.Editor
             }
         }
 
+        /// <summary>
+        /// 调用私有的静态方法
+        /// </summary>
+        /// <param name="type">类的类型</param>
+        /// <param name="method">类里要调用的方法名</param>
+        /// <param name="parameters">调用方法传入的参数</param>
+        public static object InvokeNonPublicStaticMethod(System.Type type, string method, params object[] parameters)
+        {
+            var methodInfo = type.GetMethod(method, BindingFlags.NonPublic | BindingFlags.Static);
+            if (methodInfo == null)
+            {
+                UnityEngine.Debug.LogError($"类型：{type.FullName} 中未找到方法: {method}");
+                return null;
+            }
+            return methodInfo.Invoke(null, parameters);
+        }
+        
         
         /// <summary>
         /// 获取排除了自身和csharp代码文件的依赖资源列表
@@ -149,7 +167,6 @@ namespace CatAsset.Editor
 
             return result;
         }
-
 
         /// <summary>
         /// 是否为有效资源

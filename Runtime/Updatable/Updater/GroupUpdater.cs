@@ -102,8 +102,8 @@ namespace CatAsset.Runtime
             foreach (BundleManifestInfo info in updateBundles)
             {
                 //创建下载文件的任务
-                string localFilePath = Util.GetReadWritePath(info.RelativePath);
-                string downloadUri = Util.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath));
+                string localFilePath = RuntimeUtil.GetReadWritePath(info.RelativePath);
+                string downloadUri = RuntimeUtil.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath));
                 CatAssetManager.AddDownloadBundleTask(this,info,downloadUri,localFilePath,onBundleDownloaded);
             }
             

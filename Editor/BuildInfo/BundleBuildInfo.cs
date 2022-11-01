@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CatAsset.Runtime;
 using UnityEditor;
 
 namespace CatAsset.Editor
@@ -53,7 +54,7 @@ namespace CatAsset.Editor
             BundleName = bundleName;
             Group = group;
             IsRaw = isRaw;
-            RelativePath = Runtime.Util.GetRegularPath(Path.Combine(DirectoryName, BundleName));
+            RelativePath = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
         }
 
         /// <summary>

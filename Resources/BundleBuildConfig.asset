@@ -45,9 +45,9 @@ MonoBehaviour:
     RuleRegex: 
     Group: Base
   Bundles:
-  - RelativePath: BundleRes/chapter1.bundle
+  - RelativePath: BundleRes/Chapter1.bundle
     DirectoryName: BundleRes
-    BundleName: chapter1.bundle
+    BundleName: Chapter1.bundle
     Group: Chapter1
     IsRaw: 0
     AssetsLength: 3704
@@ -60,9 +60,9 @@ MonoBehaviour:
       Length: 926
     - Name: Assets/BundleRes/Chapter1/B4.prefab
       Length: 926
-  - RelativePath: BundleRes/chpater2.bundle
+  - RelativePath: BundleRes/Chpater2.bundle
     DirectoryName: BundleRes
-    BundleName: chpater2.bundle
+    BundleName: Chpater2.bundle
     Group: Chapter2
     IsRaw: 0
     AssetsLength: 3704
@@ -75,9 +75,9 @@ MonoBehaviour:
       Length: 926
     - Name: Assets/BundleRes/Chpater2/B4.prefab
       Length: 926
-  - RelativePath: BundleRes/prefaba.bundle
+  - RelativePath: BundleRes/PrefabA.bundle
     DirectoryName: BundleRes
-    BundleName: prefaba.bundle
+    BundleName: PrefabA.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 5830
@@ -90,9 +90,9 @@ MonoBehaviour:
       Length: 1457
     - Name: Assets/BundleRes/PrefabA/A4.prefab
       Length: 1459
-  - RelativePath: BundleRes/prefabb.bundle
+  - RelativePath: BundleRes/PrefabB.bundle
     DirectoryName: BundleRes
-    BundleName: prefabb.bundle
+    BundleName: PrefabB.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 3704
@@ -114,18 +114,18 @@ MonoBehaviour:
     Assets:
     - Name: Assets/BundleRes/RawText/rawText1.txt
       Length: 17
-  - RelativePath: BundleRes/Scene/new scene_unity.bundle
+  - RelativePath: BundleRes/Scene/New Scene_unity.bundle
     DirectoryName: BundleRes/Scene
-    BundleName: new scene_unity.bundle
+    BundleName: New Scene_unity.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 5801
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
       Length: 5801
-  - RelativePath: BundleRes/Scene/new scene2_unity.bundle
+  - RelativePath: BundleRes/Scene/New Scene2_unity.bundle
     DirectoryName: BundleRes/Scene
-    BundleName: new scene2_unity.bundle
+    BundleName: New Scene2_unity.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 5801
