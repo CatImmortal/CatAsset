@@ -21,15 +21,18 @@ namespace CatAsset.Editor
 
         private void OnGUI()
         {
-            svc = (ShaderVariantCollection)EditorGUILayout.ObjectField("选择SVC：", svc, typeof(ShaderVariantCollection));
+            svc = (ShaderVariantCollection)EditorGUILayout.ObjectField("选择SVC：", svc, typeof(ShaderVariantCollection),false);
             EditorGUILayout.LabelField($"SVC中的Shader数：{ShaderVariantCollector.GetCurrentShaderVariantCollectionShaderCount()}");
             EditorGUILayout.LabelField($"SVC中的Shader变体数：{ShaderVariantCollector.GetCurrentShaderVariantCollectionVariantCount()}");
             if (GUILayout.Button("收集Shader变体"))
             {
-                string path = AssetDatabase.GetAssetPath(svc);
                 ShaderVariantCollector.CollectVariant(svc);
-                svc = AssetDatabase.LoadAssetAtPath<ShaderVariantCollection>(path);  //这里重新恢复引用 因为旧文件被删除了
             }
+        }
+
+        public void SetSVC(ShaderVariantCollection svc)
+        {
+            this.svc = svc;
         }
     }
 }
