@@ -15,7 +15,7 @@ namespace CatAsset.Runtime
         public bool IsEditorMode = true;
 
         [Header("资源包卸载延迟")]
-        public float UnloadBundleDelayTime = 60f;
+        public float UnloadBundleDelayTime = 120f;
 
         [Header("资源卸载延迟")]
         public float UnloadAssetDelayTime = 60f;
