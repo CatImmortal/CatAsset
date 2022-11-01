@@ -119,7 +119,22 @@ namespace CatAsset.Runtime
             }
             
             //更新指定资源组
-            groupUpdater.UpdateBundles(callback);
+            groupUpdater.UpdateGroup(callback);
+        }
+
+        /// <summary>
+        /// 更新指定资源组的资源包
+        /// </summary>
+        internal static void UpdateBundle(string group,BundleManifestInfo info, OnBundleUpdated callback,
+            TaskPriority priority = TaskPriority.VeryHeight)
+        {
+            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
+            {
+                Debug.LogError($"更新失败，没有找到该资源组的资源更新器：{group}");
+                return;
+            }
+            //更新指定资源包
+            groupUpdater.UpdateBundle(info,callback);
         }
 
         /// <summary>

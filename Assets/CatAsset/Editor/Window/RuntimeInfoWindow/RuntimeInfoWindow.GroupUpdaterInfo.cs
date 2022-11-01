@@ -33,9 +33,9 @@ namespace CatAsset.Editor
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("资源组");
-                EditorGUILayout.LabelField("更新资源总数");
-                EditorGUILayout.LabelField("更新资源长度");
-                EditorGUILayout.LabelField("已更新资源数");
+                EditorGUILayout.LabelField("资源包总数");
+                EditorGUILayout.LabelField("资源包长度");
+                EditorGUILayout.LabelField("已更新资源包总数");
                 EditorGUILayout.LabelField("已更新资源长度");
                 EditorGUILayout.LabelField("状态");
             }

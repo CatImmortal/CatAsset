@@ -32,10 +32,10 @@ namespace CatAsset.Editor
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("资源组");
-                EditorGUILayout.LabelField("远端资源数");
-                EditorGUILayout.LabelField("远端资源长度");
-                EditorGUILayout.LabelField("本地资源数");
-                EditorGUILayout.LabelField("本地资源长度");
+                EditorGUILayout.LabelField("远端资源包数");
+                EditorGUILayout.LabelField("远端资源包长度");
+                EditorGUILayout.LabelField("本地资源包数");
+                EditorGUILayout.LabelField("本地资源包长度");
 
             }
 

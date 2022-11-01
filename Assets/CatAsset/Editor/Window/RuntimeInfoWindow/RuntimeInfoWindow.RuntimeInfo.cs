@@ -168,7 +168,7 @@ namespace CatAsset.Editor
                     EditorGUILayout.Space();
                 }
 
-                EditorGUILayout.LabelField($"资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(100));
+                EditorGUILayout.LabelField($"资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(150));
                 EditorGUILayout.LabelField($"使用中资源数：{bundleRuntimeInfo.UsingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(125));
                 EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
                 EditorGUILayout.LabelField($"下游资源包数量：{bundleRuntimeInfo.DependencyLink.DownStream.Count}",GUILayout.Width(125));
