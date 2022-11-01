@@ -15,26 +15,32 @@ namespace CatAsset.Editor
     public static class ShaderVariantCollector
     {
         private const float WaitMilliseconds = 1000f;
-        private static bool isCollected = false;
+        private static bool isCollecting = false;
         private static Stopwatch sw = new Stopwatch();
         private static ShaderVariantCollection svc;
         private static void EditorUpdate()
         {
             // 注意：一定要延迟保存才会起效
-            if (isCollected && sw.ElapsedMilliseconds > WaitMilliseconds)
+            if (isCollecting && sw.ElapsedMilliseconds > WaitMilliseconds)
             {
-                isCollected = false;
+                isCollecting = false;
                 sw.Stop();
                 EditorApplication.update -= EditorUpdate;
                 
                 //删除旧的svc文件
                 string savePath = AssetDatabase.GetAssetPath(svc);
                 AssetDatabase.DeleteAsset(savePath);
+                svc = null;
                 
-                // 保存结果
+                //保存结果
                 SaveCurrentShaderVariantCollection(savePath);
 
-                svc = null;
+                //恢复引用
+                EditorWindow.GetWindow<ShaderVariantCollectWindow>()?.SetSVC(AssetDatabase.LoadAssetAtPath<ShaderVariantCollection>(savePath));
+
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+                
                 Debug.Log($"Shader变体收集完毕");
 
             }
@@ -49,6 +55,13 @@ namespace CatAsset.Editor
             {
                 return;
             }
+
+            if (isCollecting)
+            {
+                return;
+            }
+
+            isCollecting = true;
 
             ShaderVariantCollector.svc = svc;
 
@@ -67,7 +80,6 @@ namespace CatAsset.Editor
             CollectVariant(materials);
             
             EditorApplication.update += EditorUpdate;
-            isCollected = true;
             sw.Reset();
             sw.Start();
         }
