@@ -140,9 +140,9 @@ namespace CatAsset.Editor
         /// </summary>
         private static string CreateFullOutputPath(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
-            string fullOutputPath = Util.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+            string fullOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                 bundleBuildConfig.ManifestVersion);
-            Util.CreateEmptyDirectory(fullOutputPath);
+            EditorUtil.CreateEmptyDirectory(fullOutputPath);
             return fullOutputPath;
         }
     }

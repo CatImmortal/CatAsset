@@ -23,8 +23,8 @@ namespace CatAsset.Editor
                 foreach (DirectoryInfo topDirInfo in topDirectories)
                 {
                     //每个一级目录构建成一个资源包
-                    string assetsDir = Util.FullNameToAssetName(topDirInfo.FullName);
-                    if (Util.IsChildDirectory(assetsDir,bundleBuildDirectory.DirectoryName))
+                    string assetsDir = EditorUtil.FullNameToAssetName(topDirInfo.FullName);
+                    if (EditorUtil.IsChildDirectory(assetsDir,bundleBuildDirectory.DirectoryName))
                     {
                         //跳过子构建目录
                         continue;

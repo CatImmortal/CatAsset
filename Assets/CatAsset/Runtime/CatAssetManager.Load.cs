@@ -87,7 +87,7 @@ namespace CatAsset.Runtime
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                category = Util.GetAssetCategoryWithEditorMode(assetName,assetType);
+                category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName,assetType);
 
                 object asset;
                 try
@@ -102,7 +102,7 @@ namespace CatAsset.Runtime
                         //加载原生资源
                         if (category == AssetCategory.ExternalRawAsset)
                         {
-                            assetName = Util.GetReadWritePath(assetName);
+                            assetName = RuntimeUtil.GetReadWritePath(assetName);
                         }
 
                         asset = File.ReadAllBytes(assetName);
@@ -120,7 +120,7 @@ namespace CatAsset.Runtime
             }
 #endif
             
-            category = Util.GetAssetCategory(assetName);
+            category = RuntimeUtil.GetAssetCategory(assetName);
             
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo.RefCount > 0)

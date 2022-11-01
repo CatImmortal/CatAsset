@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -15,9 +16,7 @@ namespace CatAsset.Editor
         private Dictionary<string, bool> foldOutDict = new Dictionary<string, bool>();
 
         private Vector2 scrollPos;
-        private MethodInfo findTextureByTypeMI = typeof(EditorGUIUtility).GetMethod("FindTextureByType", BindingFlags.NonPublic | BindingFlags.Static);
-        private object[] paramObjs = new object[1];
-        
+
         /// <summary>
         /// 绘制资源包预览界面
         /// </summary>
@@ -78,7 +77,7 @@ namespace CatAsset.Editor
                         
                         EditorGUILayout.LabelField("资源组：" + bundleBuildInfo.Group,GUILayout.Width(150));
                         EditorGUILayout.LabelField("资源数：" + bundleBuildInfo.Assets.Count,GUILayout.Width(100));
-                        EditorGUILayout.LabelField("总长度：" + Runtime.Util.GetByteLengthDesc(bundleBuildInfo.AssetsLength),GUILayout.Width(200));
+                        EditorGUILayout.LabelField("总长度：" + RuntimeUtil.GetByteLengthDesc(bundleBuildInfo.AssetsLength),GUILayout.Width(200));
                         
                     }
                     
@@ -110,7 +109,7 @@ namespace CatAsset.Editor
                 EditorGUI.EndDisabledGroup();
                 
                 //文件长度
-                EditorGUILayout.LabelField($"\t长度：{Runtime.Util.GetByteLengthDesc(assetBuildInfo.Length)}");
+                EditorGUILayout.LabelField($"\t长度：{RuntimeUtil.GetByteLengthDesc(assetBuildInfo.Length)}");
             }
            
         }

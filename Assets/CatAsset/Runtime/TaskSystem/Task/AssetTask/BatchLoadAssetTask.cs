@@ -76,7 +76,7 @@ namespace CatAsset.Runtime
             //保证资源顺序和加载顺序一致
             foreach (string assetName in assetNames)
             {
-                AssetCategory category = Util.GetAssetCategory(assetName);
+                AssetCategory category = RuntimeUtil.GetAssetCategory(assetName);
                 AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
                 loadedAssets.Add(new LoadAssetResult(assetRuntimeInfo.Asset, category));
             }

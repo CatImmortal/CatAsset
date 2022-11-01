@@ -65,7 +65,7 @@ namespace CatAsset.Runtime
 
             //写入清单文件json
             string json = JsonUtility.ToJson(manifest, true);
-            string path = Util.GetReadWritePath(Util.ManifestFileName);
+            string path = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName);
             if (File.Exists(path))
             {
                 File.Delete(path);

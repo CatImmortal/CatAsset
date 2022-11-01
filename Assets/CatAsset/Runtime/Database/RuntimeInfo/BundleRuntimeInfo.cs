@@ -37,11 +37,11 @@ namespace CatAsset.Runtime
                 {
                     if (InReadWrite)
                     {
-                        loadPath = Util.GetReadWritePath(Manifest.RelativePath);
+                        loadPath = RuntimeUtil.GetReadWritePath(Manifest.RelativePath);
                     }
                     else
                     {
-                        loadPath = Util.GetReadOnlyPath(Manifest.RelativePath);
+                        loadPath = RuntimeUtil.GetReadOnlyPath(Manifest.RelativePath);
                     }
                 }
                 return loadPath;

@@ -8,7 +8,10 @@ using UnityEngine.Profiling;
 
 namespace CatAsset.Runtime
 {
-    public class Util
+    /// <summary>
+    /// 运行时工具类
+    /// </summary>
+    public static class RuntimeUtil
     {
         /// <summary>
         /// 资源清单文件名

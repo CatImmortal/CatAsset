@@ -42,15 +42,15 @@ namespace CatAsset.Editor
             
             foreach (FileInfo file in files)
             {
-                string assetDir = Util.FullNameToAssetName(file.Directory.FullName);
-                if (Util.IsChildDirectory(assetDir,buildDirectory))
+                string assetDir = EditorUtil.FullNameToAssetName(file.Directory.FullName);
+                if (EditorUtil.IsChildDirectory(assetDir,buildDirectory))
                 {
                     //跳过子构建目录
                     continue;
                 }
                 
-                string assetName = Util.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
-                if (!Util.IsValidAsset(assetName))
+                string assetName = EditorUtil.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
+                if (!EditorUtil.IsValidAsset(assetName))
                 {
                     continue;
                 }

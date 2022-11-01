@@ -46,9 +46,9 @@ namespace CatAsset.Runtime
             onVersionChecked = callback;
             
             //进行只读区 读写区 远端三方的资源清单检查
-            string readOnlyManifestPath = Util.GetReadOnlyPath(Util.ManifestFileName);
-            string readWriteManifestPath = Util.GetReadWritePath(Util.ManifestFileName);
-            string remoteManifestPath = Util.GetRemotePath(Util.ManifestFileName);
+            string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
+            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName);
+            string remoteManifestPath = RuntimeUtil.GetRemotePath(RuntimeUtil.ManifestFileName);
             
             CatAssetManager.CheckUpdatableManifest(readOnlyManifestPath,CheckReadOnlyManifest);
             CatAssetManager.CheckUpdatableManifest(readWriteManifestPath,CheckReadWriteManifest);
@@ -218,7 +218,7 @@ namespace CatAsset.Runtime
                 {
                     //需要删除读写区的那份
                     Debug.Log($"删除读写区资源:{checkInfo.Name}");
-                    string path = Util.GetReadWritePath(checkInfo.Name);
+                    string path = RuntimeUtil.GetReadWritePath(checkInfo.Name);
                     File.Delete(path);
 
                     needGenerateReadWriteManifest = true;

@@ -115,7 +115,7 @@ namespace CatAsset.Runtime
             if (isVerify)
             {
                 //文件长度对得上 再校验MD5
-                string md5 = Util.GetFileMD5(localTempFilePath);
+                string md5 = RuntimeUtil.GetFileMD5(localTempFilePath);
                 isVerify = md5 == bundleManifestInfo.MD5;
             }
 

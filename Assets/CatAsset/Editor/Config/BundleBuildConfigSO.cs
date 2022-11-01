@@ -68,7 +68,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 要复制到只读目录下的资源组，以分号分隔
         /// </summary>
-        public string CopyGroup = Util.DefaultGroup;
+        public string CopyGroup = EditorUtil.DefaultGroup;
 
         /// <summary>
         /// 资源包构建目录列表
@@ -247,7 +247,7 @@ namespace CatAsset.Editor
                 {
                     //检查依赖列表
                     string assetName = assetBuildInfo.Name;
-                    List<string> dependencies = Util.GetDependencies(assetName);
+                    List<string> dependencies = EditorUtil.GetDependencies(assetName);
                     
                     foreach (string dependency in dependencies)
                     {

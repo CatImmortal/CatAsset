@@ -26,7 +26,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            string path = Util.GetReadOnlyPath(Util.ManifestFileName);
+            string path = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
 
             WebRequestTask task = WebRequestTask.Create(loadTaskRunner, path, path, callback,
                 (success, uwr, userdata) =>
@@ -88,7 +88,7 @@ namespace CatAsset.Runtime
         public static void ImportInternalAsset(string manifestPath, Action<bool> callback,
             string bundleRelativePathPrefix = null)
         {
-            manifestPath = Util.GetReadWritePath(manifestPath);
+            manifestPath = RuntimeUtil.GetReadWritePath(manifestPath);
             WebRequestTask task = WebRequestTask.Create(loadTaskRunner, manifestPath, manifestPath, callback,
                 (success, uwr, userdata) =>
                 {
@@ -108,7 +108,7 @@ namespace CatAsset.Runtime
                             if (!string.IsNullOrEmpty(bundleRelativePathPrefix))
                             {
                                 //为资源包目录名添加额外前缀
-                                bundleManifestInfo.Directory = Util.GetRegularPath(Path.Combine(bundleRelativePathPrefix,
+                                bundleManifestInfo.Directory = RuntimeUtil.GetRegularPath(Path.Combine(bundleRelativePathPrefix,
                                     bundleManifestInfo.Directory));
                             }
 

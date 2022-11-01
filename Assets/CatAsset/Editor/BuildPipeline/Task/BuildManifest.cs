@@ -55,7 +55,7 @@ namespace CatAsset.Editor
             if (results.BundleInfos.ContainsKey(builtInShadersBundleName))
             {
                 BundleBuildInfo bundleBuildInfo =
-                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, Util.DefaultGroup, false);
+                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, EditorUtil.DefaultGroup, false);
                 infoParam.NormalBundleBuilds.Add(bundleBuildInfo);
             }
             
@@ -79,7 +79,7 @@ namespace CatAsset.Editor
                 string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = fi.Length;
-                bundleManifestInfo.MD5 = Runtime.Util.GetFileMD5(fullPath);
+                bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
                 BundleDetails details = results.BundleInfos[bundleManifestInfo.RelativePath];
                 if (configParam.TargetPlatform == BuildTarget.WebGL)
                 {
@@ -104,7 +104,7 @@ namespace CatAsset.Editor
                     bundleManifestInfo.Assets.Add(assetManifestInfo);
 
                     //依赖列表不需要进行递归记录 因为加载的时候会对依赖进行递归加载
-                    assetManifestInfo.Dependencies = Util.GetDependencies(assetManifestInfo.Name, false);
+                    assetManifestInfo.Dependencies = EditorUtil.GetDependencies(assetManifestInfo.Name, false);
                 }
             }
 
@@ -124,7 +124,7 @@ namespace CatAsset.Editor
                 string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = fi.Length;
-                bundleManifestInfo.MD5 = Runtime.Util.GetFileMD5(fullPath);
+                bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
                 
                 //资源信息
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()

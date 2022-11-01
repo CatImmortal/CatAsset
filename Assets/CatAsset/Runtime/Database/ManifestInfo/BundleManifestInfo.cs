@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
             {
                 if (relativePath == null)
                 {
-                    relativePath = Util.GetRegularPath(Path.Combine(Directory, BundleName));
+                    relativePath = RuntimeUtil.GetRegularPath(Path.Combine(Directory, BundleName));
                 }
                 return relativePath;
             }
