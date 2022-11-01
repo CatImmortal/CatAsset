@@ -231,7 +231,7 @@ namespace CatAsset.Runtime
             }
             
             //调用版本检查完毕回调
-            VersionCheckResult result = new VersionCheckResult(string.Empty,totalCount, totalLength);
+            VersionCheckResult result = new VersionCheckResult(null,totalCount, totalLength);
             onVersionChecked?.Invoke(result);
                 
             Clear();

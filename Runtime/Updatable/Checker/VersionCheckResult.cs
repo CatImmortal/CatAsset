@@ -29,7 +29,7 @@
 
         public override string ToString()
         {
-            return $"VersionCheckResult Error:{Error},TotalCount:{TotalCount},TotalLength:{TotalLength}";
+            return $"VersionCheckResult Error:{Error ?? "null"},TotalCount:{TotalCount},TotalLength:{TotalLength}";
         }
     }
 }

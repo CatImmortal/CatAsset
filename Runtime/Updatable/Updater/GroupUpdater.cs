@@ -105,7 +105,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 更新所有待更新资源包
         /// </summary>
-        internal void UpdateBundles(OnBundleUpdated callback,TaskPriority priority = TaskPriority.Middle)
+        internal void UpdateGroup(OnBundleUpdated callback,TaskPriority priority = TaskPriority.Middle)
         {
             if (updatingBundles.Count + updatedBundles.Count  == updaterBundles.Count)
             {
@@ -151,7 +151,16 @@ namespace CatAsset.Runtime
             }
             
             //添加回调
-            onBundleUpdatedDict[info] += callback;
+            if (!onBundleUpdatedDict.TryGetValue(info,out OnBundleUpdated value))
+            {
+                onBundleUpdatedDict.Add(info,callback);
+            }
+            else
+            {
+                value += callback;
+                onBundleUpdatedDict[info] = value;
+            }
+           
            
         }
         
@@ -169,7 +178,7 @@ namespace CatAsset.Runtime
                 State = GroupUpdaterState.Free;
             }
             
-            OnBundleUpdated callback = onBundleUpdatedDict[info];
+            onBundleUpdatedDict.TryGetValue(info, out OnBundleUpdated callback);
             
             BundleUpdateResult result;
             if (!success)
