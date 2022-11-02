@@ -24,7 +24,7 @@ namespace CatAsset.Runtime
         /// 游戏对象池管理器的根节点
         /// </summary>
         public static Transform Root;
-        
+
         /// <summary>
         /// 默认对象失效时间
         /// </summary>
@@ -104,7 +104,7 @@ namespace CatAsset.Runtime
                 GetGameObjectAsync(loadedPrefabDict[prefabName], parent, callback);
                 return;
             }
-            
+
             //此prefab未加载过，先加载
             CatAssetManager.LoadAssetAsync<GameObject>(prefabName, (prefab, result) =>
             {
@@ -112,12 +112,12 @@ namespace CatAsset.Runtime
                 {
                     return;
                 }
-                
+
                 loadedPrefabDict[prefabName] = prefab;
-                
+
                 //这里要先调用GetGameObject 才能保证 poolDict[prefab] 不为空
                 GetGameObjectAsync(prefab, parent, callback);
-                
+
                 //进行资源绑定
                 GameObject root = poolDict[prefab].Root.gameObject;
                 root.Bind(result.Asset);
@@ -206,20 +206,25 @@ namespace CatAsset.Runtime
             waitInstantiateQueue.Enqueue((prefab, parent, callback));
         }
 
-        
+
         /// <summary>
         /// 预热对象
         /// </summary>
         public static void Prewarm(string prefabName,int count,Action callback)
         {
             List<GameObject> objects = new List<GameObject>(count);
-            
             Prewarm(prefabName,count,0,objects, () =>
             {
+                foreach (GameObject go in objects)
+                {
+                    ReleaseGameObject(prefabName,go);
+                }
                 callback?.Invoke();
             });
+
+
         }
-        
+
         /// <summary>
         /// 递归预热对象
         /// </summary>
@@ -229,8 +234,8 @@ namespace CatAsset.Runtime
             {
                 counter++;
                 objects.Add(go);
-                ReleaseGameObject(prefabName,go);
-                
+                go.SetActive(false);
+
                 if (counter < count)
                 {
                     //预热未结束
@@ -244,33 +249,38 @@ namespace CatAsset.Runtime
                 }
             }));
         }
-        
-        
+
+
         /// <summary>
         /// 预热对象
         /// </summary>
         public static void Prewarm(GameObject template,int count,Action callback)
         {
-            Prewarm(template,count,0, () =>
+            List<GameObject> objects = new List<GameObject>(count);
+            Prewarm(template,count,0,objects, () =>
             {
+                foreach (GameObject go in objects)
+                {
+                    ReleaseGameObject(template,go);
+                }
                 callback?.Invoke();
             });
         }
-        
+
         /// <summary>
         /// 递归预热对象
         /// </summary>
-        private static void Prewarm(GameObject template,int count,int counter,Action callback)
+        private static void Prewarm(GameObject template,int count,int counter,List<GameObject> objects,Action callback)
         {
             GetGameObjectAsync(template,Root,(go =>
             {
                 counter++;
-                ReleaseGameObject(template,go);
+                go.SetActive(false);
                 if (counter < count)
                 {
                     //预热未结束
                     //递归预热下去
-                    Prewarm(template,count,counter,callback);
+                    Prewarm(template,count,counter,objects,callback);
                 }
                 else
                 {
