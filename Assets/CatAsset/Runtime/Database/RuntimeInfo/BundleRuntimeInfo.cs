@@ -10,6 +10,29 @@ namespace CatAsset.Runtime
     public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>,IEquatable<BundleRuntimeInfo>
     {
         /// <summary>
+        /// 状态
+        /// </summary>
+        public enum State
+        {
+            None,
+            
+            /// <summary>
+            /// 位于只读区
+            /// </summary>
+            InReadOnly,
+            
+            /// <summary>
+            /// 位于读写区
+            /// </summary>
+            InReadWrite,
+            
+            /// <summary>
+            /// 位于远端
+            /// </summary>
+            InRemote,
+        }
+        
+        /// <summary>
         /// 资源包清单信息
         /// </summary>
         public BundleManifestInfo Manifest;
@@ -20,9 +43,9 @@ namespace CatAsset.Runtime
         public AssetBundle Bundle;
 
         /// <summary>
-        /// 是否位于读写区
+        /// 资源包状态
         /// </summary>
-        public bool InReadWrite;
+        public State BundleState;
 
         private string loadPath;
         
@@ -35,13 +58,17 @@ namespace CatAsset.Runtime
             {
                 if (loadPath == null)
                 {
-                    if (InReadWrite)
+                    switch (BundleState)
                     {
-                        loadPath = RuntimeUtil.GetReadWritePath(Manifest.RelativePath);
-                    }
-                    else
-                    {
-                        loadPath = RuntimeUtil.GetReadOnlyPath(Manifest.RelativePath);
+                        case State.InReadOnly:
+                            loadPath = RuntimeUtil.GetReadOnlyPath(Manifest.RelativePath);
+                            break;
+                        case State.InReadWrite:
+                            loadPath = RuntimeUtil.GetReadWritePath(Manifest.RelativePath);
+                            break;
+                        default:
+                            Debug.LogError($"资源包：{this}的loadPath获取错误，资源包状态：{BundleState}");
+                            break;
                     }
                 }
                 return loadPath;

@@ -85,7 +85,7 @@ namespace CatAsset.Runtime
         
         public bool Equals(BundleManifestInfo other)
         {
-            return RelativePath.Equals(other.RelativePath)  && Length.Equals(other.Length) && MD5.Equals(other.MD5) && Group.Equals(other.Group);
+            return RelativePath.Equals(other.RelativePath)  && Length.Equals(other.Length) && MD5.Equals(other.MD5);
         }
 
         public override string ToString()

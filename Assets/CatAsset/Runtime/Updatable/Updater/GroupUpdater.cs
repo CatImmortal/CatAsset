@@ -89,7 +89,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 从上一次重新生成读写区资源清单到现在下载的字节数
         /// </summary>
-        private long deltaUpdatedLength;
+        private static long deltaUpdatedLength;
 
 
 
@@ -211,8 +211,9 @@ namespace CatAsset.Runtime
             UpdatedLength += info.Length;
             deltaUpdatedLength += info.Length;
             
-            //将下载好的资源包的运行时信息添加到CatAssetDatabase中
-            CatAssetDatabase.InitRuntimeInfo(info, true);
+            //将下载好的资源包的状态从 InRemote 修改为 InReadWrite，表示可从本地读写区加载
+            BundleRuntimeInfo bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(info.RelativePath);
+            bundleRuntimeInfo.BundleState = BundleRuntimeInfo.State.InReadWrite;
             
             //刷新读写区资源信息列表
             CatAssetUpdater.AddReadWriteManifestInfo(info);
@@ -222,9 +223,9 @@ namespace CatAsset.Runtime
             groupInfo.AddLocalBundle(info.RelativePath);
             groupInfo.LocalLength += info.Length;
             
-            if (updatingBundles.Count == 0 || deltaUpdatedLength >= generateManifestLength)
+            if (IsAllUpdated || deltaUpdatedLength >= generateManifestLength)
             {
-                //没有资源需要下载了 或者已下载字节数达到要求 就重新生成一次读写区资源清单
+                //需要更新的资源都更新完了 或者已下载字节数达到要求 就重新生成一次读写区资源清单
                 deltaUpdatedLength = 0;
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
