@@ -201,6 +201,7 @@ namespace CatAsset.Runtime
             loadState = LoadBundleState.BundleDownloading;
             
             //下载本地不存在的资源包
+            Debug.Log($"开始下载：{BundleRuntimeInfo.Manifest.RelativePath}");
             CatAssetManager.UpdateBundle(BundleRuntimeInfo.Manifest.Group,BundleRuntimeInfo.Manifest,onBundleUpdated);
         }
         

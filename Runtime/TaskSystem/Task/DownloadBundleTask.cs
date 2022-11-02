@@ -9,7 +9,7 @@ namespace CatAsset.Runtime
     /// 资源包下载完成回调的原型
     /// </summary>
     public delegate void DownloadBundleCallback(bool success, BundleManifestInfo info);
-    
+
     /// <summary>
     /// 资源包下载任务
     /// </summary>
@@ -20,16 +20,16 @@ namespace CatAsset.Runtime
         private string downloadUri;
         private string localFilePath;
         private DownloadBundleCallback onFinished;
-        
+
         private string localTempFilePath;
         private UnityWebRequestAsyncOperation op;
 
         private ulong oldFileLength;
         private ulong downloadedBytes;
-        
+
         private const int maxRetryCount = 3;
         private int retriedCount;
-        
+
         /// <inheritdoc />
         public override float Progress
         {
@@ -42,7 +42,7 @@ namespace CatAsset.Runtime
                 return op.webRequest.downloadProgress;
             }
         }
-        
+
         /// <inheritdoc />
         public override void Run()
         {
@@ -54,7 +54,7 @@ namespace CatAsset.Runtime
 
             //旧文件长度
             oldFileLength = 0;
-            
+
             //先检查本地是否已存在临时下载文件
             if (File.Exists(localTempFilePath))
             {
@@ -62,7 +62,7 @@ namespace CatAsset.Runtime
                 FileInfo fi = new FileInfo(localTempFilePath);
                 oldFileLength = (ulong)fi.Length;
             }
-            
+
             UnityWebRequest uwr = new UnityWebRequest(downloadUri);
             if (oldFileLength > 0)
             {
@@ -82,7 +82,7 @@ namespace CatAsset.Runtime
                 State = TaskState.Free;
                 return;
             }
-            
+
             if (!op.webRequest.isDone)
             {
                 //下载中
@@ -96,7 +96,7 @@ namespace CatAsset.Runtime
                 //下载失败 重试
                 if (RetryDownload())
                 {
-                    Debug.LogError($"下载失败准备重试：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
+                    Debug.Log($"下载失败准备重试：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
                 }
                 else
                 {
@@ -107,7 +107,7 @@ namespace CatAsset.Runtime
                 }
                 return;
             }
-            
+
             //下载成功 开始校验
             //先对比文件长度
             FileInfo fi = new FileInfo(localTempFilePath);
@@ -123,10 +123,10 @@ namespace CatAsset.Runtime
             {
                 //校验失败 删除临时下载文件 尝试重新下载
                 File.Delete(localTempFilePath);
-                
+
                 if (RetryDownload())
                 {
-                    Debug.LogError($"校验失败准备重试：{Name}，当前重试次数：{retriedCount}");
+                    Debug.Log($"校验失败准备重试：{Name}，当前重试次数：{retriedCount}");
                 }
                 else
                 {
@@ -135,14 +135,14 @@ namespace CatAsset.Runtime
                     State = TaskState.Finished;
                     onFinished?.Invoke(false ,bundleManifestInfo);
                 }
-                
+
                 return;
             }
-            
-            
+
+
             //校验成功
             State = TaskState.Finished;
-                    
+
             //将临时下载文件覆盖到正式文件上
             if (File.Exists(localFilePath))
             {
@@ -162,15 +162,12 @@ namespace CatAsset.Runtime
                 //重试
                 retriedCount++;
                 State = TaskState.Free;
-                op.webRequest.Dispose();
-                op = null;
-
                 return true;
             }
 
             return false;
         }
-        
+
         public static DownloadBundleTask Create(TaskRunner owner, string name, BundleManifestInfo bundleManifestInfo,
             GroupUpdater groupUpdater, string downloadUri, string localFilePath, DownloadBundleCallback onFinished)
         {
@@ -183,7 +180,7 @@ namespace CatAsset.Runtime
             task.localFilePath = localFilePath;
             task.onFinished = onFinished;
             task.localTempFilePath = localFilePath + ".downloading";
-            
+
             return task;
         }
 
@@ -196,14 +193,13 @@ namespace CatAsset.Runtime
             downloadUri = default;
             localFilePath = default;
             onFinished = default;
-            
+
             localTempFilePath = default;
-            op?.webRequest.Dispose();
             op = default;
 
             oldFileLength = default;
             downloadedBytes = default;
-            
+
             retriedCount = default;
         }
     }

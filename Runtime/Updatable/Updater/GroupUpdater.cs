@@ -116,18 +116,20 @@ namespace CatAsset.Runtime
                 //没有资源需要更新
                 return;
             }
-            
+
             State = GroupUpdaterState.Running;
             onBundleUpdated += callback;
             foreach (BundleManifestInfo info in updaterBundles)
             {
-                if (!updatingBundles.Contains(info) && !updatedBundles.Contains(info))
+                if (updatedBundles.Contains(info))
                 {
-                    //不是更新中的 或者已更新的
-                    //添加下载文件的任务
-                    CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,priority);
-                    updatingBundles.Add(info);
+                    continue;
                 }
+                
+                //不是更新中的 或者已更新的
+                //添加下载文件的任务
+                CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,priority);
+                updatingBundles.Add(info);
             }
         }
         
@@ -148,11 +150,8 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (!updatingBundles.Contains(info))
-            {
-                CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,priority);
-                updatingBundles.Add(info);
-            }
+            CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,priority);
+            updatingBundles.Add(info);
             
             //添加回调
             if (!onBundleUpdatedDict.TryGetValue(info,out OnBundleUpdated value))
@@ -164,8 +163,6 @@ namespace CatAsset.Runtime
                 value += callback;
                 onBundleUpdatedDict[info] = value;
             }
-           
-           
         }
         
         /// <summary>
@@ -173,6 +170,12 @@ namespace CatAsset.Runtime
         /// </summary>
         private void OnBundleDownloaded(bool success, BundleManifestInfo info)
         {
+            if (updatedBundles.Contains(info))
+            {
+                //重复的回调 不处理
+                return;
+            }
+            
             //无论是否下载成功 都要从updatingBundles中移除
             updatingBundles.Remove(info);
 

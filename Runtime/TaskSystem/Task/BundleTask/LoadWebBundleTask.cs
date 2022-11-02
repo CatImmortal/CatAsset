@@ -65,7 +65,6 @@ namespace CatAsset.Runtime
         {
             base.Clear();
             
-            op?.webRequest.Dispose();
             op = default;
         }
     }

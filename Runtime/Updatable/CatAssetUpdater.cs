@@ -110,7 +110,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 更新资源组
         /// </summary>
-        internal static void UpdateGroup(string group,OnBundleUpdated callback)
+        internal static void UpdateGroup(string group,OnBundleUpdated callback,TaskPriority priority = TaskPriority.Middle)
         {
             if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
             {
@@ -119,7 +119,7 @@ namespace CatAsset.Runtime
             }
             
             //更新指定资源组
-            groupUpdater.UpdateGroup(callback);
+            groupUpdater.UpdateGroup(callback,priority);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace CatAsset.Runtime
                 return;
             }
             //更新指定资源包
-            groupUpdater.UpdateBundle(info,callback);
+            groupUpdater.UpdateBundle(info,callback,priority);
         }
 
         /// <summary>
