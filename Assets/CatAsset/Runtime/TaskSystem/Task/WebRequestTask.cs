@@ -8,7 +8,7 @@ namespace CatAsset.Runtime
     /// Web请求任务完成回调的原型
     /// </summary>
     public delegate void WebRequestCallback(bool success,UnityWebRequest uwr,object userdata);
-    
+
     /// <summary>
     /// Web请求任务
     /// </summary>
@@ -17,7 +17,7 @@ namespace CatAsset.Runtime
         private string uri;
         private object userdata;
         private WebRequestCallback onFinished;
-        
+
         private UnityWebRequestAsyncOperation op;
 
         /// <inheritdoc />
@@ -32,7 +32,7 @@ namespace CatAsset.Runtime
                 return op.progress;
             }
         }
-        
+
         /// <inheritdoc />
         public override void Run()
         {
@@ -81,19 +81,18 @@ namespace CatAsset.Runtime
             task.uri = uri;
             task.userdata = userdata;
             task.onFinished = callback;
-            
+
             return task;
         }
-        
+
         /// <inheritdoc />
         public override void Clear()
         {
             base.Clear();
-            
+
             uri = default;
             userdata = default;
             onFinished = default;
-            op?.webRequest.Dispose();
             op = default;
         }
     }
