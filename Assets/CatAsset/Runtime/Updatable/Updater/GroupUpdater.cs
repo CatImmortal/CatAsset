@@ -76,6 +76,10 @@ namespace CatAsset.Runtime
         /// </summary>
         public long UpdatedLength { get; private set; }
 
+        /// <summary>
+        /// 是否已全部更新
+        /// </summary>
+        public bool IsAllUpdated => UpdatedCount == TotalCount;
         
         /// <summary>
         /// 重新生成一次读写区资源清单所需的下载字节数
@@ -225,7 +229,7 @@ namespace CatAsset.Runtime
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
 
-            if (UpdatedCount == TotalCount)
+            if (IsAllUpdated)
             {
                 //该组资源都更新完毕，可以删掉updater了
                 CatAssetUpdater.RemoveGroupUpdater(GroupName);

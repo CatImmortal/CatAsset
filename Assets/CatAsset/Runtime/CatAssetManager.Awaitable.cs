@@ -22,6 +22,19 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 检查资源版本，可更新资源模式下专用
+        /// </summary>
+        public static Task<VersionCheckResult> CheckVersion()
+        {
+            TaskCompletionSource<VersionCheckResult> tcs = new TaskCompletionSource<VersionCheckResult>();
+            CheckVersion((result =>
+            {
+                tcs.SetResult(result);
+            }));
+            return tcs.Task;
+        }
+
+        /// <summary>
         /// 加载资源（可等待）
         /// </summary>
         public static Task<T> LoadAssetAsync<T>(string assetName,GameObject target,TaskPriority priority = TaskPriority.Low)
