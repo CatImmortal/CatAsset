@@ -55,19 +55,19 @@ namespace CatAsset.Runtime
             
             foreach (BundleManifestInfo info in manifest.Bundles)
             {
-                InitRuntimeInfo(info, false);
+                InitRuntimeInfo(info,BundleRuntimeInfo.State.InReadOnly);
             }
         }
         
         /// <summary>
         /// 根据资源包清单信息初始化运行时信息
         /// </summary>
-        internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, bool inReadWrite)
+        internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, BundleRuntimeInfo.State state)
         {
             BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
             bundleRuntimeInfoDict.Add(bundleManifestInfo.RelativePath, bundleRuntimeInfo);
             bundleRuntimeInfo.Manifest = bundleManifestInfo;
-            bundleRuntimeInfo.InReadWrite = inReadWrite;
+            bundleRuntimeInfo.BundleState = state;
 
             foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
             {
@@ -148,7 +148,7 @@ namespace CatAsset.Runtime
                 BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo
                 {
                     Manifest = assetRuntimeInfo.BundleManifest,
-                    InReadWrite = true,
+                    BundleState = BundleRuntimeInfo.State.InReadWrite,
                 };
                 bundleRuntimeInfoDict.Add(bundleRuntimeInfo.Manifest.RelativePath,bundleRuntimeInfo);
             }

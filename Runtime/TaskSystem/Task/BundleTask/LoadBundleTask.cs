@@ -21,6 +21,21 @@ namespace CatAsset.Runtime
             None,
             
             /// <summary>
+            /// 资源包不存在于本地
+            /// </summary>
+            BundleNotExist,
+            
+            /// <summary>
+            /// 资源包下载中
+            /// </summary>
+            BundleDownloading,
+            
+            /// <summary>
+            /// 资源包下载结束
+            /// </summary>
+            BundleDownloaded,
+            
+            /// <summary>
             /// 内置Shader资源包未加载
             /// </summary>
             BuiltInShaderBundleNotLoad,
@@ -34,7 +49,7 @@ namespace CatAsset.Runtime
             /// 内置Shader资源包加载结束
             /// </summary>
             BuiltInShaderBundleLoaded,
-            
+
             /// <summary>
             /// 资源包未加载
             /// </summary>
@@ -51,9 +66,13 @@ namespace CatAsset.Runtime
             BundleLoaded,
 
         }
-        private LoadBundleCallback onBuiltInShaderBundleLoadedCallback;
+        
         protected LoadBundleCallback OnFinished;
         protected BundleRuntimeInfo BundleRuntimeInfo;
+
+        private OnBundleUpdated onBundleUpdated;
+        private LoadBundleCallback onBuiltInShaderBundleLoadedCallback;
+        
         private LoadBundleState loadState;
         private AssetBundleCreateRequest request;
 
@@ -73,37 +92,47 @@ namespace CatAsset.Runtime
 
         public LoadBundleTask()
         {
+            onBundleUpdated = OnBundleUpdated;
             onBuiltInShaderBundleLoadedCallback = OnBuiltInShaderBundleLoadedCallback;
         }
+        
 
         /// <inheritdoc />
         public override void Run()
         {
-            if (BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
+            if (BundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InRemote)
             {
-                //此资源包依赖内置Shader资源包
-                BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
-                if (builtInShaderBundleRuntimeInfo.Bundle == null)
-                {
-                    //内置Shader资源包未加载 需要加载
-                    loadState = LoadBundleState.BuiltInShaderBundleNotLoad;
-                }
-                else
-                {
-                    //内置Shader资源包已加载 添加依赖链记录
-                    loadState = LoadBundleState.BuiltInShaderBundleLoaded;
-                }
+                //不在本地 需要先下载
+                loadState = LoadBundleState.BundleNotExist;
             }
             else
             {
-                //不需要加载内置资源包
-                loadState = LoadBundleState.BundleNotLoad;
+                //在本地了 不需要下载 检查是否需要加载内置Shader资源包
+                loadState = LoadBundleState.BundleDownloaded;
             }
         }
 
         /// <inheritdoc />
         public override void Update()
         {
+            if (loadState == LoadBundleState.BundleNotExist)
+            {
+                //资源包不存在于本地
+                CheckStateWithBundleNotExist();
+            }
+
+            if (loadState == LoadBundleState.BundleDownloading)
+            {
+                //资源包下载中
+                CheckStateWithBundleDownloading();
+            }
+
+            if (loadState == LoadBundleState.BundleDownloaded)
+            {
+                //资源包下载结束
+                CheckStateWithBundleDownloaded();
+            }
+            
             if (loadState == LoadBundleState.BuiltInShaderBundleNotLoad)
             {
                 //内置Shader资源包未加载
@@ -142,6 +171,23 @@ namespace CatAsset.Runtime
         }
         
         /// <summary>
+        /// 资源包更新完毕回调
+        /// </summary>
+        private void OnBundleUpdated(BundleUpdateResult result)
+        {
+            if (!result.Success)
+            {
+                //下载失败
+                loadState = LoadBundleState.BundleLoaded;
+                return;
+            }
+
+            //下载成功 检测是否需要加载内置Shader资源包
+            Debug.Log($"下载成功：{result.BundleRelativePath}");
+            loadState = LoadBundleState.BundleDownloaded;
+        }
+        
+        /// <summary>
         /// 内置Shader资源包加载完毕回调
         /// </summary>
         private void OnBuiltInShaderBundleLoadedCallback(bool success)
@@ -149,6 +195,46 @@ namespace CatAsset.Runtime
             loadState = LoadBundleState.BuiltInShaderBundleLoaded;
         }
 
+        private void CheckStateWithBundleNotExist()
+        {
+            State = TaskState.Waiting;
+            loadState = LoadBundleState.BundleDownloading;
+            
+            //下载本地不存在的资源包
+            CatAssetManager.UpdateBundle(BundleRuntimeInfo.Manifest.Group,BundleRuntimeInfo.Manifest,onBundleUpdated);
+        }
+        
+        private void CheckStateWithBundleDownloading()
+        {
+            State = TaskState.Waiting;
+        }
+        
+        private void CheckStateWithBundleDownloaded()
+        {
+            State = TaskState.Waiting;
+            
+            if (BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
+            {
+                //此资源包依赖内置Shader资源包
+                BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
+                if (builtInShaderBundleRuntimeInfo.Bundle == null)
+                {
+                    //内置Shader资源包未加载 需要加载
+                    loadState = LoadBundleState.BuiltInShaderBundleNotLoad;
+                }
+                else
+                {
+                    //内置Shader资源包已加载 添加依赖链记录
+                    loadState = LoadBundleState.BuiltInShaderBundleLoaded;
+                }
+            }
+            else
+            {
+                //不需要加载内置Shader资源包
+                loadState = LoadBundleState.BundleNotLoad;
+            }
+        }
+        
         private void CheckStateWithBuiltInShaderBundleNotLoad()
         {
             State = TaskState.Waiting;
@@ -239,7 +325,7 @@ namespace CatAsset.Runtime
         /// </summary>
         protected virtual void LoadAsync()
         {
-            request =  AssetBundle.LoadFromFileAsync(BundleRuntimeInfo.LoadPath);
+            request = AssetBundle.LoadFromFileAsync(BundleRuntimeInfo.LoadPath);
         }
         
         /// <summary>

@@ -123,7 +123,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 更新指定资源组的资源包
+        /// 更新指定的资源包
         /// </summary>
         internal static void UpdateBundle(string group,BundleManifestInfo info, OnBundleUpdated callback,
             TaskPriority priority = TaskPriority.VeryHeight)

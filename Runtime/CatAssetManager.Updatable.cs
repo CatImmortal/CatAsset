@@ -36,13 +36,30 @@ namespace CatAsset.Runtime
         {
             CatAssetUpdater.UpdateGroup(group, callback);
         }
+        
+        /// <summary>
+        /// 更新指定的资源包
+        /// </summary>
+        public static void UpdateBundle(string group, BundleManifestInfo info, OnBundleUpdated callback,
+            TaskPriority priority = TaskPriority.VeryHeight)
+        {
+            CatAssetUpdater.UpdateBundle(group,info,callback,priority);
+        }
 
         /// <summary>
         /// 暂停资源组更新
         /// </summary>
-        public static void PauseGroupUpdater(string group, bool isPause)
+        public static void PauseGroupUpdater(string group)
         {
-            CatAssetUpdater.PauseGroupUpdate(group, isPause);
+            CatAssetUpdater.PauseGroupUpdate(group, true);
+        }
+        
+        /// <summary>
+        /// 恢复资源组更新
+        /// </summary>
+        public static void ResumeGroupUpdater(string group)
+        {
+            CatAssetUpdater.PauseGroupUpdate(group, false);
         }
 
         /// <summary>

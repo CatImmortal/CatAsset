@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     public enum RuntimeMode
     {
         /// <summary>
-        /// 仅使用安装包内资源
+        /// 仅使用安装包内资源（WebGL平台只能使用此模式）
         /// </summary>
         PackageOnly,
 

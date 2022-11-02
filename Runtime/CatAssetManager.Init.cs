@@ -63,7 +63,7 @@ namespace CatAsset.Runtime
                 return;
             }
 #endif
-            
+
             if (RuntimeMode != RuntimeMode.Updatable)
             {
                 Debug.LogError("Updatable模式下才能调用CheckVersion");
@@ -112,7 +112,7 @@ namespace CatAsset.Runtime
                                     bundleManifestInfo.Directory));
                             }
 
-                            CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo, true);
+                            CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo,BundleRuntimeInfo.State.InReadWrite);
                         }
 
                         Debug.Log("内置资源导入完毕");
