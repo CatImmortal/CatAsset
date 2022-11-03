@@ -3,11 +3,7 @@ using UnityEngine;
 
 namespace CatAsset.Runtime
 {
-    /// <summary>
-    /// 批量资源加载任务完成回调的原型
-    /// </summary>
-    public delegate void BatchLoadAssetCallback(List<LoadAssetResult> assets);
-    
+
     /// <summary>
     /// 批量资源加载任务
     /// </summary>

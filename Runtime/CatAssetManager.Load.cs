@@ -26,63 +26,37 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAssetAsync(string assetName,LoadAssetCallback<object> callback,
-            TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<object> LoadAssetAsync(string assetName,TaskPriority priority = TaskPriority.Low)
         {
-            int id = InternalLoadAssetAsync(assetName, typeof(object), callback, ((userdata, result) =>
-            {
-                LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
-                localCallback?.Invoke(result.Asset,result);
-            }),priority);
-            return id;
+            return InternalLoadAssetAsync<object>(assetName, priority);
         }
         
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAssetAsync(string assetName,Type assetType,LoadAssetCallback<object> callback,
-            TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<T> LoadAssetAsync<T>(string assetName,TaskPriority priority = TaskPriority.Low)
         {
-            int id = InternalLoadAssetAsync(assetName, assetType, callback, ((userdata, result) =>
-            {
-                LoadAssetCallback<object> localCallback = (LoadAssetCallback<object>)userdata;
-                localCallback?.Invoke(result.Asset,result);
-            }),priority);
-            return id;
+            return InternalLoadAssetAsync<T>(assetName, priority);
         }
-
+        
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static int LoadAssetAsync<T>(string assetName,LoadAssetCallback<T> callback,
-            TaskPriority priority = TaskPriority.Low)
+        private static AssetHandler<T> InternalLoadAssetAsync<T>(string assetName, TaskPriority priority)
         {
-            int id = InternalLoadAssetAsync(assetName, typeof(T), callback, ((userdata, result) =>
-            {
-                LoadAssetCallback<T> localCallback = (LoadAssetCallback<T>)userdata;
-                localCallback?.Invoke(result.GetAsset<T>(),result);
-            }),priority);
-            return id;
-        }
 
-        /// <summary>
-        /// 加载资源
-        /// </summary>
-        private static int InternalLoadAssetAsync(string assetName, Type assetType,object userdata, InternalLoadAssetCallback callback,
-            TaskPriority priority)
-        {
+            AssetHandler<T> handler;
+                
             if (string.IsNullOrEmpty(assetName))
             {
                 Debug.LogError("资源加载失败，资源名为空");
-                return 0;
-            }
-
-            if (assetType == null)
-            {
-                Debug.LogError("资源加载失败，资源类型为空");
-                return 0;
+                handler = AssetHandler<T>.Create();
+                handler.SetAssetObj(null);
+                return handler;
             }
             
+            Type assetType = typeof(T);
+
             AssetCategory category;
 #if UNITY_EDITOR
             if (IsEditorMode)
@@ -110,57 +84,61 @@ namespace CatAsset.Runtime
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(userdata, default);
-                    throw;
+                    Debug.LogError($"{e.Message}\r\n{e.StackTrace}");
+                    handler = AssetHandler<T>.Create();
+                    handler.SetAssetObj(null);
+                    return handler;
                 }
 
-                LoadAssetResult result = new LoadAssetResult(asset, category);
-                callback?.Invoke(userdata, result);
-                return 0;
+
+                handler = AssetHandler<T>.Create(category);
+                handler.SetAssetObj(asset);
+                return handler;
             }
 #endif
             
             category = RuntimeUtil.GetAssetCategory(assetName);
+            handler = AssetHandler<T>.Create(category);
             
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo.RefCount > 0)
             {
                 //引用计数>0
-                //直接增加引用计数 通知回调
+                //直接增加引用计数
                 assetRuntimeInfo.AddRefCount();
-                
-                LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
-                callback?.Invoke(userdata,result);
-                
-                return 0;
+                handler.SetAssetObj(assetRuntimeInfo.Asset);
+                return handler;
             }
             
             //引用计数=0 需要走一遍资源加载任务的流程
             switch (category)
             {
                 case AssetCategory.None:
-                    callback?.Invoke(userdata, default);
-                    return default;
+                    handler.SetAssetObj(null);
+                    break;
 
                 case AssetCategory.InternalBundledAsset:
                     //加载内置资源包资源
                     LoadBundledAssetTask loadBundledAssetTask =
-                        LoadBundledAssetTask.Create(loadTaskRunner, assetName, assetType,userdata, callback);
+                        LoadBundledAssetTask.Create(loadTaskRunner, assetName, assetType,handler);
                     loadTaskRunner.AddTask(loadBundledAssetTask, priority);
-                    return loadBundledAssetTask.ID;
+
+                    handler.Task = loadBundledAssetTask;
+                    break;
 
 
                 case AssetCategory.InternalRawAsset:
                 case AssetCategory.ExternalRawAsset:
                     //加载原生资源
                     LoadRawAssetTask loadRawAssetTask =
-                        LoadRawAssetTask.Create(loadTaskRunner, assetName, category,userdata,callback);
+                        LoadRawAssetTask.Create(loadTaskRunner, assetName, category,handler);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
 
-                    return loadRawAssetTask.ID;
+                    handler.Task = loadRawAssetTask;
+                    break;
             }
 
-            return default;
+            return handler;
         }
 
         /// <summary>

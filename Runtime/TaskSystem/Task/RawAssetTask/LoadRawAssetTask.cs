@@ -29,8 +29,7 @@ namespace CatAsset.Runtime
         }
 
         private AssetCategory category;
-        private object userdata;
-        private InternalLoadAssetCallback onFinished;
+        private BaseAssetHandler handler;
 
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
@@ -185,14 +184,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建原生资源加载任务的对象
         /// </summary>
-        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,object userdata,InternalLoadAssetCallback callback)
+        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,BaseAssetHandler handler)
         {
             LoadRawAssetTask task = ReferencePool.Get<LoadRawAssetTask>();
             task.CreateBase(owner,name);
             
             task.category = category;
-            task.userdata = userdata;
-            task.onFinished = callback;
+            task.handler = handler;
             task.assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.bundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(task.assetRuntimeInfo.BundleManifest.RelativePath);

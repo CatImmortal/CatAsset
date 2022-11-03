@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
             {
                 //引用计数 > 0
                 //跳过依赖的加载 直接加载场景
-                LoadState = LoadBundleAssetState.DependenciesLoaded;
+                LoadState = LoadBundledAssetState.DependenciesLoaded;
             }
             else
             {
