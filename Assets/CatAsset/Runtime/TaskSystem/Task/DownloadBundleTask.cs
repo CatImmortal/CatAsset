@@ -5,10 +5,16 @@ using UnityEngine.Networking;
 
 namespace CatAsset.Runtime
 {
+        
     /// <summary>
     /// 资源包下载完成回调的原型
     /// </summary>
     public delegate void DownloadBundleCallback(bool success, BundleManifestInfo info);
+    
+    /// <summary>
+    /// 资源包下载进度更新回调的原型
+    /// </summary>
+    public delegate void DownloadBundleUpdateCallback(ulong deltaDownloadedBytes,ulong totalDownloadedBytes, BundleManifestInfo info);
 
     /// <summary>
     /// 资源包下载任务
@@ -20,12 +26,14 @@ namespace CatAsset.Runtime
         private string downloadUri;
         private string localFilePath;
         private DownloadBundleCallback onFinished;
+        private DownloadBundleUpdateCallback onDownloadUpdate;
+        
 
         private string localTempFilePath;
         private UnityWebRequestAsyncOperation op;
-
-        private ulong oldFileLength;
+        
         private ulong downloadedBytes;
+
 
         private const int maxRetryCount = 3;
         private int retriedCount;
@@ -53,6 +61,7 @@ namespace CatAsset.Runtime
             }
 
             //先检查本地是否已存在临时下载文件
+            ulong oldFileLength = 0;
             if (File.Exists(localTempFilePath))
             {
                 //检查已下载的字节数
@@ -84,7 +93,13 @@ namespace CatAsset.Runtime
             {
                 //下载中
                 State = TaskState.Running;
-                downloadedBytes = oldFileLength + op.webRequest.downloadedBytes;
+                ulong newDownloadedBytes = op.webRequest.downloadedBytes;
+                if (downloadedBytes != newDownloadedBytes)
+                {
+                    ulong deltaDownloadedBytes = newDownloadedBytes - downloadedBytes;
+                    onDownloadUpdate?.Invoke(deltaDownloadedBytes,newDownloadedBytes,bundleManifestInfo);
+                    downloadedBytes = newDownloadedBytes;
+                }
                 return;
             }
 
@@ -101,10 +116,6 @@ namespace CatAsset.Runtime
                     Debug.LogError($"下载失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
                     onFinished?.Invoke(false ,bundleManifestInfo);
-                    foreach (DownloadBundleTask task in MergedTasks)
-                    {
-                        task.onFinished?.Invoke(false,bundleManifestInfo);
-                    }
                 }
                 return;
             }
@@ -135,10 +146,6 @@ namespace CatAsset.Runtime
                     Debug.LogError($"下载失败重试次数达到上限：{Name}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
                     onFinished?.Invoke(false ,bundleManifestInfo);
-                    foreach (DownloadBundleTask task in MergedTasks)
-                    {
-                        task.onFinished?.Invoke(false,bundleManifestInfo);
-                    }
                 }
 
                 return;
@@ -155,10 +162,6 @@ namespace CatAsset.Runtime
             }
             File.Move(localTempFilePath, localFilePath);
             onFinished?.Invoke(true,bundleManifestInfo);
-            foreach (DownloadBundleTask task in MergedTasks)
-            {
-                task.onFinished?.Invoke(true,bundleManifestInfo);
-            }
         }
 
         /// <summary>
@@ -169,8 +172,6 @@ namespace CatAsset.Runtime
             if (retriedCount < maxRetryCount)
             {
                 //重试
-                oldFileLength = 0;
-                downloadedBytes = 0;
                 retriedCount++;
                 State = TaskState.Free;
                 return true;
@@ -180,7 +181,7 @@ namespace CatAsset.Runtime
         }
 
         public static DownloadBundleTask Create(TaskRunner owner, string name, BundleManifestInfo bundleManifestInfo,
-            GroupUpdater groupUpdater, string downloadUri, string localFilePath, DownloadBundleCallback onFinished)
+            GroupUpdater groupUpdater, string downloadUri, string localFilePath, DownloadBundleCallback onFinished,DownloadBundleUpdateCallback onDownloadUpdate)
         {
             DownloadBundleTask task = ReferencePool.Get<DownloadBundleTask>();
             task.CreateBase(owner, name);
@@ -190,6 +191,7 @@ namespace CatAsset.Runtime
             task.downloadUri = downloadUri;
             task.localFilePath = localFilePath;
             task.onFinished = onFinished;
+            task.onDownloadUpdate = onDownloadUpdate;
             task.localTempFilePath = localFilePath + ".downloading";
 
             return task;
@@ -207,8 +209,7 @@ namespace CatAsset.Runtime
 
             localTempFilePath = default;
             op = default;
-
-            oldFileLength = default;
+            
             downloadedBytes = default;
 
             retriedCount = default;

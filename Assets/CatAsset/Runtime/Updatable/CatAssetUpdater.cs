@@ -12,7 +12,7 @@ namespace CatAsset.Runtime
         /// 资源更新Uri前缀，下载资源文件时会以 UpdateUriPrefix/BundleRelativePath 为下载地址
         /// </summary>
         internal static string UpdateUriPrefix;
-        
+
         /// <summary>
         /// 资源包相对路径->读写区资源包清单信息，用于生成读写区资源清单
         /// </summary>
@@ -30,7 +30,7 @@ namespace CatAsset.Runtime
         {
             readWriteManifestInfoDict[info.RelativePath] = info;
         }
-        
+
         /// <summary>
         /// 移除读写区资源包清单信息
         /// </summary>
@@ -38,7 +38,7 @@ namespace CatAsset.Runtime
         {
             readWriteManifestInfoDict.Remove(info.RelativePath);
         }
-        
+
         /// <summary>
         /// 清空读写区资源包清单信息
         /// </summary>
@@ -46,7 +46,7 @@ namespace CatAsset.Runtime
         {
             readWriteManifestInfoDict.Clear();
         }
-        
+
         /// <summary>
         /// 生成读写区资源清单
         /// </summary>
@@ -75,7 +75,7 @@ namespace CatAsset.Runtime
                 sw.Write(json);
             }
         }
-        
+
         /// <summary>
         /// 获取指定资源组的更新器，若不存在则添加
         /// </summary>
@@ -110,14 +110,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 更新资源组
         /// </summary>
-        internal static void UpdateGroup(string group,OnBundleUpdated callback,TaskPriority priority = TaskPriority.Middle)
+        internal static void UpdateGroup(string group,BundleUpdatedCallback callback,TaskPriority priority = TaskPriority.Middle)
         {
             if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
             {
                 Debug.LogError($"更新失败，没有找到该资源组的资源更新器：{group}");
                 return;
             }
-            
+
             //更新指定资源组
             groupUpdater.UpdateGroup(callback,priority);
         }
@@ -125,7 +125,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 更新指定的资源包
         /// </summary>
-        internal static void UpdateBundle(string group,BundleManifestInfo info, OnBundleUpdated callback,
+        internal static void UpdateBundle(string group,BundleManifestInfo info, BundleUpdatedCallback callback,
             TaskPriority priority = TaskPriority.VeryHeight)
         {
             if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
