@@ -228,9 +228,6 @@ namespace CatAsset.Runtime
             //没有资源需要更新了 改变状态为Free
             if (updatingBundles.Count == 0)
             {
-                Speed = UpdatedLength - lastRecordDownloadBytes;
-                Debug.Log($"当前下载速度:{RuntimeUtil.GetByteLengthDesc((long)Speed)}");
-
                 State = GroupUpdaterState.Free;
                 Speed = 0;
                 lastRecordTime = 0;
@@ -263,15 +260,11 @@ namespace CatAsset.Runtime
 
             //下载成功 刷新已下载资源信息
             updatedBundles.Add(info);
-            //UpdatedLength += info.Length;
             deltaUpdatedLength += info.Length;
 
             //将下载好的资源包的状态从 InRemote 修改为 InReadWrite，表示可从本地读写区加载
             BundleRuntimeInfo bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(info.RelativePath);
             bundleRuntimeInfo.BundleState = BundleRuntimeInfo.State.InReadWrite;
-
-            //刷新读写区资源信息列表
-            CatAssetUpdater.AddReadWriteManifestInfo(info);
 
             //刷新资源组本地资源信息
             GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(info.Group);

@@ -28,12 +28,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 默认对象失效时间
         /// </summary>
-        public static float DefaultObjectExpireTime = 30;
+        public static float DefaultObjectExpireTime = 60;
 
         /// <summary>
         /// 默认对象池失效时间
         /// </summary>
-        public static float DefaultPoolExpireTime = 60;
+        public static float DefaultPoolExpireTime = 120;
 
         /// <summary>
         /// 单帧最大实例化数
