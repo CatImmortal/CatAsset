@@ -52,9 +52,6 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            //旧文件长度
-            oldFileLength = 0;
-
             //先检查本地是否已存在临时下载文件
             if (File.Exists(localTempFilePath))
             {
@@ -101,9 +98,13 @@ namespace CatAsset.Runtime
                 else
                 {
                     //重试次数达到上限 通知失败
-                    Debug.LogError($"重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
+                    Debug.LogError($"下载失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
                     onFinished?.Invoke(false ,bundleManifestInfo);
+                    foreach (DownloadBundleTask task in MergedTasks)
+                    {
+                        task.onFinished?.Invoke(false,bundleManifestInfo);
+                    }
                 }
                 return;
             }
@@ -131,9 +132,13 @@ namespace CatAsset.Runtime
                 else
                 {
                     //重试次数达到上限 通知失败
-                    Debug.LogError($"重试次数达到上限：{Name}，当前重试次数：{retriedCount}");
+                    Debug.LogError($"下载失败重试次数达到上限：{Name}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
                     onFinished?.Invoke(false ,bundleManifestInfo);
+                    foreach (DownloadBundleTask task in MergedTasks)
+                    {
+                        task.onFinished?.Invoke(false,bundleManifestInfo);
+                    }
                 }
 
                 return;
@@ -150,6 +155,10 @@ namespace CatAsset.Runtime
             }
             File.Move(localTempFilePath, localFilePath);
             onFinished?.Invoke(true,bundleManifestInfo);
+            foreach (DownloadBundleTask task in MergedTasks)
+            {
+                task.onFinished?.Invoke(true,bundleManifestInfo);
+            }
         }
 
         /// <summary>
@@ -160,6 +169,8 @@ namespace CatAsset.Runtime
             if (retriedCount < maxRetryCount)
             {
                 //重试
+                oldFileLength = 0;
+                downloadedBytes = 0;
                 retriedCount++;
                 State = TaskState.Free;
                 return true;

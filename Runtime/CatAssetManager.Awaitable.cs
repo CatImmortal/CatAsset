@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 检查资源版本，可更新资源模式下专用
+        /// 检查资源版本，可更新模式下专用
         /// </summary>
         public static Task<VersionCheckResult> CheckVersion()
         {

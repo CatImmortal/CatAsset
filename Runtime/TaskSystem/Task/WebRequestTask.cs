@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace CatAsset.Runtime
@@ -19,6 +20,8 @@ namespace CatAsset.Runtime
         private WebRequestCallback onFinished;
 
         private UnityWebRequestAsyncOperation op;
+        private const int maxRetryCount = 3;
+        private int retriedCount;
 
         /// <inheritdoc />
         public override float Progress
@@ -54,10 +57,21 @@ namespace CatAsset.Runtime
 
             if (op.webRequest.result != UnityWebRequest.Result.Success)
             {
-                onFinished?.Invoke(false, op.webRequest,userdata);
-                foreach (WebRequestTask task in MergedTasks)
+                //下载失败 重试
+                if (RetryWebRequest())
                 {
-                    task.onFinished?.Invoke(false, op.webRequest,task.userdata);
+                    Debug.Log($"Web请求失败准备重试：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
+                }
+                else
+                {
+                    //重试次数达到上限 通知失败
+                    Debug.LogError($"Web请求失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
+                    State = TaskState.Finished;
+                    onFinished?.Invoke(false, op.webRequest,userdata);
+                    foreach (WebRequestTask task in MergedTasks)
+                    {
+                        task.onFinished?.Invoke(false, op.webRequest,task.userdata);
+                    }
                 }
             }
             else
@@ -70,6 +84,22 @@ namespace CatAsset.Runtime
             }
         }
 
+        /// <summary>
+        /// 尝试重新请求
+        /// </summary>
+        private bool RetryWebRequest()
+        {
+            if (retriedCount < maxRetryCount)
+            {
+                //重试
+                retriedCount++;
+                State = TaskState.Free;
+                return true;
+            }
+
+            return false;
+        }
+        
         /// <summary>
         /// 创建Web请求任务的对象
         /// </summary>
