@@ -78,10 +78,14 @@ namespace CatAsset.Runtime
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAssetAsync(assetNames, (assets) =>
             {
-                foreach (LoadAssetResult result in assets)
+                if (target != null)
                 {
-                    target.Bind(result.Asset);
+                    foreach (LoadAssetResult result in assets)
+                    {
+                        target.Bind(result.Asset);
+                    }
                 }
+                
                 tcs.SetResult(assets);
                
             }, priority);
@@ -97,10 +101,14 @@ namespace CatAsset.Runtime
             TaskCompletionSource<List<LoadAssetResult>> tcs = new TaskCompletionSource<List<LoadAssetResult>>();
             BatchLoadAssetAsync(assetNames, (assets) =>
             {
-                foreach (LoadAssetResult result in assets)
+                if (target != default)
                 {
-                    target.Bind(result.Asset);
+                    foreach (LoadAssetResult result in assets)
+                    {
+                        target.Bind(result.Asset);
+                    }
                 }
+                
                 tcs.SetResult(assets);
                
             }, priority);

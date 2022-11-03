@@ -14,38 +14,10 @@ namespace CatAsset.Runtime
         internal static string UpdateUriPrefix;
 
         /// <summary>
-        /// 资源包相对路径->读写区资源包清单信息，用于生成读写区资源清单
-        /// </summary>
-        private static Dictionary<string, BundleManifestInfo> readWriteManifestInfoDict = new Dictionary<string, BundleManifestInfo>();
-
-        /// <summary>
         /// 资源组名->资源组对应的资源更新器
         /// </summary>
         private static Dictionary<string, GroupUpdater> groupUpdaterDict = new Dictionary<string, GroupUpdater>();
-
-        /// <summary>
-        /// 添加读写区资源包清单信息
-        /// </summary>
-        internal static void AddReadWriteManifestInfo(BundleManifestInfo info)
-        {
-            readWriteManifestInfoDict[info.RelativePath] = info;
-        }
-
-        /// <summary>
-        /// 移除读写区资源包清单信息
-        /// </summary>
-        internal static void RemoveReadWriteManifestInfo(BundleManifestInfo info)
-        {
-            readWriteManifestInfoDict.Remove(info.RelativePath);
-        }
-
-        /// <summary>
-        /// 清空读写区资源包清单信息
-        /// </summary>
-        internal static void ClearReadWriteManifestInfo()
-        {
-            readWriteManifestInfoDict.Clear();
-        }
+        
 
         /// <summary>
         /// 生成读写区资源清单
@@ -55,11 +27,16 @@ namespace CatAsset.Runtime
             //创建 CatAssetManifest
             CatAssetManifest manifest = new CatAssetManifest();
             manifest.GameVersion = Application.version;
-            List<BundleManifestInfo> bundleInfos = new List<BundleManifestInfo>(readWriteManifestInfoDict.Count);
-            foreach (KeyValuePair<string, BundleManifestInfo> item in readWriteManifestInfoDict)
+            
+            List<BundleManifestInfo> bundleInfos = new List<BundleManifestInfo>();
+            foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
             {
-                bundleInfos.Add(item.Value);
+                if (pair.Value.BundleState == BundleRuntimeInfo.State.InReadWrite)
+                {
+                    bundleInfos.Add(pair.Value.Manifest);
+                }
             }
+            
             bundleInfos.Sort();
             manifest.Bundles = bundleInfos;
 

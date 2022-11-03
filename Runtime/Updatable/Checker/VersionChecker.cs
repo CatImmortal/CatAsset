@@ -199,9 +199,6 @@ namespace CatAsset.Runtime
 
                         //添加运行时信息 此资源可从本地读写区加载
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.RemoteInfo,BundleRuntimeInfo.State.InReadWrite);
-                        //添加读写区清单信息
-                        CatAssetUpdater.AddReadWriteManifestInfo(checkInfo.RemoteInfo);
-
                         break;
 
                     case CheckState.InReadOnly:
