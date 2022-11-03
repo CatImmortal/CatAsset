@@ -65,7 +65,7 @@ namespace CatAsset.Runtime
                 else
                 {
                     //重试次数达到上限 通知失败
-                    Debug.LogError($"Web请求失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
+                    Debug.LogWarning($"Web请求失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
                     onFinished?.Invoke(false, op.webRequest,userdata);
                     foreach (WebRequestTask task in MergedTasks)
@@ -99,7 +99,7 @@ namespace CatAsset.Runtime
 
             return false;
         }
-        
+
         /// <summary>
         /// 创建Web请求任务的对象
         /// </summary>

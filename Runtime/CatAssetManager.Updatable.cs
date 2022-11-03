@@ -32,7 +32,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 更新资源组
         /// </summary>
-        public static void UpdateGroup(string group, OnBundleUpdated callback)
+        public static void UpdateGroup(string group, BundleUpdatedCallback callback)
         {
             CatAssetUpdater.UpdateGroup(group, callback);
         }
@@ -40,7 +40,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 更新指定的资源包
         /// </summary>
-        public static void UpdateBundle(string group, BundleManifestInfo info, OnBundleUpdated callback,
+        public static void UpdateBundle(string group, BundleManifestInfo info, BundleUpdatedCallback callback,
             TaskPriority priority = TaskPriority.VeryHeight)
         {
             CatAssetUpdater.UpdateBundle(group,info,callback,priority);
@@ -65,14 +65,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 添加资源包下载任务
         /// </summary>
-        internal static void AddDownLoadBundleTask(GroupUpdater updater, BundleManifestInfo info,DownloadBundleCallback callback,TaskPriority priority = TaskPriority.Middle)
+        internal static void AddDownLoadBundleTask(GroupUpdater updater, BundleManifestInfo info,DownloadBundleCallback onFinished,DownloadBundleUpdateCallback onDownloadUpdate,TaskPriority priority = TaskPriority.Middle)
         {
             string localFilePath = RuntimeUtil.GetReadWritePath(info.RelativePath);
             string downloadUri = RuntimeUtil.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath));
             
             DownloadBundleTask task =
                 DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, updater, downloadUri,
-                    localFilePath, callback);
+                    localFilePath, onFinished,onDownloadUpdate);
             downloadTaskRunner.AddTask(task, priority);
         }
 

@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// 版本检查完毕回调的原型
     /// </summary>
     public delegate void OnVersionChecked(VersionCheckResult result);
-    
+
     /// <summary>
     /// 版本检查器
     /// </summary>
@@ -26,7 +26,7 @@ namespace CatAsset.Runtime
         private static OnVersionChecked onVersionChecked;
 
         private static bool isChecking;
-        
+
         //三方资源清单的加载完毕标记
         private static bool isReadOnlyLoaded;
         private static bool isReadWriteLoaded;
@@ -42,18 +42,18 @@ namespace CatAsset.Runtime
                 return;
             }
             isChecking = true;
-            
+
             onVersionChecked = callback;
-            
+
             //进行只读区 读写区 远端三方的资源清单检查
             string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
             string readWriteManifestPath = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName);
             string remoteManifestPath = RuntimeUtil.GetRemotePath(RuntimeUtil.ManifestFileName);
-            
+
             CatAssetManager.CheckUpdatableManifest(readOnlyManifestPath,CheckReadOnlyManifest);
             CatAssetManager.CheckUpdatableManifest(readWriteManifestPath,CheckReadWriteManifest);
             CatAssetManager.CheckUpdatableManifest(remoteManifestPath, CheckRemoteManifest);
-            
+
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace CatAsset.Runtime
                 RefreshCheckInfos();
                 return;
             }
-            
+
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
@@ -77,9 +77,9 @@ namespace CatAsset.Runtime
 
             isReadOnlyLoaded = true;
             RefreshCheckInfos();
-            
+
         }
-        
+
         /// <summary>
         /// 检查读写区资源清单
         /// </summary>
@@ -91,7 +91,7 @@ namespace CatAsset.Runtime
                 RefreshCheckInfos();
                 return;
             }
-            
+
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
@@ -102,7 +102,7 @@ namespace CatAsset.Runtime
             isReadWriteLoaded = true;
             RefreshCheckInfos();
         }
-        
+
         /// <summary>
         /// 检查远端资源清单
         /// </summary>
@@ -116,7 +116,7 @@ namespace CatAsset.Runtime
                 Clear();
                 return;
             }
-            
+
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
@@ -142,7 +142,7 @@ namespace CatAsset.Runtime
 
             return checkInfo;
         }
-        
+
         /// <summary>
         /// 刷新资源检查信息
         /// </summary>
@@ -172,7 +172,7 @@ namespace CatAsset.Runtime
                     groupInfo.AddRemoteBundle(checkInfo.RemoteInfo.RelativePath);
                     groupInfo.RemoteLength += checkInfo.RemoteInfo.Length;
                 }
-                
+
                 switch (checkInfo.State)
                 {
 
@@ -184,32 +184,32 @@ namespace CatAsset.Runtime
                         //添加至更新器中
                         GroupUpdater groupUpdater = CatAssetUpdater.GetOrAddGroupUpdater(checkInfo.RemoteInfo.Group);
                         groupUpdater.AddUpdaterBundle(checkInfo.RemoteInfo);
-                        groupUpdater.TotalLength += checkInfo.RemoteInfo.Length;
-                        
+                        groupUpdater.TotalLength += (ulong)checkInfo.RemoteInfo.Length;
+
                         //添加运行时信息 此资源如果在更新前就被加载了 需要先下载到本地
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.RemoteInfo,BundleRuntimeInfo.State.InRemote);
-                        
+
                         break;
-                    
+
                     case CheckState.InReadWrite:
                         //不需要更新 最新版本存在于读写区
                         GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.RemoteInfo.Group);
                         groupInfo.AddLocalBundle(checkInfo.RemoteInfo.RelativePath);
                         groupInfo.LocalLength += checkInfo.RemoteInfo.Length;
-                        
+
                         //添加运行时信息 此资源可从本地读写区加载
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.RemoteInfo,BundleRuntimeInfo.State.InReadWrite);
                         //添加读写区清单信息
                         CatAssetUpdater.AddReadWriteManifestInfo(checkInfo.RemoteInfo);
-                        
+
                         break;
-                    
+
                     case CheckState.InReadOnly:
                         //不需要更新 最新版本存在于只读区
                         groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.RemoteInfo.Group);
                         groupInfo.AddLocalBundle(checkInfo.RemoteInfo.RelativePath);
                         groupInfo.LocalLength += checkInfo.RemoteInfo.Length;
-                        
+
                         //添加运行时信息 此资源可从本地只读区加载
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.RemoteInfo,BundleRuntimeInfo.State.InReadOnly);
                         break;
@@ -231,11 +231,11 @@ namespace CatAsset.Runtime
                 //删除过读写区资源 需要重新生成读写区资源清单
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
-            
+
             //调用版本检查完毕回调
             VersionCheckResult result = new VersionCheckResult(null,totalCount, totalLength);
             onVersionChecked?.Invoke(result);
-                
+
             Clear();
         }
 
@@ -247,7 +247,7 @@ namespace CatAsset.Runtime
             isRemoteLoaded = false;
             isReadOnlyLoaded = false;
             isReadWriteLoaded = false;
-            
+
         }
     }
 }

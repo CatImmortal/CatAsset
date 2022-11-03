@@ -45,7 +45,7 @@ namespace CatAsset.Runtime
             
             if (!bundleRuntimeInfo.Manifest.IsRaw)
             {
-                //非场景 非prefab的资源包资源 还要通过Resources.Unload卸载
+                //非prefab的资源包资源 还要通过Resources.Unload卸载
                 Object asset = (Object)assetRuntimeInfo.Asset;
                 CatAssetManager.UnloadAssetFromMemory(asset);
             }

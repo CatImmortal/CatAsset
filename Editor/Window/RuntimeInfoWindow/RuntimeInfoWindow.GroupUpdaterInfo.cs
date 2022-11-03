@@ -37,6 +37,7 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("资源包长度");
                 EditorGUILayout.LabelField("已更新资源包总数");
                 EditorGUILayout.LabelField("已更新资源长度");
+                EditorGUILayout.LabelField("下载速度");
                 EditorGUILayout.LabelField("状态");
             }
             foreach (KeyValuePair<string, GroupUpdater> item in groupUpdaterDict)
@@ -55,9 +56,10 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField(updater.GroupName);
 
                 EditorGUILayout.LabelField(updater.TotalCount.ToString());
-                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(updater.TotalLength));
+                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)updater.TotalLength));
                 EditorGUILayout.LabelField(updater.UpdatedCount.ToString());
-                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(updater.UpdatedLength));
+                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)updater.UpdatedLength));
+                EditorGUILayout.LabelField($"{RuntimeUtil.GetByteLengthDesc((long)updater.Speed)}/S");
                 EditorGUILayout.LabelField(updater.State.ToString());
             }
         }
