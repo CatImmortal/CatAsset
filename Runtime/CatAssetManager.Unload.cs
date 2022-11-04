@@ -72,10 +72,10 @@ namespace CatAsset.Runtime
             SceneManager.UnloadSceneAsync(scene);
 
             //卸载与场景绑定的资源
-            List<IBindableHandler> handlers = CatAssetDatabase.GetSceneBindAssets(scene);
+            List<AssetHandler> handlers = CatAssetDatabase.GetSceneBindAssets(scene);
             if (handlers != null)
             {
-                foreach (IBindableHandler handler in handlers)
+                foreach (AssetHandler handler in handlers)
                 {
                     handler.Unload();
                 }

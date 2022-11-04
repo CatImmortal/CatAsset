@@ -155,7 +155,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
         /// </summary>
-        public static void BindToGameObject(GameObject target, IBindableHandler handler)
+        public static void BindToGameObject(GameObject target, AssetHandler handler)
         {
             if (handler == null)
             {
@@ -169,7 +169,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
         /// </summary>
-        public static void BindToScene(Scene scene, IBindableHandler handler)
+        public static void BindToScene(Scene scene, AssetHandler handler)
         {
             if (handler == null)
             {

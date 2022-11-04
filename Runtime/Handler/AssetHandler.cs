@@ -7,11 +7,11 @@ namespace CatAsset.Runtime
     /// 资源加载完毕回调方法的原型
     /// </summary>
     public delegate void AssetLoadedCallback<T>(AssetHandler<T> handler);
-
+    
     /// <summary>
     /// 资源句柄
     /// </summary>
-    public abstract class AssetHandler : BaseHandler, IBindableHandler
+    public abstract class AssetHandler : BaseHandler
     {
         /// <summary>
         /// 原始资源实例
