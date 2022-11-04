@@ -9,6 +9,11 @@ namespace CatAsset.Runtime
     public delegate void AssetLoadedCallback<T>(AssetHandler<T> handler);
     
     /// <summary>
+    /// 自定义原生资源转换方法的原型
+    /// </summary>
+    public delegate object CustomRawAssetConverter(byte[] bytes);
+    
+    /// <summary>
     /// 资源句柄
     /// </summary>
     public abstract class AssetHandler : BaseHandler
