@@ -8,9 +8,9 @@ namespace CatAsset.Runtime
     /// </summary>
     public class AssetBinder : MonoBehaviour
     {
-        private readonly List<IBindableHandler> handlers = new List<IBindableHandler>();
+        private readonly List<AssetHandler> handlers = new List<AssetHandler>();
 
-        public void BindTo(IBindableHandler handler)
+        public void BindTo(AssetHandler handler)
         {
             handlers.Add(handler);
         }
@@ -18,7 +18,7 @@ namespace CatAsset.Runtime
 
         private void OnDestroy()
         {
-            foreach (IBindableHandler handler in handlers)
+            foreach (AssetHandler handler in handlers)
             {
                 handler.Unload();
             }

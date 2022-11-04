@@ -36,8 +36,8 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 场景实例handler->绑定的资源句柄
         /// </summary>
-        private static Dictionary<int, List<IBindableHandler>> sceneBindHandlers =
-            new Dictionary<int, List<IBindableHandler>>();
+        private static Dictionary<int, List<AssetHandler>> sceneBindHandlers =
+            new Dictionary<int, List<AssetHandler>>();
 
 
         /// <summary>
@@ -208,21 +208,21 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取场景绑定的资源句柄列表
         /// </summary>
-        internal static List<IBindableHandler> GetSceneBindAssets(Scene scene)
+        internal static List<AssetHandler> GetSceneBindAssets(Scene scene)
         {
-            sceneBindHandlers.TryGetValue(scene.handle, out List<IBindableHandler> handlers);
+            sceneBindHandlers.TryGetValue(scene.handle, out List<AssetHandler> handlers);
             return handlers;
         }
 
         /// <summary>
         /// 添加场景绑定的资源句柄
         /// </summary>
-        internal static void AddSceneBindHandler(Scene scene, IBindableHandler handler)
+        internal static void AddSceneBindHandler(Scene scene, AssetHandler handler)
         {
             
-            if (!sceneBindHandlers.TryGetValue(scene.handle,out List<IBindableHandler> handlers))
+            if (!sceneBindHandlers.TryGetValue(scene.handle,out List<AssetHandler> handlers))
             {
-                handlers = new List<IBindableHandler>();
+                handlers = new List<AssetHandler>();
                 sceneBindHandlers.Add(scene.handle,handlers);
             }
             handlers.Add(handler);

@@ -15,7 +15,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 场景实例
         /// </summary>
-        private Scene scene;
+        public Scene Scene;
 
         /// <summary>
         /// 场景加载完毕回调
@@ -42,14 +42,14 @@ namespace CatAsset.Runtime
         }
 
         /// <inheritdoc />
-        public override bool Success => scene != default;
+        public override bool Success => Scene != default;
 
         /// <summary>
         /// 设置场景实例
         /// </summary>
         internal void SetScene(Scene loadedScene)
         {
-            scene = loadedScene;
+            Scene = loadedScene;
             IsDone = true;
             onLoaded?.Invoke(this);
         }
@@ -57,7 +57,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Unload()
         {
-            CatAssetManager.UnloadScene(scene);
+            CatAssetManager.UnloadScene(Scene);
             Release();
         }
 
@@ -71,7 +71,7 @@ namespace CatAsset.Runtime
         {
             base.Clear();
 
-            scene = default;
+            Scene = default;
         }
     }
 }

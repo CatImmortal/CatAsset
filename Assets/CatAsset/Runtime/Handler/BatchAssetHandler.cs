@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源句柄
     /// </summary>
-    public class BatchAssetHandler : BaseHandler, IBindableHandler
+    public class BatchAssetHandler : BaseHandler
     {
         /// <summary>
         /// 需要加载的资源数量

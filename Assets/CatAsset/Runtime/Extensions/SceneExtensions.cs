@@ -8,7 +8,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
         /// </summary>
-        public static void Bind(this Scene scene,IBindableHandler handler)
+        public static void Bind(this Scene scene,AssetHandler handler)
         {
             CatAssetManager.BindToScene(scene,handler);
         }
