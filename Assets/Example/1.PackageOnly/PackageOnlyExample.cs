@@ -33,32 +33,29 @@ public class PackageOnlyExample : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
-
-                CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/PrefabA/A1.prefab", ((asset,
-                    result) =>
+                AssetHandler<GameObject> handler = CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/PrefabA/A1.prefab");
+                handler.OnLoaded += assetHandler =>
                 {
-                    if (asset != null)
+                    if (assetHandler.Success)
                     {
                         Debug.Log("加载GameObject");
-                        go = Instantiate(asset);
+                        go = Instantiate(assetHandler.Asset);
                 
-                        //绑定asset到实例化的go上 这样销毁go后也会将asset也卸载了
-                        CatAssetManager.BindToGameObject(go, asset);
+                        //绑定assetHandler到实例化的go上 这样销毁go后也会将asset也卸载了
+                        go.Bind(assetHandler);
                     }
-                }));
+                };
 
-                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", (
-                    (asset, result) =>
+                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt").OnLoaded+=(
+                    assetHandler =>
                     {
-                        if (asset != null)
+                        if (assetHandler.Success)
                         {
-                            Debug.Log($"加载原生资源 文本文件:{asset.text}");
-                            
-                            //注意这里 原生资源除非是以byte[]类型获取的 否则都是被二次包装的 不是原始资源 不能直接卸载
-                            //UnloadAsset需要使用原始二进制数据来卸载 需要调用result.GetAsset()
-                            CatAssetManager.UnloadAsset(result.Asset);
+                            Debug.Log($"加载原生资源 文本文件:{assetHandler.Asset.text}");
+                            assetHandler.Unload();
                         }
-                    }));
+                    });
+
             }
 
             if (Input.GetKeyDown(KeyCode.S))

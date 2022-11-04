@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
         }
 
         private AssetCategory category;
-        private BaseAssetHandler handler;
+        private AssetHandler assetHandler;
 
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
@@ -105,10 +105,6 @@ namespace CatAsset.Runtime
                 
                 CatAssetDatabase.SetAssetInstance(assetRuntimeInfo.Asset,assetRuntimeInfo);
             }
-            else
-            {
-                Debug.LogError($"原生资源:{bundleRuntimeInfo.LoadPath}加载失败");
-            }
         }
         
         private void CheckStateWithLoading()
@@ -122,17 +118,19 @@ namespace CatAsset.Runtime
 
             if (assetRuntimeInfo == null)
             {
+                Debug.LogError($"原生资源:{bundleRuntimeInfo.LoadPath}加载失败");
+                
                 //资源加载失败
                 if (!needCancel)
                 {
-                    onFinished?.Invoke(userdata,default);
+                    assetHandler.SetAsset(null);
                 }
                 
                 foreach (LoadRawAssetTask task in MergedTasks)
                 {
                     if (!task.needCancel)
                     {
-                        task.onFinished?.Invoke(task.userdata,default);
+                        task.assetHandler.SetAsset(null);
                     }
                 }
             }
@@ -142,24 +140,22 @@ namespace CatAsset.Runtime
                 {
                     //所有任务都被取消了 这个资源没人要了 直接卸载吧
                     assetRuntimeInfo.AddRefCount();  //注意这里要先计数+1 才能正确执行后续的卸载流程
-                    CatAssetManager.InternalUnloadAsset(assetRuntimeInfo);
+                    CatAssetManager.UnloadAsset(assetRuntimeInfo.Asset);
                     return;
                 }
-                
-                LoadAssetResult result = new LoadAssetResult(assetRuntimeInfo.Asset, category);
 
                 //加载成功 通知所有未取消的加载任务
                 if (!needCancel)
                 {
                     assetRuntimeInfo.AddRefCount();
-                    onFinished?.Invoke(userdata,result);
+                    assetHandler.SetAsset(assetRuntimeInfo.Asset);
                 }
                 foreach (LoadRawAssetTask task in MergedTasks)
                 {
                     if (!task.needCancel)
                     {
                         assetRuntimeInfo.AddRefCount();
-                        task.onFinished?.Invoke(task.userdata,result);
+                        task. assetHandler.SetAsset(assetRuntimeInfo.Asset);
                     }
                 }
             }
@@ -184,13 +180,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建原生资源加载任务的对象
         /// </summary>
-        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,BaseAssetHandler handler)
+        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,AssetHandler handler)
         {
             LoadRawAssetTask task = ReferencePool.Get<LoadRawAssetTask>();
             task.CreateBase(owner,name);
             
             task.category = category;
-            task.handler = handler;
+            task.assetHandler = handler;
             task.assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.bundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(task.assetRuntimeInfo.BundleManifest.RelativePath);
@@ -204,8 +200,7 @@ namespace CatAsset.Runtime
             base.Clear();
 
             category = default;
-            userdata = null;
-            onFinished = default;
+            assetHandler = default;
 
             assetRuntimeInfo = default;
             bundleRuntimeInfo = default;

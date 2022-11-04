@@ -21,9 +21,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
         /// </summary>
-        public static void Bind(this GameObject go,object asset)
+        public static void Bind(this GameObject go,IBindableHandler handler)
         {
-            CatAssetManager.BindToGameObject(go,asset);
+            CatAssetManager.BindToGameObject(go,handler);
         }
     }
 }

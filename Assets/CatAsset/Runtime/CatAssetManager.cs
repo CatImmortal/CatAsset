@@ -155,23 +155,23 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
         /// </summary>
-        public static void BindToGameObject(GameObject target, object asset)
+        public static void BindToGameObject(GameObject target, IBindableHandler handler)
         {
-            if (asset == null)
+            if (handler == null)
             {
                 return;
             }
             
             AssetBinder assetBinder = target.GetOrAddComponent<AssetBinder>();
-            assetBinder.BindTo(asset);
+            assetBinder.BindTo(handler);
         }
 
         /// <summary>
         /// 将资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
         /// </summary>
-        public static void BindToScene(Scene scene, object asset)
+        public static void BindToScene(Scene scene, IBindableHandler handler)
         {
-            if (asset == null)
+            if (handler == null)
             {
                 return;
             }
@@ -181,7 +181,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            CatAssetDatabase.AddSceneBindAsset(scene, asset);
+            CatAssetDatabase.AddSceneBindHandler(scene, handler);
         }
 
     }

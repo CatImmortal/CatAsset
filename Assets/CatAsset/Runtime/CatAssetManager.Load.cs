@@ -26,19 +26,19 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<object> LoadAssetAsync(string assetName,TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<object> LoadAssetAsync(string assetName, TaskPriority priority = TaskPriority.Low)
         {
             return InternalLoadAssetAsync<object>(assetName, priority);
         }
-        
+
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<T> LoadAssetAsync<T>(string assetName,TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<T> LoadAssetAsync<T>(string assetName, TaskPriority priority = TaskPriority.Low)
         {
             return InternalLoadAssetAsync<T>(assetName, priority);
         }
-        
+
         /// <summary>
         /// 加载资源
         /// </summary>
@@ -46,22 +46,23 @@ namespace CatAsset.Runtime
         {
 
             AssetHandler<T> handler;
-                
+
             if (string.IsNullOrEmpty(assetName))
             {
                 Debug.LogError("资源加载失败，资源名为空");
                 handler = AssetHandler<T>.Create();
-                handler.SetAssetObj(null);
+                handler.SetAsset(null);
                 return handler;
             }
-            
+
             Type assetType = typeof(T);
 
             AssetCategory category;
+
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName,assetType);
+                category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName, assetType);
 
                 object asset;
                 try
@@ -85,42 +86,42 @@ namespace CatAsset.Runtime
                 catch (Exception e)
                 {
                     Debug.LogError($"{e.Message}\r\n{e.StackTrace}");
-                    handler = AssetHandler<T>.Create();
-                    handler.SetAssetObj(null);
+                    handler = AssetHandler<T>.Create(category);
+                    handler.SetAsset(null);
                     return handler;
                 }
 
 
                 handler = AssetHandler<T>.Create(category);
-                handler.SetAssetObj(asset);
+                handler.SetAsset(asset);
                 return handler;
             }
 #endif
-            
+
             category = RuntimeUtil.GetAssetCategory(assetName);
             handler = AssetHandler<T>.Create(category);
-            
+
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo.RefCount > 0)
             {
                 //引用计数>0
                 //直接增加引用计数
                 assetRuntimeInfo.AddRefCount();
-                handler.SetAssetObj(assetRuntimeInfo.Asset);
+                handler.SetAsset(assetRuntimeInfo.Asset);
                 return handler;
             }
-            
+
             //引用计数=0 需要走一遍资源加载任务的流程
             switch (category)
             {
                 case AssetCategory.None:
-                    handler.SetAssetObj(null);
+                    handler.SetAsset(null);
                     break;
 
                 case AssetCategory.InternalBundledAsset:
                     //加载内置资源包资源
                     LoadBundledAssetTask loadBundledAssetTask =
-                        LoadBundledAssetTask.Create(loadTaskRunner, assetName, assetType,handler);
+                        LoadBundledAssetTask.Create(loadTaskRunner, assetName, assetType, handler);
                     loadTaskRunner.AddTask(loadBundledAssetTask, priority);
 
                     handler.Task = loadBundledAssetTask;
@@ -131,7 +132,7 @@ namespace CatAsset.Runtime
                 case AssetCategory.ExternalRawAsset:
                     //加载原生资源
                     LoadRawAssetTask loadRawAssetTask =
-                        LoadRawAssetTask.Create(loadTaskRunner, assetName, category,handler);
+                        LoadRawAssetTask.Create(loadTaskRunner, assetName, category, handler);
                     loadTaskRunner.AddTask(loadRawAssetTask, priority);
 
                     handler.Task = loadRawAssetTask;
@@ -144,56 +145,53 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static int BatchLoadAssetAsync(List<string> assetNames, BatchLoadAssetCallback callback,
+        public static BatchAssetHandler BatchLoadAssetAsync(List<string> assetNames,
             TaskPriority priority = TaskPriority.Low)
         {
+            BatchAssetHandler handler;
+
             if (assetNames == null || assetNames.Count == 0)
             {
-                Debug.LogError("批量加载资源失败，资源名列表为空");
-                callback?.Invoke(null);
-                return 0;
+                Debug.LogWarning("批量加载资源的资源名列表为空");
+                handler = BatchAssetHandler.Create(0);
+                return handler;
             }
 
-#if UNITY_EDITOR
-            if (IsEditorMode)
+            handler = BatchAssetHandler.Create(assetNames.Count);
+
+            foreach (string assetName in assetNames)
             {
-                List<LoadAssetResult> assets = new List<LoadAssetResult>();
-                foreach (string assetName in assetNames)
-                {
-                    LoadAssetAsync(assetName, ((asset, result) =>
-                    {
-                        assets.Add(result);
-
-                        if (assets.Count == assetNames.Count)
-                        {
-                            //编辑器模式下是以同步的方式加载所有资源的 所以这里的asset顺序是和assetNames给出的顺序可以对上的
-                            callback?.Invoke(assets);
-                        }
-                    }));
-                }
-
-                return 0;
+                AssetHandler<object> assetHandler = LoadAssetAsync(assetName);
+                handler.AddAssetHandler(assetHandler);
             }
-#endif
 
-            BatchLoadAssetTask task = BatchLoadAssetTask.Create(loadTaskRunner,
-                $"{nameof(BatchLoadAssetAsync)} - {TaskRunner.TaskIDFactory + 1}", assetNames, callback);
-            loadTaskRunner.AddTask(task, priority);
-            return task.ID;
+            return handler;
         }
 
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static int LoadSceneAsync(string sceneName, LoadSceneCallback callback,
-            TaskPriority priority = TaskPriority.Low)
+        public static SceneHandler LoadSceneAsync(string sceneName, TaskPriority priority = TaskPriority.Low)
         {
+            SceneHandler handler = SceneHandler.Create();
+
             if (string.IsNullOrEmpty(sceneName))
             {
                 Debug.LogError("场景加载失败，场景名为空");
-                return 0;
+                handler.SetScene(default);
+                return handler;
             }
-            
+
+            InternalLoadSceneAsync(sceneName,handler,priority);
+            return handler;
+        }
+
+        /// <summary>
+        /// 加载场景
+        /// </summary>
+        internal static void InternalLoadSceneAsync(string sceneName, SceneHandler handler,
+            TaskPriority priority = TaskPriority.Low)
+        {
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
@@ -201,34 +199,36 @@ namespace CatAsset.Runtime
                 {
                     LoadSceneParameters param = new LoadSceneParameters();
                     param.loadSceneMode = LoadSceneMode.Additive;
-               
-                    AsyncOperation op = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);
+
+                    AsyncOperation op =
+                        UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);
                     op.completed += operation =>
                     {
                         Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
                         SceneManager.SetActiveScene(scene);
-                        callback?.Invoke(true, scene);
+                        handler.SetScene(scene);
                     };
                 }
                 catch (Exception e)
                 {
-                    callback?.Invoke(false, default);
-                    throw;
+                    Debug.LogError($"{e.Message}\r\n{e.StackTrace}");
+                    handler.SetScene(default);
+                    return;
                 }
 
-                return 0;
+                return;
             }
 #endif
             if (!CheckAssetReady(sceneName))
             {
-                callback?.Invoke(false, default);
-                return 0;
+                handler.SetScene(default);
+                return;
             }
 
-            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, callback);
+            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, handler);
             loadTaskRunner.AddTask(task, priority);
 
-            return task.ID;
+            handler.Task = task;
         }
     }
 }

@@ -77,14 +77,14 @@ public class UpdatableExample : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.S))
             {
-                CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/Chapter1/B1.prefab", (
-                    (asset, result) =>
+                CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/Chapter1/B1.prefab")
+                    .OnLoaded += handler =>
+                {
+                    if (handler.Success)
                     {
-                        if (asset != null)
-                        {
-                            Instantiate(asset);
-                        }
-                    }));
+                        Instantiate(handler.Asset);
+                    }
+                };
             }
         }
     }

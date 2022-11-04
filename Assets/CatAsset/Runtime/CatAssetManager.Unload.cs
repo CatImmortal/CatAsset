@@ -6,8 +6,8 @@ namespace CatAsset.Runtime
 {
     public static partial class CatAssetManager
     {
-                /// <summary>
-        /// 卸载资源，注意：asset参数需要是原始资源实例,可以从LoadAssetResult.Asset获取
+        /// <summary>
+        /// 卸载资源，注意：asset参数需要是原始资源实例
         /// </summary>
         public static void UnloadAsset(object asset)
         {
@@ -72,13 +72,14 @@ namespace CatAsset.Runtime
             SceneManager.UnloadSceneAsync(scene);
 
             //卸载与场景绑定的资源
-            List<AssetRuntimeInfo> bindAssets = CatAssetDatabase.GetSceneBindAssets(scene);
-            if (bindAssets != null)
+            List<IBindableHandler> handlers = CatAssetDatabase.GetSceneBindAssets(scene);
+            if (handlers != null)
             {
-                foreach (AssetRuntimeInfo bindAsset in bindAssets)
+                foreach (IBindableHandler handler in handlers)
                 {
-                    InternalUnloadAsset(bindAsset);
+                    handler.Unload();
                 }
+                handlers.Clear();
             }
 
             InternalUnloadAsset(assetRuntimeInfo);
@@ -87,7 +88,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 卸载资源
         /// </summary>
-        internal static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
+        private static void InternalUnloadAsset(AssetRuntimeInfo assetRuntimeInfo)
         {
             //减少引用计数
             assetRuntimeInfo.SubRefCount();
