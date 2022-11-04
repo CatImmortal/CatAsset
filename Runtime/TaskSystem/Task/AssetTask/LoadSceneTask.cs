@@ -3,17 +3,13 @@ using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
 {
-    /// <summary>
-    /// 场景加载任务完成回调的原型
-    /// </summary>
-    public delegate void LoadSceneCallback(bool success, Scene scene);
-    
+
     /// <summary>
     /// 场景加载任务
     /// </summary>
     public class LoadSceneTask : LoadBundledAssetTask
     {
-        private LoadSceneCallback onFinished;
+        private SceneHandler handler;
         private Scene loadedScene;
 
         public override void Run()
@@ -64,14 +60,14 @@ namespace CatAsset.Runtime
                 //加载失败 通知所有未取消的加载任务
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(false,default);
+                    handler.SetScene(default);
                 }
                 
                 foreach (LoadSceneTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(false,default);
+                        task.handler.SetScene(default);
                     }
                 }
             }
@@ -85,16 +81,16 @@ namespace CatAsset.Runtime
                 }
                 else
                 {
-                    onFinished?.Invoke(true, loadedScene);
+                    handler.SetScene(loadedScene);
                 }
                 
-                //加载成功后 无论主任务是否被取消 都要对已合并任务调用LoadSceneAsync重新走加载场景流程
+                //加载成功后 无论主任务是否被取消 都要对已合并任务调用InternalLoadSceneAsync重新走加载场景流程
                 //因为每次加载场景都是在实例化一个新场景 无法复用
                 foreach (LoadSceneTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        CatAssetManager.LoadSceneAsync(task.Name,task.onFinished);
+                        CatAssetManager.InternalLoadSceneAsync(task.Name,task.handler);
                     }
                 }
             }
@@ -103,12 +99,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建场景加载任务的对象
         /// </summary>
-        public static LoadSceneTask Create(TaskRunner owner, string name,LoadSceneCallback callback)
+        public static LoadSceneTask Create(TaskRunner owner, string name,SceneHandler handler)
         {
             LoadSceneTask task = ReferencePool.Get<LoadSceneTask>();
             task.CreateBase(owner,name);
 
-            task.onFinished = callback;
+            task.handler = handler;
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
@@ -119,8 +115,8 @@ namespace CatAsset.Runtime
         public override void Clear()
         {
             base.Clear();
-            
-            onFinished = default;
+
+            handler = default;
             loadedScene = default;
         }
     }

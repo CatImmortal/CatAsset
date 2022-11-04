@@ -10,11 +10,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void SetImage(this Image image, string assetName)
         {
-            CatAssetManager.LoadAssetAsync<Sprite>(assetName, ((asset, result) =>
-            {
-                image.sprite = asset;
-                image.gameObject.Bind(result.Asset);
-            }));
+            AssetHandler<Sprite> handler =  CatAssetManager.LoadAssetAsync<Sprite>(assetName);
+           handler.OnLoaded += (assetHandler =>
+           {
+               image.sprite = assetHandler.Asset;
+               image.gameObject.Bind(assetHandler);
+           });
         }
     }
 }

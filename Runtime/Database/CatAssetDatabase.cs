@@ -34,10 +34,10 @@ namespace CatAsset.Runtime
         private static Dictionary<int, AssetRuntimeInfo> sceneInstanceDict = new Dictionary<int, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 场景实例handler->绑定的资源
+        /// 场景实例handler->绑定的资源句柄
         /// </summary>
-        private static Dictionary<int, List<AssetRuntimeInfo>> sceneBindAssets =
-            new Dictionary<int, List<AssetRuntimeInfo>>();
+        private static Dictionary<int, List<IBindableHandler>> sceneBindHandlers =
+            new Dictionary<int, List<IBindableHandler>>();
 
 
         /// <summary>
@@ -206,29 +206,26 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 获取场景绑定的资源列表
+        /// 获取场景绑定的资源句柄列表
         /// </summary>
-        internal static List<AssetRuntimeInfo> GetSceneBindAssets(Scene scene)
+        internal static List<IBindableHandler> GetSceneBindAssets(Scene scene)
         {
-            sceneBindAssets.TryGetValue(scene.handle, out List<AssetRuntimeInfo> assets);
-            return assets;
+            sceneBindHandlers.TryGetValue(scene.handle, out List<IBindableHandler> handlers);
+            return handlers;
         }
 
         /// <summary>
-        /// 添加场景绑定的资源
+        /// 添加场景绑定的资源句柄
         /// </summary>
-        internal static void AddSceneBindAsset(Scene scene, object asset)
+        internal static void AddSceneBindHandler(Scene scene, IBindableHandler handler)
         {
             
-            if (!sceneBindAssets.TryGetValue(scene.handle,out List<AssetRuntimeInfo> assets))
+            if (!sceneBindHandlers.TryGetValue(scene.handle,out List<IBindableHandler> handlers))
             {
-                assets = new List<AssetRuntimeInfo>();
-                sceneBindAssets.Add(scene.handle,assets);
+                handlers = new List<IBindableHandler>();
+                sceneBindHandlers.Add(scene.handle,handlers);
             }
-
-            AssetRuntimeInfo info = GetAssetRuntimeInfo(asset);
-            assets.Add(info);
-          
+            handlers.Add(handler);
         }
         
         /// <summary>

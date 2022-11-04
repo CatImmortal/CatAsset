@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -64,16 +65,17 @@ namespace CatAsset.Runtime
         }
 
         private Type assetType;
-        private BaseAssetHandler handler;
+        private AssetHandler assetHandler;
         
         protected AssetRuntimeInfo AssetRuntimeInfo;
         protected BundleRuntimeInfo BundleRuntimeInfo;
         
-        private LoadBundleCallback onBundleLoadedCallback;
+        private readonly LoadBundleCallback onBundleLoadedCallback;
 
         private int totalDependencyCount;
         private int loadFinishDependencyCount;
-        private AssetLoadedCallback<Object> onDependencyLoadedCallback;
+        private readonly List<AssetHandler> dependencyHandlers = new List<AssetHandler>();
+        private readonly AssetLoadedCallback<Object> onDependencyLoadedCallback;
 
 
         protected LoadBundledAssetState LoadState;
@@ -231,8 +233,7 @@ namespace CatAsset.Runtime
             {
                 //资源包加载失败
                 State = TaskState.Finished;
-
-                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
+                
                 CallFinished(false);
 
             }
@@ -253,7 +254,9 @@ namespace CatAsset.Runtime
             totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
             foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
-                CatAssetManager.LoadAssetAsync(dependency, onDependencyLoadedCallback,TaskPriority.Middle);
+                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,TaskPriority.Middle);
+                dependencyHandler.OnLoaded += onDependencyLoadedCallback;
+                dependencyHandlers.Add(dependencyHandler);
             }
         }
         
@@ -313,21 +316,20 @@ namespace CatAsset.Runtime
             if (IsLoadFailed())
             {
                 //资源加载失败
-                
                 //将已加载好的依赖都卸载一遍
-                foreach (string dependencyName in AssetRuntimeInfo.AssetManifest.Dependencies)
+                foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    AssetRuntimeInfo dependencyInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyName);
-                    if (dependencyInfo.Asset != null)
+                    AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                    if (depInfo.Asset == null)
                     {
-                        CatAssetManager.InternalUnloadAsset(dependencyInfo);
+                        //跳过加载失败的依赖
+                        continue;
                     }
+                    CatAssetManager.UnloadAsset(depInfo.Asset);   
                 }
-                
+
                 //检查下资源包的生命周期 可能需要卸载了
                 BundleRuntimeInfo.CheckLifeCycle();
-                
-                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
                 
                 CallFinished(false);
             }
@@ -336,18 +338,23 @@ namespace CatAsset.Runtime
                 //资源加载成功 或 是已加载好的
 
                 //添加依赖链记录
-                foreach (string dependencyName in AssetRuntimeInfo.AssetManifest.Dependencies)
+                foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    AssetRuntimeInfo depAssetInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyName);
-                    if (depAssetInfo.Asset != null)
+                    AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                    if (depInfo.Asset == null)
                     {
-                        depAssetInfo.AddDownStream(AssetRuntimeInfo);
+                        //跳过加载失败的依赖
+                        continue;
                     }
                     
-                    if (!depAssetInfo.BundleManifest.Equals(AssetRuntimeInfo.BundleManifest))
+                    //将自身设置为依赖资源的下游资源
+                    depInfo.AddDownStream(AssetRuntimeInfo);
+                        
+                    //如果依赖了其他资源包里的资源 还需要设置 自身所在资源包 与 依赖所在资源包 的上下游关系
+                    if (!depInfo.BundleManifest.Equals(AssetRuntimeInfo.BundleManifest))
                     {
                         BundleRuntimeInfo depBundleInfo =
-                            CatAssetDatabase.GetBundleRuntimeInfo(depAssetInfo.BundleManifest.RelativePath);
+                            CatAssetDatabase.GetBundleRuntimeInfo(depInfo.BundleManifest.RelativePath);
                         
                         depBundleInfo.AddDownStream(BundleRuntimeInfo);
                         BundleRuntimeInfo.AddUpStream(depBundleInfo);
@@ -399,17 +406,19 @@ namespace CatAsset.Runtime
         {
             if (!success)
             {
+                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
+                
                 //加载失败 通知所有未取消的加载任务
                 if (!NeedCancel)
                 {
-                    onFinished?.Invoke(userdata,default);
+                    assetHandler.SetAsset(null);
                 }
                 
                 foreach (LoadBundledAssetTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.onFinished?.Invoke(task.userdata,default);
+                        task.assetHandler.SetAsset(null);
                     }
                 }
             }
@@ -419,24 +428,22 @@ namespace CatAsset.Runtime
                 {
                     //所有任务都被取消了 这个资源没人要了 直接卸载吧
                     AssetRuntimeInfo.AddRefCount();  //注意这里要先计数+1 才能正确执行后续的卸载流程
-                    CatAssetManager.InternalUnloadAsset(AssetRuntimeInfo);
+                    CatAssetManager.UnloadAsset(AssetRuntimeInfo.Asset);
                     return;
                 }
-                
-                LoadAssetResult result = new LoadAssetResult(AssetRuntimeInfo.Asset, AssetCategory.InternalBundledAsset);
 
                 //加载成功 通知所有未取消的加载任务
                 if (!NeedCancel)
                 {
                     AssetRuntimeInfo.AddRefCount();
-                    onFinished?.Invoke(userdata,result);
+                    assetHandler.SetAsset(AssetRuntimeInfo.Asset);
                 }
                 foreach (LoadBundledAssetTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
                         AssetRuntimeInfo.AddRefCount();
-                        task.onFinished?.Invoke(task.userdata,result);
+                        task.assetHandler.SetAsset(AssetRuntimeInfo.Asset);
                     }
                    
                 }
@@ -463,13 +470,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建资源加载任务的对象
         /// </summary>
-        public static LoadBundledAssetTask Create(TaskRunner owner, string name,Type assetType,BaseAssetHandler handler)
+        public static LoadBundledAssetTask Create(TaskRunner owner, string name,Type assetType,AssetHandler handler)
         {
             LoadBundledAssetTask task = ReferencePool.Get<LoadBundledAssetTask>();
             task.CreateBase(owner, name);
 
             task.assetType = assetType;
-            task.handler = handler;
+            task.assetHandler = handler;
             
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
@@ -485,11 +492,21 @@ namespace CatAsset.Runtime
             base.Clear();
 
             assetType = default;
-            handler = default;
+            assetHandler = default;
+            
             AssetRuntimeInfo = default;
             BundleRuntimeInfo = default;
+            
             totalDependencyCount = default;
             loadFinishDependencyCount = default;
+            
+            //释放掉所有依赖资源句柄
+            foreach (AssetHandler dependencyHandler in dependencyHandlers)
+            {
+                dependencyHandler.Release();
+            }
+            dependencyHandlers.Clear();
+            
             LoadState = default;
             Operation = default;
             NeedCancel = default;
