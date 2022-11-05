@@ -138,6 +138,12 @@ namespace CatAsset.Runtime
         {
             add
             {
+                if (!IsValid)
+                {
+                    Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
+                    return;
+                }
+                
                 if (IsDone)
                 {
                     value?.Invoke(this);
@@ -147,7 +153,15 @@ namespace CatAsset.Runtime
                 onLoaded += value;
             }
 
-            remove => onLoaded -= value;
+            remove
+            {
+                if (!IsValid)
+                { 
+                    Debug.LogError($"错误的在无效的{GetType().Name}上移除OnLoaded回调");
+                    return;   
+                }
+                onLoaded -= value;
+            }
         }
         
         /// <inheritdoc />
@@ -157,6 +171,7 @@ namespace CatAsset.Runtime
             Asset = AssetAs<T>();
             IsDone = true;
             onLoaded?.Invoke(this);
+            AwaiterContinuation?.Invoke();
         }
         
         public static AssetHandler<T> Create(AssetCategory category = AssetCategory.None)

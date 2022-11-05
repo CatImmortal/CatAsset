@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace CatAsset.Runtime
 {
@@ -48,6 +49,12 @@ namespace CatAsset.Runtime
         {
             add
             {
+                if (!IsValid)
+                {
+                    Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
+                    return;
+                }
+                
                 if (IsDone)
                 {
                     value?.Invoke(handlers);
@@ -57,7 +64,16 @@ namespace CatAsset.Runtime
                 onLoaded += value;
             }
 
-            remove => onLoaded -= value;
+            remove
+            {
+                if (!IsValid)
+                {
+                    Debug.LogError($"错误的在无效的{GetType().Name}上移除OnLoaded回调");
+                    return;
+                }
+
+                onLoaded -= value;
+            }
         }
 
         public BatchAssetHandler()
@@ -75,9 +91,7 @@ namespace CatAsset.Runtime
             {
                 IsDone = true;
                 onLoaded?.Invoke(handlers);
-                
-                //加载结束 自行释放此句柄
-                Release();
+                AwaiterContinuation?.Invoke();
             }
         }
 
@@ -116,6 +130,11 @@ namespace CatAsset.Runtime
         {
             foreach (AssetHandler<object> assetHandler in handlers)
             {
+                if (!assetHandler.IsValid)
+                {
+                    continue;
+                }
+                
                 assetHandler.Unload();
             }
             

@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     public static partial class CatAssetManager
     {
         /// <summary>
-        /// 检查安装包内资源清单,仅使用安装包内资源模式下专用
+        /// 检查安装包内资源清单,单机模式下专用
         /// </summary>
         public static void CheckPackageManifest(Action<bool> callback)
         {
