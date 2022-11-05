@@ -17,13 +17,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 任务id->任务
         /// </summary>
-        internal static readonly Dictionary<int, ITask> TaskIDDict = new Dictionary<int, ITask>();
+        internal static readonly Dictionary<int, BaseTask> TaskIDDict = new Dictionary<int, BaseTask>();
 
         /// <summary>
         /// 任务运行器->(任务名->主任务)
         /// </summary>
-        internal static readonly Dictionary<TaskRunner, Dictionary<string, ITask>> MainTaskDict =
-            new Dictionary<TaskRunner, Dictionary<string, ITask>>();
+        internal static readonly Dictionary<TaskRunner, Dictionary<string, BaseTask>> MainTaskDict =
+            new Dictionary<TaskRunner, Dictionary<string, BaseTask>>();
 
         /// <summary>
         /// 任务组列表
@@ -50,15 +50,15 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 添加任务
         /// </summary>
-        public void AddTask(ITask task, TaskPriority priority)
+        public void AddTask(BaseTask task, TaskPriority priority)
         {
-            if (!MainTaskDict.TryGetValue(task.Owner,out Dictionary<string, ITask> dict))
+            if (!MainTaskDict.TryGetValue(task.Owner,out Dictionary<string, BaseTask> dict))
             {
-                dict = new Dictionary<string, ITask>();
+                dict = new Dictionary<string, BaseTask>();
                 MainTaskDict.Add(task.Owner,dict);
             }
 
-            if (dict.TryGetValue(task.Name,out ITask mainTask))
+            if (dict.TryGetValue(task.Name,out BaseTask mainTask))
             {
                 //合并同名任务到主任务里
                 mainTask.MergeTask(task);
@@ -79,7 +79,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 变更优先级
         /// </summary>
-        private void ChangePriority(ITask task, TaskPriority newPriority)
+        private void ChangePriority(BaseTask task, TaskPriority newPriority)
         {
             if (task.Group.Priority == newPriority)
             {

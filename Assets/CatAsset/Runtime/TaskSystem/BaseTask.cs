@@ -6,47 +6,69 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 任务基类
     /// </summary>
-    public abstract class BaseTask : ITask
+    public abstract class BaseTask : IReference
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// 编号
+        /// </summary>
         public int ID { get; protected set; }
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 名称
+        /// </summary>
         public string Name { get; private set; }
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 持有者
+        /// </summary>
         public TaskRunner Owner { get; private set; }
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 任务组
+        /// </summary>
         public TaskGroup Group { get; set; }
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 状态
+        /// </summary>
         public TaskState State { get; set; }
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 进度
+        /// </summary>
         public virtual float Progress { get; }
         
         /// <summary>
         /// 已合并的任务列表（同名的任务）
         /// </summary>
-        protected List<ITask> MergedTasks = new List<ITask>();
+        protected List<BaseTask> MergedTasks = new List<BaseTask>();
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 已合并任务数量
+        /// </summary>
         public int MergedTaskCount => MergedTasks.Count;
         
-        /// <inheritdoc />
-        public void MergeTask(ITask task)
+        /// <summary>
+        /// 合并任务
+        /// </summary>
+        public void MergeTask(BaseTask task)
         {
             MergedTasks.Add(task);
         }
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 运行任务
+        /// </summary>
         public abstract void Run();
         
-        /// <inheritdoc />
+        /// <summary>
+        /// 轮询任务
+        /// </summary>
         public abstract void Update();
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 取消任务
+        /// </summary>
         public virtual void Cancel()
         {
             Debug.LogError($"此任务类型未支持取消操作:{GetType().Name}");
@@ -77,7 +99,7 @@ namespace CatAsset.Runtime
             Owner = default;
             Group = default;
             State = default;
-            foreach (ITask task in MergedTasks)
+            foreach (BaseTask task in MergedTasks)
             {
                 ReferencePool.Release(task);
             }

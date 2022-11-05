@@ -9,12 +9,12 @@ namespace CatAsset.Runtime
     /// </summary>
     public class TaskGroup
     {
-        private static List<ITask> tempTaskList = new List<ITask>();
+        private static List<BaseTask> tempTaskList = new List<BaseTask>();
 
         /// <summary>
         /// 任务列表
         /// </summary>
-        private List<ITask> mainTaskList = new List<ITask>();
+        private List<BaseTask> mainTaskList = new List<BaseTask>();
 
         /// <summary>
         /// 当前任务索引
@@ -39,7 +39,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 添加任务
         /// </summary>
-        public void AddTask(ITask task)
+        public void AddTask(BaseTask task)
         {
             mainTaskList.Add(task);
             task.Group = this;
@@ -48,7 +48,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 移除任务
         /// </summary>
-        public void RemoveTask(ITask task)
+        public void RemoveTask(BaseTask task)
         {
             mainTaskList.Remove(task);
             task.Group = null;
@@ -61,7 +61,7 @@ namespace CatAsset.Runtime
         {
             if (mainTaskList.Count > 0)
             {
-                foreach (ITask task in mainTaskList)
+                foreach (BaseTask task in mainTaskList)
                 {
                     tempTaskList.Add(task);
                 }
@@ -89,7 +89,7 @@ namespace CatAsset.Runtime
             int index = curTaskIndex;
             curTaskIndex++;
 
-            ITask task = tempTaskList[index];
+            BaseTask task = tempTaskList[index];
 
             try
             {

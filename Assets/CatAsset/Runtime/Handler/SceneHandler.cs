@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// 场景加载完毕回调方法的原型
     /// </summary>
     public delegate void SceneLoadedCallback(SceneHandler handler);
-    
+
     /// <summary>
     /// 场景句柄
     /// </summary>
@@ -35,7 +35,7 @@ namespace CatAsset.Runtime
                     Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
                     return;
                 }
-                
+
                 if (IsDone)
                 {
                     value?.Invoke(this);
@@ -70,7 +70,7 @@ namespace CatAsset.Runtime
             onLoaded?.Invoke(this);
             AwaiterContinuation?.Invoke();
         }
-        
+
         /// <inheritdoc />
         public override void Unload()
         {
@@ -81,6 +81,7 @@ namespace CatAsset.Runtime
         public static SceneHandler Create()
         {
             SceneHandler handler = ReferencePool.Get<SceneHandler>();
+            handler.IsValid = true;
             return handler;
         }
 
