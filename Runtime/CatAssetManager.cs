@@ -133,7 +133,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void CancelTask(int taskID)
         {
-            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out ITask task))
+            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out BaseTask task))
             {
                 task.Cancel();
             }
@@ -144,7 +144,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static float GetTaskProgress(int taskID)
         {
-            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out ITask task))
+            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out BaseTask task))
             {
                 return task.Progress;
             }

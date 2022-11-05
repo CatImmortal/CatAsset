@@ -8,7 +8,7 @@ namespace CatAsset.Runtime
     /// 批量资源加载完毕回调方法的原型
     /// </summary>
     public delegate void BatchAssetLoadedCallback(List<AssetHandler<object>> handlers);
-    
+
     /// <summary>
     /// 批量资源句柄
     /// </summary>
@@ -18,12 +18,12 @@ namespace CatAsset.Runtime
         /// 需要加载的资源数量
         /// </summary>
         private int assetCount;
-        
+
         /// <summary>
         /// 加载结束的资源数量
         /// </summary>
         private int loadedCount;
-        
+
         /// <summary>
         /// 资源句柄列表
         /// </summary>
@@ -36,7 +36,7 @@ namespace CatAsset.Runtime
 
         /// <inheritdoc />
         public override bool Success => loadedCount == assetCount;
-        
+
         /// <summary>
         /// 批量资源加载完毕回调
         /// </summary>
@@ -54,7 +54,7 @@ namespace CatAsset.Runtime
                     Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
                     return;
                 }
-                
+
                 if (IsDone)
                 {
                     value?.Invoke(handlers);
@@ -120,7 +120,7 @@ namespace CatAsset.Runtime
                     assetHandler.Cancel();
                 }
             }
-            
+
             //释放自身
             Release();
         }
@@ -134,10 +134,10 @@ namespace CatAsset.Runtime
                 {
                     continue;
                 }
-                
+
                 assetHandler.Unload();
             }
-            
+
             //释放自身
             Release();
         }
@@ -145,6 +145,7 @@ namespace CatAsset.Runtime
         public static BatchAssetHandler Create(int assetCount)
         {
             BatchAssetHandler handler = ReferencePool.Get<BatchAssetHandler>();
+            handler.IsValid = true;
             handler.assetCount = assetCount;
             handler.IsDone = assetCount == 0;
             return handler;
@@ -153,7 +154,7 @@ namespace CatAsset.Runtime
         public override void Clear()
         {
             base.Clear();
-            
+
             assetCount = default;
             loadedCount = default;
             handlers.Clear();

@@ -7,12 +7,12 @@ namespace CatAsset.Runtime
     /// 资源加载完毕回调方法的原型
     /// </summary>
     public delegate void AssetLoadedCallback<T>(AssetHandler<T> handler);
-    
+
     /// <summary>
     /// 自定义原生资源转换方法的原型
     /// </summary>
     public delegate object CustomRawAssetConverter(byte[] bytes);
-    
+
     /// <summary>
     /// 资源句柄
     /// </summary>
@@ -22,29 +22,29 @@ namespace CatAsset.Runtime
         /// 原始资源实例
         /// </summary>
         public object AssetObj { get; protected set; }
-        
+
         /// <summary>
         /// 资源类别
         /// </summary>
         public AssetCategory Category { get; protected set; }
-        
+
         /// <summary>
         /// 是否加载成功
         /// </summary>
         public override bool Success => AssetObj != null;
-        
+
         /// <summary>
         /// 设置原始资源实例
         /// </summary>
         internal abstract void SetAsset(object loadedAsset);
-        
+
         /// <inheritdoc />
         public override void Unload()
         {
             CatAssetManager.UnloadAsset(AssetObj);
             Release();
         }
-        
+
         /// <summary>
         /// 转换原始资源实例为指定类型的资源实例
         /// </summary>
@@ -111,7 +111,7 @@ namespace CatAsset.Runtime
         public override void Clear()
         {
             base.Clear();
-            
+
             AssetObj = default;
             Category = default;
         }
@@ -125,7 +125,7 @@ namespace CatAsset.Runtime
         /// 资源实例
         /// </summary>
         public T Asset { get; private set; }
-        
+
         /// <summary>
         /// 资源加载完毕回调
         /// </summary>
@@ -143,7 +143,7 @@ namespace CatAsset.Runtime
                     Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
                     return;
                 }
-                
+
                 if (IsDone)
                 {
                     value?.Invoke(this);
@@ -156,14 +156,14 @@ namespace CatAsset.Runtime
             remove
             {
                 if (!IsValid)
-                { 
+                {
                     Debug.LogError($"错误的在无效的{GetType().Name}上移除OnLoaded回调");
-                    return;   
+                    return;
                 }
                 onLoaded -= value;
             }
         }
-        
+
         /// <inheritdoc />
         internal override void SetAsset(object loadedAsset)
         {
@@ -173,19 +173,19 @@ namespace CatAsset.Runtime
             onLoaded?.Invoke(this);
             AwaiterContinuation?.Invoke();
         }
-        
+
         public static AssetHandler<T> Create(AssetCategory category = AssetCategory.None)
         {
             AssetHandler<T> handler = ReferencePool.Get<AssetHandler<T>>();
-            handler.Category = category;
             handler.IsValid = true;
+            handler.Category = category;
             return handler;
         }
 
         public override void Clear()
         {
             base.Clear();
-            
+
             Asset = default;
             onLoaded = default;
         }

@@ -12,7 +12,7 @@ namespace CatAsset.Editor
     {
         private bool isInitTaskInfoView;
         private Vector2 taskInfoScrollPos;
-        private Dictionary<TaskRunner, Dictionary<string, ITask>> allTasks;
+        private Dictionary<TaskRunner, Dictionary<string, BaseTask>> allTasks;
 
         /// <summary>
         /// 初始化任务信息界面
@@ -22,7 +22,7 @@ namespace CatAsset.Editor
             isInitTaskInfoView = true;
 
             allTasks = typeof(TaskRunner).GetField("MainTaskDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as
-                Dictionary<TaskRunner, Dictionary<string, ITask>>;
+                Dictionary<TaskRunner, Dictionary<string, BaseTask>>;
 
         }
 
@@ -49,11 +49,11 @@ namespace CatAsset.Editor
                     EditorGUILayout.LabelField("已合并任务数");
                 }
 
-                foreach (KeyValuePair<TaskRunner, Dictionary<string, ITask>> pair in allTasks)
+                foreach (KeyValuePair<TaskRunner, Dictionary<string, BaseTask>> pair in allTasks)
                 {
-                    foreach (KeyValuePair<string,ITask> item in pair.Value)
+                    foreach (KeyValuePair<string,BaseTask> item in pair.Value)
                     {
-                        ITask task = item.Value;
+                        BaseTask task = item.Value;
                         using (new EditorGUILayout.HorizontalScope())
                         {
                             EditorGUILayout.LabelField(task.Name, GUILayout.Width(position.width / 2));

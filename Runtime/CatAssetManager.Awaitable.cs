@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using Task = UnityEditor.VersionControl.Task;
+﻿using System.Threading.Tasks;
 
 namespace CatAsset.Runtime
 {
     public static partial class CatAssetManager
     {
         /// <summary>
-        /// 检查安装包内资源清单,仅使用安装包内资源模式下专用（可等待）
+        /// 检查安装包内资源清单,单机模式下专用（可等待）
         /// </summary>
         public static Task<bool> CheckPackageManifest()
         {
@@ -23,7 +18,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 检查资源版本，可更新模式下专用
+        /// 检查资源版本，可更新模式下专用（可等待）
         /// </summary>
         public static Task<VersionCheckResult> CheckVersion()
         {
@@ -35,5 +30,5 @@ namespace CatAsset.Runtime
             return tcs.Task;
         }
     }
-    
+
 }
