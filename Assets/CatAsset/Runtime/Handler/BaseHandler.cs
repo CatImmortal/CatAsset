@@ -15,9 +15,30 @@ namespace CatAsset.Runtime
         internal BaseTask Task;
 
         /// <summary>
+        /// Awaiter的Continuation回调，在加载完毕时调用
+        /// </summary>
+        internal Action AwaiterContinuation;
+        
+        /// <summary>
         /// 进度
         /// </summary>
-        public float Progress => Task?.Progress ?? 0;
+        public float Progress
+        {
+            get
+            {
+                if (!IsValid)
+                {
+                    return 0;
+                }
+
+                if (IsDone)
+                {
+                    return 1;
+                }
+
+                return Task?.Progress ?? 0;
+            }
+        }
         
         /// <summary>
         /// 是否已加载完毕
@@ -30,11 +51,6 @@ namespace CatAsset.Runtime
         public abstract bool Success { get; }
 
         /// <summary>
-        /// Awaiter的Continuation回调，在加载完毕时调用
-        /// </summary>
-        internal Action AwaiterContinuation;
-        
-        /// <summary>
         /// 是否有效
         /// </summary>
         public bool IsValid { get; protected set; }
@@ -44,12 +60,18 @@ namespace CatAsset.Runtime
         /// </summary>
         public virtual void Cancel()
         {
+            if (!IsValid)
+            {
+                Debug.LogWarning($"取消了无效的{GetType().Name}");
+                return;
+            }
+            
             Task?.Cancel();
             Release();
         }
 
         /// <summary>
-        /// 卸载资源
+        /// 卸载资源，同时会释放此句柄
         /// </summary>
         public abstract void Unload();
 
@@ -64,14 +86,6 @@ namespace CatAsset.Runtime
                 return;
             }
             ReferencePool.Release(this);
-        }
-        
-        public virtual void Clear()
-        {
-            Task = default;
-            IsDone = default;
-            AwaiterContinuation = default;
-            IsValid = default;
         }
         
         public void Dispose()
@@ -101,6 +115,17 @@ namespace CatAsset.Runtime
             }
         }
         
+        public virtual void Clear()
+        {
+            Task = default;
+            IsDone = default;
+            AwaiterContinuation = default;
+            IsValid = default;
+        }
+
+        /// <summary>
+        /// 获取可等待对象
+        /// </summary>
         public HandlerAwaiter GetAwaiter()
         {
             return new HandlerAwaiter(this);
