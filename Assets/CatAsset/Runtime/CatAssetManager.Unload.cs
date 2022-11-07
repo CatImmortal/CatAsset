@@ -77,7 +77,7 @@ namespace CatAsset.Runtime
             {
                 foreach (AssetHandler handler in handlers)
                 {
-                    handler.Unload();
+                    handler.Dispose();
                 }
                 handlers.Clear();
             }
