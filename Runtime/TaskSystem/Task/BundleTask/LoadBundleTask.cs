@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包加载任务完成回调的原型
     /// </summary>
-    public delegate void LoadBundleCallback(bool success);
+    public delegate void BundleLoadedCallback(bool success);
 
     /// <summary>
     /// 资源包加载任务
@@ -67,11 +67,11 @@ namespace CatAsset.Runtime
 
         }
 
-        protected LoadBundleCallback OnFinished;
+        protected BundleLoadedCallback OnFinishedCallback;
         protected BundleRuntimeInfo BundleRuntimeInfo;
 
-        private BundleUpdatedCallback onBundleUpdated;
-        private LoadBundleCallback onBuiltInShaderBundleLoadedCallback;
+        private readonly BundleUpdatedCallback onBundleUpdatedCallback;
+        private readonly BundleLoadedCallback onBuiltInShaderBundleLoadedCallback;
 
         private LoadBundleState loadState;
         private AssetBundleCreateRequest request;
@@ -92,7 +92,7 @@ namespace CatAsset.Runtime
 
         public LoadBundleTask()
         {
-            onBundleUpdated = OnBundleUpdated;
+            onBundleUpdatedCallback = OnBundleUpdated;
             onBuiltInShaderBundleLoadedCallback = OnBuiltInShaderBundleLoadedCallback;
         }
 
@@ -202,7 +202,7 @@ namespace CatAsset.Runtime
 
             //下载本地不存在的资源包
             Debug.Log($"开始下载：{BundleRuntimeInfo.Manifest.RelativePath}");
-            CatAssetManager.UpdateBundle(BundleRuntimeInfo.Manifest.Group,BundleRuntimeInfo.Manifest,onBundleUpdated);
+            CatAssetManager.UpdateBundle(BundleRuntimeInfo.Manifest.Group,BundleRuntimeInfo.Manifest,onBundleUpdatedCallback);
         }
 
         private void CheckStateWithBundleDownloading()
@@ -304,19 +304,19 @@ namespace CatAsset.Runtime
             if (BundleRuntimeInfo.Bundle == null)
             {
                 Debug.LogError($"资源包加载失败：{BundleRuntimeInfo.Manifest}");
-                OnFinished?.Invoke(false);
+                OnFinishedCallback?.Invoke(false);
                 foreach (LoadBundleTask task in MergedTasks)
                 {
-                    task.OnFinished?.Invoke(false);
+                    task.OnFinishedCallback?.Invoke(false);
                 }
             }
             else
             {
                 //Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
-                OnFinished?.Invoke(true);
+                OnFinishedCallback?.Invoke(true);
                 foreach (LoadBundleTask task in MergedTasks)
                 {
-                    task.OnFinished?.Invoke(true);
+                    task.OnFinishedCallback?.Invoke(true);
                 }
             }
         }
@@ -349,12 +349,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建资源包加载任务的对象
         /// </summary>
-        public static LoadBundleTask Create(TaskRunner owner, string name,LoadBundleCallback callback)
+        public static LoadBundleTask Create(TaskRunner owner, string name,BundleLoadedCallback callback)
         {
             LoadBundleTask task = ReferencePool.Get<LoadBundleTask>();
             task.CreateBase(owner,name);
 
-            task.OnFinished = callback;
+            task.OnFinishedCallback = callback;
             task.BundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(name);
 
             return task;
@@ -365,7 +365,7 @@ namespace CatAsset.Runtime
         {
             base.Clear();
 
-            OnFinished = default;
+            OnFinishedCallback = default;
             BundleRuntimeInfo = default;
             request = default;
             loadState = default;

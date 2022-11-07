@@ -34,7 +34,7 @@ namespace CatAsset.Runtime
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
         private LoadRawAssetState loadState;
-        private WebRequestCallback onWebRequestCallback;
+        private readonly WebRequestCallback onWebRequestCallback;
 
         private bool needCancel;
         

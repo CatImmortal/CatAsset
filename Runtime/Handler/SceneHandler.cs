@@ -16,46 +16,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 场景实例
         /// </summary>
-        public Scene Scene;
+        public Scene Scene { get; private set; }
 
         /// <summary>
         /// 场景加载完毕回调
         /// </summary>
-        private SceneLoadedCallback onLoaded;
-
-        /// <summary>
-        /// 场景加载完毕回调
-        /// </summary>
-        public event SceneLoadedCallback OnLoaded
-        {
-            add
-            {
-                if (!IsValid)
-                {
-                    Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
-                    return;
-                }
-
-                if (IsDone)
-                {
-                    value?.Invoke(this);
-                    return;
-                }
-
-                onLoaded += value;
-            }
-
-            remove
-            {
-                if (!IsValid)
-                {
-                    Debug.LogError($"错误的在无效的{GetType().Name}上移除OnLoaded回调");
-                    return;
-                }
-
-                onLoaded -= value;
-            }
-        }
+        private SceneLoadedCallback onLoadedCallback;
 
         /// <inheritdoc />
         public override bool Success => Scene != default;
@@ -67,8 +33,14 @@ namespace CatAsset.Runtime
         {
             Scene = loadedScene;
             IsDone = true;
-            onLoaded?.Invoke(this);
-            AwaiterContinuation?.Invoke();
+            onLoadedCallback?.Invoke(this);
+            ContinuationCallBack?.Invoke();
+
+            if (!Success)
+            {
+                //加载失败 自行释放句柄
+                Release();
+            }
         }
 
         /// <inheritdoc />
@@ -84,10 +56,11 @@ namespace CatAsset.Runtime
             Release();
         }
 
-        public static SceneHandler Create()
+        public static SceneHandler Create(SceneLoadedCallback callback)
         {
             SceneHandler handler = ReferencePool.Get<SceneHandler>();
             handler.IsValid = true;
+            handler.onLoadedCallback = callback;
             return handler;
         }
 

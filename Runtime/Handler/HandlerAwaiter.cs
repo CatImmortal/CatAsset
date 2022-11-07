@@ -24,7 +24,7 @@ namespace CatAsset.Runtime
         
         public void OnCompleted(Action continuation)
         {
-            handler.AwaiterContinuation = continuation;
+            handler.ContinuationCallBack = continuation;
         }
     }
 }

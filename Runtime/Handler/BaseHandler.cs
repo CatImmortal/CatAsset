@@ -17,7 +17,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// Awaiter的Continuation回调，在加载完毕时调用
         /// </summary>
-        internal Action AwaiterContinuation;
+        internal Action ContinuationCallBack;
         
         /// <summary>
         /// 进度
@@ -119,7 +119,7 @@ namespace CatAsset.Runtime
         {
             Task = default;
             IsDone = default;
-            AwaiterContinuation = default;
+            ContinuationCallBack = default;
             IsValid = default;
         }
 

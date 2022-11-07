@@ -135,40 +135,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源加载完毕回调
         /// </summary>
-        private AssetLoadedCallback<T> onLoaded;
-
-        /// <summary>
-        /// 资源加载完毕回调
-        /// </summary>
-        public event AssetLoadedCallback<T> OnLoaded
-        {
-            add
-            {
-                if (!IsValid)
-                {
-                    Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
-                    return;
-                }
-
-                if (IsDone)
-                {
-                    value?.Invoke(this);
-                    return;
-                }
-
-                onLoaded += value;
-            }
-
-            remove
-            {
-                if (!IsValid)
-                {
-                    Debug.LogError($"错误的在无效的{GetType().Name}上移除OnLoaded回调");
-                    return;
-                }
-                onLoaded -= value;
-            }
-        }
+        private AssetLoadedCallback<T> onLoadedCallback;
 
         /// <inheritdoc />
         internal override void SetAsset(object loadedAsset)
@@ -176,15 +143,22 @@ namespace CatAsset.Runtime
             AssetObj = loadedAsset;
             Asset = AssetAs<T>();
             IsDone = true;
-            onLoaded?.Invoke(this);
-            AwaiterContinuation?.Invoke();
+            onLoadedCallback?.Invoke(this);
+            ContinuationCallBack?.Invoke();
+
+            if (!Success)
+            {
+                //加载失败 自行释放句柄
+                Release();
+            }
         }
 
-        public static AssetHandler<T> Create(AssetCategory category = AssetCategory.None)
+        public static AssetHandler<T> Create(AssetLoadedCallback<T> callback,AssetCategory category = AssetCategory.None)
         {
             AssetHandler<T> handler = ReferencePool.Get<AssetHandler<T>>();
             handler.IsValid = true;
             handler.Category = category;
+            handler.onLoadedCallback = callback;
             return handler;
         }
 
@@ -193,7 +167,7 @@ namespace CatAsset.Runtime
             base.Clear();
 
             Asset = default;
-            onLoaded = default;
+            onLoadedCallback = default;
         }
 
 
