@@ -20,7 +20,8 @@ namespace CatAsset.Runtime
         {
             foreach (AssetHandler handler in handlers)
             {
-                handler.Unload();
+                //使用dispose 方便在handler的各种情况下都能正确处理
+                handler.Dispose();
             }
             handlers.Clear();
             

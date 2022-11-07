@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源加载完毕回调方法的原型
     /// </summary>
-    public delegate void BatchAssetLoadedCallback(List<AssetHandler<object>> handlers);
+    public delegate void BatchAssetLoadedCallback(BatchAssetHandler handler);
 
     /// <summary>
     /// 批量资源句柄
@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源句柄列表
         /// </summary>
-        private readonly List<AssetHandler<object>> handlers  = new List<AssetHandler<object>>();
+        public readonly List<AssetHandler<object>> Handlers  = new List<AssetHandler<object>>();
 
         /// <summary>
         /// 资源加载完毕回调
@@ -57,7 +57,7 @@ namespace CatAsset.Runtime
 
                 if (IsDone)
                 {
-                    value?.Invoke(handlers);
+                    value?.Invoke(this);
                     return;
                 }
 
@@ -90,7 +90,7 @@ namespace CatAsset.Runtime
             if (loadedCount == assetCount)
             {
                 IsDone = true;
-                onLoaded?.Invoke(handlers);
+                onLoaded?.Invoke(this);
                 AwaiterContinuation?.Invoke();
             }
         }
@@ -100,25 +100,22 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void AddAssetHandler(AssetHandler<object> handler)
         {
-            handlers.Add(handler);
+            Handlers.Add(handler);
             handler.OnLoaded += onAssetLoaded;
         }
 
         /// <inheritdoc />
         public override void Cancel()
         {
-            foreach (AssetHandler<object> assetHandler in handlers)
+            if (!IsValid)
             {
-                if (assetHandler.IsDone)
-                {
-                    //已加载的就卸载
-                    assetHandler.Unload();
-                }
-                else
-                {
-                    //未加载的就取消
-                    assetHandler.Cancel();
-                }
+                Debug.LogWarning($"取消了无效的{GetType().Name}");
+                return;
+            }
+            
+            foreach (AssetHandler<object> assetHandler in Handlers)
+            {
+                assetHandler.Dispose();
             }
 
             //释放自身
@@ -128,7 +125,13 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Unload()
         {
-            foreach (AssetHandler<object> assetHandler in handlers)
+            if (!IsValid)
+            {
+                Debug.LogError($"卸载了无效的{GetType().Name}");
+                return;
+            }
+            
+            foreach (AssetHandler<object> assetHandler in Handlers)
             {
                 if (!assetHandler.IsValid)
                 {
@@ -157,7 +160,7 @@ namespace CatAsset.Runtime
 
             assetCount = default;
             loadedCount = default;
-            handlers.Clear();
+            Handlers.Clear();
         }
     }
 }

@@ -219,6 +219,7 @@ namespace CatAsset.Runtime
             {
                 foreach (GameObject go in objects)
                 {
+                    //预热结束 将预热好的对象都放回池里
                     ReleaseGameObject(prefabName,go);
                 }
                 callback?.Invoke();
@@ -228,6 +229,23 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 预热对象
+        /// </summary>
+        public static void Prewarm(GameObject template,int count,Action callback)
+        {
+            List<GameObject> objects = new List<GameObject>(count);
+            Prewarm(template,count,0,objects, () =>
+            {
+                foreach (GameObject go in objects)
+                {
+                    //预热结束 将预热好的对象都放回池里
+                    ReleaseGameObject(template,go);
+                }
+                callback?.Invoke();
+            });
+        }
+        
+        /// <summary>
         /// 递归预热对象
         /// </summary>
         private static void Prewarm(string prefabName,int count,int counter, List<GameObject> objects,Action callback)
@@ -236,7 +254,7 @@ namespace CatAsset.Runtime
             {
                 counter++;
                 objects.Add(go);
-                go.SetActive(false);
+                go.SetActive(false);  //这里需要先手动隐藏一下 否则可能会出现对象在屏幕里闪一下的问题
 
                 if (counter < count)
                 {
@@ -251,23 +269,7 @@ namespace CatAsset.Runtime
                 }
             }));
         }
-
-
-        /// <summary>
-        /// 预热对象
-        /// </summary>
-        public static void Prewarm(GameObject template,int count,Action callback)
-        {
-            List<GameObject> objects = new List<GameObject>(count);
-            Prewarm(template,count,0,objects, () =>
-            {
-                foreach (GameObject go in objects)
-                {
-                    ReleaseGameObject(template,go);
-                }
-                callback?.Invoke();
-            });
-        }
+        
 
         /// <summary>
         /// 递归预热对象
@@ -277,7 +279,7 @@ namespace CatAsset.Runtime
             GetGameObjectAsync(template,Root,(go =>
             {
                 counter++;
-                go.SetActive(false);
+                go.SetActive(false);  //这里需要先手动隐藏一下 否则可能会出现对象在屏幕里闪一下的问题
                 if (counter < count)
                 {
                     //预热未结束

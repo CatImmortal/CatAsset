@@ -74,6 +74,12 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Unload()
         {
+            if (!IsValid)
+            {
+                Debug.LogError($"卸载了无效的{GetType().Name}");
+                return;
+            }
+            
             CatAssetManager.UnloadScene(Scene);
             Release();
         }
