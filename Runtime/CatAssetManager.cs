@@ -127,30 +127,6 @@ namespace CatAsset.Runtime
             return converter;
         }
         
-
-        /// <summary>
-        /// 取消任务
-        /// </summary>
-        public static void CancelTask(int taskID)
-        {
-            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out BaseTask task))
-            {
-                task.Cancel();
-            }
-        }
-        
-        /// <summary>
-        /// 获取任务进度
-        /// </summary>
-        public static float GetTaskProgress(int taskID)
-        {
-            if (TaskRunner.TaskIDDict.TryGetValue(taskID, out BaseTask task))
-            {
-                return task.Progress;
-            }
-
-            return -1;
-        }
         
         /// <summary>
         /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
