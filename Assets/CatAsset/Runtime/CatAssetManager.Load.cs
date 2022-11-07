@@ -26,7 +26,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<object> LoadAssetAsync(string assetName,AssetLoadedCallback<object> callback, TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<object> LoadAssetAsync(string assetName,AssetLoadedCallback<object> callback = null, TaskPriority priority = TaskPriority.Low)
         {
             return InternalLoadAssetAsync<object>(assetName,callback, priority);
         }
@@ -34,7 +34,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<T> LoadAssetAsync<T>(string assetName,AssetLoadedCallback<T> callback, TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<T> LoadAssetAsync<T>(string assetName,AssetLoadedCallback<T> callback = null, TaskPriority priority = TaskPriority.Low)
         {
             return InternalLoadAssetAsync<T>(assetName,callback,priority);
         }
@@ -142,7 +142,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static BatchAssetHandler BatchLoadAssetAsync(List<string> assetNames,BatchAssetLoadedCallback callback,
+        public static BatchAssetHandler BatchLoadAssetAsync(List<string> assetNames,BatchAssetLoadedCallback callback = null,
             TaskPriority priority = TaskPriority.Low)
         {
             BatchAssetHandler handler;
@@ -168,7 +168,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static SceneHandler LoadSceneAsync(string sceneName,SceneLoadedCallback callback, TaskPriority priority = TaskPriority.Low)
+        public static SceneHandler LoadSceneAsync(string sceneName,SceneLoadedCallback callback = null, TaskPriority priority = TaskPriority.Low)
         {
             SceneHandler handler = SceneHandler.Create(callback);
 
