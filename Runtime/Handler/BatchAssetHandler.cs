@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源句柄列表
         /// </summary>
-        private readonly List<AssetHandler<object>> handlers  = new List<AssetHandler<object>>();
+        internal readonly List<AssetHandler<object>> Handlers  = new List<AssetHandler<object>>();
 
         /// <summary>
         /// 资源加载完毕回调
@@ -56,7 +56,7 @@ namespace CatAsset.Runtime
             if (loadedCount == assetCount)
             {
                 IsDone = true;
-                onLoadedCallback?.Invoke(handlers);
+                onLoadedCallback?.Invoke(Handlers);
                 ContinuationCallBack?.Invoke();
                 
                 //加载结束 释放句柄
@@ -69,7 +69,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void AddAssetHandler(AssetHandler<object> handler)
         {
-            handlers.Add(handler);
+            Handlers.Add(handler);
         }
         
         /// <inheritdoc />
@@ -81,7 +81,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            foreach (AssetHandler<object> assetHandler in handlers)
+            foreach (AssetHandler<object> assetHandler in Handlers)
             {
                 assetHandler.Dispose();
             }
@@ -99,7 +99,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            foreach (AssetHandler<object> assetHandler in handlers)
+            foreach (AssetHandler<object> assetHandler in Handlers)
             {
                 if (!assetHandler.IsValid)
                 {
@@ -123,7 +123,7 @@ namespace CatAsset.Runtime
 
             if (handler.IsDone)
             {
-                handler.onLoadedCallback?.Invoke(handler.handlers);
+                handler.onLoadedCallback?.Invoke(handler.Handlers);
                 handler.ContinuationCallBack?.Invoke();
                 
                 //加载结束 释放句柄
@@ -139,7 +139,7 @@ namespace CatAsset.Runtime
 
             assetCount = default;
             loadedCount = default;
-            handlers.Clear();
+            Handlers.Clear();
         }
     }
 }
