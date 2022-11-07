@@ -40,11 +40,22 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 设置图片
         /// </summary>
-        public static void SetImage(this Image self, string assetName)
+        public static void SetSprite(this Image self, string assetName)
         {
             CatAssetManager.LoadAssetAsync<Sprite>(assetName,(handler =>
             {
                 self.sprite = handler.Asset;
+            })).BindTo(self.gameObject);
+        }
+
+        /// <summary>
+        /// 设置图片
+        /// </summary>
+        public static void SetTexture(this RawImage self, string assetName)
+        {
+            CatAssetManager.LoadAssetAsync<Texture>(assetName, (handler =>
+            {
+                self.texture = handler.Asset;
             })).BindTo(self.gameObject);
         }
 
@@ -55,7 +66,10 @@ namespace CatAsset.Runtime
         {
             CatAssetManager.LoadAssetAsync<TextAsset>(assetName, (handler =>
             {
-                self.text = handler.Asset.text;
+                if (handler.Success)
+                {
+                    self.text = handler.Asset.text;
+                }
             })).BindTo(self.gameObject);
         }
 
