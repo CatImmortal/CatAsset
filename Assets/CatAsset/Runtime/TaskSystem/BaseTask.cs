@@ -86,14 +86,12 @@ namespace CatAsset.Runtime
         {
             Owner = owner;
             ID = ++TaskRunner.TaskIDFactory;
-            TaskRunner.TaskIDDict.Add(ID,this);
             Name = name;
         }
         
         /// <inheritdoc />
         public virtual void Clear()
         {
-            TaskRunner.TaskIDDict.Remove(ID);
             ID = default;
             Name = default;
             Owner = default;

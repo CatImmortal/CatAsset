@@ -15,11 +15,6 @@ namespace CatAsset.Runtime
         internal static int TaskIDFactory = 0;
 
         /// <summary>
-        /// 任务id->任务
-        /// </summary>
-        internal static readonly Dictionary<int, BaseTask> TaskIDDict = new Dictionary<int, BaseTask>();
-
-        /// <summary>
         /// 任务运行器->(任务名->主任务)
         /// </summary>
         internal static readonly Dictionary<TaskRunner, Dictionary<string, BaseTask>> MainTaskDict =
@@ -28,7 +23,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 任务组列表
         /// </summary>
-        private List<TaskGroup> taskGroups = new List<TaskGroup>();
+        private readonly List<TaskGroup> taskGroups = new List<TaskGroup>();
 
         public TaskRunner()
         {
