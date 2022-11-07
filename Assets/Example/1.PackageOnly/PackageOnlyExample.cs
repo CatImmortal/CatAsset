@@ -42,7 +42,7 @@ public class PackageOnlyExample : MonoBehaviour
                             go = Instantiate(assetHandler.Asset);
                 
                             //绑定assetHandler到实例化的go上 这样销毁go后也会将asset也卸载了
-                            go.Bind(assetHandler);
+                            go.BindTo(assetHandler);
                         }
                     }));
 
