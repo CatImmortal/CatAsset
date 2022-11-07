@@ -146,7 +146,7 @@ namespace CatAsset.Runtime
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
 
-            if (!Success)
+            if (IsValid && !Success)
             {
                 //加载失败 自行释放句柄
                 Release();

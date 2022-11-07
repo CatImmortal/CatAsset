@@ -60,7 +60,10 @@ namespace CatAsset.Runtime
                 ContinuationCallBack?.Invoke();
                 
                 //加载结束 释放句柄
-                Release();
+                if (IsValid)
+                {
+                    Release();
+                }
             }
         }
 
