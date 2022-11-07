@@ -33,28 +33,28 @@ public class PackageOnlyExample : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
-                AssetHandler<GameObject> handler = CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/PrefabA/A1.prefab");
-                handler.OnLoaded += assetHandler =>
-                {
-                    if (assetHandler.Success)
-                    {
-                        Debug.Log("加载GameObject");
-                        go = Instantiate(assetHandler.Asset);
-                
-                        //绑定assetHandler到实例化的go上 这样销毁go后也会将asset也卸载了
-                        go.Bind(assetHandler);
-                    }
-                };
-
-                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt").OnLoaded+=(
+                CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/PrefabA/A1.prefab",(
                     assetHandler =>
                     {
                         if (assetHandler.Success)
                         {
-                            Debug.Log($"加载原生资源 文本文件:{assetHandler.Asset.text}");
-                            assetHandler.Unload();
+                            Debug.Log("加载GameObject");
+                            go = Instantiate(assetHandler.Asset);
+                
+                            //绑定assetHandler到实例化的go上 这样销毁go后也会将asset也卸载了
+                            go.Bind(assetHandler);
                         }
-                    });
+                    }));
+
+
+                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", (assetHandler =>
+                {
+                    if (assetHandler.Success)
+                    {
+                        Debug.Log($"加载原生资源 文本文件:{assetHandler.Asset.text}");
+                        assetHandler.Unload();
+                    }
+                }));
 
             }
 

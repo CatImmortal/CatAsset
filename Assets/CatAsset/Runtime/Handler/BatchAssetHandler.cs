@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源加载完毕回调方法的原型
     /// </summary>
-    public delegate void BatchAssetLoadedCallback(BatchAssetHandler handler);
+    public delegate void BatchAssetLoadedCallback(List<AssetHandler<object>> handlers);
 
     /// <summary>
     /// 批量资源句柄
@@ -27,12 +27,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源句柄列表
         /// </summary>
-        public readonly List<AssetHandler<object>> Handlers  = new List<AssetHandler<object>>();
+        private readonly List<AssetHandler<object>> handlers  = new List<AssetHandler<object>>();
 
         /// <summary>
         /// 资源加载完毕回调
         /// </summary>
-        private readonly AssetLoadedCallback<object> onAssetLoaded;
+        internal readonly AssetLoadedCallback<object> OnAssetLoadedCallback;
 
         /// <inheritdoc />
         public override bool Success => loadedCount == assetCount;
@@ -40,45 +40,11 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量资源加载完毕回调
         /// </summary>
-        private BatchAssetLoadedCallback onLoaded;
-
-        /// <summary>
-        /// 批量资源加载完毕回调
-        /// </summary>
-        public event BatchAssetLoadedCallback OnLoaded
-        {
-            add
-            {
-                if (!IsValid)
-                {
-                    Debug.LogError($"错误的在无效的{GetType().Name}上添加OnLoaded回调");
-                    return;
-                }
-
-                if (IsDone)
-                {
-                    value?.Invoke(this);
-                    return;
-                }
-
-                onLoaded += value;
-            }
-
-            remove
-            {
-                if (!IsValid)
-                {
-                    Debug.LogError($"错误的在无效的{GetType().Name}上移除OnLoaded回调");
-                    return;
-                }
-
-                onLoaded -= value;
-            }
-        }
+        private BatchAssetLoadedCallback onLoadedCallback;
 
         public BatchAssetHandler()
         {
-            onAssetLoaded = OnAssetLoaded;
+            OnAssetLoadedCallback = OnAssetLoaded;
         }
 
         /// <summary>
@@ -90,8 +56,11 @@ namespace CatAsset.Runtime
             if (loadedCount == assetCount)
             {
                 IsDone = true;
-                onLoaded?.Invoke(this);
-                AwaiterContinuation?.Invoke();
+                onLoadedCallback?.Invoke(handlers);
+                ContinuationCallBack?.Invoke();
+                
+                //加载结束 释放句柄
+                Release();
             }
         }
 
@@ -100,10 +69,9 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void AddAssetHandler(AssetHandler<object> handler)
         {
-            Handlers.Add(handler);
-            handler.OnLoaded += onAssetLoaded;
+            handlers.Add(handler);
         }
-
+        
         /// <inheritdoc />
         public override void Cancel()
         {
@@ -113,7 +81,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            foreach (AssetHandler<object> assetHandler in Handlers)
+            foreach (AssetHandler<object> assetHandler in handlers)
             {
                 assetHandler.Dispose();
             }
@@ -131,7 +99,7 @@ namespace CatAsset.Runtime
                 return;
             }
             
-            foreach (AssetHandler<object> assetHandler in Handlers)
+            foreach (AssetHandler<object> assetHandler in handlers)
             {
                 if (!assetHandler.IsValid)
                 {
@@ -145,12 +113,23 @@ namespace CatAsset.Runtime
             Release();
         }
 
-        public static BatchAssetHandler Create(int assetCount)
+        public static BatchAssetHandler Create(int assetCount,BatchAssetLoadedCallback callback)
         {
             BatchAssetHandler handler = ReferencePool.Get<BatchAssetHandler>();
             handler.IsValid = true;
             handler.assetCount = assetCount;
+            handler.onLoadedCallback = callback;
             handler.IsDone = assetCount == 0;
+
+            if (handler.IsDone)
+            {
+                handler.onLoadedCallback?.Invoke(handler.handlers);
+                handler.ContinuationCallBack?.Invoke();
+                
+                //加载结束 释放句柄
+                handler.Release();
+            }
+            
             return handler;
         }
 
@@ -160,7 +139,7 @@ namespace CatAsset.Runtime
 
             assetCount = default;
             loadedCount = default;
-            Handlers.Clear();
+            handlers.Clear();
         }
     }
 }

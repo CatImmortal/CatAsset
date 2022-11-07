@@ -5,7 +5,6 @@ using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
-    
     /// <summary>
     /// 资源包资源加载任务
     /// </summary>
@@ -70,7 +69,7 @@ namespace CatAsset.Runtime
         protected AssetRuntimeInfo AssetRuntimeInfo;
         protected BundleRuntimeInfo BundleRuntimeInfo;
         
-        private readonly LoadBundleCallback onBundleLoadedCallback;
+        private readonly BundleLoadedCallback onBundleLoadedCallback;
 
         private int totalDependencyCount;
         private int loadFinishDependencyCount;
@@ -254,8 +253,7 @@ namespace CatAsset.Runtime
             totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
             foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
-                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,TaskPriority.Middle);
-                dependencyHandler.OnLoaded += onDependencyLoadedCallback;
+                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,onDependencyLoadedCallback,TaskPriority.Middle);
                 dependencyHandlers.Add(dependencyHandler);
             }
         }
@@ -500,10 +498,13 @@ namespace CatAsset.Runtime
             totalDependencyCount = default;
             loadFinishDependencyCount = default;
             
-            //释放掉所有依赖资源句柄
+            //释放掉所有加载成功的依赖资源的句柄
             foreach (AssetHandler dependencyHandler in dependencyHandlers)
             {
-                dependencyHandler.Release();
+                if (dependencyHandler.Success)
+                {
+                    dependencyHandler.Release();
+                }
             }
             dependencyHandlers.Clear();
             
