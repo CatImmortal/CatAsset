@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -14,6 +15,31 @@ namespace CatAsset.Runtime
     /// </summary>
     public class BatchAssetHandler : BaseHandler
     {
+        /// <summary>
+        /// 可等待对象
+        /// </summary>
+        public readonly struct Awaiter : INotifyCompletion
+        {
+            private readonly BatchAssetHandler handler;
+
+            public Awaiter(BatchAssetHandler handler)
+            {
+                this.handler = handler;
+            }
+        
+            public bool IsCompleted => handler.IsDone;
+
+            public List<AssetHandler<object>> GetResult()
+            {
+                return handler.Handlers;
+            }
+        
+            public void OnCompleted(Action continuation)
+            {
+                handler.ContinuationCallBack = continuation;
+            }
+        }
+        
         /// <summary>
         /// 需要加载的资源数量
         /// </summary>
@@ -116,6 +142,14 @@ namespace CatAsset.Runtime
             Release();
         }
 
+        /// <summary>
+        /// 获取可等待对象
+        /// </summary>
+        public Awaiter GetAwaiter()
+        {
+            return new Awaiter(this);
+        }
+        
         public static BatchAssetHandler Create(int assetCount,BatchAssetLoadedCallback callback)
         {
             BatchAssetHandler handler = ReferencePool.Get<BatchAssetHandler>();

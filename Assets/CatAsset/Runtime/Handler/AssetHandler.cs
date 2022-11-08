@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -128,6 +129,31 @@ namespace CatAsset.Runtime
     public class AssetHandler<T> : AssetHandler
     {
         /// <summary>
+        /// 可等待对象
+        /// </summary>
+        public readonly struct Awaiter : INotifyCompletion
+        {
+            private readonly AssetHandler<T> handler;
+
+            public Awaiter(AssetHandler<T> handler)
+            {
+                this.handler = handler;
+            }
+        
+            public bool IsCompleted => handler.IsDone;
+
+            public T GetResult()
+            {
+                return handler.Asset;
+            }
+        
+            public void OnCompleted(Action continuation)
+            {
+                handler.ContinuationCallBack = continuation;
+            }
+        }
+        
+        /// <summary>
         /// 资源实例
         /// </summary>
         public T Asset { get; private set; }
@@ -153,6 +179,14 @@ namespace CatAsset.Runtime
             }
         }
 
+        /// <summary>
+        /// 获取可等待对象
+        /// </summary>
+        public Awaiter GetAwaiter()
+        {
+            return new Awaiter(this);
+        }
+        
         public static AssetHandler<T> Create(AssetLoadedCallback<T> callback,AssetCategory category = AssetCategory.None)
         {
             AssetHandler<T> handler = ReferencePool.Get<AssetHandler<T>>();

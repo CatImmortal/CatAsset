@@ -78,7 +78,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 释放句柄，会将此句柄归还引用池
         /// </summary>
-        public void Release()
+        internal void Release()
         {
             if (!IsValid)
             {
@@ -122,14 +122,5 @@ namespace CatAsset.Runtime
             ContinuationCallBack = default;
             IsValid = default;
         }
-
-        /// <summary>
-        /// 获取可等待对象
-        /// </summary>
-        public HandlerAwaiter GetAwaiter()
-        {
-            return new HandlerAwaiter(this);
-        }
-
     }
 }
