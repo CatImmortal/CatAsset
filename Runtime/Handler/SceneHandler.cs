@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Runtime.CompilerServices;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
@@ -13,6 +15,31 @@ namespace CatAsset.Runtime
     /// </summary>
     public class SceneHandler : BaseHandler
     {
+        /// <summary>
+        /// 可等待对象
+        /// </summary>
+        public readonly struct Awaiter : INotifyCompletion
+        {
+            private readonly SceneHandler handler;
+
+            public Awaiter(SceneHandler handler)
+            {
+                this.handler = handler;
+            }
+        
+            public bool IsCompleted => handler.IsDone;
+
+            public Scene GetResult()
+            {
+                return handler.Scene;
+            }
+        
+            public void OnCompleted(Action continuation)
+            {
+                handler.ContinuationCallBack = continuation;
+            }
+        }
+        
         /// <summary>
         /// 场景实例
         /// </summary>
@@ -54,6 +81,14 @@ namespace CatAsset.Runtime
             
             CatAssetManager.UnloadScene(Scene);
             Release();
+        }
+        
+        /// <summary>
+        /// 获取可等待对象
+        /// </summary>
+        public Awaiter GetAwaiter()
+        {
+            return new Awaiter(this);
         }
 
         public static SceneHandler Create(SceneLoadedCallback callback)
