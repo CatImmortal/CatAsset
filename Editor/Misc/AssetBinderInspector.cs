@@ -18,21 +18,37 @@ namespace CatAsset.Editor
         {
             base.OnInspectorGUI();
 
-            foreach (AssetHandler handler in binder.Handlers)
+            foreach (IBindableHandler bindable in binder.Handlers)
             {
-                using (new EditorGUILayout.HorizontalScope())
+                if (bindable is AssetHandler handler)
                 {
-                    //句柄名
-                    EditorGUILayout.LabelField(handler.Name);
+                    DrawAssetHandler(handler);
                     
-                    //资源对象
-                    EditorGUI.BeginDisabledGroup(true);
-                    EditorGUILayout.ObjectField(AssetDatabase.LoadAssetAtPath<Object>(handler.Name),typeof(Object),false);
-                    EditorGUI.EndDisabledGroup();
-
-                    //句柄状态
-                    EditorGUILayout.LabelField(handler.State.ToString());
+                }else if (bindable is BatchAssetHandler batch)
+                {
+                    foreach (AssetHandler<object> assetHandler in batch.Handlers)
+                    {
+                        DrawAssetHandler(assetHandler);
+                    }
                 }
+                
+            }
+        }
+
+        private void DrawAssetHandler(AssetHandler handler)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                //句柄名
+                EditorGUILayout.LabelField(handler.Name);
+                    
+                //资源对象
+                EditorGUI.BeginDisabledGroup(true);
+                EditorGUILayout.ObjectField(AssetDatabase.LoadAssetAtPath<Object>(handler.Name),typeof(Object),false);
+                EditorGUI.EndDisabledGroup();
+
+                //句柄状态
+                EditorGUILayout.LabelField(handler.State.ToString());
             }
         }
     }

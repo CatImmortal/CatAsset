@@ -10,12 +10,12 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 批量资源加载完毕回调方法的原型
     /// </summary>
-    public delegate void BatchAssetLoadedCallback(List<AssetHandler<object>> handlers);
+    public delegate void BatchAssetLoadedCallback(BatchAssetHandler handler);
 
     /// <summary>
     /// 批量资源句柄
     /// </summary>
-    public class BatchAssetHandler : BaseHandler
+    public class BatchAssetHandler : BaseHandler ,IBindableHandler
     {
         /// <summary>
         /// 可等待对象
@@ -28,8 +28,8 @@ namespace CatAsset.Runtime
             {
                 this.handler = handler;
             }
-        
-            public bool IsCompleted => handler.State == HandlerState.Success || handler.State == HandlerState.Failed;
+            
+            public bool IsCompleted => handler.State != HandlerState.Doing;
 
             public List<AssetHandler<object>> GetResult()
             {
@@ -91,14 +91,8 @@ namespace CatAsset.Runtime
             {
                 State = HandlerState.Success;
             
-                onLoadedCallback?.Invoke(Handlers);
+                onLoadedCallback?.Invoke(this);
                 ContinuationCallBack?.Invoke();
-                
-                //加载结束 释放句柄
-                if (State == HandlerState.Success)
-                {
-                    Release();
-                }
             }
         }
 
@@ -141,12 +135,7 @@ namespace CatAsset.Runtime
             
             foreach (AssetHandler<object> assetHandler in Handlers)
             {
-                if (State == HandlerState.InValid)
-                {
-                    continue;
-                }
-
-                assetHandler.Unload();
+                assetHandler.Dispose();
             }
 
             //释放自身

@@ -366,7 +366,7 @@ namespace CatAsset.Runtime
         }
 
         
-                /// <summary>
+        /// <summary>
         /// 发起异步加载
         /// </summary>
         protected virtual void LoadAsync()

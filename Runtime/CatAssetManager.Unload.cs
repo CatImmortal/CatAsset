@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     public static partial class CatAssetManager
     {
         /// <summary>
-        /// 卸载资源，注意：asset参数需要是原始资源实例
+        /// 卸载资源，注意：asset参数需要是原始资源对象
         /// </summary>
         public static void UnloadAsset(object asset)
         {
@@ -72,10 +72,10 @@ namespace CatAsset.Runtime
             SceneManager.UnloadSceneAsync(scene);
 
             //卸载与场景绑定的资源
-            List<AssetHandler> handlers = CatAssetDatabase.GetSceneBindAssets(scene);
+            List<IBindableHandler> handlers = CatAssetDatabase.GetSceneBindAssets(scene);
             if (handlers != null)
             {
-                foreach (AssetHandler handler in handlers)
+                foreach (IBindableHandler handler in handlers)
                 {
                     handler.Dispose();
                 }
