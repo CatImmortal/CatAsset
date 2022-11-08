@@ -8,22 +8,22 @@ namespace CatAsset.Runtime
     /// </summary>
     public class AssetBinder : MonoBehaviour
     {
-        private readonly List<AssetHandler> handlers = new List<AssetHandler>();
+        public readonly List<AssetHandler> Handlers = new List<AssetHandler>();
 
         public void BindTo(AssetHandler handler)
         {
-            handlers.Add(handler);
+            Handlers.Add(handler);
         }
 
 
         private void OnDestroy()
         {
-            foreach (AssetHandler handler in handlers)
+            foreach (AssetHandler handler in Handlers)
             {
                 //使用dispose 方便在handler的各种情况下都能正确处理
                 handler.Dispose();
             }
-            handlers.Clear();
+            Handlers.Clear();
             
         }
     }

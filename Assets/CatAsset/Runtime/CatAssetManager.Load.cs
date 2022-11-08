@@ -50,7 +50,7 @@ namespace CatAsset.Runtime
             if (string.IsNullOrEmpty(assetName))
             {
                 Debug.LogError("资源加载失败：资源名为空");
-                handler = AssetHandler<T>.Create(callback);
+                handler = AssetHandler<T>.Create(string.Empty, callback);
                 handler.SetAsset(null);
                 return handler;
             }
@@ -62,7 +62,7 @@ namespace CatAsset.Runtime
             if (IsEditorMode)
             {
                 category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName, assetType);
-                handler = AssetHandler<T>.Create(callback,category);
+                handler = AssetHandler<T>.Create(assetName, callback, category);
                 
                 object asset;
                 try
@@ -96,7 +96,7 @@ namespace CatAsset.Runtime
 #endif
 
             category = RuntimeUtil.GetAssetCategory(assetName);
-            handler = AssetHandler<T>.Create(callback,category);
+            handler = AssetHandler<T>.Create(assetName, callback, category);
 
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo.RefCount > 0)
@@ -155,13 +155,13 @@ namespace CatAsset.Runtime
             }
 
             handler = BatchAssetHandler.Create(assetNames.Count,callback);
-
             foreach (string assetName in assetNames)
             {
                 AssetHandler<object> assetHandler = LoadAssetAsync(assetName,handler.OnAssetLoadedCallback);
                 handler.AddAssetHandler(assetHandler);
             }
-
+            handler.CheckLoaded();
+            
             return handler;
         }
 
@@ -170,7 +170,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static SceneHandler LoadSceneAsync(string sceneName,SceneLoadedCallback callback = null, TaskPriority priority = TaskPriority.Low)
         {
-            SceneHandler handler = SceneHandler.Create(callback);
+            SceneHandler handler = SceneHandler.Create(sceneName, callback);
 
             if (string.IsNullOrEmpty(sceneName))
             {
@@ -194,8 +194,10 @@ namespace CatAsset.Runtime
             {
                 try
                 {
-                    LoadSceneParameters param = new LoadSceneParameters();
-                    param.loadSceneMode = LoadSceneMode.Additive;
+                    LoadSceneParameters param = new LoadSceneParameters
+                    {
+                        loadSceneMode = LoadSceneMode.Additive
+                    };
 
                     AsyncOperation op =
                         UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);

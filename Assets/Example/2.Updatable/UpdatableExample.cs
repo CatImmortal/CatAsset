@@ -79,7 +79,7 @@ public class UpdatableExample : MonoBehaviour
             {
                 CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/Chapter1/B1.prefab", (handler =>
                 {
-                    if (handler.Success)
+                    if (handler.State == HandlerState.Success)
                     {
                         Instantiate(handler.Asset);
                     }

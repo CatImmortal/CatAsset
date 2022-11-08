@@ -108,7 +108,7 @@ namespace CatAsset.Runtime
             //此prefab未加载过，先加载
             CatAssetManager.LoadAssetAsync<GameObject>(prefabName,(assetHandler =>
             {
-                if (assetHandler.Success)
+                if (assetHandler.State == HandlerState.Success)
                 {
                     GameObject prefab = assetHandler.Asset;
                     loadedPrefabDict[prefabName] = prefab;

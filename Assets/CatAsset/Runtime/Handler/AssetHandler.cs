@@ -30,11 +30,6 @@ namespace CatAsset.Runtime
         public AssetCategory Category { get; protected set; }
 
         /// <summary>
-        /// 是否加载成功
-        /// </summary>
-        public override bool Success => AssetObj != null;
-
-        /// <summary>
         /// 设置原始资源实例
         /// </summary>
         internal abstract void SetAsset(object loadedAsset);
@@ -42,7 +37,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Unload()
         {
-            if (!IsValid)
+            if (State == HandlerState.InValid)
             {
                 Debug.LogError($"卸载了无效的{GetType().Name}");
                 return;
@@ -140,7 +135,7 @@ namespace CatAsset.Runtime
                 this.handler = handler;
             }
         
-            public bool IsCompleted => handler.IsDone;
+            public bool IsCompleted => handler.State == HandlerState.Success || handler.State == HandlerState.Failed;
 
             public T GetResult()
             {
@@ -168,11 +163,13 @@ namespace CatAsset.Runtime
         {
             AssetObj = loadedAsset;
             Asset = AssetAs<T>();
-            IsDone = true;
+
+            State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
+            
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
 
-            if (IsValid && !Success)
+            if (State == HandlerState.Failed)
             {
                 //加载失败 自行释放句柄
                 Release();
@@ -187,10 +184,11 @@ namespace CatAsset.Runtime
             return new Awaiter(this);
         }
         
-        public static AssetHandler<T> Create(AssetLoadedCallback<T> callback,AssetCategory category = AssetCategory.None)
+        public static AssetHandler<T> Create(string name, AssetLoadedCallback<T> callback,AssetCategory category = AssetCategory.None)
         {
             AssetHandler<T> handler = ReferencePool.Get<AssetHandler<T>>();
-            handler.IsValid = true;
+            handler.Name = name;
+            handler.State = HandlerState.Doing;
             handler.Category = category;
             handler.onLoadedCallback = callback;
             return handler;

@@ -34,25 +34,25 @@ public class PackageOnlyExample : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.A))
             {
                 CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/PrefabA/A1.prefab",(
-                    assetHandler =>
+                    handler =>
                     {
-                        if (assetHandler.Success)
+                        if (handler.State == HandlerState.Success)
                         {
                             Debug.Log("加载GameObject");
-                            go = Instantiate(assetHandler.Asset);
+                            go = Instantiate(handler.Asset);
                 
                             //绑定assetHandler到实例化的go上 这样销毁go后也会将asset也卸载了
-                            go.BindTo(assetHandler);
+                            go.BindTo(handler);
                         }
                     }));
 
 
-                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", (assetHandler =>
+                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", (handler =>
                 {
-                    if (assetHandler.Success)
+                    if (handler.State == HandlerState.Success)
                     {
-                        Debug.Log($"加载原生资源 文本文件:{assetHandler.Asset.text}");
-                        assetHandler.Unload();
+                        Debug.Log($"加载原生资源 文本文件:{handler.Asset.text}");
+                        handler.Unload();
                     }
                 }));
 

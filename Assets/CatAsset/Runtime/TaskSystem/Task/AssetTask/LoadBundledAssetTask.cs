@@ -501,7 +501,7 @@ namespace CatAsset.Runtime
             //释放掉所有加载成功的依赖资源的句柄
             foreach (AssetHandler dependencyHandler in dependencyHandlers)
             {
-                if (dependencyHandler.Success)
+                if (dependencyHandler.State == HandlerState.Success)
                 {
                     dependencyHandler.Release();
                 }

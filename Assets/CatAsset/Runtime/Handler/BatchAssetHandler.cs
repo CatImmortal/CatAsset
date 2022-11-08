@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using Object = System.Object;
 
 namespace CatAsset.Runtime
 {
@@ -27,7 +29,7 @@ namespace CatAsset.Runtime
                 this.handler = handler;
             }
         
-            public bool IsCompleted => handler.IsDone;
+            public bool IsCompleted => handler.State == HandlerState.Success || handler.State == HandlerState.Failed;
 
             public List<AssetHandler<object>> GetResult()
             {
@@ -51,17 +53,14 @@ namespace CatAsset.Runtime
         private int loadedCount;
 
         /// <summary>
-        /// 资源句柄列表
+        /// 资源句柄列表，注意：会在加载结束调用完回调后被清空
         /// </summary>
-        internal readonly List<AssetHandler<object>> Handlers  = new List<AssetHandler<object>>();
+        public List<AssetHandler<object>> Handlers { get; } = new List<AssetHandler<object>>();
 
         /// <summary>
         /// 资源加载完毕回调
         /// </summary>
         internal readonly AssetLoadedCallback<object> OnAssetLoadedCallback;
-
-        /// <inheritdoc />
-        public override bool Success => loadedCount == assetCount;
 
         /// <summary>
         /// 批量资源加载完毕回调
@@ -79,19 +78,31 @@ namespace CatAsset.Runtime
         private void OnAssetLoaded(AssetHandler<object> handler)
         {
             loadedCount++;
+            
+            CheckLoaded();
+        }
+
+        /// <summary>
+        /// 检查所有资源是否已加载完毕
+        /// </summary>
+        internal void CheckLoaded()
+        {
             if (loadedCount == assetCount)
             {
-                IsDone = true;
+                State = HandlerState.Success;
+            
                 onLoadedCallback?.Invoke(Handlers);
                 ContinuationCallBack?.Invoke();
                 
                 //加载结束 释放句柄
-                if (IsValid)
+                if (State == HandlerState.Success)
                 {
                     Release();
                 }
             }
         }
+
+
 
         /// <summary>
         /// 添加资源句柄
@@ -104,7 +115,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Cancel()
         {
-            if (!IsValid)
+            if (State == HandlerState.InValid)
             {
                 Debug.LogWarning($"取消了无效的{GetType().Name}");
                 return;
@@ -122,7 +133,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Unload()
         {
-            if (!IsValid)
+            if (State == HandlerState.InValid)
             {
                 Debug.LogError($"卸载了无效的{GetType().Name}");
                 return;
@@ -130,7 +141,7 @@ namespace CatAsset.Runtime
             
             foreach (AssetHandler<object> assetHandler in Handlers)
             {
-                if (!assetHandler.IsValid)
+                if (State == HandlerState.InValid)
                 {
                     continue;
                 }
@@ -153,20 +164,10 @@ namespace CatAsset.Runtime
         public static BatchAssetHandler Create(int assetCount,BatchAssetLoadedCallback callback)
         {
             BatchAssetHandler handler = ReferencePool.Get<BatchAssetHandler>();
-            handler.IsValid = true;
+            handler.State = HandlerState.Doing;
             handler.assetCount = assetCount;
             handler.onLoadedCallback = callback;
-            handler.IsDone = assetCount == 0;
 
-            if (handler.IsDone)
-            {
-                handler.onLoadedCallback?.Invoke(handler.Handlers);
-                handler.ContinuationCallBack?.Invoke();
-                
-                //加载结束 释放句柄
-                handler.Release();
-            }
-            
             return handler;
         }
 
