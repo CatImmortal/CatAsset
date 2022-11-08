@@ -44,8 +44,13 @@ namespace CatAsset.Runtime
         {
             CatAssetManager.LoadAssetAsync<Sprite>(assetName,(handler =>
             {
-                self.sprite = handler.Asset;
-            })).BindTo(self.gameObject);
+                if (handler.State == HandlerState.Success)
+                {
+                    self.sprite = handler.Asset;
+                    self.gameObject.BindTo(handler);
+                }
+                
+            }));
         }
 
         /// <summary>
@@ -55,8 +60,12 @@ namespace CatAsset.Runtime
         {
             CatAssetManager.LoadAssetAsync<Texture>(assetName, (handler =>
             {
-                self.texture = handler.Asset;
-            })).BindTo(self.gameObject);
+                if (handler.State == HandlerState.Success)
+                {
+                    self.texture = handler.Asset;
+                    self.gameObject.BindTo(handler);
+                }
+            }));
         }
 
         /// <summary>
@@ -69,8 +78,9 @@ namespace CatAsset.Runtime
                 if (handler.State == HandlerState.Success)
                 {
                     self.text = handler.Asset.text;
+                    self.gameObject.BindTo(handler);
                 }
-            })).BindTo(self.gameObject);
+            }));
         }
 
         /// <summary>
@@ -80,8 +90,13 @@ namespace CatAsset.Runtime
         {
             CatAssetManager.LoadAssetAsync<VideoClip>(assetName, (handler =>
             {
-                self.clip = handler.Asset;
-            })).BindTo(self.gameObject);
+                if (handler.State == HandlerState.Success)
+                {
+                    self.clip = handler.Asset;
+                    self.gameObject.BindTo(handler);
+                }
+                
+            }));
         }
     }
 }

@@ -137,6 +137,11 @@ namespace CatAsset.Runtime
             {
                 return;
             }
+
+            if ( ((BaseHandler)handler).State != HandlerState.Success)
+            {
+                return;
+            }
             
             AssetBinder assetBinder = target.GetOrAddComponent<AssetBinder>();
             assetBinder.BindTo(handler);
@@ -148,6 +153,11 @@ namespace CatAsset.Runtime
         public static void BindToScene(Scene scene, IBindableHandler handler)
         {
             if (handler == null)
+            {
+                return;
+            }
+            
+            if ( ((BaseHandler)handler).State != HandlerState.Success)
             {
                 return;
             }
