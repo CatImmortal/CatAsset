@@ -17,10 +17,10 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源句柄
     /// </summary>
-    public abstract class AssetHandler : BaseHandler
+    public abstract class AssetHandler : BaseHandler , IBindableHandler
     {
         /// <summary>
-        /// 原始资源实例
+        /// 原始资源对象
         /// </summary>
         public object AssetObj { get; protected set; }
 
@@ -30,7 +30,7 @@ namespace CatAsset.Runtime
         public AssetCategory Category { get; protected set; }
 
         /// <summary>
-        /// 设置原始资源实例
+        /// 设置原始资源对象
         /// </summary>
         internal abstract void SetAsset(object loadedAsset);
 
@@ -48,7 +48,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 转换原始资源实例为指定类型的资源实例
+        /// 转换原始资源对象为指定类型的资源对象
         /// </summary>
         public T AssetAs<T>()
         {
@@ -135,7 +135,9 @@ namespace CatAsset.Runtime
                 this.handler = handler;
             }
         
-            public bool IsCompleted => handler.State == HandlerState.Success || handler.State == HandlerState.Failed;
+            //如果加载成功 那么Handler的状态是Success
+            //如果加载失败 那么Handler的状态可能是Failed 或者 Invalid
+            public bool IsCompleted => handler.State != HandlerState.Doing;
 
             public T GetResult()
             {
@@ -171,7 +173,12 @@ namespace CatAsset.Runtime
 
             if (State == HandlerState.Failed)
             {
-                //加载失败 自行释放句柄
+                //加载失败 自行释放
+                
+                //为什么不在加载成功后也自行释放？
+                //因为在编辑器资源模式 或 非编辑器资源模式但有资源缓存的情况下 是以一种同步的方式读取到资源的
+                //如果此时先释放handler 再返回handler，那么外部在await handler及之后的代码访问到的handler就总是无效的了 从而导致不能正确获取handler.Asset
+                
                 Release();
             }
         }

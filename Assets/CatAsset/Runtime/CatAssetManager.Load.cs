@@ -66,29 +66,26 @@ namespace CatAsset.Runtime
                 handler = AssetHandler<T>.Create(assetName, callback, category);
                 
                 object asset;
-                try
+                
+                if (category == AssetCategory.InternalBundledAsset)
                 {
-                    if (category == AssetCategory.InternalBundledAsset)
-                    {
-                        //加载资源包资源
-                        asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, assetType);
-                    }
-                    else
-                    {
-                        //加载原生资源
-                        if (category == AssetCategory.ExternalRawAsset)
-                        {
-                            assetName = RuntimeUtil.GetReadWritePath(assetName);
-                        }
-
-                        asset = File.ReadAllBytes(assetName);
-                    }
+                    //加载资源包资源
+                    asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, assetType);
                 }
-                catch (Exception e)
+                else
                 {
-                    Debug.LogError($"资源加载失败：{e.Message}\r\n{e.StackTrace}");
-                    handler.SetAsset(null);
-                    return handler;
+                    //加载原生资源
+                    if (category == AssetCategory.ExternalRawAsset)
+                    {
+                        assetName = RuntimeUtil.GetReadWritePath(assetName);
+                    }
+
+                    asset = File.ReadAllBytes(assetName);
+                }
+
+                if (asset == null)
+                {
+                    Debug.LogError($"资源加载失败：{assetName}");
                 }
                 
                 handler.SetAsset(asset);

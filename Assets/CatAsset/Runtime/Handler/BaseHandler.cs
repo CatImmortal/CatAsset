@@ -8,8 +8,6 @@ namespace CatAsset.Runtime
     /// </summary>
     public abstract class BaseHandler : IReference, IDisposable
     {
-
-        
         /// <summary>
         /// 句柄名
         /// </summary>
@@ -98,7 +96,7 @@ namespace CatAsset.Runtime
                     return;
                 
                 case HandlerState.Doing:
-                    //加载未完毕 取消
+                    //加载中 取消
                     Cancel();
                     return;
                 

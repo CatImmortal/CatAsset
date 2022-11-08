@@ -6,7 +6,7 @@ namespace CatAsset.Runtime
     public static class HandlerExtensions
     {
         /// <summary>
-        /// 将资源句柄绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源句柄
+        /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
         /// </summary>
         public static AssetHandler<T> BindTo<T>(this AssetHandler<T> self,GameObject target)
         {
@@ -15,7 +15,7 @@ namespace CatAsset.Runtime
         }
         
         /// <summary>
-        /// 将资源句柄绑定到场景上，会在指定场景卸载时卸载绑定的资源句柄
+        /// 将资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
         /// </summary>
         public static AssetHandler<T> BindTo<T>(this AssetHandler<T> self,Scene target)
         {
@@ -24,26 +24,20 @@ namespace CatAsset.Runtime
         }
         
         /// <summary>
-        /// 将批量资源句柄绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源句柄
+        /// 将批量资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
         /// </summary>
-        public static BatchAssetHandler BindTo<T>(this BatchAssetHandler self,GameObject target)
+        public static BatchAssetHandler BindTo(this BatchAssetHandler self,GameObject target)
         {
-            foreach (AssetHandler<object> handler in self.Handlers)
-            {
-                target.BindTo(handler);
-            }
+            target.BindTo(self);
             return self;
         }
         
         /// <summary>
-        /// 将批量资源句柄绑定到场景上，会在指定场景卸载时卸载绑定的资源句柄
+        /// 将批量资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
         /// </summary>
-        public static BatchAssetHandler BindTo<T>(this BatchAssetHandler self,Scene target)
+        public static BatchAssetHandler BindTo(this BatchAssetHandler self,Scene target)
         {
-            foreach (AssetHandler<object> handler in self.Handlers)
-            {
-                target.BindTo(handler);
-            }
+            target.BindTo(self);
             return self;
         }
     }

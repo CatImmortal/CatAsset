@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
                 this.handler = handler;
             }
         
-            public bool IsCompleted => handler.State == HandlerState.Success || handler.State == HandlerState.Failed;
+            public bool IsCompleted => handler.State != HandlerState.Doing;
 
             public Scene GetResult()
             {
@@ -64,7 +64,7 @@ namespace CatAsset.Runtime
 
             if (State == HandlerState.Failed)
             {
-                //加载失败 自行释放句柄
+                //加载失败 自行释放
                 Release();
             }
         }
