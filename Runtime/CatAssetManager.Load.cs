@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
@@ -228,6 +229,23 @@ namespace CatAsset.Runtime
             loadTaskRunner.AddTask(task, priority);
 
             handler.Task = task;
+        }
+
+        /// <summary>
+        /// 加载预制体并实例化，会自行将Handler绑定至实例化出的游戏物体上
+        /// </summary>
+        public static void InstantiateAsync(string prefabName,Action<GameObject> callback,Transform parent = null)
+        {
+            LoadAssetAsync<GameObject>(prefabName, (handler =>
+            {
+                if (handler.State == HandlerState.Success)
+                {
+                    GameObject go = Object.Instantiate(handler.Asset,parent);
+                    go.BindTo(handler);
+                    
+                    callback?.Invoke(go);
+                }
+            }));
         }
     }
 }
