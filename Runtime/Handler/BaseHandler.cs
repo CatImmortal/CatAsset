@@ -1,5 +1,4 @@
 ﻿using System;
-
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -9,6 +8,13 @@ namespace CatAsset.Runtime
     /// </summary>
     public abstract class BaseHandler : IReference, IDisposable
     {
+
+        
+        /// <summary>
+        /// 句柄名
+        /// </summary>
+        public string Name { get; protected set; }
+
         /// <summary>
         /// 持有此句柄的任务
         /// </summary>
@@ -26,41 +32,36 @@ namespace CatAsset.Runtime
         {
             get
             {
-                if (!IsValid)
+                switch (State)
                 {
-                    return 0;
-                }
+                    case HandlerState.InValid:
+                        return 0;
 
-                if (IsDone)
-                {
-                    return 1;
+                    case HandlerState.Doing:
+                        return Task?.Progress ?? 0;
+                    
+                    case HandlerState.Success:
+                    case HandlerState.Failed:
+                        return 1;
+                    
+                    default:
+                        return 0;
                 }
-
-                return Task?.Progress ?? 0;
             }
         }
         
         /// <summary>
-        /// 是否已加载完毕
+        /// 句柄状态
         /// </summary>
-        public bool IsDone { get; protected set; }
+        public HandlerState State { get; protected set; }
         
-        /// <summary>
-        /// 是否加载成功
-        /// </summary>
-        public abstract bool Success { get; }
-
-        /// <summary>
-        /// 是否有效
-        /// </summary>
-        public bool IsValid { get; protected set; }
 
         /// <summary>
         /// 取消加载，同时会释放此句柄
         /// </summary>
         public virtual void Cancel()
         {
-            if (!IsValid)
+            if (State == HandlerState.InValid)
             {
                 Debug.LogWarning($"取消了无效的{GetType().Name}");
                 return;
@@ -80,7 +81,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void Release()
         {
-            if (!IsValid)
+            if (State == HandlerState.InValid)
             {
                 Debug.LogError($"错误的释放了无效的{GetType().Name}");
                 return;
@@ -90,37 +91,35 @@ namespace CatAsset.Runtime
         
         public void Dispose()
         {
-            if (!IsValid)
+            switch (State)
             {
-                //无效句柄 不处理
-                return;
-            }
-            
-            if (!IsDone)
-            {
-                //加载未完毕 取消
-                Cancel();
-                return;
-            }
-            
-            if (Success)
-            {
-                //加载成功 卸载
-                Unload();
-            }
-            else
-            {
-                //加载失败 仅释放句柄
-                Release();
+                case HandlerState.InValid:
+                    //无效句柄 不处理
+                    return;
+                
+                case HandlerState.Doing:
+                    //加载未完毕 取消
+                    Cancel();
+                    return;
+                
+                case HandlerState.Success:
+                    //加载成功 卸载
+                    Unload();
+                    return;
+                
+                case HandlerState.Failed:
+                    //加载失败 仅释放句柄
+                    Release();
+                    return;
             }
         }
         
         public virtual void Clear()
         {
+            Name = default;
             Task = default;
-            IsDone = default;
+            State = default;
             ContinuationCallBack = default;
-            IsValid = default;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
                 this.handler = handler;
             }
         
-            public bool IsCompleted => handler.IsDone;
+            public bool IsCompleted => handler.State == HandlerState.Success || handler.State == HandlerState.Failed;
 
             public Scene GetResult()
             {
@@ -50,20 +50,19 @@ namespace CatAsset.Runtime
         /// </summary>
         private SceneLoadedCallback onLoadedCallback;
 
-        /// <inheritdoc />
-        public override bool Success => Scene != default;
-
         /// <summary>
         /// 设置场景实例
         /// </summary>
         internal void SetScene(Scene loadedScene)
         {
             Scene = loadedScene;
-            IsDone = true;
+
+            State = loadedScene != default ? HandlerState.Success : HandlerState.Failed;
+            
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
 
-            if (IsValid && !Success)
+            if (State == HandlerState.Failed)
             {
                 //加载失败 自行释放句柄
                 Release();
@@ -73,7 +72,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Unload()
         {
-            if (!IsValid)
+            if (State == HandlerState.InValid)
             {
                 Debug.LogError($"卸载了无效的{GetType().Name}");
                 return;
@@ -91,10 +90,11 @@ namespace CatAsset.Runtime
             return new Awaiter(this);
         }
 
-        public static SceneHandler Create(SceneLoadedCallback callback)
+        public static SceneHandler Create(string name, SceneLoadedCallback callback)
         {
             SceneHandler handler = ReferencePool.Get<SceneHandler>();
-            handler.IsValid = true;
+            handler.Name = name;
+            handler.State = HandlerState.Doing;
             handler.onLoadedCallback = callback;
             return handler;
         }

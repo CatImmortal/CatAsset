@@ -66,7 +66,7 @@ namespace CatAsset.Runtime
         {
             CatAssetManager.LoadAssetAsync<TextAsset>(assetName, (handler =>
             {
-                if (handler.Success)
+                if (handler.State == HandlerState.Success)
                 {
                     self.text = handler.Asset.text;
                 }
