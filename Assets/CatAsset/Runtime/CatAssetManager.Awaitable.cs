@@ -1,4 +1,6 @@
-﻿#if !UNITASK
+﻿using UnityEngine;
+
+#if !UNITASK
 using System.Threading.Tasks;
 #else
 using Cysharp.Threading.Tasks;
@@ -35,6 +37,19 @@ namespace CatAsset.Runtime
             }));
             return tcs.Task;
         }
+
+        /// <summary>
+        /// 加载预制体并实例化，会自行将Handler绑定至实例化出的游戏物体上（可等待）
+        /// </summary>
+        public static Task<GameObject> InstantiateAsync(string prefabName,Transform parent = null)
+        {
+            TaskCompletionSource<GameObject> tcs = new TaskCompletionSource<GameObject>();
+            InstantiateAsync(prefabName, (go =>
+            {
+                tcs.SetResult(go);
+            }), parent);
+            return tcs.Task;
+        }
 #else
         /// <summary>
         /// 检查安装包内资源清单,单机模式下专用（可等待）
@@ -61,9 +76,20 @@ namespace CatAsset.Runtime
             }));
             return tcs.Task;
         }
-#endif
         
-
+         /// <summary>
+        /// 加载预制体并实例化，会自行将Handler绑定至实例化出的游戏物体上（可等待）
+        /// </summary>
+        public static UniTask<GameObject> InstantiateAsync(string prefabName,Transform parent = null)
+        {
+            UniTaskCompletionSource<GameObject> tcs = new UniTaskCompletionSource<GameObject>();
+            InstantiateAsync(prefabName, (go =>
+            {
+                tcs.TrySetResult(go);
+            }), parent);
+            return tcs.Task;
+        }
+#endif
     }
 
 }

@@ -14,7 +14,7 @@ namespace CatAsset.Runtime
     public static partial class GameObjectPoolManager
     {
 #if !UNITASK
-    /// <summary>
+        /// <summary>
         /// 从池中获取一个游戏对象（可等待）
         /// </summary>
         public static Task<GameObject> GetGameObjectAsync(string prefabName, Transform parent)
