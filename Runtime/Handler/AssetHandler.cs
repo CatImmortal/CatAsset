@@ -124,33 +124,6 @@ namespace CatAsset.Runtime
     public class AssetHandler<T> : AssetHandler
     {
         /// <summary>
-        /// 可等待对象
-        /// </summary>
-        public readonly struct Awaiter : INotifyCompletion
-        {
-            private readonly AssetHandler<T> handler;
-
-            public Awaiter(AssetHandler<T> handler)
-            {
-                this.handler = handler;
-            }
-        
-            //如果加载成功 那么Handler的状态是Success
-            //如果加载失败 那么Handler的状态可能是Failed 或者 Invalid
-            public bool IsCompleted => handler.State != HandlerState.Doing;
-
-            public T GetResult()
-            {
-                return handler.Asset;
-            }
-        
-            public void OnCompleted(Action continuation)
-            {
-                handler.ContinuationCallBack = continuation;
-            }
-        }
-        
-        /// <summary>
         /// 资源实例
         /// </summary>
         public T Asset { get; private set; }
@@ -186,9 +159,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取可等待对象
         /// </summary>
-        public Awaiter GetAwaiter()
+        public HandlerAwaiter<AssetHandler<T>> GetAwaiter()
         {
-            return new Awaiter(this);
+            return new HandlerAwaiter<AssetHandler<T>>(this);
         }
         
         public static AssetHandler<T> Create(string name, AssetLoadedCallback<T> callback,AssetCategory category = AssetCategory.None)

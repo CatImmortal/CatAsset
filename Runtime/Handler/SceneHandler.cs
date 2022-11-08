@@ -16,32 +16,7 @@ namespace CatAsset.Runtime
     public class SceneHandler : BaseHandler
     {
         /// <summary>
-        /// 可等待对象
-        /// </summary>
-        public readonly struct Awaiter : INotifyCompletion
-        {
-            private readonly SceneHandler handler;
-
-            public Awaiter(SceneHandler handler)
-            {
-                this.handler = handler;
-            }
-        
-            public bool IsCompleted => handler.State != HandlerState.Doing;
-
-            public Scene GetResult()
-            {
-                return handler.Scene;
-            }
-        
-            public void OnCompleted(Action continuation)
-            {
-                handler.ContinuationCallBack = continuation;
-            }
-        }
-        
-        /// <summary>
-        /// 场景实例
+        /// 场景对象
         /// </summary>
         public Scene Scene { get; private set; }
 
@@ -51,7 +26,7 @@ namespace CatAsset.Runtime
         private SceneLoadedCallback onLoadedCallback;
 
         /// <summary>
-        /// 设置场景实例
+        /// 设置场景对象
         /// </summary>
         internal void SetScene(Scene loadedScene)
         {
@@ -85,9 +60,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取可等待对象
         /// </summary>
-        public Awaiter GetAwaiter()
+        public HandlerAwaiter<SceneHandler> GetAwaiter()
         {
-            return new Awaiter(this);
+            return new HandlerAwaiter<SceneHandler>(this);
         }
 
         public static SceneHandler Create(string name, SceneLoadedCallback callback)

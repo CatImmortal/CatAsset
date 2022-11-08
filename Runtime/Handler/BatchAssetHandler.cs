@@ -18,31 +18,6 @@ namespace CatAsset.Runtime
     public class BatchAssetHandler : BaseHandler ,IBindableHandler
     {
         /// <summary>
-        /// 可等待对象
-        /// </summary>
-        public readonly struct Awaiter : INotifyCompletion
-        {
-            private readonly BatchAssetHandler handler;
-
-            public Awaiter(BatchAssetHandler handler)
-            {
-                this.handler = handler;
-            }
-            
-            public bool IsCompleted => handler.State != HandlerState.Doing;
-
-            public List<AssetHandler<object>> GetResult()
-            {
-                return handler.Handlers;
-            }
-        
-            public void OnCompleted(Action continuation)
-            {
-                handler.ContinuationCallBack = continuation;
-            }
-        }
-        
-        /// <summary>
         /// 需要加载的资源数量
         /// </summary>
         private int assetCount;
@@ -145,9 +120,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取可等待对象
         /// </summary>
-        public Awaiter GetAwaiter()
+        public HandlerAwaiter<BatchAssetHandler> GetAwaiter()
         {
-            return new Awaiter(this);
+            return new HandlerAwaiter<BatchAssetHandler>(this);
         }
         
         public static BatchAssetHandler Create(int assetCount,BatchAssetLoadedCallback callback)
