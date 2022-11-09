@@ -67,11 +67,13 @@ namespace CatAsset.Runtime
         {
             Task = null;
             Scene = loadedScene;
+            
             if (Token != default && Token.IsCancellationRequested)
             {
-                Unload();
+                InternalUnload();
                 return;
             }
+            
             State = loadedScene != default ? HandlerState.Success : HandlerState.Failed;
             
             onLoadedCallback?.Invoke(this);
@@ -79,14 +81,8 @@ namespace CatAsset.Runtime
         }
 
         /// <inheritdoc />
-        public override void Unload()
+        protected override void InternalUnload()
         {
-            if (State == HandlerState.InValid)
-            {
-                Debug.LogError($"卸载了无效的{GetType().Name}：{Name}");
-                return;
-            }
-            
             CatAssetManager.UnloadScene(Scene);
             Release();
         }

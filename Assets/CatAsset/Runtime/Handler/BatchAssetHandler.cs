@@ -99,7 +99,7 @@ namespace CatAsset.Runtime
         {
             if (Token != default && Token.IsCancellationRequested)
             {
-                Unload();
+                InternalUnload();
                 return;
             }
             
@@ -107,7 +107,7 @@ namespace CatAsset.Runtime
             {
                 Task = null;
                 State = HandlerState.Success;
-            
+
                 onLoadedCallback?.Invoke(this);
                 ContinuationCallBack?.Invoke();
             }
@@ -122,35 +122,17 @@ namespace CatAsset.Runtime
         }
         
         /// <inheritdoc />
-        public override void Cancel()
+        protected override void Cancel()
         {
-            if (State == HandlerState.InValid)
-            {
-                Debug.LogWarning($"取消了无效的{GetType().Name}：{Name}");
-                return;
-            }
-            
-            foreach (AssetHandler<object> assetHandler in Handlers)
-            {
-                assetHandler.Dispose();
-            }
-
-            //释放自身
-            Release();
+            InternalUnload();
         }
 
         /// <inheritdoc />
-        public override void Unload()
+        protected override void InternalUnload()
         {
-            if (State == HandlerState.InValid)
-            {
-                Debug.LogError($"卸载了无效的{GetType().Name}：{Name}");
-                return;
-            }
-            
             foreach (AssetHandler<object> assetHandler in Handlers)
             {
-                assetHandler.Dispose();
+                assetHandler.Unload();
             }
 
             //释放自身

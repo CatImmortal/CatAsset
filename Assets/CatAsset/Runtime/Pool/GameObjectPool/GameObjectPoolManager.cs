@@ -111,6 +111,7 @@ namespace CatAsset.Runtime
                 if (handler.State == HandlerState.Failed)
                 {
                     handler.Unload();
+                    return;
                 }
 
                 GameObject prefab = handler.Asset;
