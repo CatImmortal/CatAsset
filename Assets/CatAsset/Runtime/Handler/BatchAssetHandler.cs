@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
         private int loadedCount;
 
         /// <summary>
-        /// 资源句柄列表，注意：会在加载结束调用完回调后被清空
+        /// 资源句柄列表
         /// </summary>
         public List<AssetHandler<object>> Handlers { get; } = new List<AssetHandler<object>>();
 
@@ -124,6 +124,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         protected override void Cancel()
         {
+            //此Handler的取消行为等同于卸载行为
             InternalUnload();
         }
 
@@ -132,6 +133,7 @@ namespace CatAsset.Runtime
         {
             foreach (AssetHandler<object> assetHandler in Handlers)
             {
+                //加载中的取消 加载成功的卸载 加载失败的释放
                 assetHandler.Unload();
             }
 
