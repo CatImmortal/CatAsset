@@ -61,7 +61,7 @@ namespace CatAsset.Runtime
         {
             if (State == HandlerState.InValid)
             {
-                Debug.LogWarning($"取消了无效的{GetType().Name}");
+                Debug.LogWarning($"取消了无效的{GetType().Name}：{Name}");
                 return;
             }
             
@@ -81,12 +81,15 @@ namespace CatAsset.Runtime
         {
             if (State == HandlerState.InValid)
             {
-                Debug.LogError($"错误的释放了无效的{GetType().Name}");
+                Debug.LogError($"错误的释放了无效的{GetType().Name}：{Name}");
                 return;
             }
             ReferencePool.Release(this);
         }
         
+        /// <summary>
+        /// 根据句柄状态进行释放处理
+        /// </summary>
         public void Dispose()
         {
             switch (State)

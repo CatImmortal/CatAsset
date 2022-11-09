@@ -36,12 +36,6 @@ namespace CatAsset.Runtime
             
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
-
-            if (State == HandlerState.Failed)
-            {
-                //加载失败 自行释放
-                Release();
-            }
         }
 
         /// <inheritdoc />
@@ -49,7 +43,7 @@ namespace CatAsset.Runtime
         {
             if (State == HandlerState.InValid)
             {
-                Debug.LogError($"卸载了无效的{GetType().Name}");
+                Debug.LogError($"卸载了无效的{GetType().Name}：{Name}");
                 return;
             }
             

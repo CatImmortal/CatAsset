@@ -39,7 +39,7 @@ namespace CatAsset.Runtime
         {
             if (State == HandlerState.InValid)
             {
-                Debug.LogError($"卸载了无效的{GetType().Name}");
+                Debug.LogError($"卸载了无效的{GetType().Name}：{Name}");
                 return;
             }
             
@@ -143,17 +143,6 @@ namespace CatAsset.Runtime
             
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
-
-            if (State == HandlerState.Failed)
-            {
-                //加载失败 自行释放
-                
-                //为什么不在加载成功后也自行释放？
-                //因为在编辑器资源模式 或 非编辑器资源模式但有资源缓存的情况下 是以一种同步的方式读取到资源的
-                //如果此时先释放handler 再返回handler，那么外部在await handler及之后的代码访问到的handler就总是无效的了 从而导致不能正确获取handler.Asset
-                
-                Release();
-            }
         }
 
         /// <summary>
