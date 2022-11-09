@@ -116,6 +116,10 @@ namespace CatAsset.Runtime
         {
             base.Clear();
 
+            if (handler != null)
+            {
+                handler.Task = null;
+            }
             handler = default;
             loadedScene = default;
         }

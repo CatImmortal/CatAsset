@@ -16,7 +16,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 持有此句柄的任务
         /// </summary>
-        internal BaseTask Task;
+        internal BaseTask Task { get; set; }
 
         /// <summary>
         /// Awaiter的Continuation回调，在加载完毕时调用

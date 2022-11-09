@@ -64,7 +64,7 @@ namespace CatAsset.Runtime
         }
 
         private Type assetType;
-        private AssetHandler assetHandler;
+        private AssetHandler handler;
         
         protected AssetRuntimeInfo AssetRuntimeInfo;
         protected BundleRuntimeInfo BundleRuntimeInfo;
@@ -403,14 +403,14 @@ namespace CatAsset.Runtime
                 //加载失败 通知所有未取消的加载任务
                 if (!NeedCancel)
                 {
-                    assetHandler.SetAsset(null);
+                    handler.SetAsset(null);
                 }
                 
                 foreach (LoadBundledAssetTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
-                        task.assetHandler.SetAsset(null);
+                        task.handler.SetAsset(null);
                     }
                 }
             }
@@ -428,14 +428,14 @@ namespace CatAsset.Runtime
                 if (!NeedCancel)
                 {
                     AssetRuntimeInfo.AddRefCount();
-                    assetHandler.SetAsset(AssetRuntimeInfo.Asset);
+                    handler.SetAsset(AssetRuntimeInfo.Asset);
                 }
                 foreach (LoadBundledAssetTask task in MergedTasks)
                 {
                     if (!task.NeedCancel)
                     {
                         AssetRuntimeInfo.AddRefCount();
-                        task.assetHandler.SetAsset(AssetRuntimeInfo.Asset);
+                        task.handler.SetAsset(AssetRuntimeInfo.Asset);
                     }
                    
                 }
@@ -468,7 +468,7 @@ namespace CatAsset.Runtime
             task.CreateBase(owner, name);
 
             task.assetType = assetType;
-            task.assetHandler = handler;
+            task.handler = handler;
             
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
@@ -484,7 +484,12 @@ namespace CatAsset.Runtime
             base.Clear();
 
             assetType = default;
-            assetHandler = default;
+            
+            if (handler != null)
+            {
+                handler.Task = null;
+            }
+            handler = default;
             
             AssetRuntimeInfo = default;
             BundleRuntimeInfo = default;
