@@ -152,10 +152,10 @@ namespace CatAsset.Runtime
                 return handler;
             }
 
-            handler = BatchAssetHandler.Create(assetNames.Count);
+            handler = BatchAssetHandler.Create(assetNames.Count,token);
             foreach (string assetName in assetNames)
             {
-                AssetHandler<object> assetHandler = LoadAssetAsync(assetName,token);
+                AssetHandler<object> assetHandler = LoadAssetAsync(assetName);
                 assetHandler.OnLoaded += handler.OnAssetLoadedCallback;
                 handler.AddAssetHandler(assetHandler);
             }
