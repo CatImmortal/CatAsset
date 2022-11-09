@@ -200,11 +200,6 @@ namespace CatAsset.Runtime
             base.Clear();
 
             category = default;
-            
-            if (handler != null)
-            {
-                handler.Task = null;
-            }
             handler = default;
 
             assetRuntimeInfo = default;

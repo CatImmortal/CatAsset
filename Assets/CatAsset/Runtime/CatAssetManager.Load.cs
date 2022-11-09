@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -27,23 +28,23 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<object> LoadAssetAsync(string assetName, TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<object> LoadAssetAsync(string assetName,CancellationToken token = default, TaskPriority priority = TaskPriority.Low)
         {
-            return InternalLoadAssetAsync<object>(assetName, priority);
+            return InternalLoadAssetAsync<object>(assetName,token, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<T> LoadAssetAsync<T>(string assetName, TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<T> LoadAssetAsync<T>(string assetName, CancellationToken token = default,TaskPriority priority = TaskPriority.Low)
         {
-            return InternalLoadAssetAsync<T>(assetName,priority);
+            return InternalLoadAssetAsync<T>(assetName,token,priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        private static AssetHandler<T> InternalLoadAssetAsync<T>(string assetName, TaskPriority priority)
+        private static AssetHandler<T> InternalLoadAssetAsync<T>(string assetName,CancellationToken token, TaskPriority priority)
         {
             
             AssetHandler<T> handler;
@@ -63,7 +64,7 @@ namespace CatAsset.Runtime
             if (IsEditorMode)
             {
                 category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName, assetType);
-                handler = AssetHandler<T>.Create(assetName, category);
+                handler = AssetHandler<T>.Create(assetName,token, category);
                 
                 object asset;
                 
@@ -94,7 +95,7 @@ namespace CatAsset.Runtime
 #endif
 
             category = RuntimeUtil.GetAssetCategory(assetName);
-            handler = AssetHandler<T>.Create(assetName, category);
+            handler = AssetHandler<T>.Create(assetName,token, category);
 
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo.RefCount > 0)
@@ -140,7 +141,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static BatchAssetHandler BatchLoadAssetAsync(List<string> assetNames, TaskPriority priority = TaskPriority.Low)
+        public static BatchAssetHandler BatchLoadAssetAsync(List<string> assetNames,CancellationToken token = default, TaskPriority priority = TaskPriority.Low)
         {
             BatchAssetHandler handler;
 
@@ -154,7 +155,7 @@ namespace CatAsset.Runtime
             handler = BatchAssetHandler.Create(assetNames.Count);
             foreach (string assetName in assetNames)
             {
-                AssetHandler<object> assetHandler = LoadAssetAsync(assetName);
+                AssetHandler<object> assetHandler = LoadAssetAsync(assetName,token);
                 assetHandler.OnLoaded += handler.OnAssetLoadedCallback;
                 handler.AddAssetHandler(assetHandler);
             }
@@ -166,9 +167,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static SceneHandler LoadSceneAsync(string sceneName, TaskPriority priority = TaskPriority.Low)
+        public static SceneHandler LoadSceneAsync(string sceneName,CancellationToken token = default, TaskPriority priority = TaskPriority.Low)
         {
-            SceneHandler handler = SceneHandler.Create(sceneName);
+            SceneHandler handler = SceneHandler.Create(sceneName,token);
 
             if (string.IsNullOrEmpty(sceneName))
             {
@@ -190,28 +191,22 @@ namespace CatAsset.Runtime
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
-                try
+                LoadSceneParameters param = new LoadSceneParameters
                 {
-                    LoadSceneParameters param = new LoadSceneParameters
-                    {
-                        loadSceneMode = LoadSceneMode.Additive
-                    };
+                    loadSceneMode = LoadSceneMode.Additive
+                };
 
-                    AsyncOperation op =
-                        UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);
-                    op.completed += operation =>
-                    {
-                        Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
-                        SceneManager.SetActiveScene(scene);
-                        handler.SetScene(scene);
-                    };
-                }
-                catch (Exception e)
+                Scene scene = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(sceneName, param);
+
+                if (scene == default)
                 {
-                    Debug.LogError($"场景加载失败：{e.Message}\r\n{e.StackTrace}");
-                    handler.SetScene(default);
-                    return;
+                    Debug.LogError($"场景加载失败：{sceneName}");
                 }
+                else
+                {
+                    SceneManager.SetActiveScene(scene);
+                }
+                handler.SetScene(scene);
 
                 return;
             }

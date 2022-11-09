@@ -115,11 +115,7 @@ namespace CatAsset.Runtime
         public override void Clear()
         {
             base.Clear();
-
-            if (handler != null)
-            {
-                handler.Task = null;
-            }
+            
             handler = default;
             loadedScene = default;
         }
