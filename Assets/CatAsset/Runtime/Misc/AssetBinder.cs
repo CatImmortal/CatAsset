@@ -10,8 +10,17 @@ namespace CatAsset.Runtime
     {
         public readonly List<IBindableHandler> Handlers = new List<IBindableHandler>();
 
+        /// <summary>
+        /// 绑定句柄
+        /// </summary>
         public void BindTo(IBindableHandler handler)
         {
+            if (handler.State == HandlerState.InValid)
+            {
+                //不可绑定无效句柄
+                return;
+            }
+            
             Handlers.Add(handler);
         }
         
@@ -20,7 +29,7 @@ namespace CatAsset.Runtime
         {
             foreach (IBindableHandler handler in Handlers)
             {
-                handler.Unload();
+                handler.Dispose();
             }
             Handlers.Clear();
 

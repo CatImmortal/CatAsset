@@ -15,8 +15,6 @@ namespace CatAsset.Runtime
             this.handler = handler;
         }
         
-        //如果加载成功 那么Handler的状态是Success
-        //如果加载失败 那么Handler的状态可能是Failed 或者 Invalid
         public bool IsCompleted => handler.State != HandlerState.Doing;
 
         public T GetResult()

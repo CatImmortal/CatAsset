@@ -47,7 +47,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void UnloadScene(Scene scene)
         {
-            if (!scene.IsValid() || !scene.isLoaded)
+            if (scene == default || !scene.IsValid() || !scene.isLoaded)
             {
                 return;
             }
@@ -77,7 +77,7 @@ namespace CatAsset.Runtime
             {
                 foreach (IBindableHandler handler in handlers)
                 {
-                    handler.Unload();
+                    handler.Dispose();
                 }
                 handlers.Clear();
             }

@@ -71,8 +71,6 @@ namespace CatAsset.Runtime
             }
         }
 
-
-
         /// <summary>
         /// 添加资源句柄
         /// </summary>
@@ -86,7 +84,7 @@ namespace CatAsset.Runtime
         {
             if (State == HandlerState.InValid)
             {
-                Debug.LogWarning($"取消了无效的{GetType().Name}");
+                Debug.LogWarning($"取消了无效的{GetType().Name}：{Name}");
                 return;
             }
             
@@ -104,7 +102,7 @@ namespace CatAsset.Runtime
         {
             if (State == HandlerState.InValid)
             {
-                Debug.LogError($"卸载了无效的{GetType().Name}");
+                Debug.LogError($"卸载了无效的{GetType().Name}：{Name}");
                 return;
             }
             

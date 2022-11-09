@@ -219,6 +219,11 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void AddSceneBindHandler(Scene scene, IBindableHandler handler)
         {
+            if (handler.State == HandlerState.InValid)
+            {
+                //不可绑定无效句柄
+                return;
+            }
             
             if (!sceneBindHandlers.TryGetValue(scene.handle,out var handlers))
             {
