@@ -42,6 +42,40 @@ namespace CatAsset.Runtime
         /// </summary>
         private BatchAssetLoadedCallback onLoadedCallback;
 
+        /// <summary>
+        /// 批量资源加载完毕回调
+        /// </summary>
+        public event BatchAssetLoadedCallback OnLoaded
+        {
+            add
+            {
+                if (State == HandlerState.InValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上添加了OnLoaded回调");
+                    return;
+                }
+
+                if (State != HandlerState.Doing)
+                {
+                    value?.Invoke(this);
+                    return;
+                }
+
+                onLoadedCallback += value;
+            }
+
+            remove
+            {
+                if (State == HandlerState.InValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上移除了OnLoaded回调");
+                    return;
+                }
+
+                onLoadedCallback -= value;
+            }
+        }
+        
         public BatchAssetHandler()
         {
             OnAssetLoadedCallback = OnAssetLoaded;
@@ -123,13 +157,14 @@ namespace CatAsset.Runtime
             return new HandlerAwaiter<BatchAssetHandler>(this);
         }
         
-        public static BatchAssetHandler Create(int assetCount,BatchAssetLoadedCallback callback)
+        public static BatchAssetHandler Create(int assetCount = 0)
         {
             BatchAssetHandler handler = ReferencePool.Get<BatchAssetHandler>();
             handler.State = HandlerState.Doing;
             handler.assetCount = assetCount;
-            handler.onLoadedCallback = callback;
-
+            
+            handler.CheckLoaded();
+            
             return handler;
         }
 

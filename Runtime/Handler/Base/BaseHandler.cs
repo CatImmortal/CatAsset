@@ -32,9 +32,6 @@ namespace CatAsset.Runtime
             {
                 switch (State)
                 {
-                    case HandlerState.InValid:
-                        return 0;
-
                     case HandlerState.Doing:
                         return Task?.Progress ?? 0;
                     
@@ -117,7 +114,7 @@ namespace CatAsset.Runtime
         
         public virtual void Clear()
         {
-            Name = default;
+            //Name = default; Name就不清空了 方便Debug
             Task = default;
             State = default;
             ContinuationCallBack = default;

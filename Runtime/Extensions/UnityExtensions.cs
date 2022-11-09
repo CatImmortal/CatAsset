@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
         }
         
         /// <summary>
-        /// 将资源绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
+        /// 将资源句柄绑定到游戏物体上，会在指定游戏物体销毁时卸载绑定的资源
         /// </summary>
         public static void BindTo(this GameObject self,IBindableHandler handler)
         {
@@ -30,7 +30,7 @@ namespace CatAsset.Runtime
         }
         
         /// <summary>
-        /// 将资源绑定到场景上，会在指定场景卸载时卸载绑定的资源
+        /// 将资源句柄绑定到场景上，会在指定场景卸载时卸载绑定的资源
         /// </summary>
         public static void BindTo(this Scene self,IBindableHandler handler)
         {
@@ -42,15 +42,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void SetSprite(this Image self, string assetName)
         {
-            CatAssetManager.LoadAssetAsync<Sprite>(assetName,(handler =>
+            CatAssetManager.LoadAssetAsync<Sprite>(assetName)
+                .BindTo(self.gameObject)
+                .OnLoaded += handler =>
             {
-                if (handler.State == HandlerState.Success)
-                {
-                    self.sprite = handler.Asset;
-                    self.gameObject.BindTo(handler);
-                }
-                
-            }));
+                self.sprite = handler.Asset;
+            };
         }
 
         /// <summary>
@@ -58,14 +55,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void SetTexture(this RawImage self, string assetName)
         {
-            CatAssetManager.LoadAssetAsync<Texture>(assetName, (handler =>
+            CatAssetManager.LoadAssetAsync<Texture>(assetName)
+                .BindTo(self.gameObject)
+                .OnLoaded += handler =>
             {
-                if (handler.State == HandlerState.Success)
-                {
-                    self.texture = handler.Asset;
-                    self.gameObject.BindTo(handler);
-                }
-            }));
+                self.texture = handler.Asset;
+            };
         }
 
         /// <summary>
@@ -73,14 +68,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void SetText(this Text self, string assetName)
         {
-            CatAssetManager.LoadAssetAsync<TextAsset>(assetName, (handler =>
+            CatAssetManager.LoadAssetAsync<TextAsset>(assetName)
+                .BindTo(self.gameObject)
+                .OnLoaded += handler =>
             {
-                if (handler.State == HandlerState.Success)
-                {
-                    self.text = handler.Asset.text;
-                    self.gameObject.BindTo(handler);
-                }
-            }));
+                self.text = handler.Asset.text;
+            };
         }
 
         /// <summary>
@@ -88,15 +81,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void SetVideoClip(this VideoPlayer self,string assetName)
         {
-            CatAssetManager.LoadAssetAsync<VideoClip>(assetName, (handler =>
+            CatAssetManager.LoadAssetAsync<VideoClip>(assetName)
+                .BindTo(self.gameObject)
+                .OnLoaded += handler =>
             {
-                if (handler.State == HandlerState.Success)
-                {
-                    self.clip = handler.Asset;
-                    self.gameObject.BindTo(handler);
-                }
-                
-            }));
+                self.clip = handler.Asset;
+            };
         }
     }
 }

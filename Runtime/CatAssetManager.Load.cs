@@ -27,23 +27,23 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<object> LoadAssetAsync(string assetName,AssetLoadedCallback<object> callback = null, TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<object> LoadAssetAsync(string assetName, TaskPriority priority = TaskPriority.Low)
         {
-            return InternalLoadAssetAsync<object>(assetName,callback, priority);
+            return InternalLoadAssetAsync<object>(assetName, priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        public static AssetHandler<T> LoadAssetAsync<T>(string assetName,AssetLoadedCallback<T> callback = null, TaskPriority priority = TaskPriority.Low)
+        public static AssetHandler<T> LoadAssetAsync<T>(string assetName, TaskPriority priority = TaskPriority.Low)
         {
-            return InternalLoadAssetAsync<T>(assetName,callback,priority);
+            return InternalLoadAssetAsync<T>(assetName,priority);
         }
 
         /// <summary>
         /// 加载资源
         /// </summary>
-        private static AssetHandler<T> InternalLoadAssetAsync<T>(string assetName,AssetLoadedCallback<T> callback, TaskPriority priority)
+        private static AssetHandler<T> InternalLoadAssetAsync<T>(string assetName, TaskPriority priority)
         {
             
             AssetHandler<T> handler;
@@ -51,7 +51,7 @@ namespace CatAsset.Runtime
             if (string.IsNullOrEmpty(assetName))
             {
                 Debug.LogError("资源加载失败：资源名为空");
-                handler = AssetHandler<T>.Create(string.Empty, callback);
+                handler = AssetHandler<T>.Create();
                 handler.SetAsset(null);
                 return handler;
             }
@@ -63,7 +63,7 @@ namespace CatAsset.Runtime
             if (IsEditorMode)
             {
                 category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName, assetType);
-                handler = AssetHandler<T>.Create(assetName, callback, category);
+                handler = AssetHandler<T>.Create(assetName, category);
                 
                 object asset;
                 
@@ -94,7 +94,7 @@ namespace CatAsset.Runtime
 #endif
 
             category = RuntimeUtil.GetAssetCategory(assetName);
-            handler = AssetHandler<T>.Create(assetName, callback, category);
+            handler = AssetHandler<T>.Create(assetName, category);
 
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo.RefCount > 0)
@@ -140,22 +140,22 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 批量加载资源
         /// </summary>
-        public static BatchAssetHandler BatchLoadAssetAsync(List<string> assetNames,BatchAssetLoadedCallback callback = null,
-            TaskPriority priority = TaskPriority.Low)
+        public static BatchAssetHandler BatchLoadAssetAsync(List<string> assetNames, TaskPriority priority = TaskPriority.Low)
         {
             BatchAssetHandler handler;
 
             if (assetNames == null || assetNames.Count == 0)
             {
                 Debug.LogWarning("批量加载资源的资源名列表为空");
-                handler = BatchAssetHandler.Create(0,callback);
+                handler = BatchAssetHandler.Create();
                 return handler;
             }
 
-            handler = BatchAssetHandler.Create(assetNames.Count,callback);
+            handler = BatchAssetHandler.Create(assetNames.Count);
             foreach (string assetName in assetNames)
             {
-                AssetHandler<object> assetHandler = LoadAssetAsync(assetName,handler.OnAssetLoadedCallback);
+                AssetHandler<object> assetHandler = LoadAssetAsync(assetName);
+                assetHandler.OnLoaded += handler.OnAssetLoadedCallback;
                 handler.AddAssetHandler(assetHandler);
             }
             handler.CheckLoaded();
@@ -166,9 +166,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载场景
         /// </summary>
-        public static SceneHandler LoadSceneAsync(string sceneName,SceneLoadedCallback callback = null, TaskPriority priority = TaskPriority.Low)
+        public static SceneHandler LoadSceneAsync(string sceneName, TaskPriority priority = TaskPriority.Low)
         {
-            SceneHandler handler = SceneHandler.Create(sceneName, callback);
+            SceneHandler handler = SceneHandler.Create(sceneName);
 
             if (string.IsNullOrEmpty(sceneName))
             {
@@ -233,16 +233,21 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void InstantiateAsync(string prefabName,Action<GameObject> callback,Transform parent = null)
         {
-            LoadAssetAsync<GameObject>(prefabName, (handler =>
+            LoadAssetAsync<GameObject>(prefabName).OnLoaded += handler =>
             {
+                GameObject go = null;
                 if (handler.State == HandlerState.Success)
                 {
-                    GameObject go = Object.Instantiate(handler.Asset,parent);
+                    go = Object.Instantiate(handler.Asset,parent);
                     go.BindTo(handler);
-                    
-                    callback?.Invoke(go);
                 }
-            }));
+                else
+                {
+                    handler.Unload();
+                }
+                
+                callback?.Invoke(go);
+            };
         }
     }
 }

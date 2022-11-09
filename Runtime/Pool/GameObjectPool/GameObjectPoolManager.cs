@@ -106,21 +106,23 @@ namespace CatAsset.Runtime
             }
 
             //此prefab未加载过，先加载
-            CatAssetManager.LoadAssetAsync<GameObject>(prefabName,(assetHandler =>
+            CatAssetManager.LoadAssetAsync<GameObject>(prefabName).OnLoaded += handler =>
             {
-                if (assetHandler.State == HandlerState.Success)
+                if (handler.State == HandlerState.Failed)
                 {
-                    GameObject prefab = assetHandler.Asset;
-                    loadedPrefabDict[prefabName] = prefab;
-
-                    //这里要先调用GetGameObject 才能保证 poolDict[prefab] 不为空
-                    GetGameObjectAsync(prefab, parent, callback);
-
-                    //进行资源绑定
-                    GameObject root = poolDict[prefab].Root.gameObject;
-                    root.BindTo(assetHandler);
+                    handler.Unload();
                 }
-            }));
+
+                GameObject prefab = handler.Asset;
+                loadedPrefabDict[prefabName] = prefab;
+
+                //这里要先调用GetGameObject 才能保证 poolDict[prefab] 不为空
+                GetGameObjectAsync(prefab, parent, callback);
+
+                //进行资源绑定
+                GameObject root = poolDict[prefab].Root.gameObject;
+                root.BindTo(handler);
+            };
 
         }
 
