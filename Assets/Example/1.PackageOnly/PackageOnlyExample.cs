@@ -33,28 +33,23 @@ public class PackageOnlyExample : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.A))
             {
-                CatAssetManager.LoadAssetAsync<GameObject>("Assets/BundleRes/PrefabA/A1.prefab",(
+                CatAssetManager.InstantiateAsync("Assets/BundleRes/PrefabA/A1.prefab",
+                    (result =>
+                    {
+                        Debug.Log("加载GameObject");
+                        go = result;
+                    }));
+
+                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt").OnLoaded +=
                     handler =>
                     {
                         if (handler.State == HandlerState.Success)
                         {
-                            Debug.Log("加载GameObject");
-                            go = Instantiate(handler.Asset);
-                
-                            //绑定assetHandler到实例化的go上 这样销毁go后也会将asset也卸载了
-                            go.BindTo(handler);
+                            Debug.Log($"加载原生资源 文本文件:{handler.Asset.text}");
                         }
-                    }));
 
-
-                CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt", (handler =>
-                {
-                    if (handler.State == HandlerState.Success)
-                    {
-                        Debug.Log($"加载原生资源 文本文件:{handler.Asset.text}");
                         handler.Unload();
-                    }
-                }));
+                    };
 
             }
 

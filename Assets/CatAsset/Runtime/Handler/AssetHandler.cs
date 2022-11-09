@@ -133,6 +133,40 @@ namespace CatAsset.Runtime
         /// </summary>
         private AssetLoadedCallback<T> onLoadedCallback;
 
+        /// <summary>
+        /// 资源加载完毕回调
+        /// </summary>
+        public event AssetLoadedCallback<T> OnLoaded
+        {
+            add
+            {
+                if (State == HandlerState.InValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上添加了OnLoaded回调");
+                    return;
+                }
+
+                if (State != HandlerState.Doing)
+                {
+                    value?.Invoke(this);
+                    return;
+                }
+
+                onLoadedCallback += value;
+            }
+
+            remove
+            {
+                if (State == HandlerState.InValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上移除了OnLoaded回调");
+                    return;
+                }
+
+                onLoadedCallback -= value;
+            }
+        }
+        
         /// <inheritdoc />
         internal override void SetAsset(object loadedAsset)
         {
@@ -153,13 +187,12 @@ namespace CatAsset.Runtime
             return new HandlerAwaiter<AssetHandler<T>>(this);
         }
         
-        public static AssetHandler<T> Create(string name, AssetLoadedCallback<T> callback,AssetCategory category = AssetCategory.None)
+        public static AssetHandler<T> Create(string name = null,AssetCategory category = AssetCategory.None)
         {
             AssetHandler<T> handler = ReferencePool.Get<AssetHandler<T>>();
             handler.Name = name;
             handler.State = HandlerState.Doing;
             handler.Category = category;
-            handler.onLoadedCallback = callback;
             return handler;
         }
 

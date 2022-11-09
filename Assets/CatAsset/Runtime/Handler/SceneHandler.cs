@@ -26,6 +26,40 @@ namespace CatAsset.Runtime
         private SceneLoadedCallback onLoadedCallback;
 
         /// <summary>
+        /// 资源加载完毕回调
+        /// </summary>
+        public event SceneLoadedCallback OnLoaded
+        {
+            add
+            {
+                if (State == HandlerState.InValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上添加了OnLoaded回调");
+                    return;
+                }
+
+                if (State != HandlerState.Doing)
+                {
+                    value?.Invoke(this);
+                    return;
+                }
+
+                onLoadedCallback += value;
+            }
+
+            remove
+            {
+                if (State == HandlerState.InValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上移除了OnLoaded回调");
+                    return;
+                }
+
+                onLoadedCallback -= value;
+            }
+        }
+        
+        /// <summary>
         /// 设置场景对象
         /// </summary>
         internal void SetScene(Scene loadedScene)
@@ -59,12 +93,11 @@ namespace CatAsset.Runtime
             return new HandlerAwaiter<SceneHandler>(this);
         }
 
-        public static SceneHandler Create(string name, SceneLoadedCallback callback)
+        public static SceneHandler Create(string name)
         {
             SceneHandler handler = ReferencePool.Get<SceneHandler>();
             handler.Name = name;
             handler.State = HandlerState.Doing;
-            handler.onLoadedCallback = callback;
             return handler;
         }
 
