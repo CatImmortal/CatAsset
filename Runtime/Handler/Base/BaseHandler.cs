@@ -30,6 +30,11 @@ namespace CatAsset.Runtime
         protected CancellationToken Token { get; private set; }
 
         /// <summary>
+        /// 是否被Token取消
+        /// </summary>
+        internal bool IsTokenCanceled => Token != default && Token.IsCancellationRequested;
+        
+        /// <summary>
         /// 进度
         /// </summary>
         public float Progress

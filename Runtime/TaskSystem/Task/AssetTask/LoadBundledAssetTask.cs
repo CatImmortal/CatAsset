@@ -79,8 +79,11 @@ namespace CatAsset.Runtime
 
         protected LoadBundledAssetState LoadState;
         protected AsyncOperation Operation;
-
-        protected bool NeedCancel;
+        
+        /// <summary>
+        /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
+        /// </summary>
+        protected virtual bool IsCanceled => handler == null || handler.IsTokenCanceled;
 
         /// <inheritdoc />
         public override float Progress
@@ -181,7 +184,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Cancel()
         {
-            NeedCancel = true;
+            handler = null;
         }
 
         /// <summary>
@@ -401,14 +404,14 @@ namespace CatAsset.Runtime
                 Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
                 
                 //加载失败 通知所有未取消的加载任务
-                if (!NeedCancel)
+                if (!IsCanceled)
                 {
                     handler.SetAsset(null);
                 }
                 
                 foreach (LoadBundledAssetTask task in MergedTasks)
                 {
-                    if (!task.NeedCancel)
+                    if (!task.IsCanceled)
                     {
                         task.handler.SetAsset(null);
                     }
@@ -416,7 +419,7 @@ namespace CatAsset.Runtime
             }
             else
             {
-                if (IsAllCancel())
+                if (IsAllCanceled())
                 {
                     //所有任务都被取消了 这个资源没人要了 直接卸载吧
                     AssetRuntimeInfo.AddRefCount();  //注意这里要先计数+1 才能正确执行后续的卸载流程
@@ -425,14 +428,14 @@ namespace CatAsset.Runtime
                 }
 
                 //加载成功 通知所有未取消的加载任务
-                if (!NeedCancel)
+                if (!IsCanceled)
                 {
                     AssetRuntimeInfo.AddRefCount();
                     handler.SetAsset(AssetRuntimeInfo.Asset);
                 }
                 foreach (LoadBundledAssetTask task in MergedTasks)
                 {
-                    if (!task.NeedCancel)
+                    if (!task.IsCanceled)
                     {
                         AssetRuntimeInfo.AddRefCount();
                         task.handler.SetAsset(AssetRuntimeInfo.Asset);
@@ -446,17 +449,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 是否全部加载任务都被取消了
         /// </summary>
-        private bool IsAllCancel()
+        private bool IsAllCanceled()
         {
             foreach (LoadBundledAssetTask task in MergedTasks)
             {
-                if (!task.NeedCancel)
+                if (!task.IsCanceled)
                 {
                     return false;
                 }
             }
 
-            return NeedCancel;
+            return IsCanceled;
         }
 
         /// <summary>
@@ -501,7 +504,6 @@ namespace CatAsset.Runtime
             
             LoadState = default;
             Operation = default;
-            NeedCancel = default;
         }
     }
 }

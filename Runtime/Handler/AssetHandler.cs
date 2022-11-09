@@ -167,12 +167,6 @@ namespace CatAsset.Runtime
         {
             Task = null;
             AssetObj = loadedAsset;
-            if (Token != default && Token.IsCancellationRequested)
-            {
-                InternalUnload();
-                return;
-            }
-            
             Asset = AssetAs<T>();
             State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
             

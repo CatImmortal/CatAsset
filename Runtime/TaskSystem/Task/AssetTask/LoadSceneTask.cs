@@ -24,8 +24,12 @@ namespace CatAsset.Runtime
             {
                 base.Run();
             }
-            
         }
+
+        /// <summary>
+        /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
+        /// </summary>
+        protected override bool IsCanceled => handler == null || handler.IsTokenCanceled;
 
         /// <inheritdoc />
         protected override void LoadAsync()
@@ -58,14 +62,14 @@ namespace CatAsset.Runtime
             if (!success)
             {
                 //加载失败 通知所有未取消的加载任务
-                if (!NeedCancel)
+                if (!IsCanceled)
                 {
                     handler.SetScene(default);
                 }
                 
                 foreach (LoadSceneTask task in MergedTasks)
                 {
-                    if (!task.NeedCancel)
+                    if (!task.IsCanceled)
                     {
                         task.handler.SetScene(default);
                     }
@@ -74,7 +78,7 @@ namespace CatAsset.Runtime
             else
             {
                 AssetRuntimeInfo.AddRefCount();
-                if (NeedCancel)
+                if (IsCanceled)
                 {
                     //被取消了 卸载场景
                     CatAssetManager.UnloadScene(loadedScene);
@@ -88,7 +92,7 @@ namespace CatAsset.Runtime
                 //因为每次加载场景都是在实例化一个新场景 无法复用
                 foreach (LoadSceneTask task in MergedTasks)
                 {
-                    if (!task.NeedCancel)
+                    if (!task.IsCanceled)
                     {
                         CatAssetManager.InternalLoadSceneAsync(task.Name,task.handler);
                     }

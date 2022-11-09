@@ -67,13 +67,6 @@ namespace CatAsset.Runtime
         {
             Task = null;
             Scene = loadedScene;
-            
-            if (Token != default && Token.IsCancellationRequested)
-            {
-                InternalUnload();
-                return;
-            }
-            
             State = loadedScene != default ? HandlerState.Success : HandlerState.Failed;
             
             onLoadedCallback?.Invoke(this);

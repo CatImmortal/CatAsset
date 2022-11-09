@@ -36,7 +36,10 @@ namespace CatAsset.Runtime
         private LoadRawAssetState loadState;
         private readonly WebRequestCallback onWebRequestCallback;
 
-        private bool needCancel;
+        /// <summary>
+        /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
+        /// </summary>
+        private bool IsCanceled => handler == null || handler.IsTokenCanceled;
         
         public LoadRawAssetTask()
         {
@@ -81,9 +84,10 @@ namespace CatAsset.Runtime
 
         }
 
+        /// <inheritdoc />
         public override void Cancel()
         {
-            needCancel = true;
+            handler = null;
         }
 
         /// <summary>
@@ -118,17 +122,17 @@ namespace CatAsset.Runtime
 
             if (assetRuntimeInfo == null)
             {
-                Debug.LogError($"原生资源:{bundleRuntimeInfo.LoadPath}加载失败");
+                Debug.LogError($"原生资源加载失败:{bundleRuntimeInfo.LoadPath}");
                 
                 //资源加载失败
-                if (!needCancel)
+                if (!IsCanceled)
                 {
                     handler.SetAsset(null);
                 }
                 
                 foreach (LoadRawAssetTask task in MergedTasks)
                 {
-                    if (!task.needCancel)
+                    if (!task.IsCanceled)
                     {
                         task.handler.SetAsset(null);
                     }
@@ -145,17 +149,17 @@ namespace CatAsset.Runtime
                 }
 
                 //加载成功 通知所有未取消的加载任务
-                if (!needCancel)
+                if (!IsCanceled)
                 {
                     assetRuntimeInfo.AddRefCount();
                     handler.SetAsset(assetRuntimeInfo.Asset);
                 }
                 foreach (LoadRawAssetTask task in MergedTasks)
                 {
-                    if (!task.needCancel)
+                    if (!task.IsCanceled)
                     {
                         assetRuntimeInfo.AddRefCount();
-                        task. handler.SetAsset(assetRuntimeInfo.Asset);
+                        task.handler.SetAsset(assetRuntimeInfo.Asset);
                     }
                 }
             }
@@ -168,13 +172,13 @@ namespace CatAsset.Runtime
         {
             foreach (LoadRawAssetTask task in MergedTasks)
             {
-                if (!task.needCancel)
+                if (!task.IsCanceled)
                 {
                     return false;
                 }
             }
 
-            return needCancel;
+            return IsCanceled;
         }
         
         /// <summary>
@@ -205,8 +209,6 @@ namespace CatAsset.Runtime
             assetRuntimeInfo = default;
             bundleRuntimeInfo = default;
             loadState = default;
-
-            needCancel = default;
         }
     }
 }
