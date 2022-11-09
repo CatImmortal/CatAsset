@@ -7,9 +7,17 @@ namespace CatAsset.Runtime
     public static partial class CatAssetManager
     {
         /// <summary>
+        /// 卸载资源
+        /// </summary>
+        public static void UnloadAsset(AssetHandler handler)
+        {
+            UnloadAsset(handler.AssetObj);
+        }
+
+        /// <summary>
         /// 卸载资源，注意：asset参数需要是原始资源对象
         /// </summary>
-        public static void UnloadAsset(object asset)
+        internal static void UnloadAsset(object asset)
         {
 #if UNITY_EDITOR
             if (IsEditorMode)
@@ -45,7 +53,15 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 卸载场景
         /// </summary>
-        public static void UnloadScene(Scene scene)
+        public static void UnloadScene(SceneHandler handler)
+        {
+            UnloadScene(handler.Scene);
+        }
+        
+        /// <summary>
+        /// 卸载场景
+        /// </summary>
+        internal static void UnloadScene(Scene scene)
         {
             if (scene == default || !scene.IsValid() || !scene.isLoaded)
             {

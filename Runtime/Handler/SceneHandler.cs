@@ -76,7 +76,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         protected override void InternalUnload()
         {
-            CatAssetManager.UnloadScene(Scene);
+            CatAssetManager.UnloadScene(this);
             Release();
         }
         
