@@ -25,10 +25,9 @@ namespace CatAsset.Runtime
         internal Action ContinuationCallBack;
 
         /// <summary>
-        /// 取消用Token
+        /// 取消Token
         /// </summary>
         protected CancellationToken Token { get; private set; }
-
 
         /// <summary>
         /// 进度
@@ -59,24 +58,46 @@ namespace CatAsset.Runtime
         
 
         /// <summary>
-        /// 取消加载，同时会释放此句柄
+        /// 卸载句柄，会根据句柄状态进行不同的处理
         /// </summary>
-        public virtual void Cancel()
+        public void Unload()
         {
-            if (State == HandlerState.InValid)
+            switch (State)
             {
-                Debug.LogWarning($"取消了无效的{GetType().Name}：{Name}");
-                return;
+                case HandlerState.InValid:
+                    //无效句柄 不处理
+                    return;
+                
+                case HandlerState.Doing:
+                    //加载中 取消
+                    Cancel();
+                    return;
+                
+                case HandlerState.Success:
+                    //加载成功 卸载资源
+                    InternalUnload();
+                    return;
+                
+                case HandlerState.Failed:
+                    //加载失败 仅释放句柄
+                    Release();
+                    return;
             }
-            
-            Task?.Cancel();
-            Release();
         }
 
         /// <summary>
+        /// 取消加载，同时会释放此句柄
+        /// </summary>
+        protected virtual void Cancel()
+        {
+            Task?.Cancel();
+            Release();
+        }
+        
+        /// <summary>
         /// 卸载资源，同时会释放此句柄
         /// </summary>
-        public abstract void Unload();
+        protected abstract void InternalUnload();
 
         /// <summary>
         /// 释放句柄，会将此句柄归还引用池
@@ -91,32 +112,9 @@ namespace CatAsset.Runtime
             ReferencePool.Release(this);
         }
         
-        /// <summary>
-        /// 根据句柄状态进行释放处理
-        /// </summary>
         public void Dispose()
         {
-            switch (State)
-            {
-                case HandlerState.InValid:
-                    //无效句柄 不处理
-                    return;
-                
-                case HandlerState.Doing:
-                    //加载中 取消
-                    Cancel();
-                    return;
-                
-                case HandlerState.Success:
-                    //加载成功 卸载
-                    Unload();
-                    return;
-                
-                case HandlerState.Failed:
-                    //加载失败 仅释放句柄
-                    Release();
-                    return;
-            }
+            Unload();
         }
 
         public void CreateBase(string name,CancellationToken token)
@@ -124,7 +122,6 @@ namespace CatAsset.Runtime
             Name = name;
             Token = token;
             State = HandlerState.Doing;
-            
         }
         
         public virtual void Clear()

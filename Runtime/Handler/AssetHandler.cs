@@ -36,14 +36,8 @@ namespace CatAsset.Runtime
         internal abstract void SetAsset(object loadedAsset);
 
         /// <inheritdoc />
-        public override void Unload()
+        protected override void InternalUnload()
         {
-            if (State == HandlerState.InValid)
-            {
-                Debug.LogError($"卸载了无效的{GetType().Name}：{Name}");
-                return;
-            }
-            
             CatAssetManager.UnloadAsset(AssetObj);
             Release();
         }
@@ -172,15 +166,14 @@ namespace CatAsset.Runtime
         internal override void SetAsset(object loadedAsset)
         {
             Task = null;
-            
             AssetObj = loadedAsset;
             if (Token != default && Token.IsCancellationRequested)
             {
-                Unload();
+                InternalUnload();
                 return;
             }
+            
             Asset = AssetAs<T>();
-
             State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
             
             onLoadedCallback?.Invoke(this);
