@@ -41,7 +41,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 已合并的任务列表（同名的任务）
         /// </summary>
-        protected List<BaseTask> MergedTasks = new List<BaseTask>();
+        protected readonly List<BaseTask> MergedTasks = new List<BaseTask>();
         
         /// <summary>
         /// 已合并任务数量
