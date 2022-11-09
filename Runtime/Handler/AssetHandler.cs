@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -170,7 +171,14 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         internal override void SetAsset(object loadedAsset)
         {
+            Task = null;
+            
             AssetObj = loadedAsset;
+            if (Token != default && Token.IsCancellationRequested)
+            {
+                Unload();
+                return;
+            }
             Asset = AssetAs<T>();
 
             State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
@@ -187,11 +195,10 @@ namespace CatAsset.Runtime
             return new HandlerAwaiter<AssetHandler<T>>(this);
         }
         
-        public static AssetHandler<T> Create(string name = null,AssetCategory category = AssetCategory.None)
+        public static AssetHandler<T> Create(string name = null,CancellationToken token = default,AssetCategory category = AssetCategory.None)
         {
             AssetHandler<T> handler = ReferencePool.Get<AssetHandler<T>>();
-            handler.Name = name;
-            handler.State = HandlerState.Doing;
+            handler.CreateBase(name,token);
             handler.Category = category;
             return handler;
         }

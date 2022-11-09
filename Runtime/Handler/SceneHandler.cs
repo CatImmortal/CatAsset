@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -64,8 +65,13 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void SetScene(Scene loadedScene)
         {
+            Task = null;
             Scene = loadedScene;
-
+            if (Token != default && Token.IsCancellationRequested)
+            {
+                Unload();
+                return;
+            }
             State = loadedScene != default ? HandlerState.Success : HandlerState.Failed;
             
             onLoadedCallback?.Invoke(this);
@@ -93,11 +99,10 @@ namespace CatAsset.Runtime
             return new HandlerAwaiter<SceneHandler>(this);
         }
 
-        public static SceneHandler Create(string name)
+        public static SceneHandler Create(string name,CancellationToken token)
         {
             SceneHandler handler = ReferencePool.Get<SceneHandler>();
-            handler.Name = name;
-            handler.State = HandlerState.Doing;
+            handler.CreateBase(name,token);
             return handler;
         }
 

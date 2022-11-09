@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
 using Object = System.Object;
 
@@ -96,8 +97,15 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void CheckLoaded()
         {
+            if (Token != default && Token.IsCancellationRequested)
+            {
+                Unload();
+                return;
+            }
+            
             if (loadedCount == assetCount)
             {
+                Task = null;
                 State = HandlerState.Success;
             
                 onLoadedCallback?.Invoke(this);
@@ -157,10 +165,10 @@ namespace CatAsset.Runtime
             return new HandlerAwaiter<BatchAssetHandler>(this);
         }
         
-        public static BatchAssetHandler Create(int assetCount = 0)
+        public static BatchAssetHandler Create(int assetCount = 0,CancellationToken token = default)
         {
             BatchAssetHandler handler = ReferencePool.Get<BatchAssetHandler>();
-            handler.State = HandlerState.Doing;
+            handler.CreateBase(nameof(BatchAssetHandler),token);
             handler.assetCount = assetCount;
             
             handler.CheckLoaded();

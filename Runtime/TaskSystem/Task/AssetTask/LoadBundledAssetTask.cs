@@ -253,7 +253,7 @@ namespace CatAsset.Runtime
             totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
             foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
-                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,TaskPriority.Middle);
+                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,default,TaskPriority.Middle);
                 dependencyHandler.OnLoaded += onDependencyLoadedCallback;
                 dependencyHandlers.Add(dependencyHandler);
             }
@@ -484,11 +484,6 @@ namespace CatAsset.Runtime
             base.Clear();
 
             assetType = default;
-            
-            if (handler != null)
-            {
-                handler.Task = null;
-            }
             handler = default;
             
             AssetRuntimeInfo = default;

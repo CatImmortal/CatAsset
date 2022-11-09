@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -22,7 +23,13 @@ namespace CatAsset.Runtime
         /// Awaiter的Continuation回调，在加载完毕时调用
         /// </summary>
         internal Action ContinuationCallBack;
-        
+
+        /// <summary>
+        /// 取消用Token
+        /// </summary>
+        protected CancellationToken Token { get; private set; }
+
+
         /// <summary>
         /// 进度
         /// </summary>
@@ -111,6 +118,14 @@ namespace CatAsset.Runtime
                     return;
             }
         }
+
+        public void CreateBase(string name,CancellationToken token)
+        {
+            Name = name;
+            Token = token;
+            State = HandlerState.Doing;
+            
+        }
         
         public virtual void Clear()
         {
@@ -118,6 +133,7 @@ namespace CatAsset.Runtime
             Task = default;
             State = default;
             ContinuationCallBack = default;
+            Token = default;
         }
     }
 }
