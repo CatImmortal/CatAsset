@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
         }
 
         private AssetCategory category;
-        private AssetHandler assetHandler;
+        private AssetHandler handler;
 
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
@@ -123,14 +123,14 @@ namespace CatAsset.Runtime
                 //资源加载失败
                 if (!needCancel)
                 {
-                    assetHandler.SetAsset(null);
+                    handler.SetAsset(null);
                 }
                 
                 foreach (LoadRawAssetTask task in MergedTasks)
                 {
                     if (!task.needCancel)
                     {
-                        task.assetHandler.SetAsset(null);
+                        task.handler.SetAsset(null);
                     }
                 }
             }
@@ -148,14 +148,14 @@ namespace CatAsset.Runtime
                 if (!needCancel)
                 {
                     assetRuntimeInfo.AddRefCount();
-                    assetHandler.SetAsset(assetRuntimeInfo.Asset);
+                    handler.SetAsset(assetRuntimeInfo.Asset);
                 }
                 foreach (LoadRawAssetTask task in MergedTasks)
                 {
                     if (!task.needCancel)
                     {
                         assetRuntimeInfo.AddRefCount();
-                        task. assetHandler.SetAsset(assetRuntimeInfo.Asset);
+                        task. handler.SetAsset(assetRuntimeInfo.Asset);
                     }
                 }
             }
@@ -186,7 +186,7 @@ namespace CatAsset.Runtime
             task.CreateBase(owner,name);
             
             task.category = category;
-            task.assetHandler = handler;
+            task.handler = handler;
             task.assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.bundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(task.assetRuntimeInfo.BundleManifest.RelativePath);
@@ -200,7 +200,12 @@ namespace CatAsset.Runtime
             base.Clear();
 
             category = default;
-            assetHandler = default;
+            
+            if (handler != null)
+            {
+                handler.Task = null;
+            }
+            handler = default;
 
             assetRuntimeInfo = default;
             bundleRuntimeInfo = default;
