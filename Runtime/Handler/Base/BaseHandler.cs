@@ -67,11 +67,32 @@ namespace CatAsset.Runtime
         public HandlerState State { get; protected set; }
 
         /// <summary>
+        /// 是否有效
+        /// </summary>
+        public bool IsValid => State != HandlerState.InValid;
+        
+        /// <summary>
+        /// 是否加载中
+        /// </summary>
+        public bool IsDoing => State == HandlerState.Doing;
+        
+        /// <summary>
+        /// 是否加载成功
+        /// </summary>
+        public bool IsSuccess => State == HandlerState.Success;
+        
+        /// <summary>
+        /// 是否加载结束
+        /// </summary>
+        public bool IsDone => State == HandlerState.Success || State == HandlerState.Failed;
+        
+        
+        /// <summary>
         /// 检查加载失败的错误信息
         /// </summary>
         protected void CheckError()
         {
-            if (State == HandlerState.Failed && !string.IsNullOrEmpty(Error))
+            if (!IsSuccess && !string.IsNullOrEmpty(Error))
             {
                 Debug.LogError($"{GetType().Name} | {Name} 加载失败：{Error}");
             }
@@ -124,7 +145,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void Release()
         {
-            if (State == HandlerState.InValid)
+            if (!IsValid)
             {
                 Debug.LogError($"错误的释放了无效的{GetType().Name}：{Name}");
                 return;

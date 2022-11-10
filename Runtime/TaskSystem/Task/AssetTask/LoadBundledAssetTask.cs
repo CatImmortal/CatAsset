@@ -337,7 +337,7 @@ namespace CatAsset.Runtime
                 //添加依赖链记录
                 foreach (AssetHandler dependencyHandler in dependencyHandlers)
                 {
-                    if (dependencyHandler.State == HandlerState.Success)
+                    if (dependencyHandler.IsSuccess)
                     {
                         AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyHandler.AssetObj);
                         

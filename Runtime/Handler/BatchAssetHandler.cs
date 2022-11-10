@@ -50,13 +50,13 @@ namespace CatAsset.Runtime
         {
             add
             {
-                if (State == HandlerState.InValid)
+                if (!IsValid)
                 {
                     Debug.LogError($"在无效的{GetType().Name}：{Name}上添加了OnLoaded回调");
                     return;
                 }
 
-                if (State != HandlerState.Doing)
+                if (IsDone)
                 {
                     value?.Invoke(this);
                     return;
@@ -67,7 +67,7 @@ namespace CatAsset.Runtime
 
             remove
             {
-                if (State == HandlerState.InValid)
+                if (!IsValid)
                 {
                     Debug.LogError($"在无效的{GetType().Name}：{Name}上移除了OnLoaded回调");
                     return;
@@ -146,6 +146,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public HandlerAwaiter<BatchAssetHandler> GetAwaiter()
         {
+            if (!IsValid)
+            {
+                throw new Exception("await了一个无效句柄");
+            }
+            
             return new HandlerAwaiter<BatchAssetHandler>(this);
         }
         

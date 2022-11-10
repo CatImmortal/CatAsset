@@ -108,7 +108,7 @@ namespace CatAsset.Runtime
             //此prefab未加载过，先加载
             CatAssetManager.LoadAssetAsync<GameObject>(prefabName).OnLoaded += handler =>
             {
-                if (handler.State == HandlerState.Failed)
+                if (!handler.IsSuccess)
                 {
                     handler.Unload();
                     return;

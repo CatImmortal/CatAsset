@@ -248,7 +248,7 @@ namespace CatAsset.Runtime
             LoadAssetAsync<GameObject>(prefabName).OnLoaded += handler =>
             {
                 GameObject go = null;
-                if (handler.State == HandlerState.Success)
+                if (handler.IsSuccess)
                 {
                     go = Object.Instantiate(handler.Asset,parent);
                     go.BindTo(handler);

@@ -15,7 +15,7 @@ namespace CatAsset.Runtime
             this.handler = handler;
         }
         
-        public bool IsCompleted => handler.State != HandlerState.Doing;
+        public bool IsCompleted => handler.IsDone;
 
         public T GetResult()
         {
