@@ -43,7 +43,7 @@ public class PackageOnlyExample : MonoBehaviour
                 CatAssetManager.LoadAssetAsync<TextAsset>("Assets/BundleRes/RawText/rawText1.txt").OnLoaded +=
                     handler =>
                     {
-                        if (handler.State == HandlerState.Success)
+                        if (handler.IsSuccess)
                         {
                             Debug.Log($"加载原生资源 文本文件:{handler.Asset.text}");
                         }

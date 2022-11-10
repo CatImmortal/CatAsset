@@ -23,14 +23,37 @@ namespace CatAsset.Editor
             {
                 if (instance == null)
                 {
-                    instance = Resources.Load<BundleBuildConfigSO>("BundleBuildConfig");
-                }
+                    string[] guids = AssetDatabase.FindAssets($"t:{nameof(BundleBuildConfigSO)}");
+                    if (guids.Length == 0)
+                    {
+                        
+                        BundleBuildConfigSO so = CreateInstance<BundleBuildConfigSO>();
+                        string path = $"Assets/{nameof(BundleBuildConfigSO)}.asset";
+                        AssetDatabase.CreateAsset(so,path);
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                        Debug.Log($"创建{nameof(BundleBuildConfigSO)} 路径：{path}");
+                        instance = so;
+                    }
+                    else
+                    {
+                        string path;
+                        if (guids.Length > 0)
+                        {
+                            Debug.LogWarning($"{nameof(BundleBuildConfigSO)}数量大于1");
+                            foreach (string guid in guids)
+                            {
+                                path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                                Debug.LogWarning(path);
+                            }
+                        }
+                        
+                        path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                        instance = AssetDatabase.LoadAssetAtPath<BundleBuildConfigSO>(path);
+                    }
 
-                if (instance == null)
-                {
-                    EditorUtility.DisplayDialog("提示", "需要在Editor下的Resources目录下创建BundleBuildConfig文件", "ok");
                 }
-
+                
                 return instance;
             }
         }
