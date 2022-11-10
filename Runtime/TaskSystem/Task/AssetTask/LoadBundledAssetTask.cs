@@ -341,8 +341,9 @@ namespace CatAsset.Runtime
                     {
                         AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyHandler.AssetObj);
                         
-                        //将自身设置为依赖资源的下游资源
+                        //将自身与依赖资源的上下游关系
                         depInfo.AddDownStream(AssetRuntimeInfo);
+                        AssetRuntimeInfo.AddUpStream(depInfo);
                         
                         //如果依赖了其他资源包里的资源 还需要设置 自身所在资源包 与 依赖所在资源包 的上下游关系
                         if (!depInfo.BundleManifest.Equals(AssetRuntimeInfo.BundleManifest))

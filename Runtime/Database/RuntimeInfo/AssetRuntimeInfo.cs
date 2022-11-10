@@ -31,6 +31,11 @@ namespace CatAsset.Runtime
         public int RefCount { get; private set; }
 
         /// <summary>
+        /// 上游资源集合（此资源依赖的资源）
+        /// </summary>
+        public readonly HashSet<AssetRuntimeInfo> UpStream = new HashSet<AssetRuntimeInfo>();
+        
+        /// <summary>
         /// 下游资源集合（依赖此资源的资源）
         /// </summary>
         public readonly HashSet<AssetRuntimeInfo> DownStream = new HashSet<AssetRuntimeInfo>();
@@ -86,6 +91,30 @@ namespace CatAsset.Runtime
             }
         }
 
+        /// <summary>
+        /// 添加上游资源（此资源依赖的资源）
+        /// </summary>
+        public void AddUpStream(AssetRuntimeInfo assetRuntimeInfo)
+        {
+            if (Asset == null)
+            {
+                return;
+            }
+            UpStream.Add(assetRuntimeInfo);
+        }
+
+        /// <summary>
+        /// 移除上游资源（此资源依赖的资源）
+        /// </summary>
+        public void RemoveUpStream(AssetRuntimeInfo assetRuntimeInfo)
+        {
+            if (Asset == null)
+            {
+                return;
+            }
+            UpStream.Remove(assetRuntimeInfo);
+        }
+        
         /// <summary>
         /// 添加下游资源（依赖此资源的资源）
         /// </summary>
