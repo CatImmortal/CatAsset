@@ -46,7 +46,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private static AssetHandler<T> InternalLoadAssetAsync<T>(string assetName,CancellationToken token, TaskPriority priority)
         {
-            
+
             AssetHandler<T> handler;
 
             if (string.IsNullOrEmpty(assetName))
@@ -59,15 +59,15 @@ namespace CatAsset.Runtime
 
             Type assetType = typeof(T);
             AssetCategory category;
-            
+
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
                 category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName, assetType);
                 handler = AssetHandler<T>.Create(assetName,token, category);
-                
+
                 object asset;
-                
+
                 if (category == AssetCategory.InternalBundledAsset)
                 {
                     //加载资源包资源
@@ -88,7 +88,7 @@ namespace CatAsset.Runtime
                 {
                     Debug.LogError($"资源加载失败：{assetName}");
                 }
-                
+
                 handler.SetAsset(asset);
                 return handler;
             }
@@ -160,7 +160,7 @@ namespace CatAsset.Runtime
                 handler.AddAssetHandler(assetHandler);
             }
             handler.CheckLoaded();
-            
+
             return handler;
         }
 
@@ -196,17 +196,26 @@ namespace CatAsset.Runtime
                     loadSceneMode = LoadSceneMode.Additive
                 };
 
-                Scene scene = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(sceneName, param);
-
-                if (scene == default)
+                var op = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);
+                if (op == null)
                 {
                     Debug.LogError($"场景加载失败：{sceneName}");
+                    handler.SetScene(default);
+                    return;
                 }
-                else
+
+                op.completed += operation =>
                 {
-                    SceneManager.SetActiveScene(scene);
-                }
-                handler.SetScene(scene);
+                    Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
+                    if (handler.IsTokenCanceled)
+                    {
+                        SceneManager.UnloadSceneAsync(scene);
+                    }
+                    else
+                    {
+                        handler.SetScene(scene);
+                    }
+                };
 
                 return;
             }
@@ -240,7 +249,7 @@ namespace CatAsset.Runtime
                 {
                     handler.Unload();
                 }
-                
+
                 callback?.Invoke(go);
             };
         }
