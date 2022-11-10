@@ -69,6 +69,8 @@ namespace CatAsset.Runtime
             Scene = loadedScene;
             State = loadedScene != default ? HandlerState.Success : HandlerState.Failed;
             
+            CheckError();
+            
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
         }

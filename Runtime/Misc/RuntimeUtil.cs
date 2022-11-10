@@ -129,7 +129,6 @@ namespace CatAsset.Runtime
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo == null)
             {
-                Debug.LogError($"GetAssetCategory调用失败，{assetName}的AssetRuntimeInfo为空，请检查资源名是否正确");
                 return default;
             }
 
