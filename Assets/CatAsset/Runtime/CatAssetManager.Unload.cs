@@ -120,6 +120,7 @@ namespace CatAsset.Runtime
                     
                     //删除依赖链记录
                     dependencyRuntimeInfo.RemoveDownStream(assetRuntimeInfo);
+                    assetRuntimeInfo.RemoveUpStream(dependencyRuntimeInfo);
                 }
 
                 //对于非场景 非Prefab的资源 以及原生资源 创建卸载任务
