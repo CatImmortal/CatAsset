@@ -318,10 +318,10 @@ namespace CatAsset.Runtime
             if (IsLoadFailed())
             {
                 //资源加载失败
-                //将已加载好的依赖都卸载一遍
+                //将依赖资源的句柄都卸载一遍
                 foreach (AssetHandler dependencyHandler in dependencyHandlers)
                 {
-                    dependencyHandler.Dispose();
+                    dependencyHandler.Unload();
                 }
                 dependencyHandlers.Clear();
 
@@ -401,7 +401,7 @@ namespace CatAsset.Runtime
         {
             if (!success)
             {
-                Debug.LogError($"资源加载失败：{AssetRuntimeInfo}");
+                handler.Error = "资源加载失败";
                 
                 //加载失败 通知所有未取消的加载任务
                 if (!IsCanceled)

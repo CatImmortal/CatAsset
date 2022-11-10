@@ -18,7 +18,6 @@ namespace CatAsset.Runtime
             AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (info == null)
             {
-                Debug.LogError($"资源加载失败，不在资源清单中：{assetName}");
                 return false;
             }
 
@@ -51,8 +50,8 @@ namespace CatAsset.Runtime
 
             if (string.IsNullOrEmpty(assetName))
             {
-                Debug.LogError("资源加载失败：资源名为空");
                 handler = AssetHandler<T>.Create();
+                handler.Error = "资源名为空";
                 handler.SetAsset(null);
                 return handler;
             }
@@ -86,7 +85,7 @@ namespace CatAsset.Runtime
 
                 if (asset == null)
                 {
-                    Debug.LogError($"资源加载失败：{assetName}");
+                    handler.Error = "资源加载失败";
                 }
 
                 handler.SetAsset(asset);
@@ -98,6 +97,13 @@ namespace CatAsset.Runtime
             handler = AssetHandler<T>.Create(assetName,token, category);
 
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
+            if (assetRuntimeInfo == null)
+            {
+                handler.Error = "未获取到AssetRuntimeInfo，请检查资源名是否正确";
+                handler.SetAsset(null);
+                return handler;
+            }
+            
             if (assetRuntimeInfo.RefCount > 0)
             {
                 //引用计数>0
@@ -111,6 +117,7 @@ namespace CatAsset.Runtime
             switch (category)
             {
                 case AssetCategory.None:
+                    handler.Error = "AssetCategory为None，请检查资源名是否正确";
                     handler.SetAsset(null);
                     break;
 
@@ -173,7 +180,7 @@ namespace CatAsset.Runtime
 
             if (string.IsNullOrEmpty(sceneName))
             {
-                Debug.LogError("场景加载失败：场景名为空");
+                handler.Error = "场景名为空";
                 handler.SetScene(default);
                 return handler;
             }
@@ -199,7 +206,7 @@ namespace CatAsset.Runtime
                 var op = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(sceneName, param);
                 if (op == null)
                 {
-                    Debug.LogError($"场景加载失败：{sceneName}");
+                    handler.Error = "场景加载失败";
                     handler.SetScene(default);
                     return;
                 }
@@ -222,6 +229,7 @@ namespace CatAsset.Runtime
 #endif
             if (!CheckAssetReady(sceneName))
             {
+                handler.Error = "未获取到AssetRuntimeInfo，请检查场景名是否正确";
                 handler.SetScene(default);
                 return;
             }

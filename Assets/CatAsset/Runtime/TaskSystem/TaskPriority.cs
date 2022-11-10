@@ -3,7 +3,7 @@
     /// <summary>
     /// 任务优先级
     /// </summary>
-    public enum TaskPriority : int
+    public enum TaskPriority
     {
         /// <summary>
         /// 非常低（资源清单检查）
@@ -16,7 +16,7 @@
         Low = 1,
         
         /// <summary>
-        /// 中（资源包加载，依赖资源加载，更新的资源包下载）
+        /// 中（资源包加载，依赖资源加载，更新时下载的资源包）
         /// </summary>
         Middle = 2,
         
@@ -26,7 +26,7 @@
         Height = 3,
         
         /// <summary>
-        /// 非常高（边玩边下的资源包下载）
+        /// 非常高（加载时下载的资源包）
         /// </summary>
         VeryHeight = 4,
         

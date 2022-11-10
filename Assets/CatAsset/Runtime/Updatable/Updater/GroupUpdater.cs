@@ -37,12 +37,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包下载结束回调
         /// </summary>
-        private DownloadBundleCallback onBundleDownloaded;
+        private readonly BundleDownloadedCallback onBundleDownloadedCallback;
 
         /// <summary>
         /// 资源包下载字节数更新回调
         /// </summary>
-        private DownloadBundleUpdateCallback onDownloadUpdate;
+        private readonly DownloadBundleUpdateCallback onDownloadUpdateCallback;
 
         /// <summary>
         /// 单个资源包更新完毕回调(非指定资源包更新)
@@ -52,13 +52,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包 -> 单个资源包更新完毕回调
         /// </summary>
-        private Dictionary<BundleManifestInfo, BundleUpdatedCallback> onBundleUpdatedDict =
+        private readonly Dictionary<BundleManifestInfo, BundleUpdatedCallback> onBundleUpdatedDict =
             new Dictionary<BundleManifestInfo, BundleUpdatedCallback>();
 
         /// <summary>
         /// 此更新器的资源包集合（包含待更新的+已更新的）
         /// </summary>
-        private HashSet<BundleManifestInfo> updaterBundles = new HashSet<BundleManifestInfo>();
+        private readonly HashSet<BundleManifestInfo> updaterBundles = new HashSet<BundleManifestInfo>();
 
         /// <summary>
         /// 此更新器的资源包总数（包含待更新的+已更新的）
@@ -114,8 +114,8 @@ namespace CatAsset.Runtime
 
         public GroupUpdater()
         {
-            onBundleDownloaded = OnBundleDownloaded;
-            onDownloadUpdate = OnDownloadUpdate;
+            onBundleDownloadedCallback = OnBundleDownloaded;
+            onDownloadUpdateCallback = OnDownloadUpdate;
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace CatAsset.Runtime
 
                 //不是更新中的 或者已更新的
                 //添加下载文件的任务
-                CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,onDownloadUpdate,priority);
+                CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloadedCallback,onDownloadUpdateCallback,priority);
                 updatingBundles.Add(info);
             }
         }
@@ -174,7 +174,7 @@ namespace CatAsset.Runtime
 
             //为了能让优先级变更机制生效 不判断是否在updatingBundles中 而是由DownloadBundleTask不处理已合并任务来保证不会重复回调
 
-            CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloaded,onDownloadUpdate,priority);
+            CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloadedCallback,onDownloadUpdateCallback,priority);
             updatingBundles.Add(info);
 
             //添加回调
@@ -190,11 +190,11 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 资源包下载字节数更新完毕的回调
+        /// 资源包下载字节数更新的回调
         /// </summary>
         private void OnDownloadUpdate(ulong deltaDownloadedBytes, ulong totalDownloadedBytes, BundleManifestInfo info)
         {
-            //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 而是一个下载中的资源包只会回调到这里一次
+            //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 一个下载中的资源包只会回调到这里一次
 
             UpdatedLength += deltaDownloadedBytes;
 
@@ -220,7 +220,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private void OnBundleDownloaded(bool success, BundleManifestInfo info)
         {
-            //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 而是一个下载完毕的资源包只会回调到这里一次
+            //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 一个下载完毕的资源包只会回调到这里一次
 
             //无论是否下载成功 都要从updatingBundles中移除
             updatingBundles.Remove(info);

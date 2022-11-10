@@ -9,7 +9,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包下载完成回调的原型
     /// </summary>
-    public delegate void DownloadBundleCallback(bool success, BundleManifestInfo info);
+    public delegate void BundleDownloadedCallback(bool success, BundleManifestInfo info);
     
     /// <summary>
     /// 资源包下载进度更新回调的原型
@@ -25,8 +25,8 @@ namespace CatAsset.Runtime
         private GroupUpdater groupUpdater;
         private string downloadUri;
         private string localFilePath;
-        private DownloadBundleCallback onFinished;
-        private DownloadBundleUpdateCallback onDownloadUpdate;
+        private BundleDownloadedCallback onBundleDownloadedCallback;
+        private DownloadBundleUpdateCallback onDownloadUpdateCallback;
         
 
         private string localTempFilePath;
@@ -97,7 +97,7 @@ namespace CatAsset.Runtime
                 if (downloadedBytes != newDownloadedBytes)
                 {
                     ulong deltaDownloadedBytes = newDownloadedBytes - downloadedBytes;
-                    onDownloadUpdate?.Invoke(deltaDownloadedBytes,newDownloadedBytes,bundleManifestInfo);
+                    onDownloadUpdateCallback?.Invoke(deltaDownloadedBytes,newDownloadedBytes,bundleManifestInfo);
                     downloadedBytes = newDownloadedBytes;
                 }
                 return;
@@ -115,7 +115,7 @@ namespace CatAsset.Runtime
                     //重试次数达到上限 通知失败
                     Debug.LogError($"下载失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
-                    onFinished?.Invoke(false ,bundleManifestInfo);
+                    onBundleDownloadedCallback?.Invoke(false ,bundleManifestInfo);
                 }
                 return;
             }
@@ -145,7 +145,7 @@ namespace CatAsset.Runtime
                     //重试次数达到上限 通知失败
                     Debug.LogError($"下载失败重试次数达到上限：{Name}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
-                    onFinished?.Invoke(false ,bundleManifestInfo);
+                    onBundleDownloadedCallback?.Invoke(false ,bundleManifestInfo);
                 }
 
                 return;
@@ -161,7 +161,7 @@ namespace CatAsset.Runtime
                 File.Delete(localFilePath);
             }
             File.Move(localTempFilePath, localFilePath);
-            onFinished?.Invoke(true,bundleManifestInfo);
+            onBundleDownloadedCallback?.Invoke(true,bundleManifestInfo);
         }
 
         /// <summary>
@@ -181,7 +181,8 @@ namespace CatAsset.Runtime
         }
 
         public static DownloadBundleTask Create(TaskRunner owner, string name, BundleManifestInfo bundleManifestInfo,
-            GroupUpdater groupUpdater, string downloadUri, string localFilePath, DownloadBundleCallback onFinished,DownloadBundleUpdateCallback onDownloadUpdate)
+            GroupUpdater groupUpdater, string downloadUri, string localFilePath,
+            BundleDownloadedCallback onBundleDownloadedCallback, DownloadBundleUpdateCallback onDownloadUpdateCallback)
         {
             DownloadBundleTask task = ReferencePool.Get<DownloadBundleTask>();
             task.CreateBase(owner, name);
@@ -190,8 +191,8 @@ namespace CatAsset.Runtime
             task.groupUpdater = groupUpdater;
             task.downloadUri = downloadUri;
             task.localFilePath = localFilePath;
-            task.onFinished = onFinished;
-            task.onDownloadUpdate = onDownloadUpdate;
+            task.onBundleDownloadedCallback = onBundleDownloadedCallback;
+            task.onDownloadUpdateCallback = onDownloadUpdateCallback;
             task.localTempFilePath = localFilePath + ".downloading";
 
             return task;
@@ -205,7 +206,7 @@ namespace CatAsset.Runtime
             groupUpdater = default;
             downloadUri = default;
             localFilePath = default;
-            onFinished = default;
+            onBundleDownloadedCallback = default;
 
             localTempFilePath = default;
             op = default;

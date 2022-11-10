@@ -20,6 +20,11 @@ namespace CatAsset.Runtime
         internal BaseTask Task { get; set; }
 
         /// <summary>
+        /// 错误信息
+        /// </summary>
+        public string Error { get; internal set; }
+        
+        /// <summary>
         /// Awaiter的Continuation回调，在加载完毕时调用
         /// </summary>
         internal Action ContinuationCallBack;
@@ -60,8 +65,18 @@ namespace CatAsset.Runtime
         /// 句柄状态
         /// </summary>
         public HandlerState State { get; protected set; }
-        
 
+        /// <summary>
+        /// 检查加载失败的错误信息
+        /// </summary>
+        protected void CheckError()
+        {
+            if (State == HandlerState.Failed && !string.IsNullOrEmpty(Error))
+            {
+                Debug.LogError($"{GetType().Name} | {Name} 加载失败：{Error}");
+            }
+        }
+        
         /// <summary>
         /// 卸载句柄，会根据句柄状态进行不同的处理
         /// </summary>
@@ -134,6 +149,7 @@ namespace CatAsset.Runtime
             //Name = default; Name就不清空了 方便Debug
             Task = default;
             State = default;
+            Error = default;
             ContinuationCallBack = default;
             Token = default;
         }

@@ -170,6 +170,8 @@ namespace CatAsset.Runtime
             Asset = AssetAs<T>();
             State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
             
+            CheckError();
+            
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
         }
