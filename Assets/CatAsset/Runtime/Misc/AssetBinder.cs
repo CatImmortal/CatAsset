@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
         {
             foreach (IBindableHandler handler in Handlers)
             {
-                handler.Dispose();
+                handler.Unload();
             }
             Handlers.Clear();
 
