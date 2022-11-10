@@ -76,7 +76,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 检查可更新模式下指定路径的资源清单
         /// </summary>
-        internal static void CheckUpdatableManifest(string path, WebRequestCallback callback)
+        internal static void CheckUpdatableManifest(string path, WebRequestedCallback callback)
         {
             WebRequestTask task = WebRequestTask.Create(downloadTaskRunner, path, path, null, callback);
             downloadTaskRunner.AddTask(task, TaskPriority.VeryLow);

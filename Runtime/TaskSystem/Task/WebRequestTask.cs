@@ -8,7 +8,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// Web请求任务完成回调的原型
     /// </summary>
-    public delegate void WebRequestCallback(bool success,UnityWebRequest uwr,object userdata);
+    public delegate void WebRequestedCallback(bool success,UnityWebRequest uwr,object userdata);
 
     /// <summary>
     /// Web请求任务
@@ -17,7 +17,7 @@ namespace CatAsset.Runtime
     {
         private string uri;
         private object userdata;
-        private WebRequestCallback onFinished;
+        private WebRequestedCallback onWebRequestedCallback;
 
         private UnityWebRequestAsyncOperation op;
         private const int maxRetryCount = 3;
@@ -67,19 +67,19 @@ namespace CatAsset.Runtime
                     //重试次数达到上限 通知失败
                     Debug.LogWarning($"Web请求失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
-                    onFinished?.Invoke(false, op.webRequest,userdata);
+                    onWebRequestedCallback?.Invoke(false, op.webRequest,userdata);
                     foreach (WebRequestTask task in MergedTasks)
                     {
-                        task.onFinished?.Invoke(false, op.webRequest,task.userdata);
+                        task.onWebRequestedCallback?.Invoke(false, op.webRequest,task.userdata);
                     }
                 }
             }
             else
             {
-                onFinished?.Invoke(true, op.webRequest,userdata);
+                onWebRequestedCallback?.Invoke(true, op.webRequest,userdata);
                 foreach (WebRequestTask task in MergedTasks)
                 {
-                    task.onFinished?.Invoke(true,op.webRequest,task.userdata);
+                    task.onWebRequestedCallback?.Invoke(true,op.webRequest,task.userdata);
                 }
             }
         }
@@ -103,14 +103,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建Web请求任务的对象
         /// </summary>
-        public static WebRequestTask Create(TaskRunner owner, string name,string uri,object userdata, WebRequestCallback callback)
+        public static WebRequestTask Create(TaskRunner owner, string name,string uri,object userdata, WebRequestedCallback callback)
         {
             WebRequestTask task = ReferencePool.Get<WebRequestTask>();
             task.CreateBase(owner,name);
 
             task.uri = uri;
             task.userdata = userdata;
-            task.onFinished = callback;
+            task.onWebRequestedCallback = callback;
 
             return task;
         }
@@ -122,7 +122,7 @@ namespace CatAsset.Runtime
 
             uri = default;
             userdata = default;
-            onFinished = default;
+            onWebRequestedCallback = default;
             op = default;
         }
     }

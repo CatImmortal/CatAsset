@@ -34,7 +34,7 @@ namespace CatAsset.Runtime
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
         private LoadRawAssetState loadState;
-        private readonly WebRequestCallback onWebRequestCallback;
+        private readonly WebRequestedCallback onWebRequestedCallback;
 
         /// <summary>
         /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
@@ -43,7 +43,7 @@ namespace CatAsset.Runtime
         
         public LoadRawAssetTask()
         {
-            onWebRequestCallback = OnWebRequest;
+            onWebRequestedCallback = OnWebRequested;
         }
         
 
@@ -58,7 +58,7 @@ namespace CatAsset.Runtime
             }
             
             //未加载过
-            WebRequestTask task = WebRequestTask.Create(Owner,bundleRuntimeInfo.LoadPath,bundleRuntimeInfo.LoadPath,null,onWebRequestCallback);
+            WebRequestTask task = WebRequestTask.Create(Owner,bundleRuntimeInfo.LoadPath,bundleRuntimeInfo.LoadPath,null,onWebRequestedCallback);
             Owner.AddTask(task,TaskPriority.Low);
             loadState = LoadRawAssetState.Loading;
             
@@ -93,7 +93,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// Web请求结束回调
         /// </summary>
-        private void OnWebRequest(bool success, UnityWebRequest uwr, object userdata)
+        private void OnWebRequested(bool success, UnityWebRequest uwr, object userdata)
         {
             loadState = LoadRawAssetState.Loaded;
 
