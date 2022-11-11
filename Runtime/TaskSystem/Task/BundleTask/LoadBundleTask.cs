@@ -271,8 +271,8 @@ namespace CatAsset.Runtime
             if (builtInShaderBundleRuntimeInfo.Bundle != null)
             {
                 //加载成功 添加依赖链记录
-                builtInShaderBundleRuntimeInfo.AddDownStream(BundleRuntimeInfo);
-                BundleRuntimeInfo.AddUpStream(builtInShaderBundleRuntimeInfo);
+                builtInShaderBundleRuntimeInfo.DependencyChain.DownStream.Add(BundleRuntimeInfo);
+                BundleRuntimeInfo.DependencyChain.UpStream.Add(builtInShaderBundleRuntimeInfo);
             }
 
         }

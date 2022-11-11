@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
 
         public override void Update()
         {
-            if (bundleRuntimeInfo.UsingAssets.Count > 0 || bundleRuntimeInfo.DependencyLink.DownStream.Count > 0)
+            if (bundleRuntimeInfo.UsingAssets.Count > 0 || bundleRuntimeInfo.DependencyChain.DownStream.Count > 0)
             {
                 //被重新使用了 不进行卸载了
                 State = TaskState.Finished;
@@ -53,13 +53,13 @@ namespace CatAsset.Runtime
 
             //删除此资源包在依赖链上的信息
             //并检查上游资源包的生命周期
-            foreach (BundleRuntimeInfo upStreamBundle in bundleRuntimeInfo.DependencyLink.UpStream)
+            foreach (BundleRuntimeInfo upStreamBundle in bundleRuntimeInfo.DependencyChain.UpStream)
             {
-                upStreamBundle.RemoveDownStream(bundleRuntimeInfo);
+                upStreamBundle.DependencyChain.DownStream.Remove(bundleRuntimeInfo);
                 upStreamBundle.CheckLifeCycle();
             }
-            bundleRuntimeInfo.ClearUpStream();
-            
+            bundleRuntimeInfo.DependencyChain.UpStream.Clear();
+
             //卸载资源包
 #if UNITY_2021_1_OR_NEWER
             bundleRuntimeInfo.Bundle.UnloadAsync(true);

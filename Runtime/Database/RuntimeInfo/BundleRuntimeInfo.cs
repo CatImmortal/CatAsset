@@ -83,7 +83,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包依赖链
         /// </summary>
-        public readonly BundleDependencyLink DependencyLink = new BundleDependencyLink();
+        public readonly DependencyChain<BundleRuntimeInfo> DependencyChain = new DependencyChain<BundleRuntimeInfo>();
 
         /// <summary>
         /// 添加使用中的资源
@@ -107,7 +107,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public void CheckLifeCycle()
         {
-            if (!Manifest.IsRaw && UsingAssets.Count == 0 && DependencyLink.DownStream.Count == 0)
+            if (!Manifest.IsRaw && UsingAssets.Count == 0 && DependencyChain.DownStream.Count == 0)
             {
                 //此资源包不是原生资源包 没有资源在使用中 没有下游资源包
                 //卸载资源包
@@ -115,37 +115,7 @@ namespace CatAsset.Runtime
             }
         }
 
-        /// <summary>
-        /// 添加下游资源包（依赖此资源包的资源包）
-        /// </summary>
-        public void AddDownStream(BundleRuntimeInfo bundleRuntimeInfo)
-        {
-            DependencyLink.DownStream.Add(bundleRuntimeInfo);
-        }
 
-        /// <summary>
-        /// 移除下游资源包（依赖此资源包的资源包）
-        /// </summary>
-        public void RemoveDownStream(BundleRuntimeInfo bundleRuntimeInfo)
-        {
-            DependencyLink.DownStream.Remove(bundleRuntimeInfo);
-        }
-
-        /// <summary>
-        /// 添加上游资源包（此资源包依赖的资源包）
-        /// </summary>
-        public void AddUpStream(BundleRuntimeInfo bundleRuntimeInfo)
-        {
-            DependencyLink.UpStream.Add(bundleRuntimeInfo);
-        }
-        
-        /// <summary>
-        /// 清空上游资源包（此资源包依赖的资源包）
-        /// </summary>
-        public void ClearUpStream()
-        {
-            DependencyLink.UpStream.Clear();
-        }
 
         public int CompareTo(BundleRuntimeInfo other)
         {
