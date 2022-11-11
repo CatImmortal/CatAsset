@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using UnityEngine;
 
 #if !UNITASK
 using System.Threading.Tasks;
@@ -15,106 +16,90 @@ namespace CatAsset.Runtime
     {
 #if !UNITASK
         /// <summary>
-        /// 从池中获取一个游戏对象（可等待）
+        /// 异步创建对象池，此方法创建的对象池会自动销毁
         /// </summary>
-        public static Task<GameObject> GetGameObjectAsync(string prefabName, Transform parent)
+        public static Task<bool> CreatePoolAsync(string assetName, CancellationToken token = default)
         {
-            TaskCompletionSource<GameObject> tcs = new TaskCompletionSource<GameObject>();
-            GetGameObjectAsync(prefabName, parent, (go) =>
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            CreatePoolAsync(assetName, (result =>
             {
-                tcs.SetResult(go);
-            });
+                tcs.TrySetResult(result);
+            }),token);
             return tcs.Task;
         }
 
         /// <summary>
-        /// 从池中获取一个游戏对象（可等待）
+        /// 异步获取游戏对象，此方法会自动创建未创建的对象池
         /// </summary>
-        public static Task<GameObject> GetGameObjectAsync(GameObject template, Transform parent)
+        public static Task<GameObject> GetAsync(string assetName, Transform parent = null,
+            CancellationToken token = default)
         {
             TaskCompletionSource<GameObject> tcs = new TaskCompletionSource<GameObject>();
-            GetGameObjectAsync(template, parent, (go) =>
+
+            GetAsync(assetName, (go =>
             {
-                tcs.SetResult(go);
-            });
+                tcs.TrySetResult(go);
+            }), parent, token);
+            
             return tcs.Task;
         }
 
         /// <summary>
-        /// 预热对象（可等待）
+        /// 异步预热对象，此方法会自动创建未创建的对象池
         /// </summary>
-        public static Task Prewarm(string prefabName, int count)
+        public static Task PrewarmAsync(string assetName, int count, CancellationToken token = default)
         {
             TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            Prewarm(prefabName,count, () =>
+
+            PrewarmAsync(assetName, count, () =>
             {
-                tcs.SetResult(null);   
-            });
-            return tcs.Task;
-        }
-        
-        /// <summary>
-        /// 预热对象（可等待）
-        /// </summary>
-        public static Task Prewarm(GameObject template, int count)
-        {
-            TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-            Prewarm(template,count, () =>
-            {
-                tcs.SetResult(null);   
-            });
+                tcs.TrySetResult(null);
+            }, token);
+            
             return tcs.Task;
         }
 #else
         /// <summary>
-        /// 从池中获取一个游戏对象（可等待）
+        /// 异步创建对象池，此方法创建的对象池会自动销毁
         /// </summary>
-        public static UniTask<GameObject> GetGameObjectAsync(string prefabName, Transform parent)
+        public static UniTask<bool> CreatePoolAsync(string assetName, CancellationToken token = default)
         {
-            UniTaskCompletionSource<GameObject> tcs = new UniTaskCompletionSource<GameObject>();
-            GetGameObjectAsync(prefabName, parent, (go) =>
+            UniTaskCompletionSource<bool> tcs = new UniTaskCompletionSource<bool>();
+            CreatePoolAsync(assetName, (result =>
             {
-                tcs.TrySetResult(go);
-            });
+                tcs.TrySetResult(result);
+            }),token);
             return tcs.Task;
         }
 
         /// <summary>
-        /// 从池中获取一个游戏对象（可等待）
+        /// 异步获取游戏对象，此方法会自动创建未创建的对象池
         /// </summary>
-        public static UniTask<GameObject> GetGameObjectAsync(GameObject template, Transform parent)
+        public static UniTask<GameObject> GetAsync(string assetName, Transform parent = null,
+            CancellationToken token = default)
         {
             UniTaskCompletionSource<GameObject> tcs = new UniTaskCompletionSource<GameObject>();
-            GetGameObjectAsync(template, parent, (go) =>
+
+            GetAsync(assetName, (go =>
             {
                 tcs.TrySetResult(go);
-            });
+            }), parent, token);
+            
             return tcs.Task;
         }
 
         /// <summary>
-        /// 预热对象（可等待）
+        /// 异步预热对象，此方法会自动创建未创建的对象池
         /// </summary>
-        public static UniTask Prewarm(string prefabName, int count)
+        public static UniTask PrewarmAsync(string assetName, int count, CancellationToken token = default)
         {
             UniTaskCompletionSource<object> tcs = new UniTaskCompletionSource<object>();
-            Prewarm(prefabName,count, () =>
+
+            PrewarmAsync(assetName, count, () =>
             {
-                tcs.TrySetResult(null);   
-            });
-            return tcs.Task;
-        }
-        
-        /// <summary>
-        /// 预热对象（可等待）
-        /// </summary>
-        public static UniTask Prewarm(GameObject template, int count)
-        {
-            UniTaskCompletionSource<object> tcs = new UniTaskCompletionSource<object>();
-            Prewarm(template,count, () =>
-            {
-                tcs.TrySetResult(null);   
-            });
+                tcs.TrySetResult(null);
+            }, token);
+            
             return tcs.Task;
         }
 #endif
