@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
 {
@@ -17,7 +19,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 根节点
         /// </summary>
-        public Transform Root { get; private set; }
+        public Transform Root { get; }
 
         /// <summary>
         /// 模板
@@ -30,7 +32,7 @@ namespace CatAsset.Runtime
         private float expireTime;
 
         /// <summary>
-        /// 游戏对象->池对象
+        /// 游戏对象 -> 池对象
         /// </summary>
         private Dictionary<GameObject, PoolObject> poolObjectDict = new Dictionary<GameObject, PoolObject>();
 
@@ -39,6 +41,9 @@ namespace CatAsset.Runtime
         /// </summary>
         private List<PoolObject> unusedPoolObjectList = new List<PoolObject>();
 
+        /// <summary>
+        /// 等待删除的池对象列表
+        /// </summary>
         private List<PoolObject> waitRemoveObjectList = new List<PoolObject>();
 
         public GameObjectPool(GameObject template, float expireTime, Transform root)
@@ -79,7 +84,7 @@ namespace CatAsset.Runtime
                 poolObject.UnusedTimer += deltaTime;
                 if (poolObject.UnusedTimer >= expireTime && !poolObject.IsLock)
                 {
-                    //已过期且未锁定 销毁掉
+                    //已失效且未锁定 销毁掉
                     poolObjectDict.Remove(poolObject.Target);
                     unusedPoolObjectList.RemoveAt(i);
 
@@ -137,39 +142,71 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 从池中获取一个游戏对象
+        /// 同步获取游戏对象
         /// </summary>
-        public void GetGameObjectAsync(Transform parent, Action<GameObject> callback)
+        public GameObject Get(Transform parent)
+        {
+            PoolObject poolObject;
+            if (unusedPoolObjectList.Count == 0)
+            {
+                GameObject go = Object.Instantiate(template, parent);
+                poolObject = new PoolObject { Target = go, Used = true };
+                poolObjectDict.Add(go, poolObject);
+                go.SetActive(true);
+                return go;
+            }
+            
+            poolObject = ActivePoolObject(parent);
+            return poolObject.Target;
+        }
+        
+        /// <summary>
+        /// 异步获取游戏对象
+        /// </summary>
+        public void GetAsync(Action<GameObject> callback,Transform parent,CancellationToken token)
         {
             if (unusedPoolObjectList.Count == 0)
             {
                 //没有未使用的池对象，需要实例化出来
-                GameObjectPoolManager.InstantiateAsync(template, parent, (go) =>
-                {
-                    PoolObject poolObject = new PoolObject { Target = go, Used = true };
+                GameObjectPoolManager.InstantiateAsync(template, parent, token, poolObjectDict, callback,
+                    (go, userdata1, userdata2) =>
+                    {
+                        var localPoolObjectDict = (Dictionary<GameObject, PoolObject>)userdata1;
+                        var localCallback = (Action<GameObject>)userdata2;
 
-                    poolObjectDict.Add(go, poolObject);
+                        PoolObject poolObject = new PoolObject { Target = go, Used = true };
 
-                    go.SetActive(true);
-                    callback?.Invoke(go);
-                });
+                        localPoolObjectDict.Add(go, poolObject);
+
+                        go.SetActive(true);
+                        localCallback?.Invoke(go);
+                    });
 
                 return;
             }
 
             //有空闲的池对象
             //从中拿一个出来
+            PoolObject poolObject = ActivePoolObject(parent);
+            callback?.Invoke(poolObject.Target);
+        }
+        
+        /// <summary>
+        /// 激活一个池对象
+        /// </summary>
+        private PoolObject ActivePoolObject(Transform parent)
+        {
             PoolObject poolObject = unusedPoolObjectList[unusedPoolObjectList.Count - 1];
             unusedPoolObjectList.RemoveAt(unusedPoolObjectList.Count - 1);
             poolObject.Target.transform.SetParent(parent);
             poolObject.Target.SetActive(true);
-            callback?.Invoke(poolObject.Target);
+            return poolObject;
         }
-
+        
         /// <summary>
-        /// 将游戏对象归还池中
+        /// 释放游戏对象
         /// </summary>
-        public void ReleaseGameObject(GameObject go)
+        public void Release(GameObject go)
         {
             if (go == null)
             {
