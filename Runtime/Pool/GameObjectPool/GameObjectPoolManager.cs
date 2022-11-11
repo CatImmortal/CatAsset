@@ -82,6 +82,8 @@ namespace CatAsset.Runtime
         /// </summary>
         private static List<string> waitUnloadPrefabNames = new List<string>();
 
+        private static List<GameObject> tempList = new List<GameObject>();
+
         /// <summary>
         /// 轮询管理器
         /// </summary>
@@ -324,9 +326,16 @@ namespace CatAsset.Runtime
                 var pool = GetOrCreatePool(template);
                 for (int i = 0; i < count; i++)
                 {
-                    GameObject go  = pool.Get(Root);
-                    Release(assetName,go);
+                    GameObject go = pool.Get(Root);
+                    tempList.Add(go);
                 }
+
+                //预热完毕 统一释放
+                foreach (GameObject go in tempList)
+                {
+                    Release(template,go);
+                }
+                tempList.Clear();
                 callback?.Invoke();
             }
 
