@@ -119,8 +119,8 @@ namespace CatAsset.Runtime
                     InternalUnloadAsset(dependencyRuntimeInfo);
                     
                     //删除依赖链记录
-                    dependencyRuntimeInfo.RemoveDownStream(assetRuntimeInfo);
-                    assetRuntimeInfo.RemoveUpStream(dependencyRuntimeInfo);
+                    dependencyRuntimeInfo.DependencyChain.DownStream.Remove(assetRuntimeInfo);
+                    assetRuntimeInfo.DependencyChain.UpStream.Remove(dependencyRuntimeInfo);
                 }
 
                 //对于非场景 非Prefab的资源 以及原生资源 创建卸载任务

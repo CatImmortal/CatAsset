@@ -16,7 +16,7 @@ namespace CatAsset.Editor
         /// </summary>
         public static void Open(AssetRuntimeInfo assetRuntimeInfo)
         {
-           var window =  GetWindow<DependencyGraphViewWindow>("依赖关系图");
+           var window = CreateWindow<DependencyGraphViewWindow>("依赖关系图");
             
             var graphView = new AssetDependencyGraphView()
             {

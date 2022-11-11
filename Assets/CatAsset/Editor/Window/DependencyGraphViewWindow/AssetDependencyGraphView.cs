@@ -20,6 +20,9 @@ namespace CatAsset.Editor
             this.AddManipulator(new ContentDragger());
         }
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
         public void Init(AssetRuntimeInfo info)
         {
             CreateAssetNode(info);
@@ -45,13 +48,13 @@ namespace CatAsset.Editor
             AddElement(node);
             
             //递归创建上游资源的节点
-            foreach (AssetRuntimeInfo upStreamInfo in info.UpStream)
+            foreach (AssetRuntimeInfo upStreamInfo in info.DependencyChain.UpStream)
             {
                 CreateAssetNode(upStreamInfo);
             }
             
             //递归创建下游资源的节点
-            foreach (AssetRuntimeInfo downStreamInfo in info.DownStream)
+            foreach (AssetRuntimeInfo downStreamInfo in info.DependencyChain.DownStream)
             {
                 CreateAssetNode(downStreamInfo);
             }
@@ -78,7 +81,7 @@ namespace CatAsset.Editor
             Port selfOutput = (Port)node.outputContainer[0];
             
             
-            foreach (AssetRuntimeInfo upStreamInfo in node.Info.UpStream)
+            foreach (AssetRuntimeInfo upStreamInfo in node.Info.DependencyChain.UpStream)
             {
                 AssetNode upStreamNode = assetNodes[upStreamInfo];
                 Port output = (Port)upStreamNode.outputContainer[0];
@@ -88,7 +91,7 @@ namespace CatAsset.Editor
                 
                 BuildConnect(upStreamNode,lookedNodes);
             }
-            foreach (AssetRuntimeInfo downStreamInfo in node.Info.DownStream)
+            foreach (AssetRuntimeInfo downStreamInfo in node.Info.DependencyChain.DownStream)
             {
                 AssetNode downStreamNode = assetNodes[downStreamInfo];
                 Port input = (Port)downStreamNode.inputContainer[0];
@@ -97,18 +100,6 @@ namespace CatAsset.Editor
                 AddElement(edge);
                 
                 BuildConnect(downStreamNode,lookedNodes);
-            }
-        }
-        
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public void Init(Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict)
-        {
-            foreach (KeyValuePair<string,AssetRuntimeInfo> pair in assetRuntimeInfoDict)
-            {
-                AssetRuntimeInfo assetRuntimeInfo = pair.Value;
-                
             }
         }
     }

@@ -341,18 +341,18 @@ namespace CatAsset.Runtime
                     {
                         AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyHandler.AssetObj);
                         
-                        //将自身与依赖资源的上下游关系
-                        depInfo.AddDownStream(AssetRuntimeInfo);
-                        AssetRuntimeInfo.AddUpStream(depInfo);
+                        //更新自身与依赖资源的上下游关系
+                        depInfo.DependencyChain.DownStream.Add(AssetRuntimeInfo);
+                        AssetRuntimeInfo.DependencyChain.UpStream.Add(depInfo);
                         
                         //如果依赖了其他资源包里的资源 还需要设置 自身所在资源包 与 依赖所在资源包 的上下游关系
                         if (!depInfo.BundleManifest.Equals(AssetRuntimeInfo.BundleManifest))
                         {
                             BundleRuntimeInfo depBundleInfo =
                                 CatAssetDatabase.GetBundleRuntimeInfo(depInfo.BundleManifest.RelativePath);
-                        
-                            depBundleInfo.AddDownStream(BundleRuntimeInfo);
-                            BundleRuntimeInfo.AddUpStream(depBundleInfo);
+                            
+                            depBundleInfo.DependencyChain.DownStream.Add(BundleRuntimeInfo);
+                            BundleRuntimeInfo.DependencyChain.UpStream.Add(depBundleInfo);
                         }
                     }
                 }

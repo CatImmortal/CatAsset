@@ -95,7 +95,7 @@ namespace CatAsset.Editor
 
 
                     //没有资源在使用 也没下游资源包 不显示
-                    if (bundleRuntimeInfo.UsingAssets.Count == 0 && bundleRuntimeInfo.DependencyLink.DownStream.Count == 0)
+                    if (bundleRuntimeInfo.UsingAssets.Count == 0 && bundleRuntimeInfo.DependencyChain.DownStream.Count == 0)
                     {
                         continue;
                     }
@@ -107,7 +107,7 @@ namespace CatAsset.Editor
                         bool canShow = false;
                         foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsingAssets)
                         {
-                            if (assetRuntimeInfo.RefCount != assetRuntimeInfo.DownStream.Count)
+                            if (assetRuntimeInfo.RefCount != assetRuntimeInfo.DependencyChain.DownStream.Count)
                             {
                                 canShow = true;
                                 break;
@@ -135,7 +135,7 @@ namespace CatAsset.Editor
 
                         foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsingAssets)
                         {
-                            if (isOnlyShowActiveLoad && assetRuntimeInfo.RefCount == assetRuntimeInfo.DownStream.Count)
+                            if (isOnlyShowActiveLoad && assetRuntimeInfo.RefCount == assetRuntimeInfo.DependencyChain.DownStream.Count)
                             {
                                 //只显示主动加载的资源 且此资源纯被依赖加载的 就跳过
                                 continue;
@@ -172,22 +172,22 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"使用中资源数：{bundleRuntimeInfo.UsingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(125));
                 EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
                 
-                EditorGUILayout.LabelField($"上游资源包数量：{bundleRuntimeInfo.DependencyLink.UpStream.Count}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"上游资源包数量：{bundleRuntimeInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));
                 if (GUILayout.Button("查看上游资源包", GUILayout.Width(100)))
                 {
-                    if (bundleRuntimeInfo.DependencyLink.UpStream.Count > 0)
+                    if (bundleRuntimeInfo.DependencyChain.UpStream.Count > 0)
                     {
-                        BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyLink.UpStream);
+                        BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyChain.UpStream);
                     }
                 }
                 
-                EditorGUILayout.LabelField($"下游资源包数量：{bundleRuntimeInfo.DependencyLink.DownStream.Count}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"下游资源包数量：{bundleRuntimeInfo.DependencyChain.DownStream.Count}",GUILayout.Width(125));
                 
                 if (GUILayout.Button("查看下游资源包", GUILayout.Width(100)))
                 {
-                    if (bundleRuntimeInfo.DependencyLink.DownStream.Count > 0)
+                    if (bundleRuntimeInfo.DependencyChain.DownStream.Count > 0)
                     {
-                        BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyLink.DownStream);
+                        BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyChain.DownStream);
                     }
                 }
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
@@ -218,18 +218,10 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"\t引用计数：{assetRuntimeInfo.RefCount}");
                 
                 //上游资源数
-                EditorGUILayout.LabelField($"\t上游资源数量：{assetRuntimeInfo.UpStream.Count}");
+                EditorGUILayout.LabelField($"\t上游资源数量：{assetRuntimeInfo.DependencyChain.UpStream.Count}");
                 
                 //下游资源数
-                EditorGUILayout.LabelField($"\t下游资源数量：{assetRuntimeInfo.DownStream.Count}");
-                
-                // if (GUILayout.Button("查看下游资源"))
-                // {
-                //     if (assetRuntimeInfo.DownStream.Count > 0)
-                //     {
-                //         RefAssetListWindow.OpenWindow(this,assetRuntimeInfo);
-                //     }
-                // }
+                EditorGUILayout.LabelField($"\t下游资源数量：{assetRuntimeInfo.DependencyChain.DownStream.Count}");
 
                 if (GUILayout.Button("查看资源依赖关系图"))
                 {
@@ -267,47 +259,6 @@ namespace CatAsset.Editor
                     parent.DrawBundleRuntimeInfo(bundleRuntimeInfo);
                 }
             }
-        }
-
-        /// <summary>
-        ///  通过依赖加载引用了指定资源的资源列表窗口
-        /// </summary>
-        private class RefAssetListWindow : EditorWindow
-        {
-            private RuntimeInfoWindow parent;
-            private AssetRuntimeInfo assetRuntimeInfo;
-
-            public static void OpenWindow(RuntimeInfoWindow parent, AssetRuntimeInfo assetRuntimeInfo)
-            {
-                RefAssetListWindow window = CreateWindow<RefAssetListWindow>(nameof(RefAssetListWindow));
-                window.ShowPopup();
-                window.parent = parent;
-                window.assetRuntimeInfo = assetRuntimeInfo;
-
-
-            }
-
-            private void OnGUI()
-            {
-                if (!Application.isPlaying)
-                {
-                    Close();
-                    return;
-                }
-
-                EditorGUILayout.LabelField(assetRuntimeInfo.AssetManifest.Name);
-                DrawRefAssetList();
-            }
-
-            private void DrawRefAssetList()
-            {
-                foreach (AssetRuntimeInfo assetRuntimeInfo in assetRuntimeInfo.DownStream)
-                {
-                    parent.DrawAssetRuntimeInfo(assetRuntimeInfo);
-                }
-            }
-
-
         }
     }
 }
