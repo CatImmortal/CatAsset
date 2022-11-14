@@ -81,9 +81,9 @@ namespace CatAsset.Runtime
         protected AsyncOperation Operation;
         
         /// <summary>
-        /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
+        /// 是否被取消，handler为空 就认为此任务被取消了
         /// </summary>
-        protected virtual bool IsCanceled => handler == null || handler.IsTokenCanceled;
+        protected virtual bool IsCanceled => handler == null;
 
         /// <inheritdoc />
         public override float Progress

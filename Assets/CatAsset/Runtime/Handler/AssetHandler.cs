@@ -167,11 +167,18 @@ namespace CatAsset.Runtime
         {
             Task = null;
             AssetObj = loadedAsset;
-            Asset = AssetAs<T>();
             State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
+
+            if (CheckTokenCanceled())
+            {
+                //走到这里 表示是被token取消的 而不是handler.Cancel取消的
+                return;
+            }
             
+            Asset = AssetAs<T>();
+            
+            //未被token取消 检查错误信息 调用回调
             CheckError();
-            
             onLoadedCallback?.Invoke(this);
             ContinuationCallBack?.Invoke();
         }

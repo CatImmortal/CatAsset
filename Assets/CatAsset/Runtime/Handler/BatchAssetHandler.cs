@@ -97,9 +97,9 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void CheckLoaded()
         {
-            if (Token != default && Token.IsCancellationRequested)
+            if (CheckTokenCanceled())
             {
-                InternalUnload();
+                //走到这里 表示是被token取消的 而不是handler.Cancel取消的
                 return;
             }
             
