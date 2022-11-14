@@ -24,12 +24,15 @@ namespace CatAsset.Runtime
         /// 已加载的资源实例
         /// </summary>
         public object Asset;
-        
+
         /// <summary>
         /// 引用计数
         /// </summary>
         public int RefCount { get; private set; }
 
+        /// <summary>
+        /// 资源依赖链
+        /// </summary>
         public readonly DependencyChain<AssetRuntimeInfo> DependencyChain = new DependencyChain<AssetRuntimeInfo>();
 
         /// <summary>
@@ -55,7 +58,7 @@ namespace CatAsset.Runtime
             RefCount -= count;
             CheckLifeCycle();
         }
-        
+
         /// <summary>
         /// 是否未被使用
         /// </summary>
@@ -71,7 +74,7 @@ namespace CatAsset.Runtime
         {
             BundleRuntimeInfo bundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
-            
+
             if (IsUnused())
             {
                 //从资源包的使用中资源集合删除
@@ -82,8 +85,8 @@ namespace CatAsset.Runtime
                 bundleRuntimeInfo.AddUsingAsset(this);
             }
         }
-        
-        
+
+
         public int CompareTo(AssetRuntimeInfo other)
         {
             return AssetManifest.CompareTo(other.AssetManifest);
