@@ -210,18 +210,11 @@ namespace CatAsset.Runtime
                     handler.SetScene(default);
                     return;
                 }
-
+                
                 op.completed += operation =>
                 {
                     Scene scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
-                    if (handler.IsTokenCanceled)
-                    {
-                        SceneManager.UnloadSceneAsync(scene);
-                    }
-                    else
-                    {
-                        handler.SetScene(scene);
-                    }
+                    handler.SetScene(scene);
                 };
 
                 return;

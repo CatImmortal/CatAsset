@@ -23,7 +23,46 @@ namespace CatAsset.Runtime
         /// 错误信息
         /// </summary>
         public string Error { get; internal set; }
+
+        /// <summary>
+        /// 被取消时的回调
+        /// </summary>
+        private Action onCanceledCallback;
         
+        /// <summary>
+        /// 被取消时的回调
+        /// </summary>
+        public event Action OnCanceled
+        {
+            add
+            {
+                if (!IsValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上添加了OnCanceled回调");
+                    return;
+                }
+
+                if (IsDone)
+                {
+                    value?.Invoke();
+                    return;
+                }
+
+                onCanceledCallback += value;
+            }
+
+            remove
+            {
+                if (!IsValid)
+                {
+                    Debug.LogError($"在无效的{GetType().Name}：{Name}上移除了OnCanceled回调");
+                    return;
+                }
+
+                onCanceledCallback -= value;
+            }
+        }
+
         /// <summary>
         /// Awaiter的Continuation回调，在加载完毕时调用
         /// </summary>
@@ -35,9 +74,9 @@ namespace CatAsset.Runtime
         protected CancellationToken Token { get; private set; }
 
         /// <summary>
-        /// 是否被Token取消
+        /// 是否已被Token取消
         /// </summary>
-        internal bool IsTokenCanceled => Token != default && Token.IsCancellationRequested;
+        protected bool IsTokenCanceled => Token != default && Token.IsCancellationRequested;
         
         /// <summary>
         /// 进度
@@ -85,8 +124,23 @@ namespace CatAsset.Runtime
         /// 是否加载结束
         /// </summary>
         public bool IsDone => State == HandlerState.Success || State == HandlerState.Failed;
-        
-        
+
+        /// <summary>
+        /// 检查是否被Token取消
+        /// </summary>
+        protected bool CheckTokenCanceled()
+        {
+            if (IsTokenCanceled)
+            {
+                onCanceledCallback?.Invoke();
+                Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
+                Unload();
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// 检查加载失败的错误信息
         /// </summary>
@@ -132,6 +186,8 @@ namespace CatAsset.Runtime
         protected virtual void Cancel()
         {
             Task?.Cancel();
+            onCanceledCallback?.Invoke();
+            Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
             Release();
         }
         
@@ -169,10 +225,11 @@ namespace CatAsset.Runtime
         {
             //Name = default; Name就不清空了 方便Debug
             Task = default;
-            State = default;
             Error = default;
+            onCanceledCallback = default;
             ContinuationCallBack = default;
             Token = default;
+            State = default;
         }
     }
 }

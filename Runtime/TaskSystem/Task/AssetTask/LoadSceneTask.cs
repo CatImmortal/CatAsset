@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
         /// </summary>
-        protected override bool IsCanceled => handler == null || handler.IsTokenCanceled;
+        protected override bool IsCanceled => handler == null;
 
         /// <inheritdoc />
         protected override void LoadAsync()
