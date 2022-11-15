@@ -12,33 +12,6 @@ namespace CatAsset.Runtime
     public static partial class GameObjectPoolManager
     {
         /// <summary>
-        /// 异步分帧实例化参数
-        /// </summary>
-        private struct InstantiateAsyncParam
-        {
-            public InstantiateAsyncParam(GameObject prefab, Transform parent, CancellationToken token, object userdata1,
-                object userdata2, Action<GameObject, object, object> callback,Action onCanceled)
-            {
-                Prefab = prefab;
-                Parent = parent;
-                Token = token;
-                Userdata1 = userdata1;
-                Userdata2 = userdata2;
-                Callback = callback;
-                OnCanceled = onCanceled;
-            }
-
-            public GameObject Prefab;
-            public Transform Parent;
-            public CancellationToken Token;
-            public object Userdata1;
-            public object Userdata2;
-            public Action<GameObject,object,object> Callback;
-            public Action OnCanceled;
-        }
-
-
-        /// <summary>
         /// 预制体名字->加载好的预制体
         /// </summary>
         private static Dictionary<string, GameObject> loadedPrefabDict = new Dictionary<string, GameObject>();
@@ -77,7 +50,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 等待实例化的游戏对象队列
         /// </summary>
-        private static Queue<InstantiateAsyncParam> waitInstantiateQueue = new Queue<InstantiateAsyncParam>();
+        private static Queue<InstantiateHandler> handlerQueue = new Queue<InstantiateHandler>();
 
         /// <summary>
         /// 等待卸载的预制体名字列表
@@ -115,18 +88,17 @@ namespace CatAsset.Runtime
             waitUnloadPrefabNames.Clear();
 
             //处理分帧实例化
-            while (instantiateCounter < MaxInstantiateCount && waitInstantiateQueue.Count > 0)
+            while (instantiateCounter < MaxInstantiateCount && handlerQueue.Count > 0)
             {
-                InstantiateAsyncParam param = waitInstantiateQueue.Dequeue();
-                if (param.Token != default && param.Token.IsCancellationRequested)
+                InstantiateHandler handler = handlerQueue.Dequeue();
+                GameObject instance = null;
+                if (!handler.IsTokenCanceled)
                 {
-                    //被取消了
-                    param.OnCanceled?.Invoke();
-                    Debug.LogWarning($"对象池的分帧实例化被取消了：{param.Prefab.name}");
-                    continue;
+                    //未被取消才会实例化游戏对象
+                    instance = Object.Instantiate(handler.Template, handler.Parent);
+                    instantiateCounter++;
                 }
-                param.Callback?.Invoke(Object.Instantiate(param.Prefab, param.Parent),param.Userdata1,param.Userdata2);
-                instantiateCounter++;
+                handler.SetInstance(instance);
             }
 
             instantiateCounter = 0;
@@ -153,7 +125,7 @@ namespace CatAsset.Runtime
         /// 使用资源名异步创建对象池，此方法创建的对象池会自动销毁
         /// </summary>
         public static void CreatePoolAsync(string assetName, Action<bool> callback, CancellationToken token = default,
-            Action onCanceled = null)
+            CanceledCallback onCanceled = null)
         {
             if (loadedPrefabDict.ContainsKey(assetName))
             {
@@ -227,7 +199,7 @@ namespace CatAsset.Runtime
         /// 使用资源名异步获取游戏对象
         /// </summary>
         public static void GetAsync(string assetName, Action<GameObject> callback, Transform parent = null,
-            CancellationToken token = default, Action onCanceled = null)
+            CancellationToken token = default, CanceledCallback onCanceled = null)
         {
             if (loadedPrefabDict.TryGetValue(assetName,out var prefab))
             {
@@ -256,10 +228,16 @@ namespace CatAsset.Runtime
         /// 使用模板异步获取游戏对象
         /// </summary>
         public static void GetAsync(GameObject template, Action<GameObject> callback, Transform parent = null,
-            CancellationToken token = default,Action onCanceled = null)
+            CancellationToken token = default,CanceledCallback onCanceled = null)
         {
             var pool = GetOrCreatePool(template);
-            pool.GetAsync(callback,parent,token,onCanceled);
+            var handler = pool.GetAsync(parent,token);
+            handler.OnInstantiated += instantiateHandler =>
+            {
+                callback?.Invoke(handler.Instance);
+                handler.Unload();
+            };
+            handler.OnCanceled += onCanceled;
         }
 
         /// <summary>
@@ -317,17 +295,15 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 分帧异步实例化
         /// </summary>
-        internal static void InstantiateAsync(GameObject prefab, Transform parent, CancellationToken token,
-            object userdata1, object userdata2, Action<GameObject, object, object> callback, Action onCanceled)
+        internal static void InstantiateAsync(InstantiateHandler handler)
         {
-            waitInstantiateQueue.Enqueue(new InstantiateAsyncParam(prefab, parent, token, userdata1, userdata2,
-                callback, onCanceled));
+            handlerQueue.Enqueue(handler);
         }
 
         /// <summary>
         /// 使用资源名异步预热对象
         /// </summary>
-        public static void PrewarmAsync(string assetName,int count,Action callback,CancellationToken token = default,Action onCanceled = null)
+        public static void PrewarmAsync(string assetName,int count,Action callback,CancellationToken token = default,CanceledCallback onCanceled = null)
         {
             bool hasPool = loadedPrefabDict.TryGetValue(assetName,out var prefab);
 

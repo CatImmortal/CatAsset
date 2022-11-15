@@ -250,7 +250,7 @@ namespace CatAsset.Runtime
                 {
                     handler.Unload();
                 }
-
+        
                 callback?.Invoke(go);
             };
         }
