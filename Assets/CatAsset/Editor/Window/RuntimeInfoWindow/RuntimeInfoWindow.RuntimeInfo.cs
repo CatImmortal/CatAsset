@@ -173,23 +173,14 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
 
                 EditorGUILayout.LabelField($"上游资源包数量：{bundleRuntimeInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));
-                if (GUILayout.Button("查看上游资源包", GUILayout.Width(100)))
-                {
-                    if (bundleRuntimeInfo.DependencyChain.UpStream.Count > 0)
-                    {
-                        BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyChain.UpStream);
-                    }
-                }
-
                 EditorGUILayout.LabelField($"下游资源包数量：{bundleRuntimeInfo.DependencyChain.DownStream.Count}",GUILayout.Width(125));
 
-                if (GUILayout.Button("查看下游资源包", GUILayout.Width(100)))
+
+                if (GUILayout.Button("查看资源包依赖关系图") && (bundleRuntimeInfo.DependencyChain.UpStream.Count > 0 || bundleRuntimeInfo.DependencyChain.DownStream.Count > 0))
                 {
-                    if (bundleRuntimeInfo.DependencyChain.DownStream.Count > 0)
-                    {
-                        BundleListWindow.OpenWindow(this,bundleRuntimeInfo.DependencyChain.DownStream);
-                    }
+                    DependencyGraphViewWindow.Open<BundleRuntimeInfo,BundleNode>(bundleRuntimeInfo);
                 }
+                
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
             }
 
@@ -226,37 +217,6 @@ namespace CatAsset.Editor
                 if (GUILayout.Button("查看资源依赖关系图") && (assetRuntimeInfo.DependencyChain.UpStream.Count > 0 || assetRuntimeInfo.DependencyChain.DownStream.Count > 0))
                 {
                     DependencyGraphViewWindow.Open<AssetRuntimeInfo,AssetNode>(assetRuntimeInfo);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 资源包列表弹窗
-        /// </summary>
-        private class BundleListWindow : EditorWindow
-        {
-            private RuntimeInfoWindow parent;
-            private HashSet<BundleRuntimeInfo> bundleRuntimeInfos;
-
-            public static void OpenWindow(RuntimeInfoWindow parent, HashSet<BundleRuntimeInfo> bundleRuntimeInfos)
-            {
-                BundleListWindow window = CreateWindow<BundleListWindow>(nameof(BundleListWindow));
-                window.ShowPopup();
-                window.bundleRuntimeInfos = bundleRuntimeInfos;
-                window.parent = parent;
-            }
-
-            private void OnGUI()
-            {
-                if (!Application.isPlaying)
-                {
-                    Close();
-                    return;
-                }
-
-                foreach (BundleRuntimeInfo bundleRuntimeInfo in bundleRuntimeInfos)
-                {
-                    parent.DrawBundleRuntimeInfo(bundleRuntimeInfo);
                 }
             }
         }

@@ -14,7 +14,7 @@ namespace CatAsset.Editor
         where TNode : BaseDependencyNode<TOwner>, new()
     {
         /// <summary>
-        /// 依赖信息 -> 依赖链节点
+        /// 依赖链持有者 -> 依赖链节点
         /// </summary>
         private readonly Dictionary<TOwner, TNode> depNodes = new Dictionary<TOwner, TNode>();
 
@@ -46,6 +46,7 @@ namespace CatAsset.Editor
 
             Dictionary<int, int> depthCounter = new Dictionary<int, int>();
             CalHeight(depthCounter);
+            
             AutoLayout(depthCounter);
         }
 
