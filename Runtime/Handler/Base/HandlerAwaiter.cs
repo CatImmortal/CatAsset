@@ -15,7 +15,7 @@ namespace CatAsset.Runtime
             this.handler = handler;
         }
         
-        public bool IsCompleted => handler.IsDone;
+        public bool IsCompleted => handler?.IsDone ?? false;
 
         public T GetResult()
         {
@@ -24,7 +24,11 @@ namespace CatAsset.Runtime
         
         public void OnCompleted(Action continuation)
         {
-            handler.AsyncStateMachineMoveNext = continuation;
+            if (handler != null)
+            {
+                handler.AsyncStateMachineMoveNext = continuation;
+            }
+           
         }
     }
 }

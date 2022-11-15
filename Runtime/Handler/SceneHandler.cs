@@ -95,7 +95,8 @@ namespace CatAsset.Runtime
         {
             if (!IsValid)
             {
-                throw new Exception("await了一个无效句柄");
+                Debug.LogError($"await了一个无效的{GetType().Name}：{Name}");
+                return default;
             }
             
             return new HandlerAwaiter<SceneHandler>(this);

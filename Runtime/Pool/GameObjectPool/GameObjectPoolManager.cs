@@ -122,7 +122,7 @@ namespace CatAsset.Runtime
                 {
                     //被取消了
                     param.OnCanceled?.Invoke();
-                    Debug.LogWarning($"分帧实例化被取消了：{param.Prefab.name}");
+                    Debug.LogWarning($"对象池的分帧实例化被取消了：{param.Prefab.name}");
                     continue;
                 }
                 param.Callback?.Invoke(Object.Instantiate(param.Prefab, param.Parent),param.Userdata1,param.Userdata2);
