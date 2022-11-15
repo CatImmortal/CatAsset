@@ -225,7 +225,7 @@ namespace CatAsset.Editor
 
                 if (GUILayout.Button("查看资源依赖关系图") && (assetRuntimeInfo.DependencyChain.UpStream.Count > 0 || assetRuntimeInfo.DependencyChain.DownStream.Count > 0))
                 {
-                    DependencyGraphViewWindow.Open(assetRuntimeInfo);
+                    DependencyGraphViewWindow.Open<AssetRuntimeInfo,AssetNode>(assetRuntimeInfo);
                 }
             }
         }
