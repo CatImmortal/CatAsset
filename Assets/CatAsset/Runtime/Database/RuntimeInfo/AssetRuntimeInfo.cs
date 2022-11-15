@@ -8,7 +8,8 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源运行时信息
     /// </summary>
-    public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>
+    public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>,
+        IDependencyChainOwner<AssetRuntimeInfo>
     {
         /// <summary>
         /// 所属资源包的清单信息
@@ -33,7 +34,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源依赖链
         /// </summary>
-        public readonly DependencyChain<AssetRuntimeInfo> DependencyChain = new DependencyChain<AssetRuntimeInfo>();
+        public DependencyChain<AssetRuntimeInfo> DependencyChain { get; } = new DependencyChain<AssetRuntimeInfo>();
 
         /// <summary>
         /// 增加引用计数

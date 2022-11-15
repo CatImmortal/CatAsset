@@ -9,26 +9,28 @@ namespace CatAsset.Editor
     /// <summary>
     /// 依赖关系图窗口
     /// </summary>
-    public class DependencyGraphViewWindow: EditorWindow
+    public class DependencyGraphViewWindow : EditorWindow
     {
         /// <summary>
         /// 打开窗口
         /// </summary>
-        public static void Open(AssetRuntimeInfo assetRuntimeInfo)
+        public static void Open<TOwner, TNode>(TOwner owner) 
+            where TOwner : IDependencyChainOwner<TOwner>
+            where TNode : BaseDependencyNode<TOwner>, new()
         {
-           var window = CreateWindow<DependencyGraphViewWindow>("依赖关系图");
-            
-            var graphView = new AssetDependencyGraphView()
+            var window = CreateWindow<DependencyGraphViewWindow>("依赖关系图");
+
+            var graphView = new DependencyChainGraphView<TOwner, TNode>()
             {
-                style = { flexGrow = 1}
+                style = { flexGrow = 1 }
             };
 
             window.rootVisualElement.Add(graphView);
             window.ShowPopup();
-            
-            graphView.Init(assetRuntimeInfo);
+
+            graphView.Init(owner);
         }
-        
+
         private void OnGUI()
         {
             if (!Application.isPlaying)

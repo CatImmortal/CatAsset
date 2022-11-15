@@ -7,7 +7,8 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包运行时信息
     /// </summary>
-    public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>,IEquatable<BundleRuntimeInfo>
+    public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>, IEquatable<BundleRuntimeInfo>,
+        IDependencyChainOwner<BundleRuntimeInfo>
     {
         /// <summary>
         /// 状态
@@ -15,23 +16,23 @@ namespace CatAsset.Runtime
         public enum State
         {
             None,
-            
+
             /// <summary>
             /// 位于只读区
             /// </summary>
             InReadOnly,
-            
+
             /// <summary>
             /// 位于读写区
             /// </summary>
             InReadWrite,
-            
+
             /// <summary>
             /// 位于远端
             /// </summary>
             InRemote,
         }
-        
+
         /// <summary>
         /// 资源包清单信息
         /// </summary>
@@ -48,7 +49,7 @@ namespace CatAsset.Runtime
         public State BundleState;
 
         private string loadPath;
-        
+
         /// <summary>
         /// 加载地址
         /// </summary>
@@ -71,6 +72,7 @@ namespace CatAsset.Runtime
                             break;
                     }
                 }
+
                 return loadPath;
             }
         }
@@ -83,7 +85,8 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包依赖链
         /// </summary>
-        public readonly DependencyChain<BundleRuntimeInfo> DependencyChain = new DependencyChain<BundleRuntimeInfo>();
+        public DependencyChain<BundleRuntimeInfo> DependencyChain { get; } =
+            new DependencyChain<BundleRuntimeInfo>();
 
         /// <summary>
         /// 添加使用中的资源
@@ -92,7 +95,7 @@ namespace CatAsset.Runtime
         {
             UsingAssets.Add(assetRuntimeInfo);
         }
-        
+
         /// <summary>
         /// 移除使用中的资源
         /// </summary>
