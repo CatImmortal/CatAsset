@@ -5,6 +5,11 @@ using UnityEngine;
 namespace CatAsset.Runtime
 {
     /// <summary>
+    /// 取消回调方法的原型
+    /// </summary>
+    public delegate void CanceledCallback(CancellationToken token);
+    
+    /// <summary>
     /// 句柄基类
     /// </summary>
     public abstract class BaseHandler : IReference, IDisposable
@@ -27,12 +32,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 被取消时的回调
         /// </summary>
-        private Action onCanceledCallback;
+        private CanceledCallback onCanceledCallback;
         
         /// <summary>
         /// 被取消时的回调
         /// </summary>
-        public event Action OnCanceled
+        public event CanceledCallback OnCanceled
         {
             add
             {
@@ -75,7 +80,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 是否已被Token取消
         /// </summary>
-        protected bool IsTokenCanceled => Token != default && Token.IsCancellationRequested;
+        internal bool IsTokenCanceled => Token != default && Token.IsCancellationRequested;
         
         /// <summary>
         /// 进度
@@ -120,7 +125,7 @@ namespace CatAsset.Runtime
         public bool IsSuccess => State == HandlerState.Success;
         
         /// <summary>
-        /// 是否加载结束
+        /// 是否加载完毕
         /// </summary>
         public bool IsDone => State == HandlerState.Success || State == HandlerState.Failed;
 
@@ -131,7 +136,7 @@ namespace CatAsset.Runtime
         {
             if (IsTokenCanceled)
             {
-                onCanceledCallback?.Invoke();
+                onCanceledCallback?.Invoke(Token);
                 Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
                 Unload();
                 return true;
@@ -185,7 +190,7 @@ namespace CatAsset.Runtime
         protected virtual void Cancel()
         {
             Task?.Cancel();
-            onCanceledCallback?.Invoke();
+            onCanceledCallback?.Invoke(Token);
             Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
             Release();
         }

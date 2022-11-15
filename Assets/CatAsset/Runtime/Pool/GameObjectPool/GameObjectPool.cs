@@ -9,7 +9,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 游戏对象池
     /// </summary>
-    public class GameObjectPool
+    public partial class GameObjectPool
     {
         /// <summary>
         /// 未使用时间的计时器
@@ -163,32 +163,26 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 异步获取游戏对象
         /// </summary>
-        public void GetAsync(Action<GameObject> callback,Transform parent,CancellationToken token,Action onCanceled)
+        public InstantiateHandler GetAsync(Transform parent,CancellationToken token)
         {
+            InstantiateHandler handler = InstantiateHandler.Create(string.Empty,token, template,parent);
+            
             if (unusedPoolObjectList.Count == 0)
             {
-                //没有未使用的池对象，需要实例化出来
-                GameObjectPoolManager.InstantiateAsync(template, parent, token, poolObjectDict, callback,
-                    (go, userdata1, userdata2) =>
-                    {
-                        var localPoolObjectDict = (Dictionary<GameObject, PoolObject>)userdata1;
-                        var localCallback = (Action<GameObject>)userdata2;
-
-                        PoolObject poolObject = new PoolObject { Target = go, Used = true };
-                        localPoolObjectDict.Add(go, poolObject);
-                        go.SetActive(true);
-                        localCallback?.Invoke(go);
-                    },onCanceled);
-
-                return;
+                //没有空闲的池对象
+                //实例化游戏对象
+                GameObjectPoolManager.InstantiateAsync(handler);
             }
-
-            //有空闲的池对象
-            //从中拿一个出来
-            PoolObject poolObject = ActivePoolObject(parent);
-            callback?.Invoke(poolObject.Target);
+            else
+            {
+                //有空闲的池对象
+                //从中拿一个出来
+                PoolObject poolObject = ActivePoolObject(parent);
+                handler.SetInstance(poolObject.Target);
+            }
+            return handler;
         }
-        
+
         /// <summary>
         /// 激活一个池对象
         /// </summary>
@@ -213,7 +207,9 @@ namespace CatAsset.Runtime
             
             if (!poolObjectDict.TryGetValue(go, out PoolObject poolObject))
             {
-                return;
+                //释放的游戏对象不在字典中 创建池对象并缓存
+                poolObject = new PoolObject { Target = go};
+                poolObjectDict.Add(go, poolObject);
             }
 
             poolObject.Used = false;

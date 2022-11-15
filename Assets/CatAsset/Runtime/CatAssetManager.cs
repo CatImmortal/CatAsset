@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
         /// 下载相关任务运行器
         /// </summary>
         private static TaskRunner downloadTaskRunner = new TaskRunner();
-        
+
         /// <summary>
         /// 资源类型->自定义原生资源转换方法
         /// </summary>

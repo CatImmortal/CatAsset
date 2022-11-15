@@ -77,7 +77,7 @@ public class UpdatableExample : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.S))
             {
-                CatAssetManager.InstantiateAsync("Assets/BundleRes/Chapter1/B1.prefab",callback:null);
+                CatAssetManager.InstantiateAsync("Assets/BundleRes/Chapter1/B1.prefab");
             }
         }
     }
