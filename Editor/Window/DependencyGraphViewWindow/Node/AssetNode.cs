@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace CatAsset.Editor
 {
+    /// <summary>
+    /// 资源依赖链节点
+    /// </summary>
     public class AssetNode : BaseDependencyNode<AssetRuntimeInfo>
     {
         private readonly ObjectField objFiled;
