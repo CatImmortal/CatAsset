@@ -180,7 +180,7 @@ namespace CatAsset.Runtime
             //未被token取消 检查错误信息 调用回调
             CheckError();
             onLoadedCallback?.Invoke(this);
-            ContinuationCallBack?.Invoke();
+            AsyncStateMachineMoveNext?.Invoke();
         }
 
         /// <summary>

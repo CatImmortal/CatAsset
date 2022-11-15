@@ -44,7 +44,6 @@ namespace CatAsset.Runtime
 
                 if (IsDone)
                 {
-                    value?.Invoke();
                     return;
                 }
 
@@ -64,9 +63,9 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// Awaiter的Continuation回调，在加载完毕时调用
+        /// async/await异步状态机的MoveNext，在加载结束时调用
         /// </summary>
-        internal Action ContinuationCallBack;
+        internal Action AsyncStateMachineMoveNext;
 
         /// <summary>
         /// 取消Token
@@ -126,7 +125,7 @@ namespace CatAsset.Runtime
         public bool IsDone => State == HandlerState.Success || State == HandlerState.Failed;
 
         /// <summary>
-        /// 检查是否被Token取消
+        /// 检查是否已被Token取消
         /// </summary>
         protected bool CheckTokenCanceled()
         {
@@ -223,11 +222,11 @@ namespace CatAsset.Runtime
         
         public virtual void Clear()
         {
-            //Name = default; Name就不清空了 方便Debug
+            Name = default;
             Task = default;
             Error = default;
             onCanceledCallback = default;
-            ContinuationCallBack = default;
+            AsyncStateMachineMoveNext = default;
             Token = default;
             State = default;
         }

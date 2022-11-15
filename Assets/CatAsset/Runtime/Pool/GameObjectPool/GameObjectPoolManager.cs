@@ -17,7 +17,7 @@ namespace CatAsset.Runtime
         private struct InstantiateAsyncParam
         {
             public InstantiateAsyncParam(GameObject prefab, Transform parent, CancellationToken token, object userdata1,
-                object userdata2, Action<GameObject, object, object> callback)
+                object userdata2, Action<GameObject, object, object> callback,Action onCanceled)
             {
                 Prefab = prefab;
                 Parent = parent;
@@ -25,6 +25,7 @@ namespace CatAsset.Runtime
                 Userdata1 = userdata1;
                 Userdata2 = userdata2;
                 Callback = callback;
+                OnCanceled = onCanceled;
             }
 
             public GameObject Prefab;
@@ -33,6 +34,7 @@ namespace CatAsset.Runtime
             public object Userdata1;
             public object Userdata2;
             public Action<GameObject,object,object> Callback;
+            public Action OnCanceled;
         }
 
 
@@ -119,6 +121,8 @@ namespace CatAsset.Runtime
                 if (param.Token != default && param.Token.IsCancellationRequested)
                 {
                     //被取消了
+                    param.OnCanceled?.Invoke();
+                    Debug.LogWarning($"分帧实例化被取消了：{param.Prefab.name}");
                     continue;
                 }
                 param.Callback?.Invoke(Object.Instantiate(param.Prefab, param.Parent),param.Userdata1,param.Userdata2);
@@ -148,7 +152,8 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 使用资源名异步创建对象池，此方法创建的对象池会自动销毁
         /// </summary>
-        public static void CreatePoolAsync(string assetName,Action<bool> callback,CancellationToken token = default)
+        public static void CreatePoolAsync(string assetName, Action<bool> callback, CancellationToken token = default,
+            Action onCanceled = null)
         {
             if (loadedPrefabDict.ContainsKey(assetName))
             {
@@ -157,17 +162,18 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManager.LoadAssetAsync<GameObject>(assetName,token).OnLoaded += handler =>
+            var handler = CatAssetManager.LoadAssetAsync<GameObject>(assetName,token);
+            handler.OnLoaded += assetHandler =>
             {
-                if (!handler.IsSuccess)
+                if (!assetHandler.IsSuccess)
                 {
                     Debug.LogError($"对象池异步创建失败：{assetName}");
-                    handler.Unload();
+                    assetHandler.Unload();
                     callback?.Invoke(false);
                     return;
                 }
 
-                GameObject prefab = handler.Asset;
+                GameObject prefab = assetHandler.Asset;
                 loadedPrefabDict[assetName] = prefab;
 
                 //创建对象池
@@ -175,11 +181,12 @@ namespace CatAsset.Runtime
 
                 //进行资源绑定
                 GameObject root = pool.Root.gameObject;
-                root.BindTo(handler);
+                root.BindTo(assetHandler);
 
                 callback?.Invoke(true);
             };
 
+            handler.OnCanceled += onCanceled;
 
         }
 
@@ -219,12 +226,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 使用资源名异步获取游戏对象
         /// </summary>
-        public static void GetAsync(string assetName, Action<GameObject> callback,Transform parent = null,CancellationToken token = default)
+        public static void GetAsync(string assetName, Action<GameObject> callback, Transform parent = null,
+            CancellationToken token = default, Action onCanceled = null)
         {
             if (loadedPrefabDict.TryGetValue(assetName,out var prefab))
             {
                 //此对象池已存在
-                GetAsync(prefab, callback, parent, token);
+                GetAsync(prefab, callback, parent, token,onCanceled);
                 return;
             }
 
@@ -239,19 +247,19 @@ namespace CatAsset.Runtime
 
                 prefab = loadedPrefabDict[assetName];
 
-                GetAsync(prefab, callback, parent, token);
+                GetAsync(prefab, callback, parent, token,onCanceled);
 
-            }),token);
+            }),token,onCanceled);
         }
 
         /// <summary>
         /// 使用模板异步获取游戏对象
         /// </summary>
         public static void GetAsync(GameObject template, Action<GameObject> callback, Transform parent = null,
-            CancellationToken token = default)
+            CancellationToken token = default,Action onCanceled = null)
         {
             var pool = GetOrCreatePool(template);
-            pool.GetAsync(callback,parent,token);
+            pool.GetAsync(callback,parent,token,onCanceled);
         }
 
         /// <summary>
@@ -309,15 +317,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 分帧异步实例化
         /// </summary>
-        internal static void InstantiateAsync(GameObject prefab, Transform parent,CancellationToken token,object userdata1,object userdata2, Action<GameObject,object,object> callback)
+        internal static void InstantiateAsync(GameObject prefab, Transform parent, CancellationToken token,
+            object userdata1, object userdata2, Action<GameObject, object, object> callback, Action onCanceled)
         {
-            waitInstantiateQueue.Enqueue(new InstantiateAsyncParam(prefab, parent, token, userdata1,userdata2, callback));
+            waitInstantiateQueue.Enqueue(new InstantiateAsyncParam(prefab, parent, token, userdata1, userdata2,
+                callback, onCanceled));
         }
 
         /// <summary>
         /// 使用资源名异步预热对象
         /// </summary>
-        public static void PrewarmAsync(string assetName,int count,Action callback,CancellationToken token = default)
+        public static void PrewarmAsync(string assetName,int count,Action callback,CancellationToken token = default,Action onCanceled = null)
         {
             bool hasPool = loadedPrefabDict.TryGetValue(assetName,out var prefab);
 
@@ -348,7 +358,7 @@ namespace CatAsset.Runtime
                         Prewarm(loadedPrefabDict[assetName]);
                     }
 
-                }),token);
+                }),token,onCanceled);
             }
             else
             {

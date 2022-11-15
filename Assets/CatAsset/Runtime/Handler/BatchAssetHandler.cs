@@ -109,7 +109,7 @@ namespace CatAsset.Runtime
                 State = HandlerState.Success;
 
                 onLoadedCallback?.Invoke(this);
-                ContinuationCallBack?.Invoke();
+                AsyncStateMachineMoveNext?.Invoke();
             }
         }
 
