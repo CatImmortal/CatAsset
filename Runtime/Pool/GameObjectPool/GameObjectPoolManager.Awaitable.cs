@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using UnityEngine;
 
 #if !UNITASK
@@ -24,7 +25,10 @@ namespace CatAsset.Runtime
             CreatePoolAsync(assetName, (result =>
             {
                 tcs.TrySetResult(result);
-            }),token);
+            }),token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             return tcs.Task;
         }
 
@@ -39,7 +43,10 @@ namespace CatAsset.Runtime
             GetAsync(assetName, (go =>
             {
                 tcs.TrySetResult(go);
-            }), parent, token);
+            }), parent, token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             
             return tcs.Task;
         }
@@ -55,7 +62,10 @@ namespace CatAsset.Runtime
             GetAsync(template, (go =>
             {
                 tcs.TrySetResult(go);
-            }), parent, token);
+            }), parent, token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             
             return tcs.Task;
         }
@@ -70,7 +80,10 @@ namespace CatAsset.Runtime
             PrewarmAsync(assetName, count, () =>
             {
                 tcs.TrySetResult(null);
-            }, token);
+            }, token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             
             return tcs.Task;
         }
@@ -84,7 +97,10 @@ namespace CatAsset.Runtime
             CreatePoolAsync(assetName, (result =>
             {
                 tcs.TrySetResult(result);
-            }),token);
+            }),token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             return tcs.Task;
         }
 
@@ -99,7 +115,10 @@ namespace CatAsset.Runtime
             GetAsync(assetName, (go =>
             {
                 tcs.TrySetResult(go);
-            }), parent, token);
+            }), parent, token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             
             return tcs.Task;
         }
@@ -115,7 +134,10 @@ namespace CatAsset.Runtime
             GetAsync(template, (go =>
             {
                 tcs.TrySetResult(go);
-            }), parent, token);
+            }), parent, token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             
             return tcs.Task;
         }
@@ -130,7 +152,10 @@ namespace CatAsset.Runtime
             PrewarmAsync(assetName, count, () =>
             {
                 tcs.TrySetResult(null);
-            }, token);
+            }, token,(() =>
+            {
+                tcs.TrySetException(new OperationCanceledException(token));
+            }));
             
             return tcs.Task;
         }

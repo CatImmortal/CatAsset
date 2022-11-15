@@ -163,7 +163,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 异步获取游戏对象
         /// </summary>
-        public void GetAsync(Action<GameObject> callback,Transform parent,CancellationToken token)
+        public void GetAsync(Action<GameObject> callback,Transform parent,CancellationToken token,Action onCanceled)
         {
             if (unusedPoolObjectList.Count == 0)
             {
@@ -175,12 +175,10 @@ namespace CatAsset.Runtime
                         var localCallback = (Action<GameObject>)userdata2;
 
                         PoolObject poolObject = new PoolObject { Target = go, Used = true };
-
                         localPoolObjectDict.Add(go, poolObject);
-
                         go.SetActive(true);
                         localCallback?.Invoke(go);
-                    });
+                    },onCanceled);
 
                 return;
             }
