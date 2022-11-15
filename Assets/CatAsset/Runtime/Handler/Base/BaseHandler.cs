@@ -222,7 +222,7 @@ namespace CatAsset.Runtime
         
         public virtual void Clear()
         {
-            Name = default;
+            //Name = default; Name不清空了 报错需要
             Task = default;
             Error = default;
             onCanceledCallback = default;
