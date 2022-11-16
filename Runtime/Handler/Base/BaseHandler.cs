@@ -136,9 +136,10 @@ namespace CatAsset.Runtime
         {
             if (IsTokenCanceled)
             {
-                onCanceledCallback?.Invoke(Token);
+                var callback = onCanceledCallback;
                 Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
                 Unload();
+                callback?.Invoke(Token);
                 return true;
             }
 
@@ -189,10 +190,12 @@ namespace CatAsset.Runtime
         /// </summary>
         protected virtual void Cancel()
         {
-            Task?.Cancel();
-            onCanceledCallback?.Invoke(Token);
+            var callback = onCanceledCallback;
             Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
+            Task?.Cancel();
             Release();
+            
+            callback?.Invoke(Token);
         }
         
         /// <summary>

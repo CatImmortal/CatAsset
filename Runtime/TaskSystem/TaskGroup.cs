@@ -59,25 +59,13 @@ namespace CatAsset.Runtime
         /// </summary>
         public void PreRun()
         {
-            if (mainTaskList.Count > 0)
-            {
-                foreach (BaseTask task in mainTaskList)
-                {
-                    tempTaskList.Add(task);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 任务组运行后
-        /// </summary>
-        public void PostRun()
-        {
-            if (tempTaskList.Count > 0)
-            {
-                tempTaskList.Clear();
-            }
+            tempTaskList.Clear();
             curTaskIndex = 0;
+            
+            foreach (BaseTask task in mainTaskList)
+            {
+                tempTaskList.Add(task);
+            }
         }
 
         /// <summary>

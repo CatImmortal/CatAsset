@@ -40,7 +40,7 @@ namespace CatAsset.Runtime
         {
             add
             {
-                if (IsDoing)
+                if (IsDone)
                 {
                     value?.Invoke(this);
                     return;

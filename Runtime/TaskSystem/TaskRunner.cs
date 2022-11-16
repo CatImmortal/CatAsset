@@ -108,8 +108,7 @@ namespace CatAsset.Runtime
                         curRunCounter++;
                     }
                 }
-
-                group.PostRun();
+                
             }
         }
 
