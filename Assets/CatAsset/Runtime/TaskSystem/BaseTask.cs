@@ -93,7 +93,7 @@ namespace CatAsset.Runtime
         public virtual void Clear()
         {
             ID = default;
-            Name = default;
+            //Name = default;
             Owner = default;
             Group = default;
             State = default;
