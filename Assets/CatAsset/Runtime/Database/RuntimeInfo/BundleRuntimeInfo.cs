@@ -65,7 +65,7 @@ namespace CatAsset.Runtime
                             loadPath = RuntimeUtil.GetReadOnlyPath(Manifest.RelativePath);
                             break;
                         case State.InReadWrite:
-                            loadPath = RuntimeUtil.GetReadWritePath(Manifest.RelativePath);
+                            loadPath = RuntimeUtil.GetReadWritePath(Manifest.RelativePath,Manifest.IsRaw);
                             break;
                         default:
                             Debug.LogError($"资源包：{this}的loadPath获取错误，资源包状态：{BundleState}");
