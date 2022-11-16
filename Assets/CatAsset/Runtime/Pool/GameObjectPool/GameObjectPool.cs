@@ -155,23 +155,28 @@ namespace CatAsset.Runtime
                 go.SetActive(true);
                 return go;
             }
-            
+
             poolObject = ActivePoolObject(parent);
             return poolObject.Target;
         }
-        
+
         /// <summary>
         /// 异步获取游戏对象
         /// </summary>
         public InstantiateHandler GetAsync(Transform parent,CancellationToken token)
         {
             InstantiateHandler handler = InstantiateHandler.Create(string.Empty,token, template,parent);
-            
+
             if (unusedPoolObjectList.Count == 0)
             {
                 //没有空闲的池对象
                 //实例化游戏对象
-                GameObjectPoolManager.InstantiateAsync(handler);
+                GameObjectPoolManager.InstantiateAsync(handler,poolObjectDict, (go, userdata) =>
+                {
+                    var localPoolObjectDict = (Dictionary<GameObject, PoolObject>)userdata;
+                    var poolObject = new PoolObject { Target = go,Used = true};
+                    localPoolObjectDict.Add(go, poolObject);
+                });
             }
             else
             {
@@ -194,7 +199,7 @@ namespace CatAsset.Runtime
             poolObject.Target.SetActive(true);
             return poolObject;
         }
-        
+
         /// <summary>
         /// 释放游戏对象
         /// </summary>
@@ -204,12 +209,11 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-            
+
             if (!poolObjectDict.TryGetValue(go, out PoolObject poolObject))
             {
-                //释放的游戏对象不在字典中 创建池对象并缓存
-                poolObject = new PoolObject { Target = go};
-                poolObjectDict.Add(go, poolObject);
+                Debug.LogWarning($"要释放的对象{go.name}不属于对象池{template.name}");
+                return;
             }
 
             poolObject.Used = false;

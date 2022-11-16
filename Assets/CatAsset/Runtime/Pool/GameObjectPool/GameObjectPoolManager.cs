@@ -11,6 +11,13 @@ namespace CatAsset.Runtime
     /// </summary>
     public static partial class GameObjectPoolManager
     {
+        private struct InstantiateParam
+        {
+            public InstantiateHandler Handler;
+            public object Userdata;
+            public Action<GameObject, object> Callback;
+        }
+
         /// <summary>
         /// 预制体名字->加载好的预制体
         /// </summary>
@@ -50,7 +57,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 等待实例化的游戏对象队列
         /// </summary>
-        private static Queue<InstantiateHandler> handlerQueue = new Queue<InstantiateHandler>();
+        private static Queue<InstantiateParam> handlerQueue = new Queue<InstantiateParam>();
 
         /// <summary>
         /// 等待卸载的预制体名字列表
@@ -90,15 +97,17 @@ namespace CatAsset.Runtime
             //处理分帧实例化
             while (instantiateCounter < MaxInstantiateCount && handlerQueue.Count > 0)
             {
-                InstantiateHandler handler = handlerQueue.Dequeue();
+
+                InstantiateParam param = handlerQueue.Dequeue();
                 GameObject instance = null;
-                if (!handler.IsTokenCanceled)
+                if (!param.Handler.IsTokenCanceled)
                 {
                     //未被取消才会实例化游戏对象
-                    instance = Object.Instantiate(handler.Template, handler.Parent);
+                    instance = Object.Instantiate(param.Handler.Template, param.Handler.Parent);
+                    param.Callback?.Invoke(instance,param.Userdata);
                     instantiateCounter++;
                 }
-                handler.SetInstance(instance);
+                param.Handler.SetInstance(instance);
             }
 
             instantiateCounter = 0;
@@ -135,6 +144,7 @@ namespace CatAsset.Runtime
             }
 
             var handler = CatAssetManager.LoadAssetAsync<GameObject>(assetName,token);
+            handler.OnCanceled += onCanceled;
             handler.OnLoaded += assetHandler =>
             {
                 if (!assetHandler.IsSuccess)
@@ -157,9 +167,6 @@ namespace CatAsset.Runtime
 
                 callback?.Invoke(true);
             };
-
-            handler.OnCanceled += onCanceled;
-
         }
 
         /// <summary>
@@ -232,12 +239,13 @@ namespace CatAsset.Runtime
         {
             var pool = GetOrCreatePool(template);
             var handler = pool.GetAsync(parent,token);
+            handler.OnCanceled += onCanceled;
             handler.OnInstantiated += instantiateHandler =>
             {
                 callback?.Invoke(handler.Instance);
                 handler.Unload();
             };
-            handler.OnCanceled += onCanceled;
+
         }
 
         /// <summary>
@@ -295,9 +303,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 分帧异步实例化
         /// </summary>
-        internal static void InstantiateAsync(InstantiateHandler handler)
+        internal static void InstantiateAsync(InstantiateHandler handler,object userdata,Action<GameObject,object> callback)
         {
-            handlerQueue.Enqueue(handler);
+            InstantiateParam param = new InstantiateParam();
+            param.Handler = handler;
+            param.Userdata = userdata;
+            param.Callback = callback;
+            handlerQueue.Enqueue(param);
         }
 
         /// <summary>
