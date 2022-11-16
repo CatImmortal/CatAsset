@@ -22,7 +22,7 @@ namespace CatAsset.Runtime
         /// 内置Shader资源包名
         /// </summary>
         public const string BuiltInShaderBundleName = "UnityBuiltInShaders.bundle";
-        
+
         private const int oneKB = 1024;
         private const int oneMB = oneKB * 1024;
         private const int oneGB = oneMB * 1024;
@@ -51,9 +51,16 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取在读写区下的完整路径
         /// </summary>
-        public static string GetReadWritePath(string path)
+        public static string GetReadWritePath(string path,bool isUwrPath = false)
         {
             string result = GetRegularPath(Path.Combine(Application.persistentDataPath, path));
+
+            if (isUwrPath && Application.platform == RuntimePlatform.Android)
+            {
+                //使用UnityWebRequest访问安卓下的Persistent路径 需要加file://头才行
+                result = "file://" + result;
+            }
+
             return result;
         }
 

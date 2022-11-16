@@ -47,7 +47,7 @@ namespace CatAsset.Runtime
 
             //进行只读区 读写区 远端三方的资源清单检查
             string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
-            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName);
+            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName,true);
             string remoteManifestPath = RuntimeUtil.GetRemotePath(RuntimeUtil.ManifestFileName);
 
             CatAssetManager.CheckUpdatableManifest(readOnlyManifestPath,CheckReadOnlyManifest);
@@ -65,6 +65,7 @@ namespace CatAsset.Runtime
             {
                 isReadOnlyLoaded = true;
                 RefreshCheckInfos();
+                Debug.LogWarning($"未加载到只读区资源清单:{uwr.error}");
                 return;
             }
 
@@ -89,6 +90,7 @@ namespace CatAsset.Runtime
             {
                 isReadWriteLoaded = true;
                 RefreshCheckInfos();
+                Debug.LogWarning($"未加载到读写区资源清单：{uwr.error}");
                 return;
             }
 
