@@ -40,12 +40,18 @@ namespace CatAsset.Runtime
             //卸载时间到了
             State = TaskState.Finished;
             
-            //删除此资源包中已加载的资源实例与AssetRuntimeInfo的关联
             foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
             {
                 AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
                 if (assetRuntimeInfo.Asset != null)
                 {
+                    foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
+                    {
+                        AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                        CatAssetManager.TryUnloadAssetFromMemory(dependencyRuntimeInfo);
+                    }
+                    
+                    //删除此资源包中已加载的资源实例与AssetRuntimeInfo的关联
                     CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
                     assetRuntimeInfo.Asset = null;
                 }

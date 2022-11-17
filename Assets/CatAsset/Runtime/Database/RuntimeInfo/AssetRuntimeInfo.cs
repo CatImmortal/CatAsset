@@ -37,6 +37,11 @@ namespace CatAsset.Runtime
         public DependencyChain<AssetRuntimeInfo> DependencyChain { get; } = new DependencyChain<AssetRuntimeInfo>();
 
         /// <summary>
+        /// 下游资源记录（至少依赖加载过此资源一次的资源）
+        /// </summary>
+        public HashSet<AssetRuntimeInfo> DownStreamRecord { get; } = new HashSet<AssetRuntimeInfo>();
+
+        /// <summary>
         /// 增加引用计数
         /// </summary>
         public void AddRefCount(int count = 1)
@@ -66,6 +71,23 @@ namespace CatAsset.Runtime
         public bool IsUnused()
         {
             return RefCount == 0;
+        }
+
+        /// <summary>
+        /// 是否有还在内存中的下游资源
+        /// </summary>
+        /// <returns></returns>
+        public bool IsDownStreamInMemory()
+        {
+            foreach (AssetRuntimeInfo info in DownStreamRecord)
+            {
+                if (CatAssetDatabase.IsInMemoryAsset(info))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

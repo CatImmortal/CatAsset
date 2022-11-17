@@ -54,11 +54,11 @@ namespace CatAsset.Editor
             Open(Application.persistentDataPath);
         }
         
-        [MenuItem("CatAsset/打开教程文档", priority = 3)]
-        private static void OpenDoc()
-        {
-            Application.OpenURL("http://cathole.top/2022/08/30/catasset-guide/");
-        }
+        // [MenuItem("CatAsset/打开教程文档", priority = 3)]
+        // private static void OpenDoc()
+        // {
+        //     Application.OpenURL("http://cathole.top/2022/08/30/catasset-guide/");
+        // }
 
         /// <summary>
         /// 打开指定目录

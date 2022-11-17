@@ -40,6 +40,8 @@ namespace CatAsset.Runtime
             new Dictionary<int, List<IBindableHandler>>();
 
 
+        private static HashSet<AssetRuntimeInfo> inMemoryAssets = new HashSet<AssetRuntimeInfo>();
+
         /// <summary>
         /// 资源组名->资源组信息
         /// </summary>
@@ -231,6 +233,21 @@ namespace CatAsset.Runtime
                 sceneBindHandlers.Add(scene.handle,handlers);
             }
             handlers.Add(handler);
+        }
+
+        internal static void AddInMemoryAsset(AssetRuntimeInfo info)
+        {
+            inMemoryAssets.Add(info);
+        }
+        
+        internal static void RemoveInMemoryAsset(AssetRuntimeInfo info)
+        {
+            inMemoryAssets.Remove(info);
+        }
+        
+        internal static bool IsInMemoryAsset(AssetRuntimeInfo info)
+        {
+            return inMemoryAssets.Contains(info);
         }
         
         /// <summary>
