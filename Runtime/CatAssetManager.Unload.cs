@@ -123,94 +123,141 @@ namespace CatAsset.Runtime
                     assetRuntimeInfo.DependencyChain.UpStream.Remove(dependencyRuntimeInfo);
                 }
 
-                //对于非场景 非Prefab的资源 以及原生资源 创建卸载任务
-                BundleRuntimeInfo bundleRuntimeInfo =
-                    CatAssetDatabase.GetBundleRuntimeInfo(assetRuntimeInfo.BundleManifest.RelativePath);
-                if (!bundleRuntimeInfo.Manifest.IsScene && !(assetRuntimeInfo.Asset is GameObject))
-                {
-                    UnloadAssetTask task = UnloadAssetTask.Create(unloadTaskRunner,assetRuntimeInfo.AssetManifest.Name,assetRuntimeInfo);
-                    unloadTaskRunner.AddTask(task,TaskPriority.Low);
-                }
+                TryUnloadAssetFromMemory(assetRuntimeInfo);
             }
         }
 
         /// <summary>
-        /// 卸载所有未使用的资源，若isQuick为true则是不处理Prefab的快速模式
+        /// 尝试将资源从内存中卸载
         /// </summary>
-        public static void UnloadUnusedAssets(bool isQuickMode = true)
+        internal static void TryUnloadAssetFromMemory(AssetRuntimeInfo info,bool isImmediate = false)
         {
-            foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
+            if (info.Asset == null)
             {
-                BundleRuntimeInfo bundleRuntimeInfo = pair.Value;
-
-                if (!bundleRuntimeInfo.Manifest.IsRaw && bundleRuntimeInfo.Bundle == null)
-                {
-                    //跳过未加载的资源包
-                    continue;
-                }
-
-                if (bundleRuntimeInfo.Manifest.IsScene)
-                {
-                    //跳过场景资源包
-                    continue;
-                }
-                
-                foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
-                {
-                    AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
-
-                    if (assetRuntimeInfo.Asset == null || assetRuntimeInfo.RefCount > 0)
-                    {
-                        //资源未加载 或 引用计数>0 跳过
-                        continue;
-                    }
-
-                    if (!isQuickMode)
-                    {
-                        //非快速模式下 只解除引用 不调用Resources.UnloadAsset 等待后面的Resources.UnloadUnusedAssets来卸载
-                        CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
-                        assetRuntimeInfo.Asset = null;
-                        continue;
-                    }
-                  
-                    //快速模式下 只处理非Prefab资源
-                    if (!(assetRuntimeInfo.Asset is GameObject))
-                    {
-                        CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
-                        if (assetRuntimeInfo.Asset is Object unityObj)
-                        {
-                            UnloadAssetFromMemory(unityObj);
-                        }
-                        assetRuntimeInfo.Asset = null;
-                    }
-
-                    
-                }
+                return;
             }
 
-            if (!isQuickMode)
+            if (!info.IsUnused())
             {
-                Resources.UnloadUnusedAssets();
+                return;
             }
-            
-            Debug.Log("已卸载所有未使用的资源");
-        }
 
-        /// <summary>
-        /// 将资源包资源从内存卸载
-        /// </summary>
-        internal static void UnloadAssetFromMemory(Object asset)
-        {
-            if (asset is Sprite sprite)
+            if (info.Asset is GameObject)
             {
-                //注意 sprite资源得卸载它的texture
-                Resources.UnloadAsset(sprite.texture);
+                return;
+            }
+
+            if (info.IsDownStreamInMemory())
+            {
+                return;
+            }
+
+            if (!isImmediate)
+            {
+                UnloadAssetFromMemoryTask task = UnloadAssetFromMemoryTask.Create(unloadTaskRunner,info.AssetManifest.Name,info);
+                unloadTaskRunner.AddTask(task,TaskPriority.Low);
             }
             else
             {
-                Resources.UnloadAsset(asset);
+                UnloadAssetFromMemory(info);
+                
+                foreach (string dependency in info.AssetManifest.Dependencies)
+                {
+                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                    
+                    TryUnloadAssetFromMemory(dependencyRuntimeInfo,true);
+                }
             }
+            
         }
+
+        /// <summary>
+        /// 将资源从内存中卸载
+        /// </summary>
+        internal static void UnloadAssetFromMemory(AssetRuntimeInfo info)
+        {
+            BundleRuntimeInfo bundleRuntimeInfo =
+                CatAssetDatabase.GetBundleRuntimeInfo(info.BundleManifest.RelativePath);
+
+            if (!bundleRuntimeInfo.Manifest.IsRaw)
+            {
+                Object unityObj = (Object)info.Asset;
+                if (unityObj is Sprite sprite)
+                {
+                    Resources.UnloadAsset(sprite.texture);
+                }
+                else
+                {
+                    Resources.UnloadAsset(unityObj);
+                }
+            }
+            
+            CatAssetDatabase.RemoveAssetInstance(info.Asset);
+            info.Asset = null;
+        }
+
+        // /// <summary>
+        // /// 卸载所有未使用的资源，若isQuick为true则是不处理Prefab的快速模式
+        // /// </summary>
+        // public static void UnloadUnusedAssets(bool isQuickMode = true)
+        // {
+        //     foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
+        //     {
+        //         BundleRuntimeInfo bundleRuntimeInfo = pair.Value;
+        //
+        //         if (!bundleRuntimeInfo.Manifest.IsRaw && bundleRuntimeInfo.Bundle == null)
+        //         {
+        //             //跳过未加载的资源包
+        //             continue;
+        //         }
+        //
+        //         if (bundleRuntimeInfo.Manifest.IsScene)
+        //         {
+        //             //跳过场景资源包
+        //             continue;
+        //         }
+        //         
+        //         foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
+        //         {
+        //             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
+        //
+        //             if (assetRuntimeInfo.Asset == null || assetRuntimeInfo.RefCount > 0)
+        //             {
+        //                 //资源未加载 或 引用计数>0 跳过
+        //                 continue;
+        //             }
+        //
+        //             if (!isQuickMode)
+        //             {
+        //                 //非快速模式下 只解除引用 不调用Resources.UnloadAsset 等待后面的Resources.UnloadUnusedAssets来卸载
+        //                 CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
+        //                 assetRuntimeInfo.Asset = null;
+        //                 continue;
+        //             }
+        //           
+        //             //快速模式下 只处理非Prefab资源
+        //             if (!(assetRuntimeInfo.Asset is GameObject))
+        //             {
+        //                 CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
+        //                 if (assetRuntimeInfo.Asset is Object unityObj)
+        //                 {
+        //                     UnloadAssetFromMemory(unityObj);
+        //                 }
+        //                 assetRuntimeInfo.Asset = null;
+        //             }
+        //
+        //             
+        //         }
+        //     }
+        //
+        //     if (!isQuickMode)
+        //     {
+        //         Resources.UnloadUnusedAssets();
+        //     }
+        //     
+        //     Debug.Log("已卸载所有未使用的资源");
+        // }
+
         
         /// <summary>
         /// 添加资源包卸载任务

@@ -343,6 +343,7 @@ namespace CatAsset.Runtime
                         
                         //更新自身与依赖资源的上下游关系
                         depInfo.DependencyChain.DownStream.Add(AssetRuntimeInfo);
+                        depInfo.DownStreamRecord.Add(AssetRuntimeInfo);
                         AssetRuntimeInfo.DependencyChain.UpStream.Add(depInfo);
                         
                         //如果依赖了其他资源包里的资源 还需要设置 自身所在资源包 与 依赖所在资源包 的上下游关系
@@ -384,6 +385,8 @@ namespace CatAsset.Runtime
             {
                 //添加关联
                 CatAssetDatabase.SetAssetInstance(AssetRuntimeInfo.Asset, AssetRuntimeInfo);
+                
+                CatAssetDatabase.AddInMemoryAsset(AssetRuntimeInfo);
             }
         }
         
