@@ -57,7 +57,7 @@ namespace CatAsset.Runtime
         {
             UnloadScene(handler.Scene);
         }
-        
+
         /// <summary>
         /// 卸载场景
         /// </summary>
@@ -67,7 +67,7 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-            
+
 #if UNITY_EDITOR
             if (IsEditorMode)
             {
@@ -116,10 +116,10 @@ namespace CatAsset.Runtime
                 foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                 {
                     AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
-                    
+
                     //从这里递归依赖导致的TryUnloadAssetFromMemory是一定无效的 所以会在后续UnloadAssetFromMemoryTask中重新检查一遍依赖
                     InternalUnloadAsset(dependencyRuntimeInfo);
-                    
+
                     //删除依赖链记录
                     dependencyRuntimeInfo.DependencyChain.DownStream.Remove(assetRuntimeInfo);
                     assetRuntimeInfo.DependencyChain.UpStream.Remove(dependencyRuntimeInfo);
@@ -167,7 +167,7 @@ namespace CatAsset.Runtime
             {
                 //立即卸载
                 UnloadAssetFromMemory(info);
-                
+
                 //尝试将可卸载的依赖也从内存中卸载
                 foreach (string dependency in info.AssetManifest.Dependencies)
                 {
@@ -175,7 +175,7 @@ namespace CatAsset.Runtime
                     TryUnloadAssetFromMemory(dependencyRuntimeInfo,true);
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -183,6 +183,8 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void UnloadAssetFromMemory(AssetRuntimeInfo info)
         {
+            CatAssetDatabase.RemoveAssetInstance(info.Asset);
+
             BundleRuntimeInfo bundleRuntimeInfo =
                 CatAssetDatabase.GetBundleRuntimeInfo(info.BundleManifest.RelativePath);
 
@@ -199,8 +201,9 @@ namespace CatAsset.Runtime
                     Resources.UnloadAsset(unityObj);
                 }
             }
-            
-            CatAssetDatabase.RemoveAssetInstance(info.Asset);
+
+
+            CatAssetDatabase.RemoveInMemoryAsset(info);
             info.Asset = null;
         }
 
@@ -212,19 +215,19 @@ namespace CatAsset.Runtime
             foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
             {
                 BundleRuntimeInfo bundleRuntimeInfo = pair.Value;
-        
+
                 if (!bundleRuntimeInfo.Manifest.IsRaw && bundleRuntimeInfo.Bundle == null)
                 {
                     //跳过未加载的资源包
                     continue;
                 }
-        
+
                 if (bundleRuntimeInfo.Manifest.IsScene)
                 {
                     //跳过场景资源包
                     continue;
                 }
-                
+
                 foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
                 {
                     AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
@@ -236,7 +239,7 @@ namespace CatAsset.Runtime
             Debug.Log("已卸载所有未使用的资源");
         }
 
-        
+
         /// <summary>
         /// 添加资源包卸载任务
         /// </summary>
