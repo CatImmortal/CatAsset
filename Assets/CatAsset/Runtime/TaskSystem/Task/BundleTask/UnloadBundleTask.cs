@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     {
         private BundleRuntimeInfo bundleRuntimeInfo;
         private float timer;
-        
+
         /// <inheritdoc />
         public override float Progress => timer / CatAssetManager.UnloadBundleDelayTime;
 
@@ -28,7 +28,7 @@ namespace CatAsset.Runtime
                 State = TaskState.Finished;
                 return;
             }
-            
+
             timer += Time.deltaTime;
             if (timer < CatAssetManager.UnloadBundleDelayTime)
             {
@@ -36,27 +36,32 @@ namespace CatAsset.Runtime
                 State = TaskState.Waiting;
                 return;
             }
-            
+
             //卸载时间到了
             State = TaskState.Finished;
-            
+
             foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
             {
                 AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
                 if (assetRuntimeInfo.Asset != null)
                 {
                     //会进入到这里的应该都是Prefab了
-                    
+
+                    //删除此资源包中已加载的资源实例与AssetRuntimeInfo的关联
+                    CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
+
+                    //从内存中资源集合删掉
+                    CatAssetDatabase.RemoveInMemoryAsset(assetRuntimeInfo);
+                    assetRuntimeInfo.Asset = null;
+
                     //尝试将可卸载的依赖从内存中卸载
                     foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
                         AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
                         CatAssetManager.TryUnloadAssetFromMemory(dependencyRuntimeInfo);
                     }
-                    
-                    //删除此资源包中已加载的资源实例与AssetRuntimeInfo的关联
-                    CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
-                    assetRuntimeInfo.Asset = null;
+
+
                 }
             }
 
@@ -76,10 +81,10 @@ namespace CatAsset.Runtime
             bundleRuntimeInfo.Bundle.Unload(true);
 #endif
             bundleRuntimeInfo.Bundle = null;
-            
+
             Debug.Log($"已卸载资源包:{bundleRuntimeInfo.Manifest.RelativePath}");
         }
-        
+
         /// <summary>
         /// 创建资源包卸载任务的对象
         /// </summary>
@@ -89,10 +94,10 @@ namespace CatAsset.Runtime
             task.CreateBase(owner,name);
 
             task.bundleRuntimeInfo = bundleRuntimeInfo;
-            
+
             return task;
         }
-        
+
         /// <inheritdoc />
         public override void Clear()
         {
