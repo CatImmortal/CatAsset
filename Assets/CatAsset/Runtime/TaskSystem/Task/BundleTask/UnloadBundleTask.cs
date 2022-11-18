@@ -45,6 +45,9 @@ namespace CatAsset.Runtime
                 AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
                 if (assetRuntimeInfo.Asset != null)
                 {
+                    //会进入到这里的应该都是Prefab了
+                    
+                    //尝试将可卸载的依赖从内存中卸载
                     foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
                         AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
