@@ -29,6 +29,11 @@ namespace CatAsset.Runtime
         private static TaskRunner downloadTaskRunner = new TaskRunner();
 
         /// <summary>
+        /// 优先级数量
+        /// </summary>
+        private static int priorityNum = Enum.GetNames(typeof(TaskPriority)).Length;
+        
+        /// <summary>
         /// 资源类型->自定义原生资源转换方法
         /// </summary>
         private static Dictionary<Type, CustomRawAssetConverter> converterDict =
@@ -105,9 +110,18 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void Update()
         {
-            loadTaskRunner.Update();
-            unloadTaskRunner.Update();
-            downloadTaskRunner.Update();
+            //每帧开始轮询前 清空计数
+            loadTaskRunner.PreUpdate();
+            unloadTaskRunner.PreUpdate();
+            downloadTaskRunner.PreUpdate();
+                
+            //按优先级轮询任务组
+            for (int i = 0; i < priorityNum; i++)
+            {
+                loadTaskRunner.Update(i);
+                unloadTaskRunner.Update(i);
+                downloadTaskRunner.Update(i);
+            }
         }
         
         /// <summary>
