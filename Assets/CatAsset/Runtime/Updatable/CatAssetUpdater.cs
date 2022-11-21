@@ -25,9 +25,12 @@ namespace CatAsset.Runtime
         internal static void GenerateReadWriteManifest()
         {
             //创建 CatAssetManifest
-            CatAssetManifest manifest = new CatAssetManifest();
-            manifest.GameVersion = Application.version;
-            
+            CatAssetManifest manifest = new CatAssetManifest
+            {
+                GameVersion = Application.version,
+                Platform = Application.platform.ToString()
+            };
+
             List<BundleManifestInfo> bundleInfos = new List<BundleManifestInfo>();
             foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
             {

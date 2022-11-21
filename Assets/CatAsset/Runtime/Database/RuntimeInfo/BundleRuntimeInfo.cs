@@ -103,12 +103,8 @@ namespace CatAsset.Runtime
         {
             ReferencingAssets.Remove(assetRuntimeInfo);
 
-            if (CanUnload())
-            {
-                //可以被卸载了
-                //尝试从内存卸载
-                CatAssetManager.TryUnloadBundle(this);
-            }
+            //尝试卸载资源包
+            CatAssetManager.TryUnloadBundle(this);
         }
 
         /// <summary>

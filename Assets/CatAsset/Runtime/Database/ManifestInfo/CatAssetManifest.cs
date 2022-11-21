@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace CatAsset.Runtime
 {
@@ -19,6 +20,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public int ManifestVersion;
 
+        /// <summary>
+        /// 目标平台
+        /// </summary>
+        public string Platform;
+        
         /// <summary>
         /// 资源包清单信息列表
         /// </summary>
