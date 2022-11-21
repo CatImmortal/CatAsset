@@ -74,7 +74,7 @@ namespace CatAsset.Runtime
             {
                 //未被使用了
 
-                //从资源包的使用中资源集合删除
+                //从资源包的引用中资源集合删除
                 BundleRuntimeInfo bundleRuntimeInfo =
                     CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
                 bundleRuntimeInfo.RemoveReferencingAsset(this);

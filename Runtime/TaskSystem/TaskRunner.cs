@@ -25,6 +25,11 @@ namespace CatAsset.Runtime
         /// </summary>
         private readonly List<TaskGroup> taskGroups = new List<TaskGroup>();
 
+        /// <summary>
+        /// 当前已运行任务的计数器
+        /// </summary>
+        private int curRunCounter;
+        
         public TaskRunner()
         {
             //优先级数量
@@ -87,28 +92,30 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 任务运行器轮询前
+        /// </summary>
+        public void PreUpdate()
+        {
+            curRunCounter = 0;
+        }
+        
+        /// <summary>
         /// 轮询任务运行器
         /// </summary>
-        public void Update()
+        public void Update(int priority)
         {
             //当前运行任务计数器
-            int curRunCounter = 0;
+            TaskGroup group = taskGroups[priority];
+            
+            group.PreRun();
 
-            for (int i = taskGroups.Count - 1; i >= 0; i--)
+            while (curRunCounter < MaxRunCount && group.CanRun)
             {
-                TaskGroup group = taskGroups[i];
-
-                group.PreRun();
-
-                while (curRunCounter < MaxRunCount && group.CanRun)
+                if (group.Run())
                 {
-                    if (group.Run())
-                    {
-                        //Run调用返回true 意味着需要增加计数器
-                        curRunCounter++;
-                    }
+                    //Run调用返回true 意味着需要增加计数器
+                    curRunCounter++;
                 }
-                
             }
         }
 
