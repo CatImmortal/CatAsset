@@ -84,6 +84,9 @@ namespace CatAsset.Editor
 
             outputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(Port));
             outputContainer.Add(outputPort);
+            
+            //节点不可删除
+            capabilities &= ~Capabilities.Deletable;
         }
     }
 }
