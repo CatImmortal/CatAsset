@@ -47,6 +47,7 @@ namespace CatAsset.Editor
             {
                 GameVersion = Application.version,
                 ManifestVersion = configParam.Config.ManifestVersion,
+                Platform = configParam.TargetPlatform.ToString(),
                 Bundles = new List<BundleManifestInfo>(),
             };
 
