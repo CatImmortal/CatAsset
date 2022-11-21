@@ -24,9 +24,10 @@ namespace CatAsset.Editor
         public DependencyChainGraphView()
         {
             SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
-            Insert(0, new GridBackground());
-            this.AddManipulator(new SelectionDragger());
-            this.AddManipulator(new ContentDragger());
+            Insert(0, new GridBackground());  //格子背景
+            this.AddManipulator(new SelectionDragger());  //节点可拖动
+            this.AddManipulator(new ContentDragger());  //节点图可移动
+            this.AddManipulator(new RectangleSelector());  //可框选多个节点
         }
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace CatAsset.Editor
 
             Dictionary<int, int> depthCounter = new Dictionary<int, int>();
             CalHeight(depthCounter);
-            
+
             AutoLayout(depthCounter);
         }
 
@@ -60,7 +61,7 @@ namespace CatAsset.Editor
             {
                 var node = new TNode
                 {
-                    Owner = info
+                    Owner = info,
                 };
                 depNodes.Add(info, node);
                 AddElement(node);
@@ -214,7 +215,7 @@ namespace CatAsset.Editor
 
                 //将高度从0...+n 映射到 -(n/2)...0...+(n/2)
                 node.Height -= maxHeight / 2;
-                float posY = node.Height.Value * 150;
+                float posY = node.Height.Value * 250;
 
                 Rect pos = new Rect(new Vector2(posX, posY), Vector2.zero);
                 node.SetPosition(pos);
