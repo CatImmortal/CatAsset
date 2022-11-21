@@ -10,7 +10,7 @@ namespace CatAsset.Editor
     {
         private static Color dirColor = Color.gray;
         private static Color assetColor = new Color(0, 0.5f, 0.5f);
-        
+
         [InitializeOnLoadMethod]
         private static void InitializeOnLoadMethod()
         {
@@ -20,7 +20,7 @@ namespace CatAsset.Editor
         private static void OnGUI(string guid, Rect selectionRect)
         {
 
-            if (BundleBuildConfigSO.Instance == null)
+            if (BundleBuildConfigSO.Instance == null || BundleBuildConfigSO.Instance.Directories == null)
             {
                 return;
             }
@@ -30,7 +30,7 @@ namespace CatAsset.Editor
                 BundleBuildConfigSO.Instance.RefreshDict();
             }
 
-            
+
             string path = AssetDatabase.GUIDToAssetPath(guid);
             if (AssetDatabase.IsValidFolder(path))
             {
@@ -66,11 +66,11 @@ namespace CatAsset.Editor
                 //图标视图
                 return;
             }
-            
+
             GUIStyle label = EditorStyles.label;
             GUIContent content = new GUIContent(desc);
-           
-         
+
+
             Rect pos = selectionRect;
 
             //只在列表视图绘制
@@ -78,14 +78,14 @@ namespace CatAsset.Editor
             pos.x = pos.xMax - width;  //绘制在最右边
             pos.width = width;
             pos.yMin++;
-            
+
             Color color = GUI.color;
             GUI.color = descColor;
             GUI.DrawTexture(pos, EditorGUIUtility.whiteTexture);
             GUI.color = color;
             GUI.Label(pos, desc);
-            
-            
+
+
         }
     }
 }

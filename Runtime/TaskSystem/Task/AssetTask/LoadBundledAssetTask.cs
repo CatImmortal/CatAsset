@@ -325,8 +325,8 @@ namespace CatAsset.Runtime
                 }
                 dependencyHandlers.Clear();
 
-                //检查下资源包的生命周期 可能需要卸载了
-                BundleRuntimeInfo.CheckLifeCycle();
+                //尝试卸载资源包
+                CatAssetManager.TryUnloadBundle(BundleRuntimeInfo);
                 
                 CallFinished(false);
             }
@@ -385,8 +385,6 @@ namespace CatAsset.Runtime
             {
                 //添加关联
                 CatAssetDatabase.SetAssetInstance(AssetRuntimeInfo.Asset, AssetRuntimeInfo);
-                
-                CatAssetDatabase.AddInMemoryAsset(AssetRuntimeInfo);
             }
         }
         
@@ -425,7 +423,7 @@ namespace CatAsset.Runtime
             {
                 if (IsAllCanceled())
                 {
-                    //所有任务都被取消了 这个资源没人要了 直接卸载吧
+                    //所有任务都被取消了 这个资源没人要了 直接走卸载流程吧
                     AssetRuntimeInfo.AddRefCount();  //注意这里要先计数+1 才能正确执行后续的卸载流程
                     CatAssetManager.UnloadAsset(AssetRuntimeInfo.Asset);
                     return;
