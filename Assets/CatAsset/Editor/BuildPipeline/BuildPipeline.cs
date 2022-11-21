@@ -29,7 +29,7 @@ namespace CatAsset.Editor
                 bundleBuildConfig.GetNormalBundleBuilds(), bundleBuildConfig.GetRawBundleBuilds());
             BundleBuildConfigParam configParam =
                 new BundleBuildConfigParam(bundleBuildConfig, targetPlatform);
-            
+
             BundleBuildContent content = new BundleBuildContent(infoParam.AssetBundleBuilds);
 
             //添加构建任务
@@ -53,7 +53,17 @@ namespace CatAsset.Editor
             ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
                 out IBundleBuildResults result, taskList, infoParam,configParam);
             sw.Stop();
-            Debug.Log($"资源包构建结束:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+
+            if (returnCode == ReturnCode.Success || returnCode == ReturnCode.SuccessCached)
+            {
+                Debug.Log($"资源包构建成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+            }
+            else
+            {
+                Debug.LogError($"资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+            }
+
+
         }
 
         /// <summary>
@@ -63,7 +73,7 @@ namespace CatAsset.Editor
             BuildTarget targetPlatform)
         {
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
-            
+
             //准备参数
             BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, fullOutputPath);
             BundleBuildInfoParam infoParam = new BundleBuildInfoParam(new List<AssetBundleBuild>(),
@@ -71,9 +81,9 @@ namespace CatAsset.Editor
             BundleBuildConfigParam configParam =
                 new BundleBuildConfigParam(bundleBuildConfig, targetPlatform);
             BundleBuildResults results = new BundleBuildResults();  //这里给个空参数，不然会报错
-            
+
             BuildContext buildContext = new BuildContext(buildParam,infoParam,configParam,results);
-            
+
             //添加构建任务
             IList<IBuildTask> taskList = new List<IBuildTask>();
             taskList.Add(new BuildRawBundles());
@@ -90,14 +100,14 @@ namespace CatAsset.Editor
                 taskList.Add(new CopyToReadOnlyDirectory());
                 taskList.Add(new WriteManifestFile());
             }
-            
+
             Stopwatch sw = Stopwatch.StartNew();
             //运行构建任务
             BuildTasksRunner.Run(taskList, buildContext);
-            
+
             Debug.Log($"原生资源包构建结束，耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
         }
-        
+
         /// <summary>
         /// 是否包含目标资源包构建设置
         /// </summary>
@@ -105,7 +115,7 @@ namespace CatAsset.Editor
         {
             return (options & target) != 0;
         }
-        
+
         /// <summary>
         /// 获取SBP用到的构建参数
         /// </summary>
@@ -118,10 +128,10 @@ namespace CatAsset.Editor
 
             //是否生成LinkXML
             parameters.WriteLinkXML = HasOption(bundleBuildConfig.Options,BundleBuildOptions.WriteLinkXML);
-            
+
             //是否增量构建
             parameters.UseCache = !HasOption(bundleBuildConfig.Options,BundleBuildOptions.ForceRebuild);
-           
+
             //是否使用LZ4压缩
             if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.ChunkBasedCompression))
             {
@@ -131,7 +141,7 @@ namespace CatAsset.Editor
             {
                 parameters.BundleCompression = BuildCompression.Uncompressed;
             }
-            
+
             return parameters;
         }
 

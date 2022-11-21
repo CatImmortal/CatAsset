@@ -78,9 +78,9 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 当前使用中的资源集合，这里面的资源的引用计数都大于0
+        /// 当前被引用中的资源集合，这里面的资源的引用计数都大于0
         /// </summary>
-        public readonly HashSet<AssetRuntimeInfo> UsingAssets = new HashSet<AssetRuntimeInfo>();
+        public readonly HashSet<AssetRuntimeInfo> ReferencingAssets = new HashSet<AssetRuntimeInfo>();
 
         /// <summary>
         /// 资源包依赖链
@@ -89,36 +89,37 @@ namespace CatAsset.Runtime
             new DependencyChain<BundleRuntimeInfo>();
 
         /// <summary>
-        /// 添加使用中的资源
+        /// 添加引用中的资源
         /// </summary>
-        public void AddUsingAsset(AssetRuntimeInfo assetRuntimeInfo)
+        public void AddReferencingAsset(AssetRuntimeInfo assetRuntimeInfo)
         {
-            UsingAssets.Add(assetRuntimeInfo);
+            ReferencingAssets.Add(assetRuntimeInfo);
         }
 
         /// <summary>
-        /// 移除使用中的资源
+        /// 移除引用中的资源
         /// </summary>
-        public void RemoveUsingAsset(AssetRuntimeInfo assetRuntimeInfo)
+        public void RemoveReferencingAsset(AssetRuntimeInfo assetRuntimeInfo)
         {
-            UsingAssets.Remove(assetRuntimeInfo);
-            CheckLifeCycle();
-        }
+            ReferencingAssets.Remove(assetRuntimeInfo);
 
-        /// <summary>
-        /// 检查资源包生命周期
-        /// </summary>
-        public void CheckLifeCycle()
-        {
-            if (!Manifest.IsRaw && UsingAssets.Count == 0 && DependencyChain.DownStream.Count == 0)
+            if (CanUnload())
             {
-                //此资源包不是原生资源包 没有资源在使用中 没有下游资源包
-                //卸载资源包
-                CatAssetManager.AddUnloadBundleTask(this);
+                //可以被卸载了
+                //尝试从内存卸载
+                CatAssetManager.TryUnloadBundle(this);
             }
         }
 
-
+        /// <summary>
+        /// 是否可卸载
+        /// </summary>
+        public bool CanUnload()
+        {
+            //此资源包不是原生资源包 没有资源在使用中 没有下游资源包
+            //就是可被卸载的
+            return !Manifest.IsRaw && ReferencingAssets.Count == 0 && DependencyChain.DownStream.Count == 0;
+        }
 
         public int CompareTo(BundleRuntimeInfo other)
         {

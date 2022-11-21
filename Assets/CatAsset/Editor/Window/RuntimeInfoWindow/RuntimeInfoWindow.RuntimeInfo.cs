@@ -95,7 +95,7 @@ namespace CatAsset.Editor
 
 
                     //没有资源在使用 也没下游资源包 不显示
-                    if (bundleRuntimeInfo.UsingAssets.Count == 0 && bundleRuntimeInfo.DependencyChain.DownStream.Count == 0)
+                    if (bundleRuntimeInfo.ReferencingAssets.Count == 0 && bundleRuntimeInfo.DependencyChain.DownStream.Count == 0)
                     {
                         continue;
                     }
@@ -105,7 +105,7 @@ namespace CatAsset.Editor
                         //仅显示主动加载的资源
                         //此资源包至少有一个主动加载的资源，才能显示
                         bool canShow = false;
-                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsingAssets)
+                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.ReferencingAssets)
                         {
                             if (assetRuntimeInfo.RefCount != assetRuntimeInfo.DependencyChain.DownStream.Count)
                             {
@@ -133,7 +133,7 @@ namespace CatAsset.Editor
                     {
                         EditorGUILayout.Space();
 
-                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.UsingAssets)
+                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.ReferencingAssets)
                         {
                             if (isOnlyShowActiveLoad && assetRuntimeInfo.RefCount == assetRuntimeInfo.DependencyChain.DownStream.Count)
                             {
@@ -169,7 +169,7 @@ namespace CatAsset.Editor
                 }
 
                 EditorGUILayout.LabelField($"资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(150));
-                EditorGUILayout.LabelField($"使用中资源数：{bundleRuntimeInfo.UsingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(125));
+                EditorGUILayout.LabelField($"使用中资源数：{bundleRuntimeInfo.ReferencingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(125));
                 EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
 
                 EditorGUILayout.LabelField($"上游资源包数量：{bundleRuntimeInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));

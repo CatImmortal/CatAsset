@@ -37,23 +37,30 @@ namespace CatAsset.Runtime
         public DependencyChain<AssetRuntimeInfo> DependencyChain { get; } = new DependencyChain<AssetRuntimeInfo>();
 
         /// <summary>
-        /// 下游资源记录（至少依赖加载过此资源一次的资源）
+        /// 下游资源记录（运行过程中至少依赖加载过此资源一次的资源）
         /// </summary>
         public HashSet<AssetRuntimeInfo> DownStreamRecord { get; } = new HashSet<AssetRuntimeInfo>();
 
         /// <summary>
         /// 增加引用计数
         /// </summary>
-        public void AddRefCount(int count = 1)
+        public void AddRefCount()
         {
-            RefCount += count;
-            CheckLifeCycle();
+            RefCount += 1;
+
+            if (RefCount == 1)
+            {
+                //被重新使用了
+                BundleRuntimeInfo bundleRuntimeInfo =
+                    CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+                bundleRuntimeInfo.AddReferencingAsset(this);
+            }
         }
 
         /// <summary>
         /// 减少引用计数
         /// </summary>
-        public void SubRefCount(int count = 1)
+        public void SubRefCount()
         {
             if (RefCount == 0)
             {
@@ -61,8 +68,20 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            RefCount -= count;
-            CheckLifeCycle();
+            RefCount -= 1;
+
+            if (IsUnused())
+            {
+                //未被使用了
+
+                //从资源包的使用中资源集合删除
+                BundleRuntimeInfo bundleRuntimeInfo =
+                    CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+                bundleRuntimeInfo.RemoveReferencingAsset(this);
+
+                //尝试从内存卸载
+                CatAssetManager.TryUnloadAssetFromMemory(this);
+            }
         }
 
         /// <summary>
@@ -76,12 +95,11 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 是否有还在内存中的下游资源
         /// </summary>
-        /// <returns></returns>
-        public bool IsDownStreamInMemory()
+        private bool IsDownStreamInMemory()
         {
             foreach (AssetRuntimeInfo info in DownStreamRecord)
             {
-                if (CatAssetDatabase.IsInMemoryAsset(info))
+                if (info.Asset != null)
                 {
                     return true;
                 }
@@ -91,22 +109,34 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 检查资源生命周期
+        /// 是否可被卸载
         /// </summary>
-        public void CheckLifeCycle()
+        public bool CanUnload()
         {
-            BundleRuntimeInfo bundleRuntimeInfo =
-                CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+            if (Asset == null)
+            {
+                return false;
+            }
 
-            if (IsUnused())
+            if (!IsUnused())
             {
-                //从资源包的使用中资源集合删除
-                bundleRuntimeInfo.RemoveUsingAsset(this);
+                //不可卸载使用中的资源
+                return false;
             }
-            else
+
+            if (Asset is GameObject)
             {
-                bundleRuntimeInfo.AddUsingAsset(this);
+                //不可卸载Prefab资源
+                return false;
             }
+
+            if (IsDownStreamInMemory())
+            {
+                //不可卸载下游资源还在内存中的 防止下游资源错误丢失依赖
+                return false;
+            }
+
+            return true;
         }
 
 
