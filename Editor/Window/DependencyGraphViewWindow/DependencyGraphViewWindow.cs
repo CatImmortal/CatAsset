@@ -14,7 +14,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 打开窗口
         /// </summary>
-        public static void Open<TOwner, TNode>(TOwner owner) 
+        public static void Open<TOwner, TNode>(TOwner owner)
             where TOwner : IDependencyChainOwner<TOwner>
             where TNode : BaseDependencyNode<TOwner>, new()
         {
@@ -29,14 +29,6 @@ namespace CatAsset.Editor
             window.ShowPopup();
 
             graphView.Init(owner);
-        }
-
-        private void OnGUI()
-        {
-            if (!Application.isPlaying)
-            {
-                Close();
-            }
         }
     }
 }

@@ -10,19 +10,22 @@ namespace CatAsset.Runtime
     {
         [Header("运行模式")]
         public RuntimeMode RuntimeMode = RuntimeMode.PackageOnly;
-        
+
         [Header("编辑器资源模式")]
         public bool IsEditorMode = true;
+
+        [Header("打开调试分析器")]
+        public bool IsOpenProfiler = false;
 
         [Header("资源包卸载延迟")]
         public float UnloadBundleDelayTime = 120f;
 
         [Header("资源卸载延迟")]
         public float UnloadAssetDelayTime = 60f;
-        
+
         [Header("每帧最大任务运行数量")]
         public int MaxTaskRunCount = 30;
-        
+
         private void Awake()
         {
             CatAssetManager.RuntimeMode= RuntimeMode;
@@ -30,6 +33,13 @@ namespace CatAsset.Runtime
             CatAssetManager.UnloadBundleDelayTime = UnloadBundleDelayTime;
             CatAssetManager.UnloadAssetDelayTime = UnloadAssetDelayTime;
             CatAssetManager.MaxTaskRunCount = MaxTaskRunCount;
+
+            if (IsOpenProfiler)
+            {
+                //打开调试分析器
+                gameObject.AddComponent<CatAssetProfilerComponent>();
+            }
+
         }
 
         private void Update()
