@@ -80,7 +80,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 当前被引用中的资源集合，这里面的资源的引用计数都大于0
         /// </summary>
-        public readonly HashSet<AssetRuntimeInfo> ReferencingAssets = new HashSet<AssetRuntimeInfo>();
+        public HashSet<AssetRuntimeInfo> ReferencingAssets { get; } = new HashSet<AssetRuntimeInfo>();
 
         /// <summary>
         /// 资源包依赖链

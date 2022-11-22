@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CatAsset.Runtime
 {
     /// <summary>
     /// 依赖链（如A依赖B，B依赖C，则称C为B的上游，B为A的上游）
     /// </summary>
+    [Serializable]
     public class DependencyChain<T>
     {
         /// <summary>

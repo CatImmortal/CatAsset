@@ -9,10 +9,7 @@ namespace CatAsset.Editor
 {
     public partial class RuntimeInfoWindow
     {
-        private bool isInitRuntimeInfoView;
-
-        private Dictionary<string, BundleRuntimeInfo> bundleRuntimeInfoDict;
-        private Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict;
+        private List<ProfilerBundleInfo> bundleInfo;
 
         private Vector2 scrollPos;
 
@@ -26,16 +23,10 @@ namespace CatAsset.Editor
         /// </summary>
         private Dictionary<string, bool> foldOutDict = new Dictionary<string, bool>();
 
-        /// <summary>
-        /// 初始化运行时信息界面
-        /// </summary>
-        private void InitRuntimeInfoView()
+
+        private void ClearRuntimeInfoView()
         {
-            isInitRuntimeInfoView = true;
-
-            bundleRuntimeInfoDict = typeof(CatAssetDatabase).GetField(nameof(bundleRuntimeInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, BundleRuntimeInfo>;
-            assetRuntimeInfoDict = typeof(CatAssetDatabase).GetField(nameof(assetRuntimeInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, AssetRuntimeInfo>;
-
+            bundleInfo = null;
         }
 
         /// <summary>
@@ -43,11 +34,6 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawRuntimeInfoView()
         {
-            if (!isInitRuntimeInfoView)
-            {
-                InitRuntimeInfoView();
-            }
-
             bool isAllFoldOutTrue = false;
             bool isAllFoldOutFalse = false;
 
@@ -70,32 +56,36 @@ namespace CatAsset.Editor
             {
                 scrollPos = sv.scrollPosition;
 
-                foreach (KeyValuePair<string, BundleRuntimeInfo> item in bundleRuntimeInfoDict)
+                if (bundleInfo == null)
+                {
+                    return;
+                }
+
+                foreach (var profilerBundleInfo in bundleInfo)
                 {
 
 
-                    string bundleRelativePath = item.Key;
-                    BundleRuntimeInfo bundleRuntimeInfo = item.Value;
+                    string relativePath = profilerBundleInfo.RelativePath;
 
-                    if (!foldOutDict.ContainsKey(bundleRelativePath))
+                    if (!foldOutDict.ContainsKey(relativePath))
                     {
-                        foldOutDict.Add(bundleRelativePath, false);
+                        foldOutDict.Add(relativePath, false);
                     }
 
                     if (isAllFoldOutTrue)
                     {
                         //点击过全部展开
-                        foldOutDict[bundleRelativePath] = true;
+                        foldOutDict[relativePath] = true;
                     }
                     else if (isAllFoldOutFalse)
                     {
                         //点击过全部收起
-                        foldOutDict[bundleRelativePath] = false;
+                        foldOutDict[relativePath] = false;
                     }
 
 
                     //没有资源在使用 也没下游资源包 不显示
-                    if (bundleRuntimeInfo.ReferencingAssets.Count == 0 && bundleRuntimeInfo.DependencyChain.DownStream.Count == 0)
+                    if (profilerBundleInfo.ReferencingAssets.Count == 0 && profilerBundleInfo.DependencyChain.DownStream.Count == 0)
                     {
                         continue;
                     }
@@ -105,9 +95,9 @@ namespace CatAsset.Editor
                         //仅显示主动加载的资源
                         //此资源包至少有一个主动加载的资源，才能显示
                         bool canShow = false;
-                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.ReferencingAssets)
+                        foreach (var profilerAssetData in profilerBundleInfo.ReferencingAssets)
                         {
-                            if (assetRuntimeInfo.RefCount != assetRuntimeInfo.DependencyChain.DownStream.Count)
+                            if (profilerAssetData.RefCount != profilerAssetData.DependencyChain.DownStream.Count)
                             {
                                 canShow = true;
                                 break;
@@ -119,29 +109,26 @@ namespace CatAsset.Editor
                         }
                     }
 
-
-
-
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        foldOutDict[bundleRelativePath] = EditorGUILayout.Foldout(foldOutDict[bundleRelativePath], bundleRelativePath);
+                        foldOutDict[relativePath] = EditorGUILayout.Foldout(foldOutDict[relativePath], relativePath);
 
-                        DrawBundleRuntimeInfo(bundleRuntimeInfo,false);
+                        DrawProfilerBundleInfo(profilerBundleInfo,false);
                     }
 
-                    if (foldOutDict[bundleRelativePath])
+                    if (foldOutDict[relativePath])
                     {
                         EditorGUILayout.Space();
 
-                        foreach (AssetRuntimeInfo assetRuntimeInfo in bundleRuntimeInfo.ReferencingAssets)
+                        foreach (var profilerAssetInfo in profilerBundleInfo.ReferencingAssets)
                         {
-                            if (isOnlyShowActiveLoad && assetRuntimeInfo.RefCount == assetRuntimeInfo.DependencyChain.DownStream.Count)
+                            if (isOnlyShowActiveLoad && profilerAssetInfo.RefCount == profilerAssetInfo.DependencyChain.DownStream.Count)
                             {
                                 //只显示主动加载的资源 且此资源纯被依赖加载的 就跳过
                                 continue;
                             }
 
-                            DrawAssetRuntimeInfo(assetRuntimeInfo);
+                            DrawProfilerAssetInfo(profilerAssetInfo);
                         }
 
                         EditorGUILayout.Space();
@@ -153,34 +140,34 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 绘制资源包运行时信息
+        /// 绘制分析器资源包信息
         /// </summary>
-        private void DrawBundleRuntimeInfo(BundleRuntimeInfo bundleRuntimeInfo,bool isDrawName = true)
+        private void DrawProfilerBundleInfo(ProfilerBundleInfo profilerBundleInfo,bool isDrawName = true)
         {
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (isDrawName)
                 {
-                    EditorGUILayout.LabelField($"{bundleRuntimeInfo.Manifest.RelativePath}" ,GUILayout.Width(400));
+                    EditorGUILayout.LabelField($"{profilerBundleInfo.RelativePath}" ,GUILayout.Width(400));
                 }
                 else
                 {
                     EditorGUILayout.Space();
                 }
 
-                EditorGUILayout.LabelField($"资源组：{bundleRuntimeInfo.Manifest.Group}" ,GUILayout.Width(150));
-                EditorGUILayout.LabelField($"引用中资源数：{bundleRuntimeInfo.ReferencingAssets.Count}/{bundleRuntimeInfo.Manifest.Assets.Count}" ,GUILayout.Width(125));
-                EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(bundleRuntimeInfo.Manifest.Length)}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"资源组：{profilerBundleInfo.Group}" ,GUILayout.Width(150));
+                EditorGUILayout.LabelField($"引用中资源数：{profilerBundleInfo.ReferencingAssets.Count}/{profilerBundleInfo.AssetCount}" ,GUILayout.Width(125));
+                EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(profilerBundleInfo.Length)}",GUILayout.Width(125));
 
-                EditorGUILayout.LabelField($"上游资源包数量：{bundleRuntimeInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));
-                EditorGUILayout.LabelField($"下游资源包数量：{bundleRuntimeInfo.DependencyChain.DownStream.Count}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"上游资源包数量：{profilerBundleInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"下游资源包数量：{profilerBundleInfo.DependencyChain.DownStream.Count}",GUILayout.Width(125));
 
 
-                if (GUILayout.Button("查看资源包依赖关系图") && (bundleRuntimeInfo.DependencyChain.UpStream.Count > 0 || bundleRuntimeInfo.DependencyChain.DownStream.Count > 0))
-                {
-                    DependencyGraphViewWindow.Open<BundleRuntimeInfo,BundleNode>(bundleRuntimeInfo);
-                }
-                
+                // if (GUILayout.Button("查看资源包依赖关系图") && (profilerBundleInfo.DependencyChain.UpStream.Count > 0 || profilerBundleInfo.DependencyChain.DownStream.Count > 0))
+                // {
+                //     DependencyGraphViewWindow.Open<BundleRuntimeInfo,BundleNode>(profilerBundleInfo);
+                // }
+
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
             }
 
@@ -188,36 +175,36 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 绘制资源运行时信息
+        /// 绘制分析器资源信息
         /// </summary>
-        private void DrawAssetRuntimeInfo(AssetRuntimeInfo assetRuntimeInfo)
+        private void DrawProfilerAssetInfo(ProfilerAssetInfo profilerAssetInfo)
         {
             using (new EditorGUILayout.HorizontalScope())
             {
                 //资源名
-                EditorGUILayout.LabelField("\t" + assetRuntimeInfo.AssetManifest.Name);
+                EditorGUILayout.LabelField("\t" + profilerAssetInfo.Name);
 
                 //对象引用
                 EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.ObjectField(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetRuntimeInfo.AssetManifest.Name), typeof(UnityEngine.Object),false);
+                EditorGUILayout.ObjectField(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(profilerAssetInfo.Name), typeof(UnityEngine.Object),false);
                 EditorGUI.EndDisabledGroup();
 
                 //长度
-                EditorGUILayout.LabelField($"\t长度：{RuntimeUtil.GetByteLengthDesc(assetRuntimeInfo.AssetManifest.Length)}");
+                EditorGUILayout.LabelField($"\t长度：{RuntimeUtil.GetByteLengthDesc(profilerAssetInfo.Length)}");
 
                 //引用计数
-                EditorGUILayout.LabelField($"\t引用计数：{assetRuntimeInfo.RefCount}");
+                EditorGUILayout.LabelField($"\t引用计数：{profilerAssetInfo.RefCount}");
 
                 //上游资源数
-                EditorGUILayout.LabelField($"\t上游资源数量：{assetRuntimeInfo.DependencyChain.UpStream.Count}");
+                EditorGUILayout.LabelField($"\t上游资源数量：{profilerAssetInfo.DependencyChain.UpStream.Count}");
 
                 //下游资源数
-                EditorGUILayout.LabelField($"\t下游资源数量：{assetRuntimeInfo.DependencyChain.DownStream.Count}");
+                EditorGUILayout.LabelField($"\t下游资源数量：{profilerAssetInfo.DependencyChain.DownStream.Count}");
 
-                if (GUILayout.Button("查看资源依赖关系图") && (assetRuntimeInfo.DependencyChain.UpStream.Count > 0 || assetRuntimeInfo.DependencyChain.DownStream.Count > 0))
-                {
-                    DependencyGraphViewWindow.Open<AssetRuntimeInfo,AssetNode>(assetRuntimeInfo);
-                }
+                // if (GUILayout.Button("查看资源依赖关系图") && (profilerAssetInfo.DependencyChain.UpStream.Count > 0 || profilerAssetInfo.DependencyChain.DownStream.Count > 0))
+                // {
+                //     DependencyGraphViewWindow.Open<AssetRuntimeInfo,AssetNode>(profilerAssetInfo);
+                // }
             }
         }
     }

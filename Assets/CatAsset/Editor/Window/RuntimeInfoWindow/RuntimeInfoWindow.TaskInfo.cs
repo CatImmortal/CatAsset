@@ -10,7 +10,6 @@ namespace CatAsset.Editor
 {
     public partial class RuntimeInfoWindow
     {
-        private bool isInitTaskInfoView;
         private Vector2 taskInfoScrollPos;
         private Dictionary<TaskRunner, Dictionary<string, BaseTask>> allTasks;
 
@@ -19,11 +18,8 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitTaskInfoView()
         {
-            isInitTaskInfoView = true;
-
             allTasks = typeof(TaskRunner).GetField("MainTaskDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as
                 Dictionary<TaskRunner, Dictionary<string, BaseTask>>;
-
         }
 
         /// <summary>
@@ -31,9 +27,9 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawTaskInfoView()
         {
-            if (!isInitTaskInfoView)
+            if (allTasks == null)
             {
-                InitTaskInfoView();
+                return;
             }
 
             using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(taskInfoScrollPos))

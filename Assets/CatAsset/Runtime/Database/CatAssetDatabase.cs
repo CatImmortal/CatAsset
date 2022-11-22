@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
@@ -51,13 +51,13 @@ namespace CatAsset.Runtime
         {
             bundleRuntimeInfoDict.Clear();
             assetRuntimeInfoDict.Clear();
-            
+
             foreach (BundleManifestInfo info in manifest.Bundles)
             {
                 InitRuntimeInfo(info,BundleRuntimeInfo.State.InReadOnly);
             }
         }
-        
+
         /// <summary>
         /// 根据资源包清单信息初始化运行时信息
         /// </summary>
@@ -124,8 +124,8 @@ namespace CatAsset.Runtime
                 {
                     name = assetName;
                 }
-                
-                
+
+
                 //创建外置原生资源的资源运行时信息
                 assetRuntimeInfo = new AssetRuntimeInfo();
                 assetRuntimeInfo.AssetManifest = new AssetManifestInfo
@@ -152,7 +152,7 @@ namespace CatAsset.Runtime
                 bundleRuntimeInfoDict.Add(bundleRuntimeInfo.Manifest.RelativePath,bundleRuntimeInfo);
             }
         }
-        
+
         /// <summary>
         /// 获取资源运行时信息
         /// </summary>
@@ -161,7 +161,7 @@ namespace CatAsset.Runtime
             assetInstanceDict.TryGetValue(asset, out AssetRuntimeInfo info);
             return info;
         }
-        
+
         /// <summary>
         /// 设置资源实例与资源运行时信息的关联
         /// </summary>
@@ -178,7 +178,7 @@ namespace CatAsset.Runtime
             assetInstanceDict.Remove(asset);
         }
 
-           
+
         /// <summary>
         /// 获取场景资源运行时信息
         /// </summary>
@@ -187,7 +187,7 @@ namespace CatAsset.Runtime
             sceneInstanceDict.TryGetValue(scene.handle, out AssetRuntimeInfo info);
             return info;
         }
-        
+
         /// <summary>
         /// 设置场景实例与资源运行时信息的关联
         /// </summary>
@@ -223,7 +223,7 @@ namespace CatAsset.Runtime
                 //不可绑定无效句柄
                 return;
             }
-            
+
             if (!sceneBindHandlers.TryGetValue(scene.handle,out var handlers))
             {
                 handlers = new List<IBindableHandler>();
@@ -263,6 +263,117 @@ namespace CatAsset.Runtime
         {
             List<GroupInfo> groupInfos = groupInfoDict.Values.ToList();
             return groupInfos;
+        }
+
+        /// <summary>
+        /// 获取调试分析器数据
+        /// </summary>
+        public static ProfilerInfo GetProfilerInfo(ProfilerInfoType type)
+        {
+
+            ProfilerInfo info = new ProfilerInfo { Type = type };
+
+            switch (type)
+            {
+                case ProfilerInfoType.None:
+                    break;
+                case ProfilerInfoType.Bundle:
+
+                    info.BundleInfo = new List<ProfilerBundleInfo>();
+
+                    Dictionary<string, ProfilerBundleInfo> pbdDict =
+                        new Dictionary<string, ProfilerBundleInfo>();
+                    Dictionary<string, ProfilerAssetInfo> padDict =
+                        new Dictionary<string, ProfilerAssetInfo>();
+
+
+                    //先建立映射
+                    foreach (var pair in bundleRuntimeInfoDict)
+                    {
+                        var bri = pair.Value;
+                        if (!bri.Manifest.IsRaw && bri.Bundle == null)
+                        {
+                            //跳过未加载的资源包
+                        }
+
+                        var pbd = new ProfilerBundleInfo
+                        {
+                            Directory = bri.Manifest.Directory,
+                            BundleName = bri.Manifest.BundleName,
+                            RelativePath = bri.Manifest.RelativePath,
+                            Group = bri.Manifest.Group,
+                            Length = bri.Manifest.Length,
+                            AssetCount = bri.Manifest.Assets.Count,
+                        };
+
+                        info.BundleInfo.Add(pbd);
+                        pbdDict.Add(bri.Manifest.RelativePath, pbd);
+
+                        foreach (var ari in bri.ReferencingAssets)
+                        {
+                            var pad = new ProfilerAssetInfo
+                            {
+                                Name = ari.AssetManifest.Name,
+                                Length = ari.AssetManifest.Length,
+                                RefCount = ari.RefCount,
+                            };
+                            padDict.Add(pad.Name, pad);
+                        }
+                    }
+
+                    //然后建立引用
+                    foreach (var pair in bundleRuntimeInfoDict)
+                    {
+                        var bri = pair.Value;
+
+                        if (!pbdDict.TryGetValue(bri.Manifest.RelativePath, out var pbd))
+                        {
+                            //跳过没有对应pbd的资源包
+                            continue;
+                        }
+
+                        foreach (var upBri in bri.DependencyChain.UpStream)
+                        {
+                            pbd.DependencyChain.UpStream.Add(pbdDict[upBri.Manifest.RelativePath]);
+                        }
+
+                        foreach (var downBri in bri.DependencyChain.DownStream)
+                        {
+                            pbd.DependencyChain.DownStream.Add(pbdDict[downBri.Manifest.RelativePath]);
+                        }
+
+                        foreach (var ari in bri.ReferencingAssets)
+                        {
+                            var pad = padDict[ari.AssetManifest.Name];
+                            pbd.ReferencingAssets.Add(pad);
+
+                            foreach (var upAri in ari.DependencyChain.UpStream)
+                            {
+                                pad.DependencyChain.UpStream.Add(padDict[upAri.AssetManifest.Name]);
+                            }
+
+                            foreach (var downAri in ari.DependencyChain.DownStream)
+                            {
+                                pad.DependencyChain.DownStream.Add(padDict[downAri.AssetManifest.Name]);
+                            }
+                        }
+
+                    }
+
+
+
+                    break;
+                case ProfilerInfoType.Task:
+                    break;
+                case ProfilerInfoType.Group:
+                    break;
+                case ProfilerInfoType.Updater:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+
+            return info;
         }
     }
 }
