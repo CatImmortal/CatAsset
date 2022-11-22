@@ -79,11 +79,6 @@ namespace CatAsset.Editor
         public string OutputPath = "./AssetBundles";
 
         /// <summary>
-        /// 是否进行冗余资源分析
-        /// </summary>
-        public bool IsRedundancyAnalyze = true;
-
-        /// <summary>
         /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到只读目录下
         /// </summary>
         public bool IsCopyToReadOnlyDirectory = true;
@@ -162,13 +157,10 @@ namespace CatAsset.Editor
 
                 //上一步执行后可能出现同一个隐式依赖被转换为了不同资源包的显式构建资源
                 //因此可能出现了资源冗余的情况
-                if (IsRedundancyAnalyze)
-                {
-                    //进行冗余资源分析
-                    EditorUtility.DisplayProgressBar("刷新资源包构建信息", "进行冗余资源分析...", curStep / stepNum);
-                    ProfileTime(RedundancyAssetAnalyze,sw,"进行冗余资源分析");
-
-                }
+                
+                //进行冗余资源分析
+                EditorUtility.DisplayProgressBar("刷新资源包构建信息", "进行冗余资源分析...", curStep / stepNum);
+                ProfileTime(RedundancyAssetAnalyze,sw,"进行冗余资源分析");
                 curStep++;
 
                 //在将隐式依赖转换为显式构建资源后，可能出现场景资源和非场景资源被放进了同一个资源包的情况
