@@ -117,6 +117,11 @@ namespace CatAsset.Runtime
             return !Manifest.IsRaw && ReferencingAssets.Count == 0 && DependencyChain.DownStream.Count == 0;
         }
 
+        public override string ToString()
+        {
+            return Manifest.ToString();
+        }
+
         public int CompareTo(BundleRuntimeInfo other)
         {
             return Manifest.CompareTo(other.Manifest);
@@ -127,10 +132,7 @@ namespace CatAsset.Runtime
             return Manifest.Equals(other.Manifest);
         }
 
-        public override string ToString()
-        {
-            return Manifest.ToString();
-        }
+
     }
 }
 

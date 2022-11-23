@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// 分析器资源包信息
     /// </summary>
     [Serializable]
-    public class ProfilerBundleInfo : IReference
+    public class ProfilerBundleInfo : IReference, IComparable<ProfilerBundleInfo>
     {
         /// <summary>
         /// 相对路径
@@ -30,20 +30,25 @@ namespace CatAsset.Runtime
         public long Length;
 
         /// <summary>
-        /// 资源总数
+        /// 当前被引用中的资源数量
         /// </summary>
-        public int AssetCount;
+        public int ReferencingAssetCount;
 
         /// <summary>
-        /// 当前被引用中的资源集合，这里面的资源的引用计数都大于0（索引）
+        /// 总资源数量
         /// </summary>
-        public List<int> ReferencingAssetIndexes = new List<int>();
+        public int TotalAssetCount;
 
         /// <summary>
-        /// 当前被引用中的资源集合，这里面的资源的引用计数都大于0
+        /// 在内存中的资源列表（索引）
+        /// </summary>
+        public List<int> InMemoryAssetIndexes = new List<int>();
+
+        /// <summary>
+        ///  在内存中的资源列表
         /// </summary>
         [NonSerialized]
-        public HashSet<ProfilerAssetInfo> ReferencingAssets = new HashSet<ProfilerAssetInfo>();
+        public List<ProfilerAssetInfo> InMemoryAssets = new List<ProfilerAssetInfo>();
 
         /// <summary>
         /// 上游资源包索引
@@ -66,14 +71,20 @@ namespace CatAsset.Runtime
             return RelativePath;
         }
 
-        public static ProfilerBundleInfo Create(string relativePath,string group,bool isRaw,long length,int assetCount)
+        public int CompareTo(ProfilerBundleInfo other)
+        {
+            return RelativePath.CompareTo(other.RelativePath);
+        }
+
+        public static ProfilerBundleInfo Create(string relativePath,string group,bool isRaw,long length,int referencingAssetCount,int totalAssetCount)
         {
             ProfilerBundleInfo info = ReferencePool.Get<ProfilerBundleInfo>();
             info.RelativePath = relativePath;
             info.Group = group;
             info.IsRaw = isRaw;
             info.Length = length;
-            info.AssetCount = assetCount;
+            info.ReferencingAssetCount = referencingAssetCount;
+            info.TotalAssetCount = totalAssetCount;
             return info;
         }
 
@@ -83,12 +94,16 @@ namespace CatAsset.Runtime
             Group = default;
             IsRaw = default;
             Length = default;
-            AssetCount = default;
+            ReferencingAssetCount = default;
+            TotalAssetCount = default;
 
-            ReferencingAssetIndexes.Clear();
+            InMemoryAssetIndexes.Clear();
 
             UpStreamIndexes.Clear();
             DownStreamIndexes.Clear();
         }
+
+
+
     }
 }
