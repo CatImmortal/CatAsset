@@ -296,12 +296,15 @@ namespace CatAsset.Runtime
                     break;
 
                 case ProfilerInfoType.Task:
+                    BuildProfilerTaskInfo(info);
                     break;
 
                 case ProfilerInfoType.Group:
+                    BuildProfilerGroupInfo(info);
                     break;
 
                 case ProfilerInfoType.Updater:
+                    BuildProfilerUpdaterInfo(info);
                     break;
 
                 default:
@@ -424,6 +427,57 @@ namespace CatAsset.Runtime
                     pai.DownStreamIndexes.Add(downPaiIndex);
                 }
             }
+        }
+
+        /// <summary>
+        /// 构建分析器任务信息
+        /// </summary>
+        private static void BuildProfilerTaskInfo(ProfilerInfo info)
+        {
+            foreach (var pair in TaskRunner.MainTaskDict)
+            {
+                foreach (var pair2 in pair.Value)
+                {
+                    var task = pair2.Value;
+
+                    ProfilerTaskInfo pti = ProfilerTaskInfo.Create(task.Name,task.GetType().Name,task.State,task.Progress,task.MergedTaskCount);
+                    info.TaskInfoList.Add(pti);
+                }
+            }
+            info.TaskInfoList.Sort();
+        }
+
+        /// <summary>
+        /// 构建分析器资源组信息
+        /// </summary>
+        private static void BuildProfilerGroupInfo(ProfilerInfo info)
+        {
+            foreach (var pair in groupInfoDict)
+            {
+                var group = pair.Value;
+
+                ProfilerGroupInfo pgi = ProfilerGroupInfo.Create(group.GroupName, group.RemoteCount, group.RemoteLength,
+                    group.LocalCount, group.LocalLength);
+
+                info.GroupInfoList.Add(pgi);
+            }
+            info.GroupInfoList.Sort();
+        }
+
+        /// <summary>
+        /// 构建分析器更新器信息
+        /// </summary>
+        private static void BuildProfilerUpdaterInfo(ProfilerInfo info)
+        {
+            foreach (var pair in CatAssetUpdater.GroupUpdaterDict)
+            {
+                var updater = pair.Value;
+                ProfilerUpdaterInfo pui = ProfilerUpdaterInfo.Create(updater.GroupName, updater.TotalCount,
+                    updater.TotalLength, updater.UpdatedCount, updater.UpdatedLength, updater.Speed, updater.State);
+
+                info.UpdaterInfoList.Add(pui);
+            }
+            info.UpdaterInfoList.Sort();
         }
     }
 }

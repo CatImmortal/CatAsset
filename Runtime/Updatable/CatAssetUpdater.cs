@@ -16,8 +16,8 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源组名->资源组对应的资源更新器
         /// </summary>
-        private static Dictionary<string, GroupUpdater> groupUpdaterDict = new Dictionary<string, GroupUpdater>();
-        
+        internal static readonly Dictionary<string, GroupUpdater> GroupUpdaterDict = new Dictionary<string, GroupUpdater>();
+
 
         /// <summary>
         /// 生成读写区资源清单
@@ -39,7 +39,7 @@ namespace CatAsset.Runtime
                     bundleInfos.Add(pair.Value.Manifest);
                 }
             }
-            
+
             bundleInfos.Sort();
             manifest.Bundles = bundleInfos;
 
@@ -61,11 +61,11 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static GroupUpdater GetOrAddGroupUpdater(string group)
         {
-            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater updater))
+            if (!GroupUpdaterDict.TryGetValue(group,out GroupUpdater updater))
             {
                 updater = new GroupUpdater();
                 updater.GroupName = group;
-                groupUpdaterDict.Add(group, updater);
+                GroupUpdaterDict.Add(group, updater);
             }
             return updater;
         }
@@ -75,7 +75,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static GroupUpdater GetGroupUpdater(string group)
         {
-            groupUpdaterDict.TryGetValue(group, out GroupUpdater updater);
+            GroupUpdaterDict.TryGetValue(group, out GroupUpdater updater);
             return updater;
         }
 
@@ -84,7 +84,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void RemoveGroupUpdater(string group)
         {
-            groupUpdaterDict.Remove(group);
+            GroupUpdaterDict.Remove(group);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void UpdateGroup(string group,BundleUpdatedCallback callback,TaskPriority priority = TaskPriority.Middle)
         {
-            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
+            if (!GroupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
             {
                 Debug.LogError($"更新失败，没有找到该资源组的资源更新器：{group}");
                 return;
@@ -108,7 +108,7 @@ namespace CatAsset.Runtime
         internal static void UpdateBundle(string group,BundleManifestInfo info, BundleUpdatedCallback callback,
             TaskPriority priority = TaskPriority.VeryHeight)
         {
-            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
+            if (!GroupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
             {
                 Debug.LogError($"更新失败，没有找到该资源组的资源更新器：{group}");
                 return;
@@ -122,7 +122,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void PauseGroupUpdate(string group, bool isPause)
         {
-            if (!groupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
+            if (!GroupUpdaterDict.TryGetValue(group,out GroupUpdater groupUpdater))
             {
                 Debug.LogError($"暂停失败，没有找到该资源组的更新器：{group}");
                 return;

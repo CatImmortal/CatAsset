@@ -10,16 +10,13 @@ namespace CatAsset.Editor
 {
     public partial class ProfilerInfoWindow
     {
-        private Vector2 taskInfoScrollPos;
-        private Dictionary<TaskRunner, Dictionary<string, BaseTask>> allTasks;
 
-        /// <summary>
-        /// 初始化任务信息界面
-        /// </summary>
-        private void InitTaskInfoView()
+        private List<ProfilerTaskInfo> taskInfoList;
+        private Vector2 taskInfoScrollPos;
+
+        private void ClearTaskInfoView()
         {
-            allTasks = typeof(TaskRunner).GetField("MainTaskDict", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as
-                Dictionary<TaskRunner, Dictionary<string, BaseTask>>;
+            taskInfoList = null;
         }
 
         /// <summary>
@@ -27,10 +24,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawTaskInfoView()
         {
-            if (allTasks == null)
-            {
-                return;
-            }
+
 
             using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(taskInfoScrollPos))
             {
@@ -45,21 +39,23 @@ namespace CatAsset.Editor
                     EditorGUILayout.LabelField("已合并任务数");
                 }
 
-                foreach (KeyValuePair<TaskRunner, Dictionary<string, BaseTask>> pair in allTasks)
+                if (taskInfoList == null)
                 {
-                    foreach (KeyValuePair<string,BaseTask> item in pair.Value)
+                    return;
+                }
+
+                foreach (var profilerTaskInfo in taskInfoList)
+                {
+                    using (new EditorGUILayout.HorizontalScope())
                     {
-                        BaseTask task = item.Value;
-                        using (new EditorGUILayout.HorizontalScope())
-                        {
-                            EditorGUILayout.LabelField(task.Name, GUILayout.Width(position.width / 2));
-                            EditorGUILayout.LabelField(task.GetType().Name);
-                            EditorGUILayout.LabelField(task.State.ToString());
-                            EditorGUILayout.LabelField(task.Progress.ToString("0.00"));
-                            EditorGUILayout.LabelField(task.MergedTaskCount.ToString());
-                        }
+                        EditorGUILayout.LabelField(profilerTaskInfo.Name, GUILayout.Width(position.width / 2));
+                        EditorGUILayout.LabelField(profilerTaskInfo.Type);
+                        EditorGUILayout.LabelField(profilerTaskInfo.State.ToString());
+                        EditorGUILayout.LabelField(profilerTaskInfo.Progress.ToString("0.00"));
+                        EditorGUILayout.LabelField(profilerTaskInfo.MergedTaskCount.ToString());
                     }
                 }
+
             }
         }
     }

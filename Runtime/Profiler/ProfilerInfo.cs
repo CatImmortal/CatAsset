@@ -29,6 +29,21 @@ namespace CatAsset.Runtime
         public List<ProfilerBundleInfo> BundleInfoList = new List<ProfilerBundleInfo>();
 
         /// <summary>
+        /// 分析器任务信息列表
+        /// </summary>
+        public List<ProfilerTaskInfo> TaskInfoList = new List<ProfilerTaskInfo>();
+
+        /// <summary>
+        /// 分析器资源组信息列表
+        /// </summary>
+        public List<ProfilerGroupInfo> GroupInfoList = new List<ProfilerGroupInfo>();
+
+        /// <summary>
+        /// 分析器更新器信息列表
+        /// </summary>
+        public List<ProfilerUpdaterInfo> UpdaterInfoList = new List<ProfilerUpdaterInfo>();
+
+        /// <summary>
         /// 序列化
         /// </summary>
         public static byte[] Serialize(ProfilerInfo profilerInfo)
@@ -52,6 +67,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public void RebuildReference()
         {
+            if (Type != ProfilerInfoType.Bundle)
+            {
+                //资源包的分析器信息才需要重建引用
+                return;
+            }
+
             foreach (var pbi in BundleInfoList)
             {
                 //资源包依赖链
@@ -111,6 +132,24 @@ namespace CatAsset.Runtime
                 ReferencePool.Release(pbi);
             }
             BundleInfoList.Clear();
+
+            foreach (var pti in TaskInfoList)
+            {
+                ReferencePool.Release(pti);
+            }
+            TaskInfoList.Clear();
+
+            foreach (var pgi in GroupInfoList)
+            {
+                ReferencePool.Release(pgi);
+            }
+            GroupInfoList.Clear();
+
+            foreach (var pui in UpdaterInfoList)
+            {
+                ReferencePool.Release(pui);
+            }
+            UpdaterInfoList.Clear();
         }
     }
 }

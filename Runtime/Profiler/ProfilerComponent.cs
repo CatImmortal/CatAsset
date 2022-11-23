@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.Networking.PlayerConnection;
 
@@ -52,6 +50,7 @@ namespace CatAsset.Runtime
             byte[] bytes = arg0.data;
             int enumInt = BitConverter.ToInt32(bytes);
             CurType = (ProfilerInfoType)enumInt;
+            Debug.Log($"接收编辑器消息切换分析器类型:{CurType}");
         }
 
         private void Update()

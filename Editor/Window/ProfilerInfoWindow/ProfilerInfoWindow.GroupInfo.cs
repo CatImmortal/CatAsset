@@ -7,16 +7,11 @@ namespace CatAsset.Editor
 {
     public partial class ProfilerInfoWindow
     {
-        private bool isInitGroupInfoView;
-        private Dictionary<string, GroupInfo> groupInfoDict;
+        private List<ProfilerGroupInfo> groupInfoList;
 
-        /// <summary>
-        /// 初始化资源组信息界面
-        /// </summary>
-        private void InitGroupInfoView()
+        private void ClearGroupInfoView()
         {
-            isInitGroupInfoView = true;
-            groupInfoDict = typeof(CatAssetDatabase).GetField(nameof(groupInfoDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, GroupInfo>;
+            groupInfoList = null;
         }
 
         /// <summary>
@@ -24,11 +19,6 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawGroupInfoView()
         {
-            if (!isInitGroupInfoView)
-            {
-                InitGroupInfoView();
-            }
-
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("资源组");
@@ -39,22 +29,26 @@ namespace CatAsset.Editor
 
             }
 
-            foreach (KeyValuePair<string, GroupInfo> item in groupInfoDict)
+            if (groupInfoList == null)
             {
-                DrawGroupInfo(item.Value);
+                return;
             }
+
+            foreach (var profilerGroupInfo in groupInfoList)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField(profilerGroupInfo.Name);
+                    EditorGUILayout.LabelField(profilerGroupInfo.RemoteCount.ToString());
+                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerGroupInfo.RemoteLength));
+                    EditorGUILayout.LabelField(profilerGroupInfo.LocalCount.ToString());
+                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerGroupInfo.LocalLength));
+                }
+            }
+
+
         }
 
-        private void DrawGroupInfo(GroupInfo groupInfo)
-        {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.LabelField(groupInfo.GroupName);
-                EditorGUILayout.LabelField(groupInfo.RemoteCount.ToString());
-                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(groupInfo.RemoteLength));
-                EditorGUILayout.LabelField(groupInfo.LocalCount.ToString());
-                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(groupInfo.LocalLength));
-            }
-        }
+
     }
 }
