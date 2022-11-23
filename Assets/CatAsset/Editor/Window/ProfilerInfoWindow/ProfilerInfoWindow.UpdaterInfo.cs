@@ -7,28 +7,18 @@ namespace CatAsset.Editor
 {
     public partial class ProfilerInfoWindow
     {
-        private bool isInitGroupUpdaterInfoView;
-        private static Dictionary<string, GroupUpdater> groupUpdaterDict;
+        private List<ProfilerUpdaterInfo> updaterInfoList;
 
-        /// <summary>
-        /// 初始化资源组更新器信息界面
-        /// </summary>
-        private void InitGroupUpdaterInfoView()
+        private void ClearUpdaterInfoView()
         {
-            isInitGroupUpdaterInfoView = true;
-
-            groupUpdaterDict = typeof(CatAssetUpdater).GetField(nameof(groupUpdaterDict), BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as Dictionary<string, GroupUpdater>;
+            updaterInfoList = null;
         }
 
         /// <summary>
-        /// 绘制资源组更新器信息界面
+        /// 绘制更新器信息界面
         /// </summary>
-        private void DrawGroupUpdaterInfoView()
+        private void DrawUpdaterInfoView()
         {
-            if (!isInitGroupUpdaterInfoView)
-            {
-                InitGroupUpdaterInfoView();
-            }
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -40,28 +30,28 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("下载速度");
                 EditorGUILayout.LabelField("状态");
             }
-            foreach (KeyValuePair<string, GroupUpdater> item in groupUpdaterDict)
+
+            if (updaterInfoList == null)
             {
-                DrawGroupUpdater(item.Value);
+                return;
+            }
+
+            foreach (var profilerUpdaterInfo in updaterInfoList)
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField(profilerUpdaterInfo.Name);
+
+                    EditorGUILayout.LabelField(profilerUpdaterInfo.TotalCount.ToString());
+                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)profilerUpdaterInfo.TotalLength));
+                    EditorGUILayout.LabelField(profilerUpdaterInfo.UpdatedCount.ToString());
+                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)profilerUpdaterInfo.UpdatedLength));
+                    EditorGUILayout.LabelField($"{RuntimeUtil.GetByteLengthDesc((long)profilerUpdaterInfo.Speed)}/S");
+                    EditorGUILayout.LabelField(profilerUpdaterInfo.State.ToString());
+                }
             }
         }
 
-        /// <summary>
-        /// 绘制资源更新器
-        /// </summary>
-        private void DrawGroupUpdater(GroupUpdater updater)
-        {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.LabelField(updater.GroupName);
 
-                EditorGUILayout.LabelField(updater.TotalCount.ToString());
-                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)updater.TotalLength));
-                EditorGUILayout.LabelField(updater.UpdatedCount.ToString());
-                EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)updater.UpdatedLength));
-                EditorGUILayout.LabelField($"{RuntimeUtil.GetByteLengthDesc((long)updater.Speed)}/S");
-                EditorGUILayout.LabelField(updater.State.ToString());
-            }
-        }
     }
 }

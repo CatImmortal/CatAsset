@@ -49,9 +49,10 @@ namespace CatAsset.Editor
                 case PlayModeStateChange.EnteredPlayMode:
                     break;
                 case PlayModeStateChange.ExitingPlayMode:
-                    ClearRuntimeInfoView();
-                    break;
-                default:
+                    ClearBundleInfoView();
+                    ClearTaskInfoView();
+                    ClearGroupInfoView();
+                    ClearUpdaterInfoView();
                     break;
             }
         }
@@ -106,10 +107,13 @@ namespace CatAsset.Editor
                     bundleInfoList = profilerInfo.BundleInfoList;
                     break;
                 case ProfilerInfoType.Task:
+                    taskInfoList = profilerInfo.TaskInfoList;
                     break;
                 case ProfilerInfoType.Group:
+                    groupInfoList = profilerInfo.GroupInfoList;
                     break;
                 case ProfilerInfoType.Updater:
+                    updaterInfoList = profilerInfo.UpdaterInfoList;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -147,7 +151,7 @@ namespace CatAsset.Editor
 
                 case 3:
                     Send(ProfilerInfoType.Updater);
-                    DrawGroupUpdaterInfoView();
+                    DrawUpdaterInfoView();
                     break;
             }
 

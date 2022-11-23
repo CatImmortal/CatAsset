@@ -23,7 +23,7 @@ namespace CatAsset.Editor
         /// </summary>
         private Dictionary<string, bool> foldOutDict = new Dictionary<string, bool>();
 
-        private void ClearRuntimeInfoView()
+        private void ClearBundleInfoView()
         {
             bundleInfoList = null;
         }

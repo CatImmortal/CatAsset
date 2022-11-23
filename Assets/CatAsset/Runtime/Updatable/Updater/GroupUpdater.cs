@@ -172,8 +172,9 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            //为了能让优先级变更机制生效 不判断是否在updatingBundles中 而是由DownloadBundleTask不处理已合并任务来保证不会重复回调
+            State = GroupUpdaterState.Running;
 
+            //为了能让优先级变更机制生效 不判断是否在updatingBundles中 而是由DownloadBundleTask不处理已合并任务来保证不会重复回调
             CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloadedCallback,onDownloadUpdateCallback,priority);
             updatingBundles.Add(info);
 
