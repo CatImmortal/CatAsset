@@ -40,14 +40,28 @@ namespace CatAsset.Runtime
         public int AssetCount;
 
         /// <summary>
+        /// 当前被引用中的资源集合，这里面的资源的引用计数都大于0（索引）
+        /// </summary>
+        public List<int> ReferencingAssetIndexes = new List<int>();
+
+        /// <summary>
         /// 当前被引用中的资源集合，这里面的资源的引用计数都大于0
         /// </summary>
+        [NonSerialized]
         public HashSet<ProfilerAssetInfo> ReferencingAssets = new HashSet<ProfilerAssetInfo>();
+
+        public List<int> UpStreamIndexes = new List<int>();
+        public List<int> DownStreamIndexes = new List<int>();
 
         /// <summary>
         /// 资源包依赖链
         /// </summary>
-        public DependencyChain<ProfilerBundleInfo> DependencyChain { get; } =
-            new DependencyChain<ProfilerBundleInfo>();
+        [NonSerialized]
+        public DependencyChain<ProfilerBundleInfo> DependencyChain = new DependencyChain<ProfilerBundleInfo>();
+
+        public override string ToString()
+        {
+            return RelativePath;
+        }
     }
 }

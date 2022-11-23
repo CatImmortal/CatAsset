@@ -61,9 +61,9 @@ namespace CatAsset.Editor
             EditorConnection.instance.Initialize();
             EditorConnection.instance.RegisterConnection(OnConnection);
             EditorConnection.instance.RegisterDisconnection(OnDisconnection);
-            EditorConnection.instance.Register(CatAssetProfilerComponent.MsgSendPlayerToEditor, OnPlayerMessage);
+            EditorConnection.instance.Register(ProfilerComponent.MsgSendPlayerToEditor, OnPlayerMessage);
 
-            CatAssetProfilerComponent.Callback = OnProfilerInfo;
+            ProfilerComponent.Callback = OnProfilerInfo;
 
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
         }
@@ -100,7 +100,7 @@ namespace CatAsset.Editor
                 case ProfilerInfoType.None:
                     break;
                 case ProfilerInfoType.Bundle:
-                    bundleInfo = profilerInfo.BundleInfo;
+                    bundleInfo = profilerInfo.BundleInfoList;
                     break;
                 case ProfilerInfoType.Task:
                     break;
@@ -158,8 +158,8 @@ namespace CatAsset.Editor
 
         private void Send(ProfilerInfoType type)
         {
-            CatAssetProfilerComponent.CurType = type;
-            EditorConnection.instance.Send(CatAssetProfilerComponent.MsgSendEditorToPlayer,
+            ProfilerComponent.CurType = type;
+            EditorConnection.instance.Send(ProfilerComponent.MsgSendEditorToPlayer,
                 BitConverter.GetBytes((int)type));
         }
 

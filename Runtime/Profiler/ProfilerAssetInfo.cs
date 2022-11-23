@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CatAsset.Runtime
 {
@@ -23,9 +24,18 @@ namespace CatAsset.Runtime
         /// </summary>
         public int RefCount;
 
+        public List<int> UpStreamIndexes = new List<int>();
+        public List<int> DownStreamIndexes = new List<int>();
+
         /// <summary>
         /// 资源依赖链
         /// </summary>
-        public DependencyChain<ProfilerAssetInfo> DependencyChain { get; } = new DependencyChain<ProfilerAssetInfo>();
+        [NonSerialized]
+        public DependencyChain<ProfilerAssetInfo> DependencyChain = new DependencyChain<ProfilerAssetInfo>();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

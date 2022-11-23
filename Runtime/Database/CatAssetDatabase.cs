@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
@@ -275,105 +278,128 @@ namespace CatAsset.Runtime
 
             switch (type)
             {
-                case ProfilerInfoType.None:
-                    break;
                 case ProfilerInfoType.Bundle:
-
-                    info.BundleInfo = new List<ProfilerBundleInfo>();
-
-                    Dictionary<string, ProfilerBundleInfo> pbdDict =
-                        new Dictionary<string, ProfilerBundleInfo>();
-                    Dictionary<string, ProfilerAssetInfo> padDict =
-                        new Dictionary<string, ProfilerAssetInfo>();
-
-
-                    //先建立映射
-                    foreach (var pair in bundleRuntimeInfoDict)
-                    {
-                        var bri = pair.Value;
-                        if (!bri.Manifest.IsRaw && bri.Bundle == null)
-                        {
-                            //跳过未加载的资源包
-                        }
-
-                        var pbd = new ProfilerBundleInfo
-                        {
-                            Directory = bri.Manifest.Directory,
-                            BundleName = bri.Manifest.BundleName,
-                            RelativePath = bri.Manifest.RelativePath,
-                            Group = bri.Manifest.Group,
-                            Length = bri.Manifest.Length,
-                            AssetCount = bri.Manifest.Assets.Count,
-                        };
-
-                        info.BundleInfo.Add(pbd);
-                        pbdDict.Add(bri.Manifest.RelativePath, pbd);
-
-                        foreach (var ari in bri.ReferencingAssets)
-                        {
-                            var pad = new ProfilerAssetInfo
-                            {
-                                Name = ari.AssetManifest.Name,
-                                Length = ari.AssetManifest.Length,
-                                RefCount = ari.RefCount,
-                            };
-                            padDict.Add(pad.Name, pad);
-                        }
-                    }
-
-                    //然后建立引用
-                    foreach (var pair in bundleRuntimeInfoDict)
-                    {
-                        var bri = pair.Value;
-
-                        if (!pbdDict.TryGetValue(bri.Manifest.RelativePath, out var pbd))
-                        {
-                            //跳过没有对应pbd的资源包
-                            continue;
-                        }
-
-                        foreach (var upBri in bri.DependencyChain.UpStream)
-                        {
-                            pbd.DependencyChain.UpStream.Add(pbdDict[upBri.Manifest.RelativePath]);
-                        }
-
-                        foreach (var downBri in bri.DependencyChain.DownStream)
-                        {
-                            pbd.DependencyChain.DownStream.Add(pbdDict[downBri.Manifest.RelativePath]);
-                        }
-
-                        foreach (var ari in bri.ReferencingAssets)
-                        {
-                            var pad = padDict[ari.AssetManifest.Name];
-                            pbd.ReferencingAssets.Add(pad);
-
-                            foreach (var upAri in ari.DependencyChain.UpStream)
-                            {
-                                pad.DependencyChain.UpStream.Add(padDict[upAri.AssetManifest.Name]);
-                            }
-
-                            foreach (var downAri in ari.DependencyChain.DownStream)
-                            {
-                                pad.DependencyChain.DownStream.Add(padDict[downAri.AssetManifest.Name]);
-                            }
-                        }
-
-                    }
-
-
-
+                    BuildProfilerBundleInfo(info);
                     break;
+
                 case ProfilerInfoType.Task:
                     break;
+
                 case ProfilerInfoType.Group:
                     break;
+
                 case ProfilerInfoType.Updater:
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
             return info;
+        }
+
+        /// <summary>
+        /// 构建分析器资源包信息
+        /// </summary>
+        private static void BuildProfilerBundleInfo(ProfilerInfo info)
+        {
+            info.AssetInfoList = new List<ProfilerAssetInfo>();
+            info.BundleInfoList = new List<ProfilerBundleInfo>();
+
+            //资源包相对路径 -> 列表索引
+            Dictionary<string, int> pbiDict =
+                new Dictionary<string, int>();
+
+            //资源名 -> 列表索引
+            Dictionary<string, int> paiDict =
+                new Dictionary<string, int>();
+
+
+            //先建立分析器信息到索引的映射
+            foreach (var pair in bundleRuntimeInfoDict)
+            {
+                var bri = pair.Value;
+                if (!bri.Manifest.IsRaw && bri.Bundle == null && bri.DependencyChain.UpStream.Count == 0 &&
+                    bri.DependencyChain.DownStream.Count == 0)
+                {
+                    //跳过未加载 也没有上下游的资源包
+                    continue;
+                }
+
+                var pbi = new ProfilerBundleInfo
+                {
+                    Directory = bri.Manifest.Directory,
+                    BundleName = bri.Manifest.BundleName,
+                    RelativePath = bri.Manifest.RelativePath,
+                    Group = bri.Manifest.Group,
+                    Length = bri.Manifest.Length,
+                    AssetCount = bri.Manifest.Assets.Count,
+                };
+
+                int index = info.BundleInfoList.Count;
+                info.BundleInfoList.Add(pbi);
+                pbiDict.Add(bri.Manifest.RelativePath, index);
+
+                foreach (var ari in bri.ReferencingAssets)
+                {
+                    var pai = new ProfilerAssetInfo
+                    {
+                        Name = ari.AssetManifest.Name, Length = ari.AssetManifest.Length, RefCount = ari.RefCount,
+                    };
+                    index = info.AssetInfoList.Count;
+                    paiDict.Add(pai.Name, index);
+                    info.AssetInfoList.Add(pai);
+                }
+            }
+
+            //建立对索引的记录
+            foreach (var pair in bundleRuntimeInfoDict)
+            {
+                var bri = pair.Value;
+
+                if (!pbiDict.TryGetValue(bri.Manifest.RelativePath, out var pbiIndex))
+                {
+                    //跳过没有对应分析器信息的资源包
+                    continue;
+                }
+
+                var pbi = info.BundleInfoList[pbiIndex];
+
+                //资源包依赖链
+                foreach (var upBri in bri.DependencyChain.UpStream)
+                {
+                    var upPbiIndex = pbiDict[upBri.Manifest.RelativePath];
+                    pbi.UpStreamIndexes.Add(upPbiIndex);
+                }
+
+                foreach (var downBri in bri.DependencyChain.DownStream)
+                {
+                    var downPbiIndex = pbiDict[downBri.Manifest.RelativePath];
+                    pbi.DownStreamIndexes.Add(downPbiIndex);
+                }
+
+                foreach (var ari in bri.ReferencingAssets)
+                {
+                    //资源包中被引用中的资源
+                    var paiIndex = paiDict[ari.AssetManifest.Name];
+                    pbi.ReferencingAssetIndexes.Add(paiIndex);
+
+                    //资源依赖链
+                    var pai = info.AssetInfoList[paiIndex];
+                    foreach (var upAri in ari.DependencyChain.UpStream)
+                    {
+                        var upPaiIndex = paiDict[upAri.AssetManifest.Name];
+                        pai.UpStreamIndexes.Add(upPaiIndex);
+                    }
+
+                    foreach (var downAri in ari.DependencyChain.DownStream)
+                    {
+                        var downPaiIndex = paiDict[downAri.AssetManifest.Name];
+                        pai.DownStreamIndexes.Add(downPaiIndex);
+                    }
+                }
+
+            }
         }
     }
 }
