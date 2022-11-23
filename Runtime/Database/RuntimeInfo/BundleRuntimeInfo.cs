@@ -112,7 +112,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public bool CanUnload()
         {
-            //此资源包不是原生资源包 没有资源在使用中 没有下游资源包
+            //此资源包不是原生资源包 没有资源被引用中 没有下游资源包
             //就是可被卸载的
             return !Manifest.IsRaw && ReferencingAssets.Count == 0 && DependencyChain.DownStream.Count == 0;
         }

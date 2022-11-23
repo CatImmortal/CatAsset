@@ -7,9 +7,9 @@ using UnityEngine;
 
 namespace CatAsset.Editor
 {
-    public partial class RuntimeInfoWindow
+    public partial class ProfilerInfoWindow
     {
-        private List<ProfilerBundleInfo> bundleInfo;
+        private List<ProfilerBundleInfo> bundleInfoList;
 
         private Vector2 scrollPos;
 
@@ -23,16 +23,15 @@ namespace CatAsset.Editor
         /// </summary>
         private Dictionary<string, bool> foldOutDict = new Dictionary<string, bool>();
 
-
         private void ClearRuntimeInfoView()
         {
-            bundleInfo = null;
+            bundleInfoList = null;
         }
 
         /// <summary>
         /// 绘制运行时信息界面
         /// </summary>
-        private void DrawRuntimeInfoView()
+        private void DrawBundleInfoView()
         {
             bool isAllFoldOutTrue = false;
             bool isAllFoldOutFalse = false;
@@ -56,15 +55,13 @@ namespace CatAsset.Editor
             {
                 scrollPos = sv.scrollPosition;
 
-                if (bundleInfo == null)
+                if (bundleInfoList == null)
                 {
                     return;
                 }
 
-                foreach (var profilerBundleInfo in bundleInfo)
+                foreach (var profilerBundleInfo in bundleInfoList)
                 {
-
-
                     string relativePath = profilerBundleInfo.RelativePath;
 
                     if (!foldOutDict.ContainsKey(relativePath))
@@ -83,11 +80,22 @@ namespace CatAsset.Editor
                         foldOutDict[relativePath] = false;
                     }
 
-
-                    //没有资源在使用 也没下游资源包 不显示
-                    if (profilerBundleInfo.ReferencingAssets.Count == 0 && profilerBundleInfo.DependencyChain.DownStream.Count == 0)
+                    if (!profilerBundleInfo.IsRaw)
                     {
-                        continue;
+                        //没有引用中的资源 并且 没有下游资源包 就是正在卸载中的资源包 不显示
+                        if (profilerBundleInfo.ReferencingAssets.Count == 0 &&
+                            profilerBundleInfo.DependencyChain.DownStream.Count == 0)
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        //没有引用中的资源 就是卸载中的原生资源 不显示
+                        if (profilerBundleInfo.ReferencingAssets.Count == 0)
+                        {
+                            continue;
+                        }
                     }
 
                     if (isOnlyShowActiveLoad)

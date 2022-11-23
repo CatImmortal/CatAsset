@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace CatAsset.Editor
 {
-    public partial class RuntimeInfoWindow
+    public partial class ProfilerInfoWindow
     {
         private Vector2 taskInfoScrollPos;
         private Dictionary<TaskRunner, Dictionary<string, BaseTask>> allTasks;

@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// 分析器资源信息
     /// </summary>
     [Serializable]
-    public class ProfilerAssetInfo
+    public class ProfilerAssetInfo : IReference
     {
         /// <summary>
         /// 资源名
@@ -24,7 +24,14 @@ namespace CatAsset.Runtime
         /// </summary>
         public int RefCount;
 
+        /// <summary>
+        /// 上游资源索引
+        /// </summary>
         public List<int> UpStreamIndexes = new List<int>();
+
+        /// <summary>
+        /// 下游资源索引
+        /// </summary>
         public List<int> DownStreamIndexes = new List<int>();
 
         /// <summary>
@@ -36,6 +43,25 @@ namespace CatAsset.Runtime
         public override string ToString()
         {
             return Name;
+        }
+
+        public static ProfilerAssetInfo Create(string name,long length,int refCount)
+        {
+            ProfilerAssetInfo info = ReferencePool.Get<ProfilerAssetInfo>();
+            info.Name = name;
+            info.Length = length;
+            info.RefCount = refCount;
+            return info;
+        }
+
+        public void Clear()
+        {
+            Name = default;
+            Length = default;
+            RefCount = default;
+
+            UpStreamIndexes.Clear();
+            DownStreamIndexes.Clear();
         }
     }
 }

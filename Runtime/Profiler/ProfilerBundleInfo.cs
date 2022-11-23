@@ -7,18 +7,8 @@ namespace CatAsset.Runtime
     /// 分析器资源包信息
     /// </summary>
     [Serializable]
-    public class ProfilerBundleInfo
+    public class ProfilerBundleInfo : IReference
     {
-        /// <summary>
-        /// 目录名
-        /// </summary>
-        public string Directory;
-
-        /// <summary>
-        /// 资源包名
-        /// </summary>
-        public string BundleName;
-
         /// <summary>
         /// 相对路径
         /// </summary>
@@ -28,6 +18,11 @@ namespace CatAsset.Runtime
         /// 资源组
         /// </summary>
         public string Group;
+
+        /// <summary>
+        /// 是否为原生资源包
+        /// </summary>
+        public bool IsRaw;
 
         /// <summary>
         /// 文件长度
@@ -50,7 +45,14 @@ namespace CatAsset.Runtime
         [NonSerialized]
         public HashSet<ProfilerAssetInfo> ReferencingAssets = new HashSet<ProfilerAssetInfo>();
 
+        /// <summary>
+        /// 上游资源包索引
+        /// </summary>
         public List<int> UpStreamIndexes = new List<int>();
+
+        /// <summary>
+        /// 下游资源包索引
+        /// </summary>
         public List<int> DownStreamIndexes = new List<int>();
 
         /// <summary>
@@ -62,6 +64,31 @@ namespace CatAsset.Runtime
         public override string ToString()
         {
             return RelativePath;
+        }
+
+        public static ProfilerBundleInfo Create(string relativePath,string group,bool isRaw,long length,int assetCount)
+        {
+            ProfilerBundleInfo info = ReferencePool.Get<ProfilerBundleInfo>();
+            info.RelativePath = relativePath;
+            info.Group = group;
+            info.IsRaw = isRaw;
+            info.Length = length;
+            info.AssetCount = assetCount;
+            return info;
+        }
+
+        public void Clear()
+        {
+            RelativePath = default;
+            Group = default;
+            IsRaw = default;
+            Length = default;
+            AssetCount = default;
+
+            ReferencingAssetIndexes.Clear();
+
+            UpStreamIndexes.Clear();
+            DownStreamIndexes.Clear();
         }
     }
 }
