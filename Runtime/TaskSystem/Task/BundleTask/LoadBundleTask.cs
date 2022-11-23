@@ -304,6 +304,22 @@ namespace CatAsset.Runtime
             if (BundleRuntimeInfo.Bundle == null)
             {
                 Debug.LogError($"资源包加载失败：{BundleRuntimeInfo.Manifest}");
+
+                if (BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
+                {
+                    BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
+                    if (builtInShaderBundleRuntimeInfo.Bundle != null)
+                    {
+                        //加载失败 并且加载过内置Shader资源包
+                        //移除依赖链记录
+                        builtInShaderBundleRuntimeInfo.DependencyChain.DownStream.Remove(BundleRuntimeInfo);
+                        BundleRuntimeInfo.DependencyChain.UpStream.Remove(builtInShaderBundleRuntimeInfo);
+
+                        //尝试卸载内置Shader资源包
+                        CatAssetManager.TryUnloadBundle(builtInShaderBundleRuntimeInfo);
+                    }
+                }
+
                 OnFinishedCallback?.Invoke(false);
                 foreach (LoadBundleTask task in MergedTasks)
                 {

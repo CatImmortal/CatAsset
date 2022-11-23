@@ -51,9 +51,14 @@ namespace CatAsset.Runtime
         private static Dictionary<string, int> tempPbiDict =
             new Dictionary<string, int>();
 
-        //资源名 -> 分析器资源信息列表列表索引
+        //资源名 -> 分析器资源信息列表索引
         private static Dictionary<string, int> tempPaiDict =
             new Dictionary<string, int>();
+
+        /// <summary>
+        /// 分析器资源信息列表索引 -> 分析器资源包信息列表索引
+        /// </summary>
+        private static Dictionary<int, int> tempPaiIndex2PbiIndexDict = new Dictionary<int, int>();
 
         /// <summary>
         /// 使用安装包资源清单进行初始化
@@ -313,6 +318,7 @@ namespace CatAsset.Runtime
         {
             tempPbiDict.Clear();
             tempPaiDict.Clear();
+            tempPaiIndex2PbiIndexDict.Clear();
 
             //先建立分析器信息到索引的映射
             foreach (var pair in bundleRuntimeInfoDict)
@@ -321,15 +327,16 @@ namespace CatAsset.Runtime
 
                 if (!bri.Manifest.IsRaw)
                 {
-                    if (bri.Bundle == null)
+                    if (bri.Bundle == null && bri.DependencyChain.UpStream.Count == 0)
                     {
-                        //跳过未加载的非原生资源包
+                        //跳过未加载的 并且 没有上游资源包 的非原生资源包
                         continue;
                     }
                 }
                 else
                 {
-                    if (bri.ReferencingAssets.Count == 0)
+                    var ari = GetAssetRuntimeInfo(bri.Manifest.Assets[0].Name);
+                    if (ari == null)
                     {
                         //跳过未加载的原生资源
                         continue;
@@ -337,69 +344,85 @@ namespace CatAsset.Runtime
                 }
 
                 ProfilerBundleInfo pbi = ProfilerBundleInfo.Create(bri.Manifest.RelativePath, bri.Manifest.Group,
-                    bri.Manifest.IsRaw, bri.Manifest.Length, bri.Manifest.Assets.Count);
+                    bri.Manifest.IsRaw, bri.Manifest.Length,bri.ReferencingAssets.Count, bri.Manifest.Assets.Count);
 
-                int index = info.BundleInfoList.Count;
+                int pbiIndex = info.BundleInfoList.Count;
                 info.BundleInfoList.Add(pbi);
-                tempPbiDict.Add(bri.Manifest.RelativePath, index);
+                tempPbiDict.Add(pbi.RelativePath, pbiIndex);
 
-                foreach (var ari in bri.ReferencingAssets)
+                foreach (var ami in bri.Manifest.Assets)
                 {
+                    var ari = GetAssetRuntimeInfo(ami.Name);
+
+                    //跳过未加载的非场景资源 或者 引用计数为0的场景资源
+                    if (!bri.Manifest.IsScene)
+                    {
+                        if (ari.Asset == null)
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if (ari.RefCount == 0)
+                        {
+                            continue;
+                        }
+                    }
+
                     ProfilerAssetInfo pai = ProfilerAssetInfo.Create(ari.AssetManifest.Name, ari.AssetManifest.Length,
                         ari.RefCount);
-                    index = info.AssetInfoList.Count;
-                    tempPaiDict.Add(pai.Name, index);
+                    int paiIndex = info.AssetInfoList.Count;
+                    tempPaiDict.Add(pai.Name, paiIndex);
+                    tempPaiIndex2PbiIndexDict.Add(paiIndex,pbiIndex);
                     info.AssetInfoList.Add(pai);
+
                 }
             }
 
             //建立对索引的记录
-            foreach (var pair in bundleRuntimeInfoDict)
+            foreach (var pbiPair in tempPbiDict)
             {
-                var bri = pair.Value;
-
-                if (!tempPbiDict.TryGetValue(bri.Manifest.RelativePath, out var pbiIndex))
-                {
-                    //跳过没有对应分析器信息的资源包
-                    continue;
-                }
-
+                var pbiIndex = pbiPair.Value;
                 var pbi = info.BundleInfoList[pbiIndex];
+                var bri = GetBundleRuntimeInfo(pbi.RelativePath);
 
-                //资源包依赖链
+                //资源包依赖链索引
                 foreach (var upBri in bri.DependencyChain.UpStream)
                 {
                     var upPbiIndex = tempPbiDict[upBri.Manifest.RelativePath];
                     pbi.UpStreamIndexes.Add(upPbiIndex);
                 }
-
                 foreach (var downBri in bri.DependencyChain.DownStream)
                 {
                     var downPbiIndex = tempPbiDict[downBri.Manifest.RelativePath];
                     pbi.DownStreamIndexes.Add(downPbiIndex);
                 }
+            }
 
-                foreach (var ari in bri.ReferencingAssets)
+            foreach (var paiPair in tempPaiDict)
+            {
+                var paiIndex = paiPair.Value;
+                var pai = info.AssetInfoList[paiIndex];
+                var ari = GetAssetRuntimeInfo(pai.Name);
+
+                //资源包中在内存中的资源索引
+                var pbiIndex = tempPaiIndex2PbiIndexDict[paiIndex];
+                var pbi = info.BundleInfoList[pbiIndex];
+                pbi.InMemoryAssetIndexes.Add(paiIndex);
+
+                //资源依赖链索引
+                foreach (var upAri in ari.DependencyChain.UpStream)
                 {
-                    //资源包中被引用中的资源
-                    var paiIndex = tempPaiDict[ari.AssetManifest.Name];
-                    pbi.ReferencingAssetIndexes.Add(paiIndex);
-
-                    //资源依赖链
-                    var pai = info.AssetInfoList[paiIndex];
-                    foreach (var upAri in ari.DependencyChain.UpStream)
-                    {
-                        var upPaiIndex = tempPaiDict[upAri.AssetManifest.Name];
-                        pai.UpStreamIndexes.Add(upPaiIndex);
-                    }
-
-                    foreach (var downAri in ari.DependencyChain.DownStream)
-                    {
-                        var downPaiIndex = tempPaiDict[downAri.AssetManifest.Name];
-                        pai.DownStreamIndexes.Add(downPaiIndex);
-                    }
+                    var upPaiIndex = tempPaiDict[upAri.AssetManifest.Name];
+                    pai.UpStreamIndexes.Add(upPaiIndex);
                 }
 
+                foreach (var downAri in ari.DependencyChain.DownStream)
+                {
+                    var downPaiIndex = tempPaiDict[downAri.AssetManifest.Name];
+                    pai.DownStreamIndexes.Add(downPaiIndex);
+                }
             }
         }
     }

@@ -66,11 +66,11 @@ namespace CatAsset.Runtime
                     pbi.DependencyChain.DownStream.Add(downPbi);
                 }
 
-                foreach (int paiIndex in pbi.ReferencingAssetIndexes)
+                foreach (int paiIndex in pbi.InMemoryAssetIndexes)
                 {
-                    //资源包中被引用中的资源
+                    //资源包中在内存中的资源
                     var pai = AssetInfoList[paiIndex];
-                    pbi.ReferencingAssets.Add(pai);
+                    pbi.InMemoryAssets.Add(pai);
 
                     //资源依赖链
                     foreach (int upPaiIndex in pai.UpStreamIndexes)
@@ -85,6 +85,8 @@ namespace CatAsset.Runtime
                     }
                 }
             }
+
+            BundleInfoList.Sort();
         }
 
         public static ProfilerInfo Create(ProfilerInfoType type)

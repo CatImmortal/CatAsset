@@ -80,32 +80,14 @@ namespace CatAsset.Editor
                         foldOutDict[relativePath] = false;
                     }
 
-                    if (!profilerBundleInfo.IsRaw)
-                    {
-                        //没有引用中的资源 并且 没有下游资源包 就是正在卸载中的资源包 不显示
-                        if (profilerBundleInfo.ReferencingAssets.Count == 0 &&
-                            profilerBundleInfo.DependencyChain.DownStream.Count == 0)
-                        {
-                            continue;
-                        }
-                    }
-                    else
-                    {
-                        //没有引用中的资源 就是卸载中的原生资源 不显示
-                        if (profilerBundleInfo.ReferencingAssets.Count == 0)
-                        {
-                            continue;
-                        }
-                    }
-
                     if (isOnlyShowActiveLoad)
                     {
                         //仅显示主动加载的资源
                         //此资源包至少有一个主动加载的资源，才能显示
                         bool canShow = false;
-                        foreach (var profilerAssetData in profilerBundleInfo.ReferencingAssets)
+                        foreach (var profilerAssetInfo in profilerBundleInfo.InMemoryAssets)
                         {
-                            if (profilerAssetData.RefCount != profilerAssetData.DependencyChain.DownStream.Count)
+                            if (profilerAssetInfo.RefCount > 0 && profilerAssetInfo.RefCount != profilerAssetInfo.DependencyChain.DownStream.Count)
                             {
                                 canShow = true;
                                 break;
@@ -128,11 +110,11 @@ namespace CatAsset.Editor
                     {
                         EditorGUILayout.Space();
 
-                        foreach (var profilerAssetInfo in profilerBundleInfo.ReferencingAssets)
+                        foreach (var profilerAssetInfo in profilerBundleInfo.InMemoryAssets)
                         {
-                            if (isOnlyShowActiveLoad && profilerAssetInfo.RefCount == profilerAssetInfo.DependencyChain.DownStream.Count)
+                            if (isOnlyShowActiveLoad && profilerAssetInfo.RefCount > 0 && profilerAssetInfo.RefCount == profilerAssetInfo.DependencyChain.DownStream.Count)
                             {
-                                //只显示主动加载的资源 且此资源纯被依赖加载的 就跳过
+                                //只显示主动加载的资源 且 此资源是纯被依赖加载的 就跳过
                                 continue;
                             }
 
@@ -164,7 +146,8 @@ namespace CatAsset.Editor
                 }
 
                 EditorGUILayout.LabelField($"资源组：{profilerBundleInfo.Group}" ,GUILayout.Width(150));
-                EditorGUILayout.LabelField($"引用中资源数：{profilerBundleInfo.ReferencingAssets.Count}/{profilerBundleInfo.AssetCount}" ,GUILayout.Width(125));
+                EditorGUILayout.LabelField($"内存中资源数：{profilerBundleInfo.InMemoryAssets.Count}/{profilerBundleInfo.TotalAssetCount}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"引用中资源数：{profilerBundleInfo.ReferencingAssetCount}/{profilerBundleInfo.TotalAssetCount}" ,GUILayout.Width(125));
                 EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(profilerBundleInfo.Length)}",GUILayout.Width(125));
 
                 EditorGUILayout.LabelField($"上游资源包数量：{profilerBundleInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));
