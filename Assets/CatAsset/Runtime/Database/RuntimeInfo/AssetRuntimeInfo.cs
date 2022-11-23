@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 引用计数
         /// </summary>
-        public int RefCount { get; private set; }
+        public int RefCount { get; internal set; }
 
         /// <summary>
         /// 资源依赖链

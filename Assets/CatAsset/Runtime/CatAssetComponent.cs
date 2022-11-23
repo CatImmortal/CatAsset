@@ -14,7 +14,7 @@ namespace CatAsset.Runtime
         [Header("编辑器资源模式")]
         public bool IsEditorMode = true;
 
-        [Header("打开调试分析器")]
+        [Header("打开真机调试分析器")]
         public bool IsOpenProfiler = false;
 
         [Header("资源包卸载延迟")]
@@ -37,7 +37,7 @@ namespace CatAsset.Runtime
             if (IsOpenProfiler)
             {
                 //打开调试分析器
-                gameObject.AddComponent<CatAssetProfilerComponent>();
+                gameObject.AddComponent<ProfilerComponent>();
             }
 
         }

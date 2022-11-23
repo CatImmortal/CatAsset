@@ -7,13 +7,12 @@ using UnityEngine.Networking.PlayerConnection;
 namespace CatAsset.Runtime
 {
     /// <summary>
-    /// CatAsset调试分析器组件
+    /// 调试分析器组件
     /// </summary>
-    public class CatAssetProfilerComponent : MonoBehaviour
+    public class ProfilerComponent : MonoBehaviour
     {
         public static Guid MsgSendPlayerToEditor = new Guid("23982ffeaf0c489189579946d8e0840f");
         public static Guid MsgSendEditorToPlayer = new Guid("45e0c47f923142ff847c0d1f8b0554d9");
-
 
         /// <summary>
         /// 编辑器下获取分析器信息的回调
@@ -66,9 +65,11 @@ namespace CatAsset.Runtime
                 var profilerInfo = CatAssetDatabase.GetProfilerInfo(CurType);
 
 #if UNITY_EDITOR
-                Callback?.Invoke(0,profilerInfo);
+
                 PlayerConnection.instance.Send(MsgSendPlayerToEditor, ProfilerInfo.Serialize(profilerInfo));
 
+                profilerInfo.RebuildReference();
+                Callback?.Invoke(0,profilerInfo);
 #else
                 PlayerConnection.instance.Send(MsgSendPlayerToEditor, ProfilerInfo.Serialize(profilerInfo));
 #endif
