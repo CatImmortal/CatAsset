@@ -47,6 +47,14 @@ namespace CatAsset.Runtime
         /// </summary>
         private static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
 
+        //资源包相对路径 -> 分析器资源包信息列表索引
+        private static Dictionary<string, int> tempPbiDict =
+            new Dictionary<string, int>();
+
+        //资源名 -> 分析器资源信息列表列表索引
+        private static Dictionary<string, int> tempPaiDict =
+            new Dictionary<string, int>();
+
         /// <summary>
         /// 使用安装包资源清单进行初始化
         /// </summary>
@@ -274,7 +282,7 @@ namespace CatAsset.Runtime
         public static ProfilerInfo GetProfilerInfo(ProfilerInfoType type)
         {
 
-            ProfilerInfo info = new ProfilerInfo { Type = type };
+            ProfilerInfo info = ProfilerInfo.Create(type);
 
             switch (type)
             {
@@ -303,51 +311,44 @@ namespace CatAsset.Runtime
         /// </summary>
         private static void BuildProfilerBundleInfo(ProfilerInfo info)
         {
-            info.AssetInfoList = new List<ProfilerAssetInfo>();
-            info.BundleInfoList = new List<ProfilerBundleInfo>();
-
-            //资源包相对路径 -> 列表索引
-            Dictionary<string, int> pbiDict =
-                new Dictionary<string, int>();
-
-            //资源名 -> 列表索引
-            Dictionary<string, int> paiDict =
-                new Dictionary<string, int>();
-
+            tempPbiDict.Clear();
+            tempPaiDict.Clear();
 
             //先建立分析器信息到索引的映射
             foreach (var pair in bundleRuntimeInfoDict)
             {
                 var bri = pair.Value;
-                if (!bri.Manifest.IsRaw && bri.Bundle == null && bri.DependencyChain.UpStream.Count == 0 &&
-                    bri.DependencyChain.DownStream.Count == 0)
+
+                if (!bri.Manifest.IsRaw)
                 {
-                    //跳过未加载 也没有上下游的资源包
-                    continue;
+                    if (bri.Bundle == null)
+                    {
+                        //跳过未加载的非原生资源包
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (bri.ReferencingAssets.Count == 0)
+                    {
+                        //跳过未加载的原生资源
+                        continue;
+                    }
                 }
 
-                var pbi = new ProfilerBundleInfo
-                {
-                    Directory = bri.Manifest.Directory,
-                    BundleName = bri.Manifest.BundleName,
-                    RelativePath = bri.Manifest.RelativePath,
-                    Group = bri.Manifest.Group,
-                    Length = bri.Manifest.Length,
-                    AssetCount = bri.Manifest.Assets.Count,
-                };
+                ProfilerBundleInfo pbi = ProfilerBundleInfo.Create(bri.Manifest.RelativePath, bri.Manifest.Group,
+                    bri.Manifest.IsRaw, bri.Manifest.Length, bri.Manifest.Assets.Count);
 
                 int index = info.BundleInfoList.Count;
                 info.BundleInfoList.Add(pbi);
-                pbiDict.Add(bri.Manifest.RelativePath, index);
+                tempPbiDict.Add(bri.Manifest.RelativePath, index);
 
                 foreach (var ari in bri.ReferencingAssets)
                 {
-                    var pai = new ProfilerAssetInfo
-                    {
-                        Name = ari.AssetManifest.Name, Length = ari.AssetManifest.Length, RefCount = ari.RefCount,
-                    };
+                    ProfilerAssetInfo pai = ProfilerAssetInfo.Create(ari.AssetManifest.Name, ari.AssetManifest.Length,
+                        ari.RefCount);
                     index = info.AssetInfoList.Count;
-                    paiDict.Add(pai.Name, index);
+                    tempPaiDict.Add(pai.Name, index);
                     info.AssetInfoList.Add(pai);
                 }
             }
@@ -357,7 +358,7 @@ namespace CatAsset.Runtime
             {
                 var bri = pair.Value;
 
-                if (!pbiDict.TryGetValue(bri.Manifest.RelativePath, out var pbiIndex))
+                if (!tempPbiDict.TryGetValue(bri.Manifest.RelativePath, out var pbiIndex))
                 {
                     //跳过没有对应分析器信息的资源包
                     continue;
@@ -368,33 +369,33 @@ namespace CatAsset.Runtime
                 //资源包依赖链
                 foreach (var upBri in bri.DependencyChain.UpStream)
                 {
-                    var upPbiIndex = pbiDict[upBri.Manifest.RelativePath];
+                    var upPbiIndex = tempPbiDict[upBri.Manifest.RelativePath];
                     pbi.UpStreamIndexes.Add(upPbiIndex);
                 }
 
                 foreach (var downBri in bri.DependencyChain.DownStream)
                 {
-                    var downPbiIndex = pbiDict[downBri.Manifest.RelativePath];
+                    var downPbiIndex = tempPbiDict[downBri.Manifest.RelativePath];
                     pbi.DownStreamIndexes.Add(downPbiIndex);
                 }
 
                 foreach (var ari in bri.ReferencingAssets)
                 {
                     //资源包中被引用中的资源
-                    var paiIndex = paiDict[ari.AssetManifest.Name];
+                    var paiIndex = tempPaiDict[ari.AssetManifest.Name];
                     pbi.ReferencingAssetIndexes.Add(paiIndex);
 
                     //资源依赖链
                     var pai = info.AssetInfoList[paiIndex];
                     foreach (var upAri in ari.DependencyChain.UpStream)
                     {
-                        var upPaiIndex = paiDict[upAri.AssetManifest.Name];
+                        var upPaiIndex = tempPaiDict[upAri.AssetManifest.Name];
                         pai.UpStreamIndexes.Add(upPaiIndex);
                     }
 
                     foreach (var downAri in ari.DependencyChain.DownStream)
                     {
-                        var downPaiIndex = paiDict[downAri.AssetManifest.Name];
+                        var downPaiIndex = tempPaiDict[downAri.AssetManifest.Name];
                         pai.DownStreamIndexes.Add(downPaiIndex);
                     }
                 }

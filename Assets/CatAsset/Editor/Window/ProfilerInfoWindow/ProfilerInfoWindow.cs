@@ -14,9 +14,9 @@ using UnityEngine.Networking.PlayerConnection;
 namespace CatAsset.Editor
 {
     /// <summary>
-    /// 运行时信息窗口
+    /// 调试分析器信息窗口
     /// </summary>
-    public partial class RuntimeInfoWindow : EditorWindow
+    public partial class ProfilerInfoWindow : EditorWindow
     {
         /// <summary>
         /// 选择的页签
@@ -26,13 +26,13 @@ namespace CatAsset.Editor
         /// <summary>
         /// 页签
         /// </summary>
-        private string[] tabs = { "资源信息", "任务信息" ,"资源组信息" ,"更新器信息"};
+        private string[] tabs = { "资源包信息", "任务信息" ,"资源组信息" ,"更新器信息"};
 
 
-        [MenuItem("CatAsset/打开运行时信息窗口", priority = 1)]
+        [MenuItem("CatAsset/打开调试分析器窗口", priority = 1)]
         private static void OpenWindow()
         {
-            RuntimeInfoWindow window = GetWindow<RuntimeInfoWindow>(false, "运行时信息窗口");
+            ProfilerInfoWindow window = GetWindow<ProfilerInfoWindow>(false, "调试分析器窗口");
             window.minSize = new Vector2(1200, 800);
             window.Show();
 
@@ -79,7 +79,9 @@ namespace CatAsset.Editor
         }
 
 
-
+        /// <summary>
+        /// 接收真机消息的回调
+        /// </summary>
         private void OnPlayerMessage(MessageEventArgs args)
         {
             if (Application.isPlaying)
@@ -87,12 +89,13 @@ namespace CatAsset.Editor
                 return;
             }
 
-            Debug.Log($"接收到真机调试数据，length == {args.data.Length}");
-
             ProfilerInfo profilerInfo = ProfilerInfo.Deserialize(args.data);
             OnProfilerInfo(args.playerId,profilerInfo);
         }
 
+        /// <summary>
+        /// 接收分析器信息的回调
+        /// </summary>
         private void OnProfilerInfo(int id, ProfilerInfo profilerInfo)
         {
             switch (profilerInfo.Type)
@@ -100,7 +103,7 @@ namespace CatAsset.Editor
                 case ProfilerInfoType.None:
                     break;
                 case ProfilerInfoType.Bundle:
-                    bundleInfo = profilerInfo.BundleInfoList;
+                    bundleInfoList = profilerInfo.BundleInfoList;
                     break;
                 case ProfilerInfoType.Task:
                     break;
@@ -123,31 +126,27 @@ namespace CatAsset.Editor
 
         private void OnGUI()
         {
-            // if (!Application.isPlaying)
-            // {
-            //     EditorGUILayout.HelpBox("运行后才能查看相关信息", MessageType.Warning);
-            //     return;
-            // }
-
             selectedTab = GUILayout.Toolbar(selectedTab, tabs);
 
             switch (selectedTab)
             {
                 case 0:
                     Send(ProfilerInfoType.Bundle);
-                    DrawRuntimeInfoView();
+                    DrawBundleInfoView();
                     break;
 
                 case 1:
-                    //Send(ProfilerDataType.Task);
+                    Send(ProfilerInfoType.Task);
                     DrawTaskInfoView();
                     break;
 
                 case 2:
+                    Send(ProfilerInfoType.Group);
                     DrawGroupInfoView();
                     break;
 
                 case 3:
+                    Send(ProfilerInfoType.Updater);
                     DrawGroupUpdaterInfoView();
                     break;
             }
@@ -156,6 +155,9 @@ namespace CatAsset.Editor
 
         }
 
+        /// <summary>
+        /// 向真机发送消息
+        /// </summary>
         private void Send(ProfilerInfoType type)
         {
             ProfilerComponent.CurType = type;

@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace CatAsset.Editor
 {
-    public partial class RuntimeInfoWindow
+    public partial class ProfilerInfoWindow
     {
         private bool isInitGroupInfoView;
         private Dictionary<string, GroupInfo> groupInfoDict;

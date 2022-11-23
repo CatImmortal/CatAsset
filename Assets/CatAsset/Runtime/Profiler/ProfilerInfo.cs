@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
     /// 分析器信息
     /// </summary>
     [Serializable]
-    public class ProfilerInfo
+    public class ProfilerInfo : IReference
     {
         /// <summary>
         /// 分析器信息类型
@@ -21,12 +21,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 分析器资源信息列表
         /// </summary>
-        public List<ProfilerAssetInfo> AssetInfoList;
+        public List<ProfilerAssetInfo> AssetInfoList = new List<ProfilerAssetInfo>();
 
         /// <summary>
         /// 分析器资源包信息列表
         /// </summary>
-        public List<ProfilerBundleInfo> BundleInfoList;
+        public List<ProfilerBundleInfo> BundleInfoList = new List<ProfilerBundleInfo>();
 
         /// <summary>
         /// 序列化
@@ -43,9 +43,7 @@ namespace CatAsset.Runtime
         public static ProfilerInfo Deserialize(byte[] bytes)
         {
             var profilerInfo = JsonUtility.FromJson<ProfilerInfo>(Encoding.UTF8.GetString(bytes));
-            //还原引用
             profilerInfo.RebuildReference();
-
             return profilerInfo;
         }
 
@@ -87,6 +85,30 @@ namespace CatAsset.Runtime
                     }
                 }
             }
+        }
+
+        public static ProfilerInfo Create(ProfilerInfoType type)
+        {
+            ProfilerInfo profilerInfo = ReferencePool.Get<ProfilerInfo>();
+            profilerInfo.Type = type;
+            return profilerInfo;
+        }
+
+        public void Clear()
+        {
+            Type = default;
+
+            foreach (var pai in AssetInfoList)
+            {
+                ReferencePool.Release(pai);
+            }
+            AssetInfoList.Clear();
+
+            foreach (var pbi in BundleInfoList)
+            {
+                ReferencePool.Release(pbi);
+            }
+            BundleInfoList.Clear();
         }
     }
 }

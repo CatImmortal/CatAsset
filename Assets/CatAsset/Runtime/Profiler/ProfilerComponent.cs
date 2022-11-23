@@ -44,6 +44,9 @@ namespace CatAsset.Runtime
             PlayerConnection.instance.Unregister(MsgSendEditorToPlayer, OnEditorMessage);
         }
 
+        /// <summary>
+        /// 接收编辑器消息的回调
+        /// </summary>
         private void OnEditorMessage(MessageEventArgs arg0)
         {
             byte[] bytes = arg0.data;
@@ -63,16 +66,14 @@ namespace CatAsset.Runtime
             {
                 timer -= interval;
                 var profilerInfo = CatAssetDatabase.GetProfilerInfo(CurType);
-
 #if UNITY_EDITOR
-
-                PlayerConnection.instance.Send(MsgSendPlayerToEditor, ProfilerInfo.Serialize(profilerInfo));
-
-                profilerInfo.RebuildReference();
+                profilerInfo.RebuildReference();  //重建引用
                 Callback?.Invoke(0,profilerInfo);
 #else
                 PlayerConnection.instance.Send(MsgSendPlayerToEditor, ProfilerInfo.Serialize(profilerInfo));
+                ReferencePool.Release(profilerInfo);  //真机下才需要回收对象
 #endif
+
 
             }
 
