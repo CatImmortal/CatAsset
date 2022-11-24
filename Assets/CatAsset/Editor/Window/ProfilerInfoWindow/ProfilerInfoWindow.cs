@@ -19,6 +19,11 @@ namespace CatAsset.Editor
     public partial class ProfilerInfoWindow : EditorWindow
     {
         /// <summary>
+        /// 分析器信息
+        /// </summary>
+        private ProfilerInfo profilerInfo;
+
+        /// <summary>
         /// 选择的页签
         /// </summary>
         private int selectedTab;
@@ -49,10 +54,7 @@ namespace CatAsset.Editor
                 case PlayModeStateChange.EnteredPlayMode:
                     break;
                 case PlayModeStateChange.ExitingPlayMode:
-                    ClearBundleInfoView();
-                    ClearTaskInfoView();
-                    ClearGroupInfoView();
-                    ClearUpdaterInfoView();
+                    profilerInfo = null;
                     break;
             }
         }
@@ -90,41 +92,27 @@ namespace CatAsset.Editor
                 return;
             }
 
-            ProfilerInfo profilerInfo = ProfilerInfo.Deserialize(args.data);
-            OnProfilerInfo(args.playerId,profilerInfo);
+            profilerInfo = ProfilerInfo.Deserialize(args.data);
         }
 
         /// <summary>
-        /// 接收分析器信息的回调
+        /// 编辑器下接收分析器信息的回调
         /// </summary>
-        private void OnProfilerInfo(int id, ProfilerInfo profilerInfo)
+        private void OnProfilerInfo(int id, ProfilerInfo info)
         {
-            switch (profilerInfo.Type)
+            if (profilerInfo != null)
             {
-                case ProfilerInfoType.None:
-                    break;
-                case ProfilerInfoType.Bundle:
-                    bundleInfoList = profilerInfo.BundleInfoList;
-                    break;
-                case ProfilerInfoType.Task:
-                    taskInfoList = profilerInfo.TaskInfoList;
-                    break;
-                case ProfilerInfoType.Group:
-                    groupInfoList = profilerInfo.GroupInfoList;
-                    break;
-                case ProfilerInfoType.Updater:
-                    updaterInfoList = profilerInfo.UpdaterInfoList;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                ReferencePool.Release(profilerInfo);
             }
+
+            profilerInfo = info;
         }
 
         private void OnDisable()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
 
-            Send(ProfilerInfoType.None);
+            Send(false);
         }
 
 
@@ -135,22 +123,22 @@ namespace CatAsset.Editor
             switch (selectedTab)
             {
                 case 0:
-                    Send(ProfilerInfoType.Bundle);
+                    Send(true);
                     DrawBundleInfoView();
                     break;
 
                 case 1:
-                    Send(ProfilerInfoType.Task);
+                    Send(true);
                     DrawTaskInfoView();
                     break;
 
                 case 2:
-                    Send(ProfilerInfoType.Group);
+                    Send(true);
                     DrawGroupInfoView();
                     break;
 
                 case 3:
-                    Send(ProfilerInfoType.Updater);
+                    Send(true);
                     DrawUpdaterInfoView();
                     break;
             }
@@ -162,11 +150,11 @@ namespace CatAsset.Editor
         /// <summary>
         /// 向真机发送消息
         /// </summary>
-        private void Send(ProfilerInfoType type)
+        private void Send(bool isOpen)
         {
-            ProfilerComponent.CurType = type;
+            ProfilerComponent.IsOpen = isOpen;
             EditorConnection.instance.Send(ProfilerComponent.MsgSendEditorToPlayer,
-                BitConverter.GetBytes((int)type));
+                BitConverter.GetBytes(isOpen));
         }
 
 

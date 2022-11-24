@@ -7,12 +7,6 @@ namespace CatAsset.Editor
 {
     public partial class ProfilerInfoWindow
     {
-        private List<ProfilerUpdaterInfo> updaterInfoList;
-
-        private void ClearUpdaterInfoView()
-        {
-            updaterInfoList = null;
-        }
 
         /// <summary>
         /// 绘制更新器信息界面
@@ -31,12 +25,12 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField("状态");
             }
 
-            if (updaterInfoList == null)
+            if (profilerInfo == null)
             {
                 return;
             }
 
-            foreach (var profilerUpdaterInfo in updaterInfoList)
+            foreach (var profilerUpdaterInfo in profilerInfo.UpdaterInfoList)
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {

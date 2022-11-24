@@ -28,9 +28,9 @@ namespace CatAsset.Runtime
         private float timer;
 
         /// <summary>
-        /// 要发送的数据类型
+        /// 是否开启
         /// </summary>
-        public static ProfilerInfoType CurType;
+        public static bool IsOpen;
 
         private void OnEnable()
         {
@@ -48,14 +48,20 @@ namespace CatAsset.Runtime
         private void OnEditorMessage(MessageEventArgs arg0)
         {
             byte[] bytes = arg0.data;
-            int enumInt = BitConverter.ToInt32(bytes);
-            CurType = (ProfilerInfoType)enumInt;
-            Debug.Log($"接收编辑器消息切换分析器类型:{CurType}");
+            IsOpen = BitConverter.ToBoolean(bytes);
         }
 
         private void Update()
         {
-            if (CurType == ProfilerInfoType.None)
+#if !UNITY_EDITOR
+            //真机时 未连接编辑器不开启
+            if (!PlayerConnection.instance.isConnected)
+            {
+                IsOpen = false;
+            }
+#endif
+
+            if (!IsOpen)
             {
                 return;
             }
@@ -64,13 +70,13 @@ namespace CatAsset.Runtime
             if (timer >= interval)
             {
                 timer -= interval;
-                var profilerInfo = CatAssetDatabase.GetProfilerInfo(CurType);
+                var profilerInfo = CatAssetDatabase.GetProfilerInfo();
 #if UNITY_EDITOR
                 profilerInfo.RebuildReference();  //重建引用
                 Callback?.Invoke(0,profilerInfo);
 #else
                 PlayerConnection.instance.Send(MsgSendPlayerToEditor, ProfilerInfo.Serialize(profilerInfo));
-                ReferencePool.Release(profilerInfo);  //真机下才需要回收对象
+                ReferencePool.Release(profilerInfo);
 #endif
 
 

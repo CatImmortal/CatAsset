@@ -284,32 +284,15 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取调试分析器数据
         /// </summary>
-        public static ProfilerInfo GetProfilerInfo(ProfilerInfoType type)
+        public static ProfilerInfo GetProfilerInfo()
         {
 
-            ProfilerInfo info = ProfilerInfo.Create(type);
+            ProfilerInfo info = ProfilerInfo.Create();
 
-            switch (type)
-            {
-                case ProfilerInfoType.Bundle:
-                    BuildProfilerBundleInfo(info);
-                    break;
-
-                case ProfilerInfoType.Task:
-                    BuildProfilerTaskInfo(info);
-                    break;
-
-                case ProfilerInfoType.Group:
-                    BuildProfilerGroupInfo(info);
-                    break;
-
-                case ProfilerInfoType.Updater:
-                    BuildProfilerUpdaterInfo(info);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+            BuildProfilerBundleInfo(info);
+            BuildProfilerTaskInfo(info);
+            BuildProfilerGroupInfo(info);
+            BuildProfilerUpdaterInfo(info);
 
             return info;
         }

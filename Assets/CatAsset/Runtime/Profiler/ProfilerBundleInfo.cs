@@ -98,9 +98,12 @@ namespace CatAsset.Runtime
             TotalAssetCount = default;
 
             InMemoryAssetIndexes.Clear();
+            InMemoryAssets.Clear();
 
             UpStreamIndexes.Clear();
             DownStreamIndexes.Clear();
+            DependencyChain.UpStream.Clear();
+            DependencyChain.DownStream.Clear();
         }
 
 

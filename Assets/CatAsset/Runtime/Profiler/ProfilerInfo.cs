@@ -14,11 +14,6 @@ namespace CatAsset.Runtime
     public class ProfilerInfo : IReference
     {
         /// <summary>
-        /// 分析器信息类型
-        /// </summary>
-        public ProfilerInfoType Type;
-
-        /// <summary>
         /// 分析器资源信息列表
         /// </summary>
         public List<ProfilerAssetInfo> AssetInfoList = new List<ProfilerAssetInfo>();
@@ -67,12 +62,6 @@ namespace CatAsset.Runtime
         /// </summary>
         public void RebuildReference()
         {
-            if (Type != ProfilerInfoType.Bundle)
-            {
-                //资源包的分析器信息才需要重建引用
-                return;
-            }
-
             foreach (var pbi in BundleInfoList)
             {
                 //资源包依赖链
@@ -110,17 +99,14 @@ namespace CatAsset.Runtime
             BundleInfoList.Sort();
         }
 
-        public static ProfilerInfo Create(ProfilerInfoType type)
+        public static ProfilerInfo Create()
         {
             ProfilerInfo profilerInfo = ReferencePool.Get<ProfilerInfo>();
-            profilerInfo.Type = type;
             return profilerInfo;
         }
 
         public void Clear()
         {
-            Type = default;
-
             foreach (var pai in AssetInfoList)
             {
                 ReferencePool.Release(pai);
