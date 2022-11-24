@@ -38,7 +38,7 @@ namespace CatAsset.Editor
         private static void OpenWindow()
         {
             ProfilerInfoWindow window = GetWindow<ProfilerInfoWindow>(false, "调试分析器窗口");
-            window.minSize = new Vector2(1200, 800);
+            window.minSize = new Vector2(1600, 800);
             window.Show();
 
         }

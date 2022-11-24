@@ -44,9 +44,17 @@ namespace CatAsset.Editor
 
         private void OnGUI()
         {
-
+            if (bundleBuildConfig == null)
+            {
+                bundleBuildConfig = BundleBuildConfigSO.Instance;
+                if (bundleBuildConfig == null)
+                {
+                    return;
+                }
+            }
+            
             selectedTab = GUILayout.Toolbar(selectedTab, tabs);
-
+            
             switch (selectedTab)
             {
                 case 0:
