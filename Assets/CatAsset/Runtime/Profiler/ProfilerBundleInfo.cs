@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// 分析器资源包信息
     /// </summary>
     [Serializable]
-    public class ProfilerBundleInfo : IReference, IComparable<ProfilerBundleInfo>
+    public class ProfilerBundleInfo : IReference, IComparable<ProfilerBundleInfo>,IDependencyChainOwner<ProfilerBundleInfo>
     {
         /// <summary>
         /// 相对路径
@@ -63,8 +63,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包依赖链
         /// </summary>
-        [NonSerialized]
-        public DependencyChain<ProfilerBundleInfo> DependencyChain = new DependencyChain<ProfilerBundleInfo>();
+        public DependencyChain<ProfilerBundleInfo> DependencyChain { get; } = new DependencyChain<ProfilerBundleInfo>();
 
         public override string ToString()
         {

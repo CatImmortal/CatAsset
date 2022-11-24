@@ -153,10 +153,10 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"下游资源包数：{profilerBundleInfo.DependencyChain.DownStream.Count}",GUILayout.Width(125));
 
 
-                // if (GUILayout.Button("查看资源包依赖关系图") && (profilerBundleInfo.DependencyChain.UpStream.Count > 0 || profilerBundleInfo.DependencyChain.DownStream.Count > 0))
-                // {
-                //     DependencyGraphViewWindow.Open<BundleRuntimeInfo,BundleNode>(profilerBundleInfo);
-                // }
+                if (GUILayout.Button("查看资源包依赖关系图") && (profilerBundleInfo.DependencyChain.UpStream.Count > 0 || profilerBundleInfo.DependencyChain.DownStream.Count > 0))
+                {
+                    DependencyGraphViewWindow.Open<ProfilerBundleInfo,BundleNode>(profilerBundleInfo);
+                }
 
                 EditorGUILayout.LabelField("", GUILayout.Width(30));
             }
@@ -191,10 +191,10 @@ namespace CatAsset.Editor
                 //下游资源数
                 EditorGUILayout.LabelField($"\t下游资源数：{profilerAssetInfo.DependencyChain.DownStream.Count}");
 
-                // if (GUILayout.Button("查看资源依赖关系图") && (profilerAssetInfo.DependencyChain.UpStream.Count > 0 || profilerAssetInfo.DependencyChain.DownStream.Count > 0))
-                // {
-                //     DependencyGraphViewWindow.Open<AssetRuntimeInfo,AssetNode>(profilerAssetInfo);
-                // }
+                if (GUILayout.Button("查看资源依赖关系图") && (profilerAssetInfo.DependencyChain.UpStream.Count > 0 || profilerAssetInfo.DependencyChain.DownStream.Count > 0))
+                {
+                    DependencyGraphViewWindow.Open<ProfilerAssetInfo,AssetNode>(profilerAssetInfo);
+                }
             }
         }
     }
