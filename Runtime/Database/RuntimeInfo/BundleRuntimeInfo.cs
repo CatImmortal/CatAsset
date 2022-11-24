@@ -7,8 +7,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包运行时信息
     /// </summary>
-    public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>, IEquatable<BundleRuntimeInfo>,
-        IDependencyChainOwner<BundleRuntimeInfo>
+    public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>, IEquatable<BundleRuntimeInfo>
     {
         /// <summary>
         /// 状态

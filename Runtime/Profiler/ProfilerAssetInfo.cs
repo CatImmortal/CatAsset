@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// 分析器资源信息
     /// </summary>
     [Serializable]
-    public class ProfilerAssetInfo : IReference
+    public class ProfilerAssetInfo : IReference,IDependencyChainOwner<ProfilerAssetInfo>
     {
         /// <summary>
         /// 资源名
@@ -37,8 +37,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源依赖链
         /// </summary>
-        [NonSerialized]
-        public DependencyChain<ProfilerAssetInfo> DependencyChain = new DependencyChain<ProfilerAssetInfo>();
+        public DependencyChain<ProfilerAssetInfo> DependencyChain { get; } = new DependencyChain<ProfilerAssetInfo>();
 
         public override string ToString()
         {

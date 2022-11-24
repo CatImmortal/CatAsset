@@ -8,8 +8,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源运行时信息
     /// </summary>
-    public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>,
-        IDependencyChainOwner<AssetRuntimeInfo>
+    public class AssetRuntimeInfo : IComparable<AssetRuntimeInfo>, IEquatable<AssetRuntimeInfo>
     {
         /// <summary>
         /// 所属资源包的清单信息

@@ -9,20 +9,20 @@ namespace CatAsset.Editor
     /// <summary>
     /// 资源依赖链节点
     /// </summary>
-    public class AssetNode : BaseDependencyNode<AssetRuntimeInfo>
+    public class AssetNode : BaseDependencyNode<ProfilerAssetInfo>
     {
         private readonly ObjectField objFiled;
 
         private readonly VisualElement infoContainer;
 
-        public override AssetRuntimeInfo Owner
+        public override ProfilerAssetInfo Owner
         {
             set
             {
                 base.Owner = value;
-                objFiled.value = AssetDatabase.LoadAssetAtPath<Object>(Owner.AssetManifest.Name);
-                title = Owner.AssetManifest.Name;
-                
+                objFiled.value = AssetDatabase.LoadAssetAtPath<Object>(Owner.Name);
+                title = Owner.Name;
+
                 //类型名
                 var typeName = objFiled.value.GetType().Name;
                 var typeLabel = new Label
