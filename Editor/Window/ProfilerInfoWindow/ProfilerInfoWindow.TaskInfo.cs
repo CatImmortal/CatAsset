@@ -11,13 +11,7 @@ namespace CatAsset.Editor
     public partial class ProfilerInfoWindow
     {
 
-        private List<ProfilerTaskInfo> taskInfoList;
         private Vector2 taskInfoScrollPos;
-
-        private void ClearTaskInfoView()
-        {
-            taskInfoList = null;
-        }
 
         /// <summary>
         /// 绘制任务信息界面
@@ -39,12 +33,12 @@ namespace CatAsset.Editor
                     EditorGUILayout.LabelField("已合并任务数");
                 }
 
-                if (taskInfoList == null)
+                if (profilerInfo == null)
                 {
                     return;
                 }
 
-                foreach (var profilerTaskInfo in taskInfoList)
+                foreach (var profilerTaskInfo in profilerInfo.TaskInfoList)
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {

@@ -9,7 +9,6 @@ namespace CatAsset.Editor
 {
     public partial class ProfilerInfoWindow
     {
-        private List<ProfilerBundleInfo> bundleInfoList;
 
         private Vector2 scrollPos;
 
@@ -23,10 +22,6 @@ namespace CatAsset.Editor
         /// </summary>
         private Dictionary<string, bool> foldOutDict = new Dictionary<string, bool>();
 
-        private void ClearBundleInfoView()
-        {
-            bundleInfoList = null;
-        }
 
         /// <summary>
         /// 绘制运行时信息界面
@@ -55,12 +50,12 @@ namespace CatAsset.Editor
             {
                 scrollPos = sv.scrollPosition;
 
-                if (bundleInfoList == null)
+                if (profilerInfo == null)
                 {
                     return;
                 }
 
-                foreach (var profilerBundleInfo in bundleInfoList)
+                foreach (var profilerBundleInfo in profilerInfo.BundleInfoList)
                 {
                     string relativePath = profilerBundleInfo.RelativePath;
 
@@ -87,7 +82,7 @@ namespace CatAsset.Editor
                         bool canShow = false;
                         foreach (var profilerAssetInfo in profilerBundleInfo.InMemoryAssets)
                         {
-                            if (profilerAssetInfo.RefCount > 0 && profilerAssetInfo.RefCount != profilerAssetInfo.DependencyChain.DownStream.Count)
+                            if (profilerAssetInfo.RefCount != profilerAssetInfo.DependencyChain.DownStream.Count)
                             {
                                 canShow = true;
                                 break;
@@ -112,10 +107,14 @@ namespace CatAsset.Editor
 
                         foreach (var profilerAssetInfo in profilerBundleInfo.InMemoryAssets)
                         {
-                            if (isOnlyShowActiveLoad && profilerAssetInfo.RefCount > 0 && profilerAssetInfo.RefCount == profilerAssetInfo.DependencyChain.DownStream.Count)
+                            if (isOnlyShowActiveLoad)
                             {
-                                //只显示主动加载的资源 且 此资源是纯被依赖加载的 就跳过
-                                continue;
+                                if (profilerAssetInfo.RefCount == profilerAssetInfo.DependencyChain.DownStream.Count)
+                                {
+                                    //只显示主动加载的资源 且 此资源是纯被依赖加载的 就跳过
+                                    continue;
+                                }
+
                             }
 
                             DrawProfilerAssetInfo(profilerAssetInfo);
@@ -150,8 +149,8 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"引用中资源数：{profilerBundleInfo.ReferencingAssetCount}/{profilerBundleInfo.TotalAssetCount}" ,GUILayout.Width(125));
                 EditorGUILayout.LabelField($"文件长度：{RuntimeUtil.GetByteLengthDesc(profilerBundleInfo.Length)}",GUILayout.Width(125));
 
-                EditorGUILayout.LabelField($"上游资源包数量：{profilerBundleInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));
-                EditorGUILayout.LabelField($"下游资源包数量：{profilerBundleInfo.DependencyChain.DownStream.Count}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"上游资源包数：{profilerBundleInfo.DependencyChain.UpStream.Count}",GUILayout.Width(125));
+                EditorGUILayout.LabelField($"下游资源包数：{profilerBundleInfo.DependencyChain.DownStream.Count}",GUILayout.Width(125));
 
 
                 // if (GUILayout.Button("查看资源包依赖关系图") && (profilerBundleInfo.DependencyChain.UpStream.Count > 0 || profilerBundleInfo.DependencyChain.DownStream.Count > 0))
@@ -187,10 +186,10 @@ namespace CatAsset.Editor
                 EditorGUILayout.LabelField($"\t引用计数：{profilerAssetInfo.RefCount}");
 
                 //上游资源数
-                EditorGUILayout.LabelField($"\t上游资源数量：{profilerAssetInfo.DependencyChain.UpStream.Count}");
+                EditorGUILayout.LabelField($"\t上游资源数：{profilerAssetInfo.DependencyChain.UpStream.Count}");
 
                 //下游资源数
-                EditorGUILayout.LabelField($"\t下游资源数量：{profilerAssetInfo.DependencyChain.DownStream.Count}");
+                EditorGUILayout.LabelField($"\t下游资源数：{profilerAssetInfo.DependencyChain.DownStream.Count}");
 
                 // if (GUILayout.Button("查看资源依赖关系图") && (profilerAssetInfo.DependencyChain.UpStream.Count > 0 || profilerAssetInfo.DependencyChain.DownStream.Count > 0))
                 // {

@@ -34,11 +34,8 @@ namespace CatAsset.Runtime
             CatAssetManager.UnloadAssetDelayTime = UnloadAssetDelayTime;
             CatAssetManager.MaxTaskRunCount = MaxTaskRunCount;
 
-            if (IsOpenProfiler)
-            {
-                //打开调试分析器
-                gameObject.AddComponent<ProfilerComponent>();
-            }
+            //添加调试分析器组件
+            gameObject.AddComponent<ProfilerComponent>();
 
         }
 

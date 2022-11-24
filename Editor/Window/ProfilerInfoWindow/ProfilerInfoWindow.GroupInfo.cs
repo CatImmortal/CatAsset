@@ -7,12 +7,6 @@ namespace CatAsset.Editor
 {
     public partial class ProfilerInfoWindow
     {
-        private List<ProfilerGroupInfo> groupInfoList;
-
-        private void ClearGroupInfoView()
-        {
-            groupInfoList = null;
-        }
 
         /// <summary>
         /// 绘制资源组信息界面
@@ -29,12 +23,12 @@ namespace CatAsset.Editor
 
             }
 
-            if (groupInfoList == null)
+            if (profilerInfo == null)
             {
                 return;
             }
 
-            foreach (var profilerGroupInfo in groupInfoList)
+            foreach (var profilerGroupInfo in profilerInfo.GroupInfoList)
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {

@@ -62,6 +62,8 @@ namespace CatAsset.Runtime
 
             UpStreamIndexes.Clear();
             DownStreamIndexes.Clear();
+            DependencyChain.UpStream.Clear();
+            DependencyChain.DownStream.Clear();
         }
     }
 }
