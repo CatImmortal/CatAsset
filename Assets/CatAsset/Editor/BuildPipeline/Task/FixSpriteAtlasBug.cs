@@ -4,14 +4,13 @@ using UnityEditor.Build.Content;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Injector;
 using UnityEditor.Build.Pipeline.Interfaces;
-using UnityEditor.U2D;
 using UnityEngine;
 using UnityEngine.U2D;
 
 namespace CatAsset.Editor
 {
     /// <summary>
-    /// 修复SBP打包SpriteAtlas的散图时，纹理冗余的Bug
+    /// 修复SBP构建包含图集散图的资源包时，发生散图纹理冗余的Bug
     /// </summary>
     public class FixSpriteAtlasBug : IBuildTask
     {
