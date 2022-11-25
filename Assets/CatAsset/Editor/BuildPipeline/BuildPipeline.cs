@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEditor.Build.Content;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
+using UnityEditor.Build.Pipeline.Tasks;
 using BuildCompression = UnityEngine.BuildCompression;
 using Debug = UnityEngine.Debug;
 
@@ -33,7 +34,7 @@ namespace CatAsset.Editor
             BundleBuildContent content = new BundleBuildContent(infoParam.AssetBundleBuilds);
 
             //添加构建任务
-            IList<IBuildTask> taskList = DefaultBuildTasks.Create(DefaultBuildTasks.Preset.AssetBundleBuiltInShaderExtraction);
+            List<IBuildTask> taskList = GetSBPInternalBuildTask();
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.AppendMD5))
@@ -115,6 +116,17 @@ namespace CatAsset.Editor
         {
             return (options & target) != 0;
         }
+        
+        /// <summary>
+        /// 创建完整资源包构建输出目录
+        /// </summary>
+        private static string CreateFullOutputPath(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        {
+            string fullOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+                bundleBuildConfig.ManifestVersion);
+            EditorUtil.CreateEmptyDirectory(fullOutputPath);
+            return fullOutputPath;
+        }
 
         /// <summary>
         /// 获取SBP用到的构建参数
@@ -144,16 +156,50 @@ namespace CatAsset.Editor
 
             return parameters;
         }
+        
 
         /// <summary>
-        /// 创建完整资源包构建输出目录
+        /// 获取SBP内置的构建任务
         /// </summary>
-        private static string CreateFullOutputPath(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        private static List<IBuildTask> GetSBPInternalBuildTask()
         {
-            string fullOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
-                bundleBuildConfig.ManifestVersion);
-            EditorUtil.CreateEmptyDirectory(fullOutputPath);
-            return fullOutputPath;
+            var buildTasks = new List<IBuildTask>();
+
+            // Setup
+            buildTasks.Add(new SwitchToBuildPlatform());
+            buildTasks.Add(new RebuildSpriteAtlasCache());
+
+            // Player Scripts
+            buildTasks.Add(new BuildPlayerScripts());
+            buildTasks.Add(new PostScriptsCallback());
+
+            // Dependency
+            buildTasks.Add(new CalculateSceneDependencyData());
+#if UNITY_2019_3_OR_NEWER
+            buildTasks.Add(new CalculateCustomDependencyData());
+#endif
+            buildTasks.Add(new CalculateAssetDependencyData());
+            buildTasks.Add(new StripUnusedSpriteSources());
+            buildTasks.Add(new CreateBuiltInShadersBundle(RuntimeUtil.BuiltInShaderBundleName));
+            buildTasks.Add(new PostDependencyCallback());
+
+            // Packing
+            buildTasks.Add(new GenerateBundlePacking());
+            buildTasks.Add(new FixSpriteAtlasBug());  //这里插入一个修复SBP图集Bug的任务
+            buildTasks.Add(new UpdateBundleObjectLayout());
+            buildTasks.Add(new GenerateBundleCommands());
+            buildTasks.Add(new GenerateSubAssetPathMaps());
+            buildTasks.Add(new GenerateBundleMaps());
+            buildTasks.Add(new PostPackingCallback());
+
+            // Writing
+            buildTasks.Add(new WriteSerializedFiles());
+            buildTasks.Add(new ArchiveAndCompressBundles());
+            buildTasks.Add(new AppendBundleHash());
+            buildTasks.Add(new GenerateLinkXml());
+            buildTasks.Add(new PostWritingCallback());
+
+            return buildTasks;
         }
     }
 }

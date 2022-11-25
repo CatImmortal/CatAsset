@@ -42,6 +42,24 @@ namespace CatAsset.Editor
         {
             string outputFolder = ((BundleBuildParameters) buildParam).OutputFolder;
 
+            
+            HashSet<string> atlasPackableSet = new HashSet<string>();
+            if (infoParam.NormalBundleBuilds.Count > 0)
+            {
+                //非仅构建原生资源包 找出所有图集散图
+                var guids = AssetDatabase.FindAssets("t:SpriteAtlas");
+                foreach (string guid in guids)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    List<string> sprites = EditorUtil.GetDependencies(path, false);
+                    foreach (string sprite in sprites)
+                    {
+                        atlasPackableSet.Add(sprite);
+                    }
+                }
+            }
+           
+            
             //创建资源清单
             CatAssetManifest manifest = new CatAssetManifest
             {
@@ -74,6 +92,7 @@ namespace CatAsset.Editor
 
                 if (bundleBuildInfo.Assets.Count > 0)
                 {
+                    //是场景资源包
                     bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].Name.EndsWith(".unity");
                 }
 
@@ -92,7 +111,7 @@ namespace CatAsset.Editor
                     //依赖内置Shader资源包
                     bundleManifestInfo.IsDependencyBuiltInShaderBundle = true;
                 }
-                
+
                 //资源信息
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
@@ -100,6 +119,7 @@ namespace CatAsset.Editor
                     {
                         Name = assetBuildInfo.Name,
                         Length = assetBuildInfo.Length,
+                        IsAtlasPackable = atlasPackableSet.Contains(assetBuildInfo.Name),
                     };
 
                     bundleManifestInfo.Assets.Add(assetManifestInfo);

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
+using UnityEditor.Build.Pipeline.Utilities;
 using UnityEngine;
 
 namespace CatAsset.Editor
@@ -110,8 +112,31 @@ namespace CatAsset.Editor
             
           
 
-
+            
             EditorGUILayout.Space();
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button("清理SBP构建缓存",GUILayout.Width(200)))
+                {
+                    BuildCache.PurgeCache(true);
+                }
+
+                if (GUILayout.Button("清理图集缓存",GUILayout.Width(200)))
+                {
+                    string atlasCachePath = "Library/AtlasCache";
+                    if (!Directory.Exists(atlasCachePath))
+                    {
+                        Debug.Log("图集缓存目录不存在");
+                        return;
+                    }
+                    
+                    Directory.Delete(atlasCachePath, true);
+                    Debug.Log("图集缓存已清理");
+                }
+                
+            }
+            
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("构建资源包", GUILayout.Width(200)))
@@ -148,8 +173,6 @@ namespace CatAsset.Editor
 
                     return;
                 }
-
-                
             }
 
             if (EditorGUI.EndChangeCheck())
