@@ -129,6 +129,12 @@ namespace CatAsset.Runtime
                 return false;
             }
 
+            if (AssetManifest.IsAtlasPackable)
+            {
+                //不可卸载图集散图 因为会导致整个图集都被卸载了
+                return false;
+            }
+
             if (IsDownStreamInMemory())
             {
                 //不可卸载下游资源还在内存中的 防止下游资源错误丢失依赖

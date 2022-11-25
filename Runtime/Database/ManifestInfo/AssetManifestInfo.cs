@@ -26,6 +26,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public List<string> Dependencies;
 
+        /// <summary>
+        /// 是否是图集散图
+        /// </summary>
+        public bool IsAtlasPackable;
+        
         public int CompareTo(AssetManifestInfo other)
         {
             return Name.CompareTo(other.Name);
