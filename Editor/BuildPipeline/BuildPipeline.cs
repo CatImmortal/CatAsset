@@ -20,7 +20,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 构建资源包
         /// </summary>
-        public static void BuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        public static ReturnCode BuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
 
@@ -64,13 +64,13 @@ namespace CatAsset.Editor
                 Debug.LogError($"资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
 
-
+            return returnCode;
         }
 
         /// <summary>
         /// 构建原生资源包
         /// </summary>
-        public static void BuildRawBundles(BundleBuildConfigSO bundleBuildConfig,
+        public static ReturnCode BuildRawBundles(BundleBuildConfigSO bundleBuildConfig,
             BuildTarget targetPlatform)
         {
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
@@ -104,9 +104,18 @@ namespace CatAsset.Editor
 
             Stopwatch sw = Stopwatch.StartNew();
             //运行构建任务
-            BuildTasksRunner.Run(taskList, buildContext);
+            ReturnCode returnCode = BuildTasksRunner.Run(taskList, buildContext);
 
-            Debug.Log($"原生资源包构建结束，耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+            if (returnCode == ReturnCode.Success || returnCode == ReturnCode.SuccessCached)
+            {
+                Debug.Log($"原生资源包构建成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+            }
+            else
+            {
+                Debug.LogError($"原生资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+            }
+            
+            return returnCode;
         }
 
         /// <summary>
