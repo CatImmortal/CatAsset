@@ -124,9 +124,6 @@ namespace CatAsset.Editor
         /// <summary>
         /// 调用私有的静态方法
         /// </summary>
-        /// <param name="type">类的类型</param>
-        /// <param name="method">类里要调用的方法名</param>
-        /// <param name="parameters">调用方法传入的参数</param>
         public static object InvokeNonPublicStaticMethod(System.Type type, string method, params object[] parameters)
         {
             var methodInfo = type.GetMethod(method, BindingFlags.NonPublic | BindingFlags.Static);
@@ -140,7 +137,7 @@ namespace CatAsset.Editor
         
         
         /// <summary>
-        /// 获取排除了自身和csharp代码文件的依赖资源列表
+        /// 获取排除了自身和无效文件的依赖资源列表
         /// </summary>
         public static List<string> GetDependencies(string assetName,bool recursive = true)
         {
@@ -156,9 +153,12 @@ namespace CatAsset.Editor
             for (int i = 0; i < dependencies.Length; i++)
             {
                 string dependencyName = dependencies[i];
-                if (dependencyName == assetName || dependencyName.EndsWith(".cs"))
+                if (!IsValidAsset(dependencyName))
                 {
-                    //过滤自身与cs代码文件
+                    continue;
+                }
+                if (dependencyName == assetName)
+                {
                     continue;
                 }
 
