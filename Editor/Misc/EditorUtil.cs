@@ -58,6 +58,7 @@ namespace CatAsset.Editor
         private static void OpenDoc()
         {
             Application.OpenURL("http://cathole.top/2022/08/30/catasset-guide/");
+            
         }
 
         /// <summary>
