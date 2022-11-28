@@ -77,7 +77,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 根据字节长度获取合适的描述信息
         /// </summary>
-        public static string GetByteLengthDesc(long length)
+        public static string GetByteLengthDesc(ulong length)
         {
             if (length > oneGB)
             {

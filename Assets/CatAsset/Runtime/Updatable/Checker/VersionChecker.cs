@@ -158,7 +158,7 @@ namespace CatAsset.Runtime
 
             //需要更新的所有资源包的数量与长度
             int totalCount = 0;
-            long totalLength = 0;
+            ulong totalLength = 0;
 
             bool needGenerateReadWriteManifest = false;
 

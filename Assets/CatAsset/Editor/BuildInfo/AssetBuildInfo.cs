@@ -25,12 +25,12 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源文件长度
         /// </summary>
-        public long Length;
+        public ulong Length;
         
         public AssetBuildInfo(string name)
         {
             Name = name;
-            Length = new FileInfo(name).Length;
+            Length = (ulong)new FileInfo(name).Length;
         }
 
         public override string ToString()

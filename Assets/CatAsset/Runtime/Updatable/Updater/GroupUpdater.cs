@@ -17,12 +17,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 重新生成一次读写区资源清单所需的下载字节数
         /// </summary>
-        private const long generateManifestLength = 1024 * 1024 * 10;  //10M
+        private const ulong generateManifestLength = 1024 * 1024 * 10;  //10M
 
         /// <summary>
         /// 从上一次重新生成读写区资源清单到现在的字节数 每次资源包更新完毕计算一次
         /// </summary>
-        private static long deltaUpdatedLength;
+        private static ulong deltaUpdatedLength;
 
         /// <summary>
         /// 资源组名

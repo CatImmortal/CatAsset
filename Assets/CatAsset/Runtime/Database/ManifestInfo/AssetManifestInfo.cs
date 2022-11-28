@@ -19,7 +19,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 文件长度
         /// </summary>
-        public long Length;
+        public ulong Length;
 
         /// <summary>
         /// 依赖资源名列表

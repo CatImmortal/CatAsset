@@ -27,7 +27,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 文件长度
         /// </summary>
-        public long Length;
+        public ulong Length;
 
         /// <summary>
         /// 当前被引用中的资源数量
@@ -75,7 +75,7 @@ namespace CatAsset.Runtime
             return RelativePath.CompareTo(other.RelativePath);
         }
 
-        public static ProfilerBundleInfo Create(string relativePath,string group,bool isRaw,long length,int referencingAssetCount,int totalAssetCount)
+        public static ProfilerBundleInfo Create(string relativePath,string group,bool isRaw,ulong length,int referencingAssetCount,int totalAssetCount)
         {
             ProfilerBundleInfo info = ReferencePool.Get<ProfilerBundleInfo>();
             info.RelativePath = relativePath;

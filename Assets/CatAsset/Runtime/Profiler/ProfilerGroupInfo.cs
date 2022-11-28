@@ -21,7 +21,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 远端资源长度
         /// </summary>
-        public long RemoteLength;
+        public ulong RemoteLength;
 
         /// <summary>
         /// 本地资源数
@@ -31,9 +31,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 本地资源长度
         /// </summary>
-        public long LocalLength;
+        public ulong LocalLength;
 
-        public static ProfilerGroupInfo Create(string name,int remoteCount,long remoteLength,int localCount,long localLength)
+        public static ProfilerGroupInfo Create(string name,int remoteCount,ulong remoteLength,int localCount,ulong localLength)
         {
             ProfilerGroupInfo info = ReferencePool.Get<ProfilerGroupInfo>();
             info.Name = name;

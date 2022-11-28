@@ -37,10 +37,10 @@ namespace CatAsset.Editor
                     EditorGUILayout.LabelField(profilerUpdaterInfo.Name);
 
                     EditorGUILayout.LabelField(profilerUpdaterInfo.TotalCount.ToString());
-                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)profilerUpdaterInfo.TotalLength));
+                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerUpdaterInfo.TotalLength));
                     EditorGUILayout.LabelField(profilerUpdaterInfo.UpdatedCount.ToString());
-                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc((long)profilerUpdaterInfo.UpdatedLength));
-                    EditorGUILayout.LabelField($"{RuntimeUtil.GetByteLengthDesc((long)profilerUpdaterInfo.Speed)}/S");
+                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerUpdaterInfo.UpdatedLength));
+                    EditorGUILayout.LabelField($"{RuntimeUtil.GetByteLengthDesc(profilerUpdaterInfo.Speed)}/S");
                     EditorGUILayout.LabelField(profilerUpdaterInfo.State.ToString());
                 }
             }

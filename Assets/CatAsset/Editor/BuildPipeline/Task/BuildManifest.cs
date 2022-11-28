@@ -98,7 +98,7 @@ namespace CatAsset.Editor
 
                 string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
                 FileInfo fi = new FileInfo(fullPath);
-                bundleManifestInfo.Length = fi.Length;
+                bundleManifestInfo.Length = (ulong)fi.Length;
                 bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
                 BundleDetails details = results.BundleInfos[bundleManifestInfo.RelativePath];
                 if (configParam.TargetPlatform == BuildTarget.WebGL)
@@ -144,7 +144,7 @@ namespace CatAsset.Editor
 
                 string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
                 FileInfo fi = new FileInfo(fullPath);
-                bundleManifestInfo.Length = fi.Length;
+                bundleManifestInfo.Length = (ulong)fi.Length;
                 bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
                 
                 //资源信息
