@@ -66,12 +66,12 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包构建目标平台
         /// </summary>
-        public List<BuildTarget> TargetPlatforms;
+        public List<BuildTarget> TargetPlatforms = new List<BuildTarget>();
 
         /// <summary>
         /// 资源包构建设置
         /// </summary>
-        public BundleBuildOptions Options = BundleBuildOptions.WriteLinkXML & BundleBuildOptions.ChunkBasedCompression;
+        public BundleBuildOptions Options = BundleBuildOptions.WriteLinkXML | BundleBuildOptions.ChunkBasedCompression;
 
         /// <summary>
         /// 资源包构建输出目录
@@ -91,12 +91,12 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包构建目录列表
         /// </summary>
-        public List<BundleBuildDirectory> Directories;
+        public List<BundleBuildDirectory> Directories = new List<BundleBuildDirectory>();
 
         /// <summary>
         /// 资源包构建信息列表
         /// </summary>
-        public List<BundleBuildInfo> Bundles;
+        public List<BundleBuildInfo> Bundles = new List<BundleBuildInfo>();
 
         /// <summary>
         /// 资源包构建规则名 -> 资源包构建规则接口实例
