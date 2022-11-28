@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Build.Content;
 using UnityEditor.Build.Pipeline;
@@ -26,22 +27,23 @@ namespace CatAsset.Editor
             BundleWriteData writeData = (BundleWriteData)writeDataParam;
 
             //所有图集散图的guid列集合
-            HashSet<GUID> spriteGuids = new  HashSet<GUID>();
+            HashSet<GUID> spriteGuids = new HashSet<GUID>();
 
             //遍历资源包里的资源 记录其中图集的散图guid
-            foreach (var pair in writeData.FileToObjects)
+            foreach (KeyValuePair<string, List<ObjectIdentifier>> pair in writeData.FileToObjects)
             {
                 foreach (ObjectIdentifier objectIdentifier in pair.Value)
                 {
-                    string path = AssetDatabase.GUIDToAssetPath(objectIdentifier.guid);
-                    Object asset = AssetDatabase.LoadAssetAtPath<Object>(path);
-                    if (asset is SpriteAtlas)
+                    string path = AssetDatabase.GUIDToAssetPath(objectIdentifier.guid.ToString());
+                    Type type = AssetDatabase.GetMainAssetTypeAtPath(path);
+                    if (type == typeof(SpriteAtlas))
                     {
                         List<string> spritePaths = EditorUtil.GetDependencies(path, false);
                         foreach (string spritePath in spritePaths)
                         {
-                            GUID spriteGuild = AssetDatabase.GUIDFromAssetPath(spritePath);
-                            spriteGuids.Add(spriteGuild);
+                            string spriteGuid = AssetDatabase.AssetPathToGUID(spritePath);
+                            GUID.TryParse(spriteGuid, out GUID guid);
+                            spriteGuids.Add(guid);
                         }
                     }
                 }

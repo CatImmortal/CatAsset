@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using System.Security.Cryptography;
 using System.Text;
+using UnityEngine.Networking;
 using UnityEngine.Profiling;
 
 namespace CatAsset.Runtime
@@ -169,6 +170,18 @@ namespace CatAsset.Runtime
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Web请求是否错误
+        /// </summary>
+        public static bool HasWebRequestError(UnityWebRequest uwr)
+        {
+#if UNITY_2020_3_OR_NEWER
+            return uwr.result != UnityWebRequest.Result.Success;
+#else
+            return uwr.isNetworkError || uwr.isHttpError;
+#endif
         }
     }
 }

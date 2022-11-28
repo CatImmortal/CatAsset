@@ -48,7 +48,7 @@ namespace CatAsset.Runtime
         private void OnEditorMessage(MessageEventArgs arg0)
         {
             byte[] bytes = arg0.data;
-            IsOpen = BitConverter.ToBoolean(bytes);
+            IsOpen = BitConverter.ToBoolean(bytes,0);
         }
 
         private void Update()

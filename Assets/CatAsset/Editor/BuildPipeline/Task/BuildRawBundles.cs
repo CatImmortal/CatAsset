@@ -3,7 +3,6 @@ using System.IO;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Injector;
 using UnityEditor.Build.Pipeline.Interfaces;
-
 namespace CatAsset.Editor
 {
     /// <summary>

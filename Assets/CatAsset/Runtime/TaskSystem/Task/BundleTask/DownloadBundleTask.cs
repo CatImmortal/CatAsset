@@ -103,7 +103,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (op.webRequest.result != UnityWebRequest.Result.Success)
+            if (RuntimeUtil.HasWebRequestError(op.webRequest))
             {
                 //下载失败 重试
                 if (RetryDownload())

@@ -11,11 +11,11 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包构建配置
         /// </summary>
-        public BundleBuildConfigSO Config { get; }
+        BundleBuildConfigSO Config { get; }
         
         /// <summary>
         /// 目标平台
         /// </summary>
-        public BuildTarget TargetPlatform { get; }
+        BuildTarget TargetPlatform { get; }
     }
 }
