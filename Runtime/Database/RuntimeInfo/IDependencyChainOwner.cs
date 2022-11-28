@@ -8,6 +8,6 @@
         /// <summary>
         /// 依赖链
         /// </summary>
-        public DependencyChain<T> DependencyChain { get; }
+       DependencyChain<T> DependencyChain { get; }
     }
 }
