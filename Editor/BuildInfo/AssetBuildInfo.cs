@@ -16,10 +16,11 @@ namespace CatAsset.Editor
         public string Name;
 
         private Type type;
+
         /// <summary>
         /// 资源类型
         /// </summary>
-        public Type Type => type ??= AssetDatabase.GetMainAssetTypeAtPath(Name);
+        public Type Type => type ?? (type = AssetDatabase.GetMainAssetTypeAtPath(Name));
 
         /// <summary>
         /// 资源文件长度

@@ -40,7 +40,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         protected override void LoadDone()
         {
-            if (op.webRequest.result == UnityWebRequest.Result.Success)
+            if (!RuntimeUtil.HasWebRequestError(op.webRequest))
             {
                 BundleRuntimeInfo.Bundle = DownloadHandlerAssetBundle.GetContent(op.webRequest);
             }

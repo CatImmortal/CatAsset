@@ -55,7 +55,7 @@ namespace CatAsset.Runtime
             //请求完毕
             State = TaskState.Finished;
 
-            if (op.webRequest.result != UnityWebRequest.Result.Success)
+            if (RuntimeUtil.HasWebRequestError(op.webRequest))
             {
                 //下载失败 重试
                 if (RetryWebRequest())
