@@ -41,7 +41,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 总资源长度
         /// </summary>
-        public long AssetsLength;
+        public ulong AssetsLength;
         
         /// <summary>
         /// 资源构建信息列表

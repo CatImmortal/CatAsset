@@ -17,7 +17,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 文件长度
         /// </summary>
-        public long Length;
+        public ulong Length;
 
         /// <summary>
         /// 引用计数
@@ -44,7 +44,7 @@ namespace CatAsset.Runtime
             return Name;
         }
 
-        public static ProfilerAssetInfo Create(string name,long length,int refCount)
+        public static ProfilerAssetInfo Create(string name,ulong length,int refCount)
         {
             ProfilerAssetInfo info = ReferencePool.Get<ProfilerAssetInfo>();
             info.Name = name;

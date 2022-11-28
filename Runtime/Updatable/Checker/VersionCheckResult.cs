@@ -18,9 +18,9 @@
         /// <summary>
         /// 需要更新的资源包总长度
         /// </summary>
-        public long TotalLength;
+        public ulong TotalLength;
 
-        public VersionCheckResult(string error,int totalCount, long totalLength)
+        public VersionCheckResult(string error,int totalCount, ulong totalLength)
         {
             Error = error;
             TotalCount = totalCount;

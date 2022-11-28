@@ -123,7 +123,7 @@ namespace CatAsset.Runtime
             //下载成功 开始校验
             //先对比文件长度
             FileInfo fi = new FileInfo(localTempFilePath);
-            bool isVerify = fi.Length == bundleManifestInfo.Length;
+            bool isVerify = (ulong)fi.Length == bundleManifestInfo.Length;
             if (isVerify)
             {
                 //文件长度对得上 再校验MD5

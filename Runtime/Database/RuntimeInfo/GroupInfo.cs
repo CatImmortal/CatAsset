@@ -25,7 +25,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此资源组的所有远端资源包长度
         /// </summary>
-        public long RemoteLength { get; internal set; }
+        public ulong RemoteLength { get; internal set; }
 
         /// <summary>
         /// 此资源组的所有本地资源包
@@ -40,7 +40,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此资源组的所有本地资源包长度
         /// </summary>
-        public long LocalLength { get; internal set; }
+        public ulong LocalLength { get; internal set; }
         
         /// <summary>
         /// 添加远端资源包

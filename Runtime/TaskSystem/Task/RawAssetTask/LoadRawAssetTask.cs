@@ -103,8 +103,8 @@ namespace CatAsset.Runtime
                 assetRuntimeInfo.Asset = rawAsset;
                 if (assetRuntimeInfo.AssetManifest.Length == default)
                 {
-                    assetRuntimeInfo.AssetManifest.Length = rawAsset.Length;
-                    bundleRuntimeInfo.Manifest.Length = rawAsset.Length;
+                    assetRuntimeInfo.AssetManifest.Length = (ulong)rawAsset.Length;
+                    bundleRuntimeInfo.Manifest.Length = (ulong)rawAsset.Length;
                 }
                 
                 CatAssetDatabase.SetAssetInstance(assetRuntimeInfo.Asset,assetRuntimeInfo);
