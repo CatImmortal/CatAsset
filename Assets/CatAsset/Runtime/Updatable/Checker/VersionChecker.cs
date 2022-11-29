@@ -186,7 +186,7 @@ namespace CatAsset.Runtime
                         //添加至更新器中
                         GroupUpdater groupUpdater = CatAssetUpdater.GetOrAddGroupUpdater(checkInfo.RemoteInfo.Group);
                         groupUpdater.AddUpdaterBundle(checkInfo.RemoteInfo);
-                        groupUpdater.TotalLength += (ulong)checkInfo.RemoteInfo.Length;
+                        groupUpdater.TotalLength += checkInfo.RemoteInfo.Length;
 
                         //添加运行时信息 此资源如果在更新前就被加载了 需要先下载到本地
                         CatAssetDatabase.InitRuntimeInfo(checkInfo.RemoteInfo,BundleRuntimeInfo.State.InRemote);

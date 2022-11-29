@@ -65,17 +65,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 添加资源包下载任务
         /// </summary>
-        internal static void AddDownLoadBundleTask(GroupUpdater updater, BundleManifestInfo info,
-            BundleDownloadedCallback onBundleDownloadedCallback, DownloadBundleUpdateCallback onDownloadUpdateCallback,
+        internal static void AddDownLoadBundleTask(GroupUpdater updater, UpdateInfo updateInfo,
+            BundleDownloadedCallback onBundleDownloadedCallback, DownloadBundleRefreshCallback onDownloadRefreshCallback,
             TaskPriority priority = TaskPriority.Middle)
         {
-            string localFilePath = RuntimeUtil.GetReadWritePath(info.RelativePath);
+            string localFilePath = RuntimeUtil.GetReadWritePath(updateInfo.Info.RelativePath);
             string downloadUri =
-                RuntimeUtil.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, info.RelativePath));
+                RuntimeUtil.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, updateInfo.Info.RelativePath));
 
             DownloadBundleTask task =
-                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, info, updater, downloadUri,
-                    localFilePath, onBundleDownloadedCallback, onDownloadUpdateCallback);
+                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, updateInfo, updater, downloadUri,
+                    localFilePath, onBundleDownloadedCallback, onDownloadRefreshCallback);
             downloadTaskRunner.AddTask(task, priority);
         }
 

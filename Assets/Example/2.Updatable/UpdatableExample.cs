@@ -112,10 +112,10 @@ public class UpdatableExample : MonoBehaviour
     {
         if (!result.Success)
         {
-            Debug.LogError($"资源组{result.Updater.GroupName}的资源{result.BundleRelativePath}更新失败");
+            Debug.LogError($"资源组{result.Updater.GroupName}的资源{result.UpdateInfo.Info}更新失败");
             return;
         }
         
-        Debug.Log($"资源组{result.Updater.GroupName}的资源{result.BundleRelativePath}更新成功，按S实例化预制体,\n{result}");
+        Debug.Log($"资源组{result.Updater.GroupName}的资源{result.UpdateInfo.Info}更新成功，按S实例化预制体,\n{result}");
     }
 }

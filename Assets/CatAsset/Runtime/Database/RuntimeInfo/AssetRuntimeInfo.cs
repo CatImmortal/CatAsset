@@ -150,14 +150,29 @@ namespace CatAsset.Runtime
             return AssetManifest.CompareTo(other.AssetManifest);
         }
 
-        public bool Equals(AssetRuntimeInfo other)
-        {
-            return BundleManifest.Equals(other.BundleManifest) && AssetManifest.Equals(other.AssetManifest);
-        }
-
         public override string ToString()
         {
             return AssetManifest.ToString();
+        }
+
+        public bool Equals(AssetRuntimeInfo other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(BundleManifest, other.BundleManifest) && Equals(AssetManifest, other.AssetManifest);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((AssetRuntimeInfo)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(BundleManifest, AssetManifest);
         }
     }
 }

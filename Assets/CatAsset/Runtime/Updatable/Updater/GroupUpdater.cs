@@ -5,7 +5,7 @@ using UnityEngine;
 namespace CatAsset.Runtime
 {
     /// <summary>
-    /// 单个资源包更新完毕回调的原型
+    /// 资源包更新完毕回调的原型
     /// </summary>
     public delegate void BundleUpdatedCallback(BundleUpdateResult result);
 
@@ -40,50 +40,40 @@ namespace CatAsset.Runtime
         private readonly BundleDownloadedCallback onBundleDownloadedCallback;
 
         /// <summary>
-        /// 资源包下载字节数更新回调
+        /// 资源包下载进度刷新回调
         /// </summary>
-        private readonly DownloadBundleUpdateCallback onDownloadUpdateCallback;
+        private readonly DownloadBundleRefreshCallback onDownloadRefreshCallback;
 
         /// <summary>
-        /// 单个资源包更新完毕回调(非指定资源包更新)
+        /// 资源包更新信息 -> 资源包更新完毕回调（外部注册的）
         /// </summary>
-        private BundleUpdatedCallback onBundleUpdated;
+        private readonly Dictionary<UpdateInfo, BundleUpdatedCallback> onBundleUpdatedDict =
+            new Dictionary<UpdateInfo, BundleUpdatedCallback>();
 
         /// <summary>
-        /// 资源包 -> 单个资源包更新完毕回调
+        /// 此更新器的所有资源包集合（待更新的+更新中+已更新的）
         /// </summary>
-        private readonly Dictionary<BundleManifestInfo, BundleUpdatedCallback> onBundleUpdatedDict =
-            new Dictionary<BundleManifestInfo, BundleUpdatedCallback>();
+        private readonly HashSet<UpdateInfo> updaterBundles = new HashSet<UpdateInfo>();
 
         /// <summary>
-        /// 此更新器的资源包集合（包含待更新的+已更新的）
-        /// </summary>
-        private readonly HashSet<BundleManifestInfo> updaterBundles = new HashSet<BundleManifestInfo>();
-
-        /// <summary>
-        /// 此更新器的资源包总数（包含待更新的+已更新的）
+        /// 此更新器的资源包总数（待更新的+更新中+已更新的）
         /// </summary>
         public int TotalCount => updaterBundles.Count;
 
         /// <summary>
-        /// 此更新器的资源包总长度（包含待更新的+已更新的）
+        /// 此更新器的资源包总长度（待更新的+更新中+已更新的）
         /// </summary>
         public ulong TotalLength { get; internal set; }
 
         /// <summary>
-        /// 更新中的资源包集合
+        /// 更新中的资源包总数
         /// </summary>
-        private HashSet<BundleManifestInfo> updatingBundles = new HashSet<BundleManifestInfo>();
-
-        /// <summary>
-        /// 已更新的资源包集合
-        /// </summary>
-        private HashSet<BundleManifestInfo> updatedBundles = new HashSet<BundleManifestInfo>();
+        public int UpdatingCount => GetCount(UpdateState.Updating);
 
         /// <summary>
         /// 已更新的资源包总数
         /// </summary>
-        public int UpdatedCount => updatedBundles.Count;
+        public int UpdatedCount => GetCount(UpdateState.Updated);
 
         /// <summary>
         /// 已更新的资源包总长度
@@ -93,37 +83,35 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 是否已全部更新完毕
         /// </summary>
-        public bool IsAllUpdated => UpdatedCount == TotalCount;
-
-        /// <summary>
-        /// 下载速度 单位：字节/秒
-        /// </summary>
-        public ulong Speed { get; private set; }
-
-        /// <summary>
-        /// 上一次记录已下载字节数的时间
-        /// </summary>
-        private float lastRecordTime;
+        public bool IsAllUpdated => UpdatedCount == updaterBundles.Count;
 
         /// <summary>
         /// 上一次记录的已下载字节数
         /// </summary>
         private ulong lastRecordDownloadBytes;
-
-
-
+        
+        /// <summary>
+        /// 上一次记录已下载字节数的时间
+        /// </summary>
+        private float lastRecordTime;
+        
+        /// <summary>
+        /// 下载速度 单位：字节/秒
+        /// </summary>
+        public ulong Speed { get; private set; }
+        
         public GroupUpdater()
         {
             onBundleDownloadedCallback = OnBundleDownloaded;
-            onDownloadUpdateCallback = OnDownloadUpdate;
+            onDownloadRefreshCallback = OnDownloadUpdate;
         }
-
+        
         /// <summary>
-        /// 添加资源包信息
+        /// 添加需要更新的资源包
         /// </summary>
         internal void AddUpdaterBundle(BundleManifestInfo info)
         {
-            updaterBundles.Add(info);
+            updaterBundles.Add(new UpdateInfo(info,UpdateState.Wait));
         }
 
         /// <summary>
@@ -138,20 +126,22 @@ namespace CatAsset.Runtime
             }
 
             State = GroupUpdaterState.Running;
-            onBundleUpdated += callback;
-            foreach (BundleManifestInfo info in updaterBundles)
+            
+            foreach (UpdateInfo updateInfo in updaterBundles)
             {
-                if (updatedBundles.Contains(info))
+                if (updateInfo.State == UpdateState.Updated)
                 {
                     continue;
                 }
 
-                //为了能让优先级变更机制生效 不判断是否在updatingBundles中 而是由DownloadBundleTask不处理已合并任务来保证不会重复回调
+                AddUpdatedListener(updateInfo,callback);
+                
+                //为了能让优先级变更机制生效 不判断State是否为updating来去重 而是由DownloadBundleTask不处理已合并任务来保证内部不会被重复回调
 
                 //不是更新中的 或者已更新的
                 //添加下载文件的任务
-                CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloadedCallback,onDownloadUpdateCallback,priority);
-                updatingBundles.Add(info);
+                CatAssetManager.AddDownLoadBundleTask(this,updateInfo,onBundleDownloadedCallback,onDownloadRefreshCallback,priority);
+                updateInfo.State = UpdateState.Updating;
             }
         }
 
@@ -160,43 +150,70 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void UpdateBundle(BundleManifestInfo info, BundleUpdatedCallback callback,TaskPriority priority = TaskPriority.VeryHeight)
         {
-            if (!updaterBundles.Contains(info))
+            foreach (UpdateInfo updateInfo in updaterBundles)
             {
-                //此更新器没有此资源包
-                return;
+                if (updateInfo.Info.Equals(info))
+                {
+                    if (updateInfo.State == UpdateState.Updated)
+                    {
+                        //此资源包已更新
+                        callback?.Invoke(new BundleUpdateResult(true,updateInfo,this));
+                        return;
+                    }
+                    
+                    State = GroupUpdaterState.Running;
+                    
+                    //添加回调
+                    AddUpdatedListener(updateInfo,callback);
+                    
+                    //为了能让优先级变更机制生效 不判断State是否为updating来去重 而是由DownloadBundleTask不处理已合并任务来保证内部不会被重复回调
+                    CatAssetManager.AddDownLoadBundleTask(this,updateInfo,onBundleDownloadedCallback,onDownloadRefreshCallback,priority);
+                    updateInfo.State = UpdateState.Updating;
+                    
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 获取指定状态的更新器的数量
+        /// </summary>
+        private int GetCount(UpdateState state)
+        {
+            int count = 0;
+            foreach (UpdateInfo updateInfo in updaterBundles)
+            {
+                if (updateInfo.State == state)
+                {
+                    count++;
+                }
             }
 
-            if (updatedBundles.Contains(info))
+            return count;
+        }
+        
+        /// <summary>
+        /// 添加资源包更新完毕时的监听回调
+        /// </summary>
+        private void AddUpdatedListener(UpdateInfo updateInfo,BundleUpdatedCallback callback)
+        {
+            if (!onBundleUpdatedDict.TryGetValue(updateInfo,out BundleUpdatedCallback value))
             {
-                //此资源包已更新
-                return;
-            }
-
-            State = GroupUpdaterState.Running;
-
-            //为了能让优先级变更机制生效 不判断是否在updatingBundles中 而是由DownloadBundleTask不处理已合并任务来保证不会重复回调
-            CatAssetManager.AddDownLoadBundleTask(this,info,onBundleDownloadedCallback,onDownloadUpdateCallback,priority);
-            updatingBundles.Add(info);
-
-            //添加回调
-            if (!onBundleUpdatedDict.TryGetValue(info,out BundleUpdatedCallback value))
-            {
-                onBundleUpdatedDict.Add(info,callback);
+                onBundleUpdatedDict.Add(updateInfo,callback);
             }
             else
             {
                 value += callback;
-                onBundleUpdatedDict[info] = value;
+                onBundleUpdatedDict[updateInfo] = value;
             }
         }
 
         /// <summary>
         /// 资源包下载字节数更新的回调
         /// </summary>
-        private void OnDownloadUpdate(ulong deltaDownloadedBytes, ulong totalDownloadedBytes, BundleManifestInfo info)
+        private void OnDownloadUpdate(UpdateInfo updateInfo,ulong deltaDownloadedBytes, ulong totalDownloadedBytes)
         {
             //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 一个下载中的资源包只会回调到这里一次
-
             UpdatedLength += deltaDownloadedBytes;
 
             if (lastRecordTime == 0)
@@ -219,15 +236,14 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源包下载完毕的回调
         /// </summary>
-        private void OnBundleDownloaded(bool success, BundleManifestInfo info)
+        private void OnBundleDownloaded(UpdateInfo updateInfo,bool success)
         {
             //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 一个下载完毕的资源包只会回调到这里一次
-
-            //无论是否下载成功 都要从updatingBundles中移除
-            updatingBundles.Remove(info);
-
+            
+            updateInfo.State = success ? UpdateState.Updated : UpdateState.Wait;
+            
             //没有资源需要更新了 改变状态为Free
-            if (updatingBundles.Count == 0)
+            if (UpdatingCount == 0)
             {
                 State = GroupUpdaterState.Free;
                 Speed = 0;
@@ -235,24 +251,20 @@ namespace CatAsset.Runtime
                 lastRecordDownloadBytes = 0;
             }
 
-            onBundleUpdatedDict.TryGetValue(info, out BundleUpdatedCallback callback);
+            //取出回调
+            onBundleUpdatedDict.TryGetValue(updateInfo, out BundleUpdatedCallback callback);
 
             BundleUpdateResult result;
             if (!success)
             {
                 //下载失败
-                Debug.LogError($"更新{info.RelativePath}失败");
+                Debug.LogError($"更新{updateInfo.Info}失败");
 
-                result = new BundleUpdateResult(false,info.RelativePath,this);
-                onBundleUpdated?.Invoke(result);
-                if (State == GroupUpdaterState.Free)
-                {
-                    onBundleUpdated = null;
-                }
+                result = new BundleUpdateResult(false,updateInfo,this);
 
                 if (callback != null)
                 {
-                    onBundleUpdatedDict.Remove(info);
+                    onBundleUpdatedDict.Remove(updateInfo);
                     callback.Invoke(result);
                 }
 
@@ -260,17 +272,16 @@ namespace CatAsset.Runtime
             }
 
             //下载成功 刷新已下载资源信息
-            updatedBundles.Add(info);
-            deltaUpdatedLength += info.Length;
+            deltaUpdatedLength += updateInfo.Info.Length;
 
             //将下载好的资源包的状态从 InRemote 修改为 InReadWrite，表示可从本地读写区加载
-            BundleRuntimeInfo bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(info.RelativePath);
+            BundleRuntimeInfo bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(updateInfo.Info.RelativePath);
             bundleRuntimeInfo.BundleState = BundleRuntimeInfo.State.InReadWrite;
 
             //刷新资源组本地资源信息
-            GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(info.Group);
-            groupInfo.AddLocalBundle(info.RelativePath);
-            groupInfo.LocalLength += info.Length;
+            GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(updateInfo.Info.Group);
+            groupInfo.AddLocalBundle(updateInfo.Info.RelativePath);
+            groupInfo.LocalLength += updateInfo.Info.Length;
 
             if (IsAllUpdated || deltaUpdatedLength >= generateManifestLength)
             {
@@ -286,16 +297,10 @@ namespace CatAsset.Runtime
             }
 
             //调用外部回调
-            result = new BundleUpdateResult(true,info.RelativePath,this);
-            onBundleUpdated?.Invoke(result);
-            if (State == GroupUpdaterState.Free)
-            {
-                onBundleUpdated = null;
-            }
-
+            result = new BundleUpdateResult(true,updateInfo,this);
             if (callback != null)
             {
-                onBundleUpdatedDict.Remove(info);
+                onBundleUpdatedDict.Remove(updateInfo);
                 callback.Invoke(result);
             }
 

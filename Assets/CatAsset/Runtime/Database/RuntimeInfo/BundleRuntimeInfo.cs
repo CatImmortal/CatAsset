@@ -126,12 +126,26 @@ namespace CatAsset.Runtime
             return Manifest.CompareTo(other.Manifest);
         }
 
+
         public bool Equals(BundleRuntimeInfo other)
         {
-            return Manifest.Equals(other.Manifest);
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Equals(Manifest, other.Manifest);
         }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((BundleRuntimeInfo)obj);
+        }
 
+        public override int GetHashCode()
+        {
+            return (Manifest != null ? Manifest.GetHashCode() : 0);
+        }
     }
 }
 
