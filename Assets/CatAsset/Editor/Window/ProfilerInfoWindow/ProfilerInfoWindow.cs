@@ -8,6 +8,7 @@ using CatAsset;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using CatAsset.Runtime;
+using UnityEditor.IMGUI.Controls;
 using UnityEditor.Networking.PlayerConnection;
 using UnityEngine.Networking.PlayerConnection;
 
@@ -33,6 +34,8 @@ namespace CatAsset.Editor
         /// </summary>
         private string[] tabs = { "资源包信息", "任务信息" ,"资源组信息" ,"更新器信息"};
 
+        private SearchField searchField;
+        private string searchString;
 
         [MenuItem("CatAsset/打开调试分析器窗口", priority = 1)]
         private static void OpenWindow()
@@ -69,6 +72,16 @@ namespace CatAsset.Editor
             ProfilerComponent.Callback = OnProfilerInfo;
 
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
+
+            searchField = new SearchField();
+            //m_SearchField.downOrUpArrowKeyPressed += bundleInfoTreeView.SetFocusAndEnsureSelectedItem;
+        }
+
+        private void OnDisable()
+        {
+            EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+
+            Send(false);
         }
 
         private void OnConnection(int arg0)
@@ -106,20 +119,92 @@ namespace CatAsset.Editor
             }
 
             profilerInfo = info;
+
+            if (bundleInfoTreeView == null)
+            {
+                InitBundleInfoTreeView();
+            }
+            bundleInfoTreeView.ProfilerInfo = profilerInfo;
+            if (profilerInfo.BundleInfoList.Count > 0)
+            {
+                bundleInfoTreeView.Reload();
+            }
+
         }
 
-        private void OnDisable()
+        /// <summary>
+        /// 创建列的数组
+        /// </summary>
+        private MultiColumnHeaderState.Column[] CreateColumns(List<string> columnList)
         {
-            EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+            var columns = new MultiColumnHeaderState.Column[columnList.Count];
+            for (int i = 0; i < columns.Length; i++)
+            {
+                string name = columnList[i];
+                columns[i] = new MultiColumnHeaderState.Column()
+                {
+                    headerContent = new GUIContent(name),
+                    headerTextAlignment = TextAlignment.Center,
+                    sortingArrowAlignment = TextAlignment.Right
+                };
+            }
 
-            Send(false);
+            return columns;
         }
 
 
         private void OnGUI()
         {
+            DrawUpToolbar();
+            DrawInfoView();
+            //Repaint();
+        }
+
+        /// <summary>
+        /// 绘制上方工具栏
+        /// </summary>
+        private void DrawUpToolbar()
+        {
             selectedTab = GUILayout.Toolbar(selectedTab, tabs);
 
+            searchString = searchField.OnGUI(new Rect(0, 30, 500, 20), searchString);
+            EditorGUILayout.EditorToolbar();
+            if (bundleInfoTreeView != null)
+            {
+                bundleInfoTreeView.searchString = searchString;
+            }
+
+            if (GUI.Button(new Rect(510,30,100,20),"全部展开"))
+            {
+                bundleInfoTreeView.ExpandAll();
+            }
+            if (GUI.Button(new Rect(610,30,100,20),"全部收起"))
+            {
+                bundleInfoTreeView.CollapseAll();
+            }
+
+
+            // using (new EditorGUILayout.HorizontalScope())
+            // {
+            //
+            //     string style = "miniButton";
+            //     if (GUILayout.Button("全部展开", style))
+            //     {
+            //         bundleInfoTreeView.ExpandAll();
+            //     }
+            //
+            //     if (GUILayout.Button("全部收起", style))
+            //     {
+            //         bundleInfoTreeView.CollapseAll();
+            //     }
+            // }
+        }
+
+        /// <summary>
+        /// 绘制信息界面
+        /// </summary>
+        private void DrawInfoView()
+        {
             switch (selectedTab)
             {
                 case 0:
@@ -142,10 +227,9 @@ namespace CatAsset.Editor
                     DrawUpdaterInfoView();
                     break;
             }
-
-            Repaint();
-
         }
+
+
 
         /// <summary>
         /// 向真机发送消息
