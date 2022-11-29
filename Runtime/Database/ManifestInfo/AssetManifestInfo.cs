@@ -35,15 +35,30 @@ namespace CatAsset.Runtime
         {
             return Name.CompareTo(other.Name);
         }
-
-        public bool Equals(AssetManifestInfo other)
-        {
-            return Name.Equals(other.Name);
-        }
-
+        
         public override string ToString()
         {
             return Name;
+        }
+
+        public bool Equals(AssetManifestInfo other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Name == other.Name;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((AssetManifestInfo)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Name != null ? Name.GetHashCode() : 0);
         }
     }
 

@@ -83,14 +83,29 @@ namespace CatAsset.Runtime
             return RelativePath.CompareTo(other.RelativePath);
         }
         
-        public bool Equals(BundleManifestInfo other)
-        {
-            return RelativePath.Equals(other.RelativePath)  && Length.Equals(other.Length) && MD5.Equals(other.MD5);
-        }
-
         public override string ToString()
         {
             return RelativePath;
+        }
+
+        public bool Equals(BundleManifestInfo other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return relativePath == other.relativePath && Length == other.Length && MD5 == other.MD5;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((BundleManifestInfo)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(relativePath, Length, MD5);
         }
     }
 }
