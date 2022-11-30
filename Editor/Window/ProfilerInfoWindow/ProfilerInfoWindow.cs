@@ -30,8 +30,10 @@ namespace CatAsset.Editor
         /// <summary>
         /// 页签
         /// </summary>
-        private string[] tabs = { "资源包信息", "任务信息" ,"资源组信息" ,"更新器信息"};
+        private string[] tabs = { "资源包信息", "资源信息", "任务信息" ,"资源组信息" ,"更新器信息"};
 
+
+        private BaseProfilerTreeView curTreeView;
         private SearchField searchField;
         private string searchString;
 
@@ -71,10 +73,11 @@ namespace CatAsset.Editor
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
 
             searchField = new SearchField();
-            //m_SearchField.downOrUpArrowKeyPressed += bundleInfoTreeView.SetFocusAndEnsureSelectedItem;
+            //m_SearchField.downOrUpArrowKeyPressed += curTreeView.SetFocusAndEnsureSelectedItem;
 
             //创建TreeView
             InitBundleInfoTreeView();
+            InitAssetInfoTreeView();
         }
 
         private void OnDisable()
@@ -129,9 +132,8 @@ namespace CatAsset.Editor
                 return;
             }
 
-            bundleInfoTreeView.ProfilerInfo = curProfilerInfo;
-            bundleInfoTreeView.Reload();
-            bundleInfoTreeView.OnSortingChanged(bundleInfoTreeView.multiColumnHeader);
+            bundleInfoTreeView.Reload(curProfilerInfo);
+            assetInfoTreeView.Reload(curProfilerInfo);
         }
 
         /// <summary>
@@ -177,9 +179,9 @@ namespace CatAsset.Editor
             x += width;
             width = 500;
             searchString = searchField.OnGUI(new Rect(x, y, width, height), searchString);
-            if (bundleInfoTreeView != null)
+            if (curTreeView != null)
             {
-                bundleInfoTreeView.searchString = searchString;
+                curTreeView.searchString = searchString;
             }
 
             x += width;
@@ -187,14 +189,14 @@ namespace CatAsset.Editor
             width = 100;
             if (GUI.Button(new Rect(x,y,width,height),"全部展开"))
             {
-                bundleInfoTreeView?.ExpandAll();
+                curTreeView?.ExpandAll();
             }
 
             x += width;
             width = 100;
             if (GUI.Button(new Rect(x,y,width,height),"全部收起"))
             {
-                bundleInfoTreeView?.CollapseAll();
+                curTreeView?.CollapseAll();
             }
 
             x += width;
@@ -255,18 +257,24 @@ namespace CatAsset.Editor
             switch (selectedTab)
             {
                 case 0:
+                    curTreeView = bundleInfoTreeView;
                     DrawBundleInfoView();
                     break;
 
                 case 1:
-                    DrawTaskInfoView();
+                    curTreeView = assetInfoTreeView;
+                    DrawAssetInfoView();
                     break;
 
                 case 2:
-                    DrawGroupInfoView();
+                    DrawTaskInfoView();
                     break;
 
                 case 3:
+                    DrawGroupInfoView();
+                    break;
+
+                case 4:
                     DrawUpdaterInfoView();
                     break;
             }
