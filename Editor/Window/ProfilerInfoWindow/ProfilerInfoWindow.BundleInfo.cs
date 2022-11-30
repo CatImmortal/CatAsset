@@ -22,6 +22,7 @@ namespace CatAsset.Editor
             {
                 "名称",
                 "Object",
+                "类型",
                 "资源组",
                 "内存中资源数",
                 "引用中资源数",
@@ -51,12 +52,18 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawBundleInfoView()
         {
-            if (profilerInfo == null ||  profilerInfo.BundleInfoList.Count == 0)
+            if (profilerPlayer.IsEmpty)
             {
                 return;
             }
 
-            bundleInfoTreeView.OnGUI(new Rect(0, 60, position.width, position.height - 60));
+            bool toggleValue = EditorGUI.ToggleLeft(new Rect(0, 50, 150, 20), "只显示主动加载的资源", bundleInfoTreeView.IsOnlyShowActiveLoad);
+            if (bundleInfoTreeView.IsOnlyShowActiveLoad != toggleValue)
+            {
+                bundleInfoTreeView.IsOnlyShowActiveLoad = toggleValue;
+                bundleInfoTreeView.Reload();
+            }
+            bundleInfoTreeView.OnGUI(new Rect(0, 70, position.width, position.height - 70));
         }
 
 

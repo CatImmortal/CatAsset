@@ -13,32 +13,32 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawGroupInfoView()
         {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                EditorGUILayout.LabelField("资源组");
-                EditorGUILayout.LabelField("远端资源包数");
-                EditorGUILayout.LabelField("远端资源包长度");
-                EditorGUILayout.LabelField("本地资源包数");
-                EditorGUILayout.LabelField("本地资源包长度");
-
-            }
-
-            if (profilerInfo == null)
-            {
-                return;
-            }
-
-            foreach (var profilerGroupInfo in profilerInfo.GroupInfoList)
-            {
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField(profilerGroupInfo.Name);
-                    EditorGUILayout.LabelField(profilerGroupInfo.RemoteCount.ToString());
-                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerGroupInfo.RemoteLength));
-                    EditorGUILayout.LabelField(profilerGroupInfo.LocalCount.ToString());
-                    EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerGroupInfo.LocalLength));
-                }
-            }
+            // using (new EditorGUILayout.HorizontalScope())
+            // {
+            //     EditorGUILayout.LabelField("资源组");
+            //     EditorGUILayout.LabelField("远端资源包数");
+            //     EditorGUILayout.LabelField("远端资源包长度");
+            //     EditorGUILayout.LabelField("本地资源包数");
+            //     EditorGUILayout.LabelField("本地资源包长度");
+            //
+            // }
+            //
+            // if (curProfilerInfo == null)
+            // {
+            //     return;
+            // }
+            //
+            // foreach (var profilerGroupInfo in curProfilerInfo.GroupInfoList)
+            // {
+            //     using (new EditorGUILayout.HorizontalScope())
+            //     {
+            //         EditorGUILayout.LabelField(profilerGroupInfo.Name);
+            //         EditorGUILayout.LabelField(profilerGroupInfo.RemoteCount.ToString());
+            //         EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerGroupInfo.RemoteLength));
+            //         EditorGUILayout.LabelField(profilerGroupInfo.LocalCount.ToString());
+            //         EditorGUILayout.LabelField(RuntimeUtil.GetByteLengthDesc(profilerGroupInfo.LocalLength));
+            //     }
+            // }
 
 
         }

@@ -30,27 +30,5 @@ namespace CatAsset.Editor
             }
         }
 
-        public static void Order<T>(this List<T> self, bool ascending) where T : IComparable<T>
-        {
-            self.Sort(((x, y) =>
-            {
-                int result = x.CompareTo(y);
-                if (!ascending)
-                {
-                    //倒序排序
-
-                    if (result == -1)
-                    {
-                        result = 1;
-
-                    }else if (result == 1)
-                    {
-                        result = -1;
-                    }
-                }
-
-                return result;
-            }));
-        }
     }
 }

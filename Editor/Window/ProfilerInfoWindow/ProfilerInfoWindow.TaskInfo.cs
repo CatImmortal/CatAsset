@@ -20,37 +20,37 @@ namespace CatAsset.Editor
         {
 
 
-            using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(taskInfoScrollPos))
-            {
-                taskInfoScrollPos = sv.scrollPosition;
-
-                using (new EditorGUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField("任务名称", GUILayout.Width(position.width / 2));
-                    EditorGUILayout.LabelField("任务类型");
-                    EditorGUILayout.LabelField("任务状态");
-                    EditorGUILayout.LabelField("任务进度");
-                    EditorGUILayout.LabelField("已合并任务数");
-                }
-
-                if (profilerInfo == null)
-                {
-                    return;
-                }
-
-                foreach (var profilerTaskInfo in profilerInfo.TaskInfoList)
-                {
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.LabelField(profilerTaskInfo.Name, GUILayout.Width(position.width / 2));
-                        EditorGUILayout.LabelField(profilerTaskInfo.Type);
-                        EditorGUILayout.LabelField(profilerTaskInfo.State.ToString());
-                        EditorGUILayout.LabelField(profilerTaskInfo.Progress.ToString("0.00"));
-                        EditorGUILayout.LabelField(profilerTaskInfo.MergedTaskCount.ToString());
-                    }
-                }
-
-            }
+            // using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(taskInfoScrollPos))
+            // {
+            //     taskInfoScrollPos = sv.scrollPosition;
+            //
+            //     using (new EditorGUILayout.HorizontalScope())
+            //     {
+            //         EditorGUILayout.LabelField("任务名称", GUILayout.Width(position.width / 2));
+            //         EditorGUILayout.LabelField("任务类型");
+            //         EditorGUILayout.LabelField("任务状态");
+            //         EditorGUILayout.LabelField("任务进度");
+            //         EditorGUILayout.LabelField("已合并任务数");
+            //     }
+            //
+            //     if (curProfilerInfo == null)
+            //     {
+            //         return;
+            //     }
+            //
+            //     foreach (var profilerTaskInfo in curProfilerInfo.TaskInfoList)
+            //     {
+            //         using (new EditorGUILayout.HorizontalScope())
+            //         {
+            //             EditorGUILayout.LabelField(profilerTaskInfo.Name, GUILayout.Width(position.width / 2));
+            //             EditorGUILayout.LabelField(profilerTaskInfo.Type);
+            //             EditorGUILayout.LabelField(profilerTaskInfo.State.ToString());
+            //             EditorGUILayout.LabelField(profilerTaskInfo.Progress.ToString("0.00"));
+            //             EditorGUILayout.LabelField(profilerTaskInfo.MergedTaskCount.ToString());
+            //         }
+            //     }
+            //
+            // }
         }
     }
 }

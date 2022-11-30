@@ -356,7 +356,9 @@ namespace CatAsset.Runtime
                         }
                     }
 
-                    ProfilerAssetInfo pai = ProfilerAssetInfo.Create(ari.AssetManifest.Name, ari.AssetManifest.Length,
+                    string type = bri.Manifest.IsScene ? "Scene" : ari.Asset.GetType().Name;
+
+                    ProfilerAssetInfo pai = ProfilerAssetInfo.Create(ari.AssetManifest.Name,type, ari.AssetManifest.Length,
                         ari.RefCount);
                     int paiIndex = info.AssetInfoList.Count;
                     tempPaiDict.Add(pai.Name, paiIndex);
