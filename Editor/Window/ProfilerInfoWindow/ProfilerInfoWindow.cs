@@ -128,6 +128,7 @@ namespace CatAsset.Editor
             if (profilerInfo.BundleInfoList.Count > 0)
             {
                 bundleInfoTreeView.Reload();
+                bundleInfoTreeView.OnSortingChanged(bundleInfoTreeView.multiColumnHeader);
             }
 
         }
@@ -168,7 +169,6 @@ namespace CatAsset.Editor
             selectedTab = GUILayout.Toolbar(selectedTab, tabs);
 
             searchString = searchField.OnGUI(new Rect(0, 30, 500, 20), searchString);
-            EditorGUILayout.EditorToolbar();
             if (bundleInfoTreeView != null)
             {
                 bundleInfoTreeView.searchString = searchString;
@@ -182,22 +182,6 @@ namespace CatAsset.Editor
             {
                 bundleInfoTreeView.CollapseAll();
             }
-
-
-            // using (new EditorGUILayout.HorizontalScope())
-            // {
-            //
-            //     string style = "miniButton";
-            //     if (GUILayout.Button("全部展开", style))
-            //     {
-            //         bundleInfoTreeView.ExpandAll();
-            //     }
-            //
-            //     if (GUILayout.Button("全部收起", style))
-            //     {
-            //         bundleInfoTreeView.CollapseAll();
-            //     }
-            // }
         }
 
         /// <summary>
