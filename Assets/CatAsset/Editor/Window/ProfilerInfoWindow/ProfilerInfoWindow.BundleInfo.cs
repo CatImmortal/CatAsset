@@ -22,12 +22,11 @@ namespace CatAsset.Editor
             {
                 "名称",
                 "Object",
-                "类型",
                 "资源组",
                 "内存中资源数",
                 "引用中资源数",
                 "长度",
-                "引用计数",
+                "内存中资源总长度",
                 "上游节点数",
                 "下游节点数",
                 "查看依赖关系图",
@@ -48,7 +47,7 @@ namespace CatAsset.Editor
 
 
         /// <summary>
-        /// 绘制运行时信息界面
+        /// 绘制资源包信息界面
         /// </summary>
         private void DrawBundleInfoView()
         {

@@ -15,6 +15,18 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
+        /// 资源组
+        /// </summary>
+        [NonSerialized]
+        public string Group;
+
+        /// <summary>
+        /// 资源包
+        /// </summary>
+        [NonSerialized]
+        public string Bundle;
+
+        /// <summary>
         /// 资源类型
         /// </summary>
         public string Type;
@@ -62,6 +74,8 @@ namespace CatAsset.Runtime
         public void Clear()
         {
             Name = default;
+            Group = default;
+            Bundle = default;
             Type = default;
             Length = default;
             RefCount = default;

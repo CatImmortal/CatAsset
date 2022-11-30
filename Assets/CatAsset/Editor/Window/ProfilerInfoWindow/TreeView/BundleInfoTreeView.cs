@@ -12,12 +12,8 @@ namespace CatAsset.Editor
     /// <summary>
     /// 资源包信息树视图
     /// </summary>
-    public class BundleInfoTreeView : TreeView
+    public class BundleInfoTreeView : BaseProfilerTreeView
     {
-        private int idGenerator = 0;
-
-        public ProfilerInfo ProfilerInfo;
-
         /// <summary>
         /// 是否只显示主动加载的资源
         /// </summary>
@@ -37,11 +33,6 @@ namespace CatAsset.Editor
             /// 对象引用
             /// </summary>
             Object,
-
-            /// <summary>
-            /// 资源类型
-            /// </summary>
-            Type,
 
             /// <summary>
             /// 资源组
@@ -64,9 +55,9 @@ namespace CatAsset.Editor
             Length,
 
             /// <summary>
-            /// 引用计数
+            /// 内存中资源总长度
             /// </summary>
-            RefCount,
+            InMemoryAssetLength,
 
             /// <summary>
             /// 上游节点数
@@ -92,7 +83,7 @@ namespace CatAsset.Editor
             multiColumnHeader.sortingChanged += OnSortingChanged;
         }
 
-        public void OnSortingChanged(MultiColumnHeader header)
+        public override void OnSortingChanged(MultiColumnHeader header)
         {
             if (header.sortedColumnIndex == -1)
             {
@@ -118,14 +109,6 @@ namespace CatAsset.Editor
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.RelativePath, ascending);
                     break;
 
-                case ColumnType.Type:
-                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
-                    {
-                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.Type, ascending);
-                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
-                    }
-                    break;
-
                 case ColumnType.Group:
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.Group, ascending);
                     break;
@@ -147,12 +130,8 @@ namespace CatAsset.Editor
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.Length, ascending);
                     break;
 
-                case ColumnType.RefCount:
-                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
-                    {
-                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.RefCount, ascending);
-                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
-                    }
+                case ColumnType.InMemoryAssetLength:
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.InMemoryAssetLength, ascending);
                     break;
 
                 case ColumnType.UpStreamCount:
@@ -190,11 +169,9 @@ namespace CatAsset.Editor
 
         protected override TreeViewItem BuildRoot()
         {
-            idGenerator = 0;
-
             var root = new TreeViewDataItem<ProfilerBundleInfo>()
             {
-                id = idGenerator++, depth = -1, displayName = "Root",Data = null,
+                id = 0, depth = -1, displayName = "Root",Data = null,
             };
 
             foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
@@ -247,7 +224,6 @@ namespace CatAsset.Editor
         /// </summary>
         private void CellGUI(Rect cellRect, TreeViewItem item, ColumnType column, ref RowGUIArgs args)
         {
-            //CenterRectUsingSingleLineHeight(ref cellRect);
             TreeViewDataItem<ProfilerBundleInfo> bundleItem = item as TreeViewDataItem<ProfilerBundleInfo>;
             TreeViewDataItem<ProfilerAssetInfo> assetItem = item as TreeViewDataItem<ProfilerAssetInfo>;
             GUIStyle centerStyle = new GUIStyle() { alignment = TextAnchor.MiddleCenter };
@@ -274,13 +250,6 @@ namespace CatAsset.Editor
                         EditorGUI.BeginDisabledGroup(true);
                         EditorGUI.ObjectField(cellRect, obj,typeof(Object),false);
                         EditorGUI.EndDisabledGroup();
-                    }
-                    break;
-
-                case ColumnType.Type:
-                    if (assetItem != null)
-                    {
-                        EditorGUI.LabelField(cellRect,assetItem.Data.Type,centerStyle);
                     }
                     break;
 
@@ -318,10 +287,10 @@ namespace CatAsset.Editor
                     EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(length),centerStyle);
                     break;
 
-                case ColumnType.RefCount:
-                    if (assetItem != null)
+                case ColumnType.InMemoryAssetLength:
+                    if (bundleItem != null)
                     {
-                        EditorGUI.LabelField(cellRect,assetItem.Data.RefCount.ToString(),centerStyle);
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.Length),centerStyle);
                     }
                     break;
 

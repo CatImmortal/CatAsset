@@ -51,6 +51,12 @@ namespace CatAsset.Runtime
         public List<ProfilerAssetInfo> InMemoryAssets = new List<ProfilerAssetInfo>();
 
         /// <summary>
+        /// 内存中资源长度
+        /// </summary>
+        [NonSerialized]
+        public ulong InMemoryAssetLength;
+
+        /// <summary>
         /// 上游资源包索引
         /// </summary>
         public List<int> UpStreamIndexes = new List<int>();
@@ -93,11 +99,13 @@ namespace CatAsset.Runtime
             Group = default;
             IsRaw = default;
             Length = default;
+
             ReferencingAssetCount = default;
             TotalAssetCount = default;
 
             InMemoryAssetIndexes.Clear();
             InMemoryAssets.Clear();
+            InMemoryAssetLength = default;
 
             UpStreamIndexes.Clear();
             DownStreamIndexes.Clear();

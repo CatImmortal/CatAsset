@@ -70,17 +70,24 @@ namespace CatAsset.Runtime
                     var upPbi = BundleInfoList[upPbiIndex];
                     pbi.DependencyChain.UpStream.Add(upPbi);
                 }
+                pbi.UpStreamIndexes.Clear();
+
                 foreach (int downPbiIndex in pbi.DownStreamIndexes)
                 {
                     var downPbi = BundleInfoList[downPbiIndex];
                     pbi.DependencyChain.DownStream.Add(downPbi);
                 }
+                pbi.DownStreamIndexes.Clear();
 
                 foreach (int paiIndex in pbi.InMemoryAssetIndexes)
                 {
                     //资源包中在内存中的资源
                     var pai = AssetInfoList[paiIndex];
+                    pai.Group = pbi.Group;
+                    pai.Bundle = pbi.RelativePath;
+
                     pbi.InMemoryAssets.Add(pai);
+                    pbi.InMemoryAssetLength += pai.Length;
 
                     //资源依赖链
                     foreach (int upPaiIndex in pai.UpStreamIndexes)
@@ -88,11 +95,14 @@ namespace CatAsset.Runtime
                         var upPai = AssetInfoList[upPaiIndex];
                         pai.DependencyChain.UpStream.Add(upPai);
                     }
+                    pai.UpStreamIndexes.Clear();
+
                     foreach (int downPaiIndex in pai.DownStreamIndexes)
                     {
                         var downPai = AssetInfoList[downPaiIndex];
                         pai.DependencyChain.DownStream.Add(downPai);
                     }
+                    pai.DownStreamIndexes.Clear();
                 }
             }
 
