@@ -56,7 +56,7 @@ namespace CatAsset.Editor
                 return;
             }
 
-            bundleInfoTreeView.OnGUI(new Rect(0, 60, position.width, position.height));
+            bundleInfoTreeView.OnGUI(new Rect(0, 60, position.width, position.height - 60));
         }
 
 

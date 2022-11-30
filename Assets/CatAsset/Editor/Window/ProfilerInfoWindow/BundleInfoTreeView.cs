@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -81,9 +82,66 @@ namespace CatAsset.Editor
             multiColumnHeader.sortingChanged += OnSortingChanged;
         }
 
-        private void OnSortingChanged(MultiColumnHeader header)
+        public void OnSortingChanged(MultiColumnHeader header)
         {
+            if (header.sortedColumnIndex == -1)
+            {
+                return;
+            }
 
+            bool ascending = header.IsSortedAscending(header.sortedColumnIndex);
+
+            ColumnType column = (ColumnType)header.sortedColumnIndex;
+
+            IOrderedEnumerable<ProfilerAssetInfo> assetOrdered = null;
+            IOrderedEnumerable<ProfilerBundleInfo> bundleOrdered = null;
+
+            switch (column)
+            {
+                case ColumnType.Name:
+                case ColumnType.Object:
+                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
+                    {
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.Name, ascending);
+                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
+                    }
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.RelativePath, ascending);
+                    break;
+                case ColumnType.Group:
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.Group, ascending);
+                    break;
+                case ColumnType.InMemoryAssetCount:
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.InMemoryAssets.Count, ascending);
+                    break;
+                case ColumnType.ReferencingAssetCount:
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.ReferencingAssetCount, ascending);
+                    break;
+                case ColumnType.Length:
+                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
+                    {
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.Length, ascending);
+                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
+                    }
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.Length, ascending);
+                    break;
+                case ColumnType.RefCount:
+                    break;
+                case ColumnType.UpStreamCount:
+                    break;
+                case ColumnType.DownStreamCount:
+                    break;
+                case ColumnType.OpenDependencyGraphView:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            if (bundleOrdered != null)
+            {
+                ProfilerInfo.BundleInfoList = new List<ProfilerBundleInfo>(bundleOrdered);
+            }
+
+            Reload();
         }
 
         protected override TreeViewItem BuildRoot()
@@ -99,7 +157,7 @@ namespace CatAsset.Editor
             {
                 var bundleNode = new TreeViewDataItem<ProfilerBundleInfo>()
                 {
-                    id = idGenerator++, displayName = bundleInfo.RelativePath,Data = bundleInfo,
+                    id = bundleInfo.RelativePath.GetHashCode(), displayName = $"{bundleInfo.RelativePath},{bundleInfo.Group}",Data = bundleInfo,
                 };
                 root.AddChild(bundleNode);
 
@@ -107,7 +165,7 @@ namespace CatAsset.Editor
                 {
                     var assetNode = new TreeViewDataItem<ProfilerAssetInfo>()
                     {
-                        id = idGenerator++, displayName = assetInfo.Name, Data = assetInfo,
+                        id = assetInfo.Name.GetHashCode(), displayName = assetInfo.Name, Data = assetInfo,
                     };
                     bundleNode.AddChild(assetNode);
                 }
@@ -117,26 +175,6 @@ namespace CatAsset.Editor
 
             return root;
         }
-
-        // protected override IList<TreeViewItem> BuildRows(TreeViewItem root)
-        // {
-        //     List<TreeViewItem> result = new List<TreeViewItem>();
-        //     TreeViewDataItem<ProfilerBundleInfo> item = (TreeViewDataItem<ProfilerBundleInfo>)root;
-        //     if (item.Data == null)
-        //     {
-        //         foreach (var bundleInfo in profilerInfo.BundleInfoList)
-        //         {
-        //             result.Add(new TreeViewDataItem<ProfilerBundleInfo>(idGenerator++,0,bundleInfo.RelativePath,bundleInfo));
-        //         }
-        //
-        //         return result;
-        //     }
-        //     else
-        //     {
-        //
-        //     }
-        //     return result;
-        // }
 
         protected override void RowGUI(RowGUIArgs args)
         {
@@ -161,6 +199,14 @@ namespace CatAsset.Editor
             {
                 case ColumnType.Name:
                     args.rowRect = cellRect;
+                    if (bundleItem != null)
+                    {
+                        args.label = bundleItem.Data.RelativePath;
+                    }
+                    else
+                    {
+                        args.label = assetItem.Data.Name;
+                    }
                     base.RowGUI(args);
                     break;
 
