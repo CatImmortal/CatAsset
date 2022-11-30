@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using CatAsset.Runtime;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace CatAsset.Editor
@@ -11,46 +12,46 @@ namespace CatAsset.Editor
     public partial class ProfilerInfoWindow
     {
 
-        private Vector2 taskInfoScrollPos;
+        private TreeViewState taskInfoTreeViewState;
+        private TaskInfoTreeView taskInfoTreeView;
+
+        /// <summary>
+        /// 初始化任务信息树视图
+        /// </summary>
+        private void InitTaskInfoTreeView()
+        {
+            List<string> columnList = new List<string>()
+            {
+                "名称",
+                "类型",
+                "状态",
+                "进度",
+                "已合并任务数"
+            };
+
+            var columns = CreateColumns(columnList);
+            columns[0].minWidth = 400;
+
+            var state = new MultiColumnHeaderState(columns);
+
+            var header = new MultiColumnHeader(state);
+            header.ResizeToFit();
+
+            taskInfoTreeViewState = new TreeViewState();
+            taskInfoTreeView = new TaskInfoTreeView(taskInfoTreeViewState, header);
+        }
 
         /// <summary>
         /// 绘制任务信息界面
         /// </summary>
         private void DrawTaskInfoView()
         {
+            if (taskInfoTreeView.ProfilerInfo == null)
+            {
+                return;
+            }
 
-
-            // using (EditorGUILayout.ScrollViewScope sv = new EditorGUILayout.ScrollViewScope(taskInfoScrollPos))
-            // {
-            //     taskInfoScrollPos = sv.scrollPosition;
-            //
-            //     using (new EditorGUILayout.HorizontalScope())
-            //     {
-            //         EditorGUILayout.LabelField("任务名称", GUILayout.Width(position.width / 2));
-            //         EditorGUILayout.LabelField("任务类型");
-            //         EditorGUILayout.LabelField("任务状态");
-            //         EditorGUILayout.LabelField("任务进度");
-            //         EditorGUILayout.LabelField("已合并任务数");
-            //     }
-            //
-            //     if (curProfilerInfo == null)
-            //     {
-            //         return;
-            //     }
-            //
-            //     foreach (var profilerTaskInfo in curProfilerInfo.TaskInfoList)
-            //     {
-            //         using (new EditorGUILayout.HorizontalScope())
-            //         {
-            //             EditorGUILayout.LabelField(profilerTaskInfo.Name, GUILayout.Width(position.width / 2));
-            //             EditorGUILayout.LabelField(profilerTaskInfo.Type);
-            //             EditorGUILayout.LabelField(profilerTaskInfo.State.ToString());
-            //             EditorGUILayout.LabelField(profilerTaskInfo.Progress.ToString("0.00"));
-            //             EditorGUILayout.LabelField(profilerTaskInfo.MergedTaskCount.ToString());
-            //         }
-            //     }
-            //
-            // }
+            taskInfoTreeView.OnGUI(new Rect(0, 70, position.width, position.height - 70));
         }
     }
 }

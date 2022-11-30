@@ -14,16 +14,6 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
-        /// 资源包总数
-        /// </summary>
-        public int TotalCount;
-
-        /// <summary>
-        /// 资源包总长度
-        /// </summary>
-        public ulong TotalLength;
-
-        /// <summary>
         /// 已更新资源包总数
         /// </summary>
         public int UpdatedCount;
@@ -32,6 +22,16 @@ namespace CatAsset.Runtime
         /// 已更新资源包总长度
         /// </summary>
         public ulong UpdatedLength;
+
+        /// <summary>
+        /// 资源包总数
+        /// </summary>
+        public int TotalCount;
+
+        /// <summary>
+        /// 资源包总长度
+        /// </summary>
+        public ulong TotalLength;
 
         /// <summary>
         /// 下载速度
@@ -43,14 +43,14 @@ namespace CatAsset.Runtime
         /// </summary>
         public GroupUpdaterState State;
 
-        public static ProfilerUpdaterInfo Create(string name, int totalCount, ulong totalLength, int updatedCount, ulong updatedLength, ulong speed, GroupUpdaterState state)
+        public static ProfilerUpdaterInfo Create(string name, int updatedCount, ulong updatedLength, int totalCount, ulong totalLength, ulong speed, GroupUpdaterState state)
         {
             ProfilerUpdaterInfo info = ReferencePool.Get<ProfilerUpdaterInfo>();
             info.Name = name;
-            info.TotalCount = totalCount;
-            info.TotalLength = totalLength;
             info.UpdatedCount = updatedCount;
             info.UpdatedLength = updatedLength;
+            info.TotalCount = totalCount;
+            info.TotalLength = totalLength;
             info.Speed = speed;
             info.State = state;
             return info;
@@ -59,10 +59,10 @@ namespace CatAsset.Runtime
         public void Clear()
         {
             Name = default;
-            TotalCount = default;
-            TotalLength = default;
             UpdatedCount = default;
             UpdatedLength = default;
+            TotalCount = default;
+            TotalLength = default;
             Speed = default;
             State = default;
         }

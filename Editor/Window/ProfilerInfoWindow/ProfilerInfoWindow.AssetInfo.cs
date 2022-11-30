@@ -47,10 +47,11 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawAssetInfoView()
         {
-            if (profilerPlayer.IsEmpty)
+            if (assetInfoTreeView.ProfilerInfo == null)
             {
                 return;
             }
+
 
             bool toggleValue = EditorGUI.ToggleLeft(new Rect(0, 50, 150, 20), "只显示主动加载的资源", assetInfoTreeView.IsOnlyShowActiveLoad);
             if (assetInfoTreeView.IsOnlyShowActiveLoad != toggleValue)

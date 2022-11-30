@@ -56,16 +56,6 @@ namespace CatAsset.Runtime
         private readonly HashSet<UpdateInfo> updaterBundles = new HashSet<UpdateInfo>();
 
         /// <summary>
-        /// 此更新器的资源包总数（待更新的+更新中+已更新的）
-        /// </summary>
-        public int TotalCount => updaterBundles.Count;
-
-        /// <summary>
-        /// 此更新器的资源包总长度（待更新的+更新中+已更新的）
-        /// </summary>
-        public ulong TotalLength { get; internal set; }
-
-        /// <summary>
         /// 更新中的资源包总数
         /// </summary>
         public int UpdatingCount => GetCount(UpdateState.Updating);
@@ -81,6 +71,16 @@ namespace CatAsset.Runtime
         public ulong UpdatedLength { get; private set; }
 
         /// <summary>
+        /// 此更新器的资源包总数（待更新的+更新中+已更新的）
+        /// </summary>
+        public int TotalCount => updaterBundles.Count;
+
+        /// <summary>
+        /// 此更新器的资源包总长度（待更新的+更新中+已更新的）
+        /// </summary>
+        public ulong TotalLength { get; internal set; }
+
+        /// <summary>
         /// 是否已全部更新完毕
         /// </summary>
         public bool IsAllUpdated => UpdatedCount == updaterBundles.Count;
@@ -89,23 +89,23 @@ namespace CatAsset.Runtime
         /// 上一次记录的已下载字节数
         /// </summary>
         private ulong lastRecordDownloadBytes;
-        
+
         /// <summary>
         /// 上一次记录已下载字节数的时间
         /// </summary>
         private float lastRecordTime;
-        
+
         /// <summary>
         /// 下载速度 单位：字节/秒
         /// </summary>
         public ulong Speed { get; private set; }
-        
+
         public GroupUpdater()
         {
             onBundleDownloadedCallback = OnBundleDownloaded;
             onDownloadRefreshCallback = OnDownloadUpdate;
         }
-        
+
         /// <summary>
         /// 添加需要更新的资源包
         /// </summary>
@@ -126,7 +126,7 @@ namespace CatAsset.Runtime
             }
 
             State = GroupUpdaterState.Running;
-            
+
             foreach (UpdateInfo updateInfo in updaterBundles)
             {
                 if (updateInfo.State == UpdateState.Updated)
@@ -135,7 +135,7 @@ namespace CatAsset.Runtime
                 }
 
                 AddUpdatedListener(updateInfo,callback);
-                
+
                 //为了能让优先级变更机制生效 不判断State是否为updating来去重 而是由DownloadBundleTask不处理已合并任务来保证内部不会被重复回调
 
                 //不是更新中的 或者已更新的
@@ -160,16 +160,16 @@ namespace CatAsset.Runtime
                         callback?.Invoke(new BundleUpdateResult(true,updateInfo,this));
                         return;
                     }
-                    
+
                     State = GroupUpdaterState.Running;
-                    
+
                     //添加回调
                     AddUpdatedListener(updateInfo,callback);
-                    
+
                     //为了能让优先级变更机制生效 不判断State是否为updating来去重 而是由DownloadBundleTask不处理已合并任务来保证内部不会被重复回调
                     CatAssetManager.AddDownLoadBundleTask(this,updateInfo,onBundleDownloadedCallback,onDownloadRefreshCallback,priority);
                     updateInfo.State = UpdateState.Updating;
-                    
+
                     return;
                 }
             }
@@ -191,7 +191,7 @@ namespace CatAsset.Runtime
 
             return count;
         }
-        
+
         /// <summary>
         /// 添加资源包更新完毕时的监听回调
         /// </summary>
@@ -239,9 +239,9 @@ namespace CatAsset.Runtime
         private void OnBundleDownloaded(UpdateInfo updateInfo,bool success)
         {
             //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 一个下载完毕的资源包只会回调到这里一次
-            
+
             updateInfo.State = success ? UpdateState.Updated : UpdateState.Wait;
-            
+
             //没有资源需要更新了 改变状态为Free
             if (UpdatingCount == 0)
             {
