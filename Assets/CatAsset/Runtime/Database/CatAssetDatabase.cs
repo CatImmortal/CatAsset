@@ -441,8 +441,9 @@ namespace CatAsset.Runtime
             {
                 var group = pair.Value;
 
-                ProfilerGroupInfo pgi = ProfilerGroupInfo.Create(group.GroupName, group.RemoteCount, group.RemoteLength,
-                    group.LocalCount, group.LocalLength);
+                ProfilerGroupInfo pgi = ProfilerGroupInfo.Create(group.GroupName, group.LocalCount, group.LocalLength,
+                    group.RemoteCount, group.RemoteLength
+                );
 
                 info.GroupInfoList.Add(pgi);
             }

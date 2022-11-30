@@ -78,6 +78,9 @@ namespace CatAsset.Editor
             //创建TreeView
             InitBundleInfoTreeView();
             InitAssetInfoTreeView();
+            InitTaskInfoTreeView();
+            InitGroupInfoTreeView();
+            InitUpdaterInfoTreeView();
         }
 
         private void OnDisable()
@@ -132,8 +135,30 @@ namespace CatAsset.Editor
                 return;
             }
 
-            bundleInfoTreeView.Reload(curProfilerInfo);
-            assetInfoTreeView.Reload(curProfilerInfo);
+            if (curProfilerInfo.BundleInfoList.Count > 0)
+            {
+                bundleInfoTreeView.Reload(curProfilerInfo);
+            }
+
+            if (curProfilerInfo.AssetInfoList.Count > 0)
+            {
+                assetInfoTreeView.Reload(curProfilerInfo);
+            }
+
+            if (curProfilerInfo.TaskInfoList.Count > 0)
+            {
+                taskInfoTreeView.Reload(curProfilerInfo);
+            }
+
+            if (curProfilerInfo.GroupInfoList.Count > 0)
+            {
+                groupInfoTreeView.Reload(curProfilerInfo);
+            }
+
+            if (curProfilerInfo.UpdaterInfoList.Count > 0)
+            {
+                updaterInfoTreeView.Reload(curProfilerInfo);
+            }
         }
 
         /// <summary>
@@ -267,14 +292,17 @@ namespace CatAsset.Editor
                     break;
 
                 case 2:
+                    curTreeView = taskInfoTreeView;
                     DrawTaskInfoView();
                     break;
 
                 case 3:
+                    curTreeView = groupInfoTreeView;
                     DrawGroupInfoView();
                     break;
 
                 case 4:
+                    curTreeView = updaterInfoTreeView;
                     DrawUpdaterInfoView();
                     break;
             }

@@ -14,16 +14,6 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
-        /// 远端资源数
-        /// </summary>
-        public int RemoteCount;
-
-        /// <summary>
-        /// 远端资源长度
-        /// </summary>
-        public ulong RemoteLength;
-
-        /// <summary>
         /// 本地资源数
         /// </summary>
         public int LocalCount;
@@ -33,24 +23,36 @@ namespace CatAsset.Runtime
         /// </summary>
         public ulong LocalLength;
 
-        public static ProfilerGroupInfo Create(string name,int remoteCount,ulong remoteLength,int localCount,ulong localLength)
+        /// <summary>
+        /// 远端资源数
+        /// </summary>
+        public int RemoteCount;
+
+        /// <summary>
+        /// 远端资源长度
+        /// </summary>
+        public ulong RemoteLength;
+
+
+
+        public static ProfilerGroupInfo Create(string name,int localCount,ulong localLength,int remoteCount,ulong remoteLength)
         {
             ProfilerGroupInfo info = ReferencePool.Get<ProfilerGroupInfo>();
             info.Name = name;
-            info.RemoteCount = remoteCount;
-            info.RemoteLength = remoteLength;
             info.LocalCount = localCount;
             info.LocalLength = localLength;
+            info.RemoteCount = remoteCount;
+            info.RemoteLength = remoteLength;
             return info;
         }
 
         public void Clear()
         {
             Name = default;
-            RemoteCount = default;
-            RemoteLength = default;
             LocalCount = default;
             LocalLength = default;
+            RemoteCount = default;
+            RemoteLength = default;
         }
 
         public int CompareTo(ProfilerGroupInfo other)
