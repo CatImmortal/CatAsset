@@ -15,6 +15,11 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
+        /// 资源类型
+        /// </summary>
+        public string Type;
+
+        /// <summary>
         /// 文件长度
         /// </summary>
         public ulong Length;
@@ -44,10 +49,11 @@ namespace CatAsset.Runtime
             return Name;
         }
 
-        public static ProfilerAssetInfo Create(string name,ulong length,int refCount)
+        public static ProfilerAssetInfo Create(string name,string type,ulong length,int refCount)
         {
             ProfilerAssetInfo info = ReferencePool.Get<ProfilerAssetInfo>();
             info.Name = name;
+            info.Type = type;
             info.Length = length;
             info.RefCount = refCount;
             return info;
@@ -56,6 +62,7 @@ namespace CatAsset.Runtime
         public void Clear()
         {
             Name = default;
+            Type = default;
             Length = default;
             RefCount = default;
 

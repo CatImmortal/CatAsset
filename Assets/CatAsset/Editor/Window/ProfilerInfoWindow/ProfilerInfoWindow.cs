@@ -1,12 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEditor;
-using CatAsset;
-using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using CatAsset.Runtime;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.Networking.PlayerConnection;
@@ -19,10 +14,13 @@ namespace CatAsset.Editor
     /// </summary>
     public partial class ProfilerInfoWindow : EditorWindow
     {
+
+        private ProfilerPlayer profilerPlayer = new ProfilerPlayer();
+
         /// <summary>
-        /// 分析器信息
+        /// 当前显示的分析器信息索引
         /// </summary>
-        private ProfilerInfo profilerInfo;
+        private int curProfilerInfoIndex = 0;
 
         /// <summary>
         /// 选择的页签
@@ -57,7 +55,6 @@ namespace CatAsset.Editor
                 case PlayModeStateChange.EnteredPlayMode:
                     break;
                 case PlayModeStateChange.ExitingPlayMode:
-                    profilerInfo = null;
                     break;
             }
         }
@@ -75,13 +72,14 @@ namespace CatAsset.Editor
 
             searchField = new SearchField();
             //m_SearchField.downOrUpArrowKeyPressed += bundleInfoTreeView.SetFocusAndEnsureSelectedItem;
+
+            //创建TreeView
+            InitBundleInfoTreeView();
         }
 
         private void OnDisable()
         {
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
-
-            Send(false);
         }
 
         private void OnConnection(int arg0)
@@ -105,7 +103,8 @@ namespace CatAsset.Editor
                 return;
             }
 
-            profilerInfo = ProfilerInfo.Deserialize(args.data);
+            var info = ProfilerInfo.Deserialize(args.data);
+            OnProfilerInfo(args.playerId, info);
         }
 
         /// <summary>
@@ -113,24 +112,26 @@ namespace CatAsset.Editor
         /// </summary>
         private void OnProfilerInfo(int id, ProfilerInfo info)
         {
-            if (profilerInfo != null)
+            profilerPlayer.AddProfilerInfo(info);
+
+            curProfilerInfoIndex = profilerPlayer.MaxRange;
+            ReloadTreeView();
+        }
+
+        /// <summary>
+        /// 重新加载TreeView
+        /// </summary>
+        private void ReloadTreeView()
+        {
+            var curProfilerInfo = profilerPlayer.GetProfilerInfo(curProfilerInfoIndex);
+            if (curProfilerInfo == null)
             {
-                ReferencePool.Release(profilerInfo);
+                return;
             }
 
-            profilerInfo = info;
-
-            if (bundleInfoTreeView == null)
-            {
-                InitBundleInfoTreeView();
-            }
-            bundleInfoTreeView.ProfilerInfo = profilerInfo;
-            if (profilerInfo.BundleInfoList.Count > 0)
-            {
-                bundleInfoTreeView.Reload();
-                bundleInfoTreeView.OnSortingChanged(bundleInfoTreeView.multiColumnHeader);
-            }
-
+            bundleInfoTreeView.ProfilerInfo = curProfilerInfo;
+            bundleInfoTreeView.Reload();
+            bundleInfoTreeView.OnSortingChanged(bundleInfoTreeView.multiColumnHeader);
         }
 
         /// <summary>
@@ -166,21 +167,83 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawUpToolbar()
         {
+            float x = 0;
+            float y = 30;
+            float height = 20;
+            float width = 0;
+
             selectedTab = GUILayout.Toolbar(selectedTab, tabs);
 
-            searchString = searchField.OnGUI(new Rect(0, 30, 500, 20), searchString);
+            x += width;
+            width = 500;
+            searchString = searchField.OnGUI(new Rect(x, y, width, height), searchString);
             if (bundleInfoTreeView != null)
             {
                 bundleInfoTreeView.searchString = searchString;
             }
 
-            if (GUI.Button(new Rect(510,30,100,20),"全部展开"))
+            x += width;
+            x += 10;
+            width = 100;
+            if (GUI.Button(new Rect(x,y,width,height),"全部展开"))
             {
-                bundleInfoTreeView.ExpandAll();
+                bundleInfoTreeView?.ExpandAll();
             }
-            if (GUI.Button(new Rect(610,30,100,20),"全部收起"))
+
+            x += width;
+            width = 100;
+            if (GUI.Button(new Rect(x,y,width,height),"全部收起"))
             {
-                bundleInfoTreeView.CollapseAll();
+                bundleInfoTreeView?.CollapseAll();
+            }
+
+            x += width;
+            x += 20;
+            width = 100;
+            if (GUI.Button(new Rect(x, y, width, height),"采样"))
+            {
+                Send(ProfilerMessageType.SampleOnce);
+            }
+
+            x += width;
+            width = 100;
+            if (GUI.Button(new Rect(x, y, width, height),"清空"))
+            {
+                profilerPlayer.ClearProfilerInfo();
+                curProfilerInfoIndex = 0;
+            }
+
+            //绘制Slider
+            x += width;
+            x += 10;
+            width = 300;
+            var sliderRect = new Rect(x, y, width, height);
+            int sliderIndex = EditorGUI.IntSlider(sliderRect, curProfilerInfoIndex, 0, Mathf.Max(0,profilerPlayer.MaxRange));
+            x += width;
+            width = 50;
+            EditorGUI.LabelField(new Rect(x, y, width, height),$" / {Mathf.Max(0,profilerPlayer.MaxRange)}");
+
+            //上一帧
+            x += width;
+            width = 20;
+            if (sliderIndex > 0 && GUI.Button(new Rect(x, y, width, height),"<"))
+            {
+                sliderIndex--;
+            }
+
+            //下一帧
+            x += width;
+            x += 5;
+            width = 20;
+            if (sliderIndex < profilerPlayer.MaxRange && GUI.Button(new Rect(x, y, width, height),">"))
+            {
+                sliderIndex++;
+            }
+
+            if (sliderIndex != curProfilerInfoIndex)
+            {
+                curProfilerInfoIndex = sliderIndex;
+                ReloadTreeView();
             }
         }
 
@@ -192,22 +255,18 @@ namespace CatAsset.Editor
             switch (selectedTab)
             {
                 case 0:
-                    Send(true);
                     DrawBundleInfoView();
                     break;
 
                 case 1:
-                    Send(true);
                     DrawTaskInfoView();
                     break;
 
                 case 2:
-                    Send(true);
                     DrawGroupInfoView();
                     break;
 
                 case 3:
-                    Send(true);
                     DrawUpdaterInfoView();
                     break;
             }
@@ -218,11 +277,11 @@ namespace CatAsset.Editor
         /// <summary>
         /// 向真机发送消息
         /// </summary>
-        private void Send(bool isOpen)
+        private void Send(ProfilerMessageType msgType)
         {
-            ProfilerComponent.IsOpen = isOpen;
+            ProfilerComponent.OnEditorMessage(msgType);
             EditorConnection.instance.Send(ProfilerComponent.MsgSendEditorToPlayer,
-                BitConverter.GetBytes(isOpen));
+                BitConverter.GetBytes((int)msgType));
         }
 
 

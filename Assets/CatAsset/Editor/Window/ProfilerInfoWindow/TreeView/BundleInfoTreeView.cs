@@ -19,6 +19,11 @@ namespace CatAsset.Editor
         public ProfilerInfo ProfilerInfo;
 
         /// <summary>
+        /// 是否只显示主动加载的资源
+        /// </summary>
+        public bool IsOnlyShowActiveLoad = false;
+
+        /// <summary>
         /// 列类型
         /// </summary>
         private enum ColumnType
@@ -32,6 +37,11 @@ namespace CatAsset.Editor
             /// 对象引用
             /// </summary>
             Object,
+
+            /// <summary>
+            /// 资源类型
+            /// </summary>
+            Type,
 
             /// <summary>
             /// 资源组
@@ -107,15 +117,27 @@ namespace CatAsset.Editor
                     }
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.RelativePath, ascending);
                     break;
+
+                case ColumnType.Type:
+                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
+                    {
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.Type, ascending);
+                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
+                    }
+                    break;
+
                 case ColumnType.Group:
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.Group, ascending);
                     break;
+
                 case ColumnType.InMemoryAssetCount:
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.InMemoryAssets.Count, ascending);
                     break;
+
                 case ColumnType.ReferencingAssetCount:
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.ReferencingAssetCount, ascending);
                     break;
+
                 case ColumnType.Length:
                     foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
                     {
@@ -124,14 +146,36 @@ namespace CatAsset.Editor
                     }
                     bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.Length, ascending);
                     break;
+
                 case ColumnType.RefCount:
+                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
+                    {
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.RefCount, ascending);
+                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
+                    }
                     break;
+
                 case ColumnType.UpStreamCount:
+                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
+                    {
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.DependencyChain.UpStream.Count, ascending);
+                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
+                    }
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.DependencyChain.UpStream.Count, ascending);
                     break;
+
                 case ColumnType.DownStreamCount:
+                    foreach (var bundleInfo in ProfilerInfo.BundleInfoList)
+                    {
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.DependencyChain.DownStream.Count, ascending);
+                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
+                    }
+                    bundleOrdered = ProfilerInfo.BundleInfoList.Order(info => info.DependencyChain.DownStream.Count, ascending);
                     break;
+
                 case ColumnType.OpenDependencyGraphView:
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -159,7 +203,6 @@ namespace CatAsset.Editor
                 {
                     id = bundleInfo.RelativePath.GetHashCode(), displayName = $"{bundleInfo.RelativePath},{bundleInfo.Group}",Data = bundleInfo,
                 };
-                root.AddChild(bundleNode);
 
                 foreach (var assetInfo in bundleInfo.InMemoryAssets)
                 {
@@ -167,8 +210,22 @@ namespace CatAsset.Editor
                     {
                         id = assetInfo.Name.GetHashCode(), displayName = assetInfo.Name, Data = assetInfo,
                     };
+
+                    if (IsOnlyShowActiveLoad && assetInfo.RefCount == assetInfo.DependencyChain.DownStream.Count)
+                    {
+                        //只显示主动加载的资源时 如果资源引用计数与下游资源数相同 就是仅被依赖加载的资源 需要跳过
+                        continue;
+                    }
+
                     bundleNode.AddChild(assetNode);
                 }
+
+                if (IsOnlyShowActiveLoad && !bundleNode.hasChildren)
+                {
+                    //只显示主动加载的资源时 如果资源包里没有符合显示条件的资源 就跳过
+                    continue;
+                }
+                root.AddChild(bundleNode);
             }
 
             SetupDepthsFromParentsAndChildren(root);
@@ -217,6 +274,13 @@ namespace CatAsset.Editor
                         EditorGUI.BeginDisabledGroup(true);
                         EditorGUI.ObjectField(cellRect, obj,typeof(Object),false);
                         EditorGUI.EndDisabledGroup();
+                    }
+                    break;
+
+                case ColumnType.Type:
+                    if (assetItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,assetItem.Data.Type,centerStyle);
                     }
                     break;
 
