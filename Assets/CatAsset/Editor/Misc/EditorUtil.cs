@@ -116,14 +116,30 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
+        /// 获取实现了指定类型的所有类的对象
+        /// </summary>
+        public static List<T> GetAssignableTypeObjects<T>()
+        {
+            List<T> objList = new List<T>();
+            TypeCache.TypeCollection types = TypeCache.GetTypesDerivedFrom<T>();
+            foreach (Type type in types)
+            {
+                T obj = (T) Activator.CreateInstance(type);
+                objList.Add(obj);
+            }
+
+            return objList;
+        }
+
+        /// <summary>
         /// 调用私有的静态方法
         /// </summary>
-        public static object InvokeNonPublicStaticMethod(System.Type type, string method, params object[] parameters)
+        public static object InvokeNonPublicStaticMethod(Type type, string method, params object[] parameters)
         {
             var methodInfo = type.GetMethod(method, BindingFlags.NonPublic | BindingFlags.Static);
             if (methodInfo == null)
             {
-                UnityEngine.Debug.LogError($"类型：{type.FullName} 中未找到方法: {method}");
+                Debug.LogError($"类型：{type.FullName} 中未找到方法: {method}");
                 return null;
             }
             return methodInfo.Invoke(null, parameters);
@@ -244,33 +260,6 @@ namespace CatAsset.Editor
             
             //删除自身
             dirInfo.Delete();
-        }
-
-
-        /// <summary>
-        /// childDir是否为构建目录parentDir的子构建目录
-        /// </summary>
-        public static bool IsChildDirectory(string childDir,string parentDir)
-        {
-            if (childDir == parentDir)
-            {
-                //两个目录名一致 
-                return false;
-            }
-
-            if (!BundleBuildConfigSO.Instance.DirectoryDict.ContainsKey(childDir))
-            {
-                //childDir不是被指定的构建目录
-                return false;
-            }
-
-            if (childDir.StartsWith(parentDir))
-            {
-                //childDir是parentDir的子构建目录
-                return true;
-            }
-
-            return false;
         }
         
 

@@ -39,12 +39,6 @@ namespace CatAsset.Editor
                 foreach (FileInfo file in files)
                 {
                     string assetDir = EditorUtil.FullNameToAssetName(file.Directory.FullName);//Assets/xxx/
-                    if (EditorUtil.IsChildDirectory(assetDir,buildDirectory))
-                    {
-                        //跳过子构建目录
-                        continue;
-                    }
-                    
                     string assetName = EditorUtil.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
                     if (!EditorUtil.IsValidAsset(assetName))
                     {

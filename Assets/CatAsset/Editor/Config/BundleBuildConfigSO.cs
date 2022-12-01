@@ -207,11 +207,11 @@ namespace CatAsset.Editor
         private void InitRuleDict()
         {
             ruleDict.Clear();
-            TypeCache.TypeCollection types = TypeCache.GetTypesDerivedFrom<IBundleBuildRule>();
-            foreach (Type type in types)
+
+            List<IBundleBuildRule> rules = EditorUtil.GetAssignableTypeObjects<IBundleBuildRule>();
+            foreach (IBundleBuildRule rule in rules)
             {
-                IBundleBuildRule rule = (IBundleBuildRule) Activator.CreateInstance(type);
-                ruleDict.Add(type.Name, rule);
+                ruleDict.Add(rule.GetType().Name,rule);
             }
         }
 
@@ -408,13 +408,13 @@ namespace CatAsset.Editor
         /// <summary>
         /// 刷新映射信息
         /// </summary>
-        public void RefreshDict()
+        internal void RefreshDict()
         {
             RefreshDirectoryDict();
             RefreshAssetToBundleDict();
         }
 
-        public void RefreshDirectoryDict()
+        private void RefreshDirectoryDict()
         {
             DirectoryDict.Clear();
             foreach (BundleBuildDirectory item in Directories)
@@ -423,7 +423,7 @@ namespace CatAsset.Editor
             }
         }
 
-        public void RefreshAssetToBundleDict()
+        private void RefreshAssetToBundleDict()
         {
             AssetToBundleDict.Clear();
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
@@ -438,7 +438,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 检查资源包构建目录是否可被添加
         /// </summary>
-        public bool CanAddDirectory(string directoryName)
+        internal bool CanAddDirectory(string directoryName)
         {
             for (int i = 0; i < Directories.Count; i++)
             {
