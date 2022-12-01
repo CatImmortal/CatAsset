@@ -45,7 +45,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawUpdaterInfoView()
         {
-            if (updaterInfoTreeView.ProfilerInfo == null)
+            if (!updaterInfoTreeView.CanShow())
             {
                 return;
             }

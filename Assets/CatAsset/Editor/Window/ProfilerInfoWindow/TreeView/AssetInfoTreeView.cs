@@ -80,6 +80,23 @@ namespace CatAsset.Editor
 
         }
 
+        public override void Reload(ProfilerInfo info)
+        {
+            ProfilerInfo = info;
+
+            if (info.AssetInfoList.Count == 0)
+            {
+                return;
+            }
+
+            base.Reload(info);
+        }
+
+        public override bool CanShow()
+        {
+            return ProfilerInfo != null && ProfilerInfo.AssetInfoList.Count > 0;
+        }
+
         public override void OnSortingChanged(MultiColumnHeader header)
         {
             if (header.sortedColumnIndex == -1)

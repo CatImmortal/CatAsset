@@ -26,11 +26,18 @@ namespace CatAsset.Editor
 
         }
 
-        public void Reload(ProfilerInfo info)
+        public virtual void Reload(ProfilerInfo info)
         {
-            ProfilerInfo = info;
             Reload();
             OnSortingChanged(multiColumnHeader);
+        }
+
+        /// <summary>
+        /// 是否可显示
+        /// </summary>
+        public virtual bool CanShow()
+        {
+            return true;
         }
     }
 }

@@ -43,7 +43,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawGroupInfoView()
         {
-            if (groupInfoTreeView.ProfilerInfo == null)
+            if (!groupInfoTreeView.CanShow())
             {
                 return;
             }

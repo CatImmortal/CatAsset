@@ -46,7 +46,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawTaskInfoView()
         {
-            if (taskInfoTreeView.ProfilerInfo == null)
+            if (!taskInfoTreeView.CanShow())
             {
                 return;
             }

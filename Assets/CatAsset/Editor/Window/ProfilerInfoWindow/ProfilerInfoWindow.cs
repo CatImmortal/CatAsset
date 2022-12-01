@@ -135,30 +135,11 @@ namespace CatAsset.Editor
                 return;
             }
 
-            if (curProfilerInfo.BundleInfoList.Count > 0)
-            {
-                bundleInfoTreeView.Reload(curProfilerInfo);
-            }
-
-            if (curProfilerInfo.AssetInfoList.Count > 0)
-            {
-                assetInfoTreeView.Reload(curProfilerInfo);
-            }
-
-            if (curProfilerInfo.TaskInfoList.Count > 0)
-            {
-                taskInfoTreeView.Reload(curProfilerInfo);
-            }
-
-            if (curProfilerInfo.GroupInfoList.Count > 0)
-            {
-                groupInfoTreeView.Reload(curProfilerInfo);
-            }
-
-            if (curProfilerInfo.UpdaterInfoList.Count > 0)
-            {
-                updaterInfoTreeView.Reload(curProfilerInfo);
-            }
+            bundleInfoTreeView.Reload(curProfilerInfo);
+            assetInfoTreeView.Reload(curProfilerInfo);
+            taskInfoTreeView.Reload(curProfilerInfo);
+            groupInfoTreeView.Reload(curProfilerInfo);
+            updaterInfoTreeView.Reload(curProfilerInfo);
         }
 
         /// <summary>

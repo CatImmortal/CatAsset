@@ -83,6 +83,23 @@ namespace CatAsset.Editor
             multiColumnHeader.sortingChanged += OnSortingChanged;
         }
 
+        public override void Reload(ProfilerInfo info)
+        {
+            ProfilerInfo = info;
+
+            if (info.BundleInfoList.Count == 0)
+            {
+                return;
+            }
+
+            base.Reload(info);
+        }
+
+        public override bool CanShow()
+        {
+            return ProfilerInfo != null && ProfilerInfo.BundleInfoList.Count > 0;
+        }
+
         public override void OnSortingChanged(MultiColumnHeader header)
         {
             if (header.sortedColumnIndex == -1)
