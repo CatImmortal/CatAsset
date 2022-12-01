@@ -1,19 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace CatAsset.Editor
 {
-    public partial class ProfilerInfoWindow
+    /// <summary>
+    /// 资源信息界面
+    /// </summary>
+    public class AssetInfoView : BaseProfilerInfoView
     {
-        private TreeViewState assetInfoTreeViewState;
-        private AssetInfoTreeView assetInfoTreeView;
-
-        /// <summary>
-        /// 初始化资源信息树视图
-        /// </summary>
-        private void InitAssetInfoTreeView()
+        protected override List<string> GetColumns()
         {
             List<string> columnList = new List<string>()
             {
@@ -29,29 +25,22 @@ namespace CatAsset.Editor
                 "查看依赖关系图",
             };
 
-            var columns = CreateColumns(columnList);
-            columns[0].minWidth = 400;
-            columns[4].minWidth = 400;
-
-            var state = new MultiColumnHeaderState(columns);
-
-            var header = new MultiColumnHeader(state);
-            header.ResizeToFit();
-
-            assetInfoTreeViewState = new TreeViewState();
-            assetInfoTreeView = new AssetInfoTreeView(assetInfoTreeViewState, header);
+            return columnList;
         }
 
-        /// <summary>
-        /// 绘制资源信息界面
-        /// </summary>
-        private void DrawAssetInfoView()
+        protected override void CreateTreeView()
         {
-            if (!assetInfoTreeView.CanShow())
+            TreeView = new AssetInfoTreeView(State, Header);
+        }
+
+        public override void DrawInfoView(Rect position)
+        {
+            if (!TreeView.CanShow())
             {
                 return;
             }
 
+            AssetInfoTreeView assetInfoTreeView = (AssetInfoTreeView)TreeView;
 
             bool toggleValue = EditorGUI.ToggleLeft(new Rect(0, 50, 150, 20), "只显示主动加载的资源", assetInfoTreeView.IsOnlyShowActiveLoad);
             if (assetInfoTreeView.IsOnlyShowActiveLoad != toggleValue)
@@ -61,5 +50,7 @@ namespace CatAsset.Editor
             }
             assetInfoTreeView.OnGUI(new Rect(0, 70, position.width, position.height - 70));
         }
+
+
     }
 }

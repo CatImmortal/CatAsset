@@ -28,6 +28,7 @@ namespace CatAsset.Editor
 
         public virtual void Reload(ProfilerInfo info)
         {
+
             Reload();
             OnSortingChanged(multiColumnHeader);
         }
