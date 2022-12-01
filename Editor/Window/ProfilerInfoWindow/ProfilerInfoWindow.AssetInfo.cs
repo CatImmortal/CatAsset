@@ -47,7 +47,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawAssetInfoView()
         {
-            if (assetInfoTreeView.ProfilerInfo == null)
+            if (!assetInfoTreeView.CanShow())
             {
                 return;
             }

@@ -51,7 +51,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawBundleInfoView()
         {
-            if (bundleInfoTreeView.ProfilerInfo == null)
+            if (!bundleInfoTreeView.CanShow())
             {
                 return;
             }
