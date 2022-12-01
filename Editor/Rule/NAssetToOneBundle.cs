@@ -42,13 +42,6 @@ namespace CatAsset.Editor
             
             foreach (FileInfo file in files)
             {
-                string assetDir = EditorUtil.FullNameToAssetName(file.Directory.FullName);
-                if (EditorUtil.IsChildDirectory(assetDir,buildDirectory))
-                {
-                    //跳过子构建目录
-                    continue;
-                }
-                
                 string assetName = EditorUtil.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
                 if (!EditorUtil.IsValidAsset(assetName))
                 {
@@ -66,7 +59,18 @@ namespace CatAsset.Editor
             //Assets/xxx/yyy
             int firstIndex = buildDirectory.IndexOf("/");
             int lastIndex = buildDirectory.LastIndexOf("/");
-            string directoryName = buildDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);  //xxx
+            string directoryName;
+            if (firstIndex != lastIndex)
+            {
+                //Assets/xxx/yyy -> //xxx
+                directoryName = buildDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);  
+            }
+            else
+            {
+                //Assets/xxx -> //xxx
+                directoryName = buildDirectory.Substring(firstIndex + 1);
+            }
+          
             string bundleName = buildDirectory.Substring(lastIndex + 1) + ".bundle"; //以构建目录名作为资源包名 yyy.bundle
             
             BundleBuildInfo bundleBuildInfo = new BundleBuildInfo(directoryName,bundleName,group,false);
