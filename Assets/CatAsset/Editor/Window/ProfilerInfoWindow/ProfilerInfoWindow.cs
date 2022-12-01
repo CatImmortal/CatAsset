@@ -12,15 +12,14 @@ namespace CatAsset.Editor
     /// <summary>
     /// 调试分析器信息窗口
     /// </summary>
-    public partial class ProfilerInfoWindow : EditorWindow
+    public class ProfilerInfoWindow : EditorWindow
     {
-
         private ProfilerPlayer profilerPlayer = new ProfilerPlayer();
 
         /// <summary>
         /// 当前显示的分析器信息索引
         /// </summary>
-        private int curProfilerInfoIndex = 0;
+        private int curProfilerInfoIndex;
 
         /// <summary>
         /// 选择的页签
@@ -32,8 +31,23 @@ namespace CatAsset.Editor
         /// </summary>
         private string[] tabs = { "资源包信息", "资源信息", "任务信息" ,"资源组信息" ,"更新器信息"};
 
+        /// <summary>
+        /// 分析器信息界面
+        /// </summary>
+        private BaseProfilerInfoView[] infoViews =
+        {
+            new BundleInfoView(),
+            new AssetInfoView(),
+            new TaskInfoView(),
+            new GroupInfoView(),
+            new UpdaterInfoView()
+        };
 
-        private BaseProfilerTreeView curTreeView;
+        /// <summary>
+        /// 当前的信息界面
+        /// </summary>
+        private BaseProfilerInfoView curInfoView;
+
         private SearchField searchField;
         private string searchString;
 
@@ -46,23 +60,16 @@ namespace CatAsset.Editor
 
         }
 
-        private void OnPlayModeChanged(PlayModeStateChange mode)
-        {
-            switch (mode)
-            {
-                case PlayModeStateChange.EnteredEditMode:
-                    break;
-                case PlayModeStateChange.ExitingEditMode:
-                    break;
-                case PlayModeStateChange.EnteredPlayMode:
-                    break;
-                case PlayModeStateChange.ExitingPlayMode:
-                    break;
-            }
-        }
-
         private void OnEnable()
         {
+            //初始化TreeView
+            foreach (var infoView in infoViews)
+            {
+                infoView.InitTreeView();
+            }
+            curInfoView = infoViews[0];
+            searchField = new SearchField();
+
             EditorConnection.instance.Initialize();
             EditorConnection.instance.RegisterConnection(OnConnection);
             EditorConnection.instance.RegisterDisconnection(OnDisconnection);
@@ -72,20 +79,19 @@ namespace CatAsset.Editor
 
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
 
-            searchField = new SearchField();
-            //m_SearchField.downOrUpArrowKeyPressed += curTreeView.SetFocusAndEnsureSelectedItem;
 
-            //创建TreeView
-            InitBundleInfoTreeView();
-            InitAssetInfoTreeView();
-            InitTaskInfoTreeView();
-            InitGroupInfoTreeView();
-            InitUpdaterInfoTreeView();
         }
 
         private void OnDisable()
         {
+            EditorConnection.instance.UnregisterConnection(OnConnection);
+            EditorConnection.instance.UnregisterDisconnection(OnDisconnection);
+            EditorConnection.instance.Unregister(ProfilerComponent.MsgSendPlayerToEditor,OnPlayerMessage);
+
+            ProfilerComponent.Callback = null;
+
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+
         }
 
         private void OnConnection(int arg0)
@@ -124,50 +130,29 @@ namespace CatAsset.Editor
             ReloadTreeView();
         }
 
-        /// <summary>
-        /// 重新加载TreeView
-        /// </summary>
-        private void ReloadTreeView()
+        private void OnPlayModeChanged(PlayModeStateChange mode)
         {
-            var curProfilerInfo = profilerPlayer.GetProfilerInfo(curProfilerInfoIndex);
-            if (curProfilerInfo == null)
+            switch (mode)
             {
-                return;
+                case PlayModeStateChange.EnteredEditMode:
+                    break;
+
+                case PlayModeStateChange.ExitingEditMode:
+                    break;
+
+                case PlayModeStateChange.EnteredPlayMode:
+                    curProfilerInfoIndex = 0;
+                    break;
+
+                case PlayModeStateChange.ExitingPlayMode:
+                    break;
             }
-
-            bundleInfoTreeView.Reload(curProfilerInfo);
-            assetInfoTreeView.Reload(curProfilerInfo);
-            taskInfoTreeView.Reload(curProfilerInfo);
-            groupInfoTreeView.Reload(curProfilerInfo);
-            updaterInfoTreeView.Reload(curProfilerInfo);
         }
-
-        /// <summary>
-        /// 创建列的数组
-        /// </summary>
-        private MultiColumnHeaderState.Column[] CreateColumns(List<string> columnList)
-        {
-            var columns = new MultiColumnHeaderState.Column[columnList.Count];
-            for (int i = 0; i < columns.Length; i++)
-            {
-                string name = columnList[i];
-                columns[i] = new MultiColumnHeaderState.Column()
-                {
-                    headerContent = new GUIContent(name),
-                    headerTextAlignment = TextAlignment.Center,
-                    sortingArrowAlignment = TextAlignment.Right
-                };
-            }
-
-            return columns;
-        }
-
 
         private void OnGUI()
         {
             DrawUpToolbar();
             DrawInfoView();
-            //Repaint();
         }
 
         /// <summary>
@@ -185,24 +170,21 @@ namespace CatAsset.Editor
             x += width;
             width = 500;
             searchString = searchField.OnGUI(new Rect(x, y, width, height), searchString);
-            if (curTreeView != null)
-            {
-                curTreeView.searchString = searchString;
-            }
+            curInfoView.TreeView.searchString = searchString;
 
             x += width;
             x += 10;
             width = 100;
             if (GUI.Button(new Rect(x,y,width,height),"全部展开"))
             {
-                curTreeView?.ExpandAll();
+                curInfoView.TreeView.ExpandAll();
             }
 
             x += width;
             width = 100;
             if (GUI.Button(new Rect(x,y,width,height),"全部收起"))
             {
-                curTreeView?.CollapseAll();
+                curInfoView.TreeView.CollapseAll();
             }
 
             x += width;
@@ -260,36 +242,9 @@ namespace CatAsset.Editor
         /// </summary>
         private void DrawInfoView()
         {
-            switch (selectedTab)
-            {
-                case 0:
-                    curTreeView = bundleInfoTreeView;
-                    DrawBundleInfoView();
-                    break;
-
-                case 1:
-                    curTreeView = assetInfoTreeView;
-                    DrawAssetInfoView();
-                    break;
-
-                case 2:
-                    curTreeView = taskInfoTreeView;
-                    DrawTaskInfoView();
-                    break;
-
-                case 3:
-                    curTreeView = groupInfoTreeView;
-                    DrawGroupInfoView();
-                    break;
-
-                case 4:
-                    curTreeView = updaterInfoTreeView;
-                    DrawUpdaterInfoView();
-                    break;
-            }
+            curInfoView = infoViews[selectedTab];
+            curInfoView.DrawInfoView(position);
         }
-
-
 
         /// <summary>
         /// 向真机发送消息
@@ -301,6 +256,22 @@ namespace CatAsset.Editor
                 BitConverter.GetBytes((int)msgType));
         }
 
+        /// <summary>
+        /// 重新加载TreeView
+        /// </summary>
+        private void ReloadTreeView()
+        {
+            ProfilerInfo info = profilerPlayer.GetProfilerInfo(curProfilerInfoIndex);
+            if (info == null)
+            {
+                return;
+            }
+
+            foreach (var infoView in infoViews)
+            {
+                infoView.TreeView.Reload(info);
+            }
+        }
 
 
 
