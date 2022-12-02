@@ -67,7 +67,7 @@ namespace CatAsset.Editor
                 Debug.LogError($"资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
 
-            OnPostprocessBuildBundles(bundleBuildConfig,targetPlatform,returnCode,result);
+            OnPostprocessBuildBundles(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,result);
             
             return returnCode;
         }
@@ -122,7 +122,7 @@ namespace CatAsset.Editor
                 Debug.LogError($"原生资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
             
-            OnPostprocessBuildBundles(bundleBuildConfig,targetPlatform,returnCode,null);
+            OnPostprocessBuildBundles(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,null);
             
             return returnCode;
         }
@@ -142,13 +142,13 @@ namespace CatAsset.Editor
         /// <summary>
         /// 构建资源包后调用
         /// </summary>
-        private static void OnPostprocessBuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform,
+        private static void OnPostprocessBuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform,string outputFolder,
             ReturnCode returnCode, IBundleBuildResults result)
         {
             List<IPostProcessBuildBundles> objs = EditorUtil.GetAssignableTypeObjects<IPostProcessBuildBundles>();
             foreach (var obj in objs)
             {
-                obj.OnPostProcessBuildBundles(bundleBuildConfig,targetPlatform,returnCode,result);
+                obj.OnPostProcessBuildBundles(bundleBuildConfig,targetPlatform,outputFolder,returnCode,result);
             }
         }
 

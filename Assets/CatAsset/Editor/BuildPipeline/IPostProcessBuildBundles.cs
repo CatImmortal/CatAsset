@@ -9,7 +9,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 构建资源包后调用
         /// </summary>
-        void OnPostProcessBuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform,
+        void OnPostProcessBuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform,string outputFolder,
             ReturnCode returnCode, IBundleBuildResults result);
     }
 }
