@@ -17,7 +17,7 @@ QQ交流群：762036315
 
 - **资源包构建管线基于Unity最新的ScriptableBuildPipline所搭建，拥有比旧的内置构建管线更快的构建速度**
 
-  *因此需要使用者自行在项目package manager中安装scriptableBuildPipline包，否则会有缺失代码的编译报错*
+  *因此需要使用者自行在项目package manager中安装ScriptableBuildPipline包，否则会有缺失代码的编译报错*
 
   
 
@@ -25,11 +25,11 @@ QQ交流群：762036315
 
   
 
-- **内置编辑器调试窗口，可快速查看相关信息（点击上方工具栏CatAsset/打开资源包构建窗口或CatAsset/打开运行时信息窗口）**
+- **内置编辑器调试窗口，可快速查看相关信息（点击上方工具栏CatAsset/打开资源包构建窗口或CatAsset/打开调试分析器窗口）**
 
-  ![](https://github.com/CatImmortal/CatAsset/raw/main/ImageRes/Image_01.png)
+  ![](ImageRes/Image_01.png)
 
-  ![](https://github.com/CatImmortal/CatAsset/raw/main/ImageRes/Image_02.png)
+  ![](ImageRes/Image_02.png)
 
   
 
@@ -51,21 +51,21 @@ QQ交流群：762036315
 
   
 
-- **精细的Asset级依赖管理，能将未使用的非Prefab资源（如纹理、材质、音频等）及时卸载，而无须等到资源包卸载**
+- **精细的Asset级依赖管理，能将未使用的非Prefab及其依赖资源（如纹理、材质、音频等）及时卸载，而无须等到资源包卸载**
 
-  *因此在资源包划分时可以无须过多关心其中非Prefab资源的生命周期*
+  *因此在资源包划分时可以无须过多关心其中非Prefab及其依赖资源的生命周期*
 
-  *同时提供了快速的UnloadUnusedAssets实现，可以低耗时的将所有未使用的非Prefab资源立即卸载*
+  *同时提供了快速的UnloadUnusedAssets实现，可以低耗时的将所有未使用的非Prefab及其依赖资源立即卸载*
 
   
 
-- **支持自动寻址，使用者直接使用资源，无需关心资源位置与资源包相关信息**
+- **支持自动寻址，使用者直接使用资源，无需关心资源最新版本的位置与资源包相关信息**
 
   
 
 - **2种运行模式，Example文件夹中提供了2种模式的使用示例**
 
-  1. 仅使用安装包内资源（单机模式）
+  1. 单机模式（仅使用安装包内资源）
 
   2. 可更新模式
 

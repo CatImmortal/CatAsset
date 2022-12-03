@@ -200,7 +200,7 @@ MonoBehaviour:
   IsEditorMode: 0
   UnloadBundleDelayTime: 120
   UnloadAssetDelayTime: 60
-  MaxTaskRunCount: 10
+  MaxTaskRunCount: 30
 --- !u!4 &1641363141
 Transform:
   m_ObjectHideFlags: 0
