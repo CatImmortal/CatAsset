@@ -30,52 +30,52 @@ namespace CatAsset.Editor
             //注意：buildDirectory在这里被假设为一个形如Assets/xxx/yyy....格式的目录
             
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();
-           
-            if (Directory.Exists(buildDirectory))
-            {
-                DirectoryInfo dirInfo = new DirectoryInfo(buildDirectory);
-                FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);//递归获取所有文件
 
-                foreach (FileInfo file in files)
+            if (!Directory.Exists(buildDirectory))
+            {
+                return result;
+            }
+
+            string[] guids = AssetDatabase.FindAssets(string.Empty, new[] { buildDirectory });
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!EditorUtil.IsValidAsset(path))
                 {
-                    string assetDir = EditorUtil.FullNameToAssetName(file.Directory.FullName);//Assets/xxx/
-                    string assetName = EditorUtil.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
-                    if (!EditorUtil.IsValidAsset(assetName))
-                    {
-                        continue;
-                    }
-                    
-                    
-                    if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(assetName,ruleRegex))
-                    {
-                        continue;
-                    }
-                    
-                    string directoryName = assetDir.Substring(assetDir.IndexOf("/") + 1); //去掉Assets/
-                    string bundleName;
-                    if (!isRaw)
-                    { 
-                        bundleName = file.Name.Replace('.','_') + ".bundle"; 
-                    }
-                    else
-                    {
-                        //直接以文件名作为原生资源包名
-                        bundleName = file.Name;
-                    }
-                    
-                    BundleBuildInfo bundleBuildInfo =
-                        new BundleBuildInfo(directoryName,bundleName, group, isRaw);
-                    
-                    
-                     bundleBuildInfo.Assets.Add(new AssetBuildInfo(assetName));
-                    
-                    result.Add(bundleBuildInfo);
-                    
+                    //不是有效的资源文件 跳过
+                    continue;
                 }
 
-               
+                if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(path,ruleRegex))
+                {
+                    //不匹配正则 跳过
+                    continue;
+                }
+
+                FileInfo fi = new FileInfo(path);
+                string assetDir = EditorUtil.FullNameToAssetName(fi.Directory.FullName);//由Assets/开头的目录
+                string directoryName = assetDir.Substring(assetDir.IndexOf('/') + 1);//去掉Assets/的目录
+                string bundleName;
+              
+                if (!isRaw)
+                { 
+                    bundleName = fi.Name.Replace('.','_') + ".bundle"; 
+                }
+                else
+                {
+                    //直接以文件名作为原生资源包名
+                    bundleName = fi.Name;
+                }
+                
+                BundleBuildInfo bundleBuildInfo =
+                    new BundleBuildInfo(directoryName,bundleName, group, isRaw);
+
+                bundleBuildInfo.Assets.Add(new AssetBuildInfo(path));
+                    
+                result.Add(bundleBuildInfo);
+                
             }
-            
+
             return result;
         }
     }
