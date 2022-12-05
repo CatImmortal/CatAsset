@@ -74,7 +74,7 @@ namespace CatAsset.Editor
             if (results.BundleInfos.ContainsKey(builtInShadersBundleName))
             {
                 BundleBuildInfo bundleBuildInfo =
-                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, EditorUtil.DefaultGroup, false);
+                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, GroupInfo.DefaultGroup, false);
                 infoParam.NormalBundleBuilds.Add(bundleBuildInfo);
             }
             

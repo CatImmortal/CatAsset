@@ -16,6 +16,9 @@ namespace CatAsset.Editor
         public virtual bool IsRaw => false;
         
         /// <inheritdoc />
+        public bool IsFile => false;
+        
+        /// <inheritdoc />
         public virtual List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory,
             HashSet<string> lookedAssets)
         {
