@@ -31,10 +31,6 @@ namespace CatAsset.Editor
             ".cginc",
         };
 
-        /// <summary>
-        /// 默认资源组
-        /// </summary>
-        public const string DefaultGroup = "Base";
 
         [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 3)]
         private static void OpenAssetBundleOutputPath()
@@ -72,39 +68,7 @@ namespace CatAsset.Editor
             }
         }
 
-        [MenuItem("Assets/添加为资源包构建目录（可多选）", false)]
-        private static void AddToBundleBuildDirectory()
-        {
-            BundleBuildConfigSO config = BundleBuildConfigSO.Instance;
-
-            foreach (string guid in Selection.assetGUIDs)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (Directory.Exists(path) && config.CanAddDirectory(path))
-                {
-                    BundleBuildDirectory directory = new BundleBuildDirectory(path,nameof(NAssetToOneBundle),null,DefaultGroup);
-                    config.Directories.Add(directory);
-                }
-            }
-            config.Directories.Sort();
-            EditorUtility.SetDirty(config);
-            AssetDatabase.SaveAssets();
-        }
-
-        [MenuItem("Assets/添加为资源包构建目录（可多选）", true)]
-        private static bool AddToBundleBuildDirectoryValidate()
-        {
-            foreach (string guid in Selection.assetGUIDs)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (Directory.Exists(path))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+      
         
         
         [MenuItem("Assets/刷新资源包构建信息")]

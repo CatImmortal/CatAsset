@@ -51,15 +51,16 @@ namespace CatAsset.Editor
                     EditorGUI.EndDisabledGroup();
                     
                     //绘制构建规则名
-                    string[] ruleNames = GetRuleNames();
+                    bool isFile = !AssetDatabase.IsValidFolder(directory.DirectoryName);
+                    string[] ruleNames = GetRuleNames(isFile);
                     ruleNameDict.TryGetValue(directory.BuildRuleName, out int index);
                     index = EditorGUILayout.Popup(index,ruleNames);
                     directory.BuildRuleName = ruleNames[index];
-                  
+
                     //绘制正则表达式字符串
                     EditorGUILayout.LabelField("正则：",GUILayout.Width(50));
                     directory.RuleRegex = EditorGUILayout.TextField(directory.RuleRegex);
-                    
+
                     //绘制资源组
                     EditorGUILayout.LabelField("资源组：",GUILayout.Width(50));
                     directory.Group = EditorGUILayout.TextField(directory.Group,GUILayout.Width(100));
@@ -95,23 +96,23 @@ namespace CatAsset.Editor
         /// 获取构建规则名列表
         /// </summary>
         /// <returns></returns>
-        private string[] GetRuleNames()
+        private string[] GetRuleNames(bool isFile)
         {
-            if (ruleNames == null || ruleNameDict.Count == 0)
+            List<string> list = new List<string>();
+            foreach (var pair in BundleBuildConfigSO.Instance.GetRuleDict())
             {
-                List<string> list = new List<string>();
-                TypeCache.TypeCollection types = TypeCache.GetTypesDerivedFrom<IBundleBuildRule>();
-                foreach (Type type in types)
+                IBundleBuildRule rule = pair.Value;
+                if (isFile == rule.IsFile)
                 {
-                    list.Add(type.Name);
+                    list.Add(rule.GetType().Name);
                 }
-                ruleNames = list.ToArray();
-                ruleNameDict.Clear();
-                for (int i = 0; i < ruleNames.Length; i++)
-                {
-                    ruleNameDict.Add(ruleNames[i],i);
-                }
-                
+                   
+            }
+            ruleNames = list.ToArray();
+            ruleNameDict.Clear();
+            for (int i = 0; i < ruleNames.Length; i++)
+            {
+                ruleNameDict.Add(ruleNames[i],i);
             }
             
             return ruleNames;

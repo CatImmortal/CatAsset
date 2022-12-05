@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using CatAsset.Runtime;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
@@ -45,8 +47,46 @@ namespace CatAsset.Editor
 
         public int CompareTo(BundleBuildDirectory other)
         {
-            //return DirectoryName.CompareTo(other.DirectoryName);
             return DirectoryName.CompareTo(other.DirectoryName);
+        }
+        
+        [MenuItem("Assets/添加为资源包构建目录（可多选）", false)]
+        private static void AddToBundleBuildDirectory()
+        {
+            BundleBuildConfigSO config = BundleBuildConfigSO.Instance;
+
+            foreach (string guid in Selection.assetGUIDs)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (config.CanAddDirectory(path))
+                {
+                    BundleBuildDirectory directory = new BundleBuildDirectory(path,nameof(NAssetToOneBundle),null,GroupInfo.DefaultGroup);
+                    config.Directories.Add(directory);
+                }
+            }
+            config.Directories.Sort();
+            EditorUtility.SetDirty(config);
+            AssetDatabase.SaveAssets();
+        }
+
+        [MenuItem("Assets/添加为资源包构建目录（可多选）", true)]
+        private static bool AddToBundleBuildDirectoryValidate()
+        {
+            foreach (string guid in Selection.assetGUIDs)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (AssetDatabase.IsValidFolder(path))
+                {
+                    return true;
+                }
+
+                if (EditorUtil.IsValidAsset(path))
+                {
+                    return true;
+                }
+            }
+        
+            return false;
         }
     }
 }

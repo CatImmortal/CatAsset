@@ -8,6 +8,11 @@ namespace CatAsset.Runtime
     public class GroupInfo
     {
         /// <summary>
+        /// 默认资源组
+        /// </summary>
+        public const string DefaultGroup = "Base";
+
+        /// <summary>
         /// 资源组名
         /// </summary>
         public string GroupName { get; internal set; }

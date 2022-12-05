@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -86,7 +87,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 要复制到只读目录下的资源组，以分号分隔
         /// </summary>
-        public string CopyGroup = EditorUtil.DefaultGroup;
+        public string CopyGroup = GroupInfo.DefaultGroup;
 
         /// <summary>
         /// 资源包构建目录列表
@@ -199,6 +200,19 @@ namespace CatAsset.Editor
             Debug.Log("资源包构建信息刷新完毕");
         }
 
+        /// <summary>
+        /// 获取资源包构建规则字典
+        /// </summary>
+        /// <returns></returns>
+       internal Dictionary<string, IBundleBuildRule> GetRuleDict()
+        {
+            if (ruleDict.Count == 0)
+            {
+                InitRuleDict();
+            }
+
+            return ruleDict;
+        }
 
         /// <summary>
         /// 初始化资源包构建规则字典
@@ -206,7 +220,6 @@ namespace CatAsset.Editor
         private void InitRuleDict()
         {
             ruleDict.Clear();
-
             List<IBundleBuildRule> rules = EditorUtil.GetAssignableTypeObjects<IBundleBuildRule>();
             foreach (IBundleBuildRule rule in rules)
             {

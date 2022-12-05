@@ -17,6 +17,11 @@ namespace CatAsset.Editor
         bool IsRaw { get; }
         
         /// <summary>
+        /// 此规则所处理的目录是否为一个文件
+        /// </summary>
+        bool IsFile { get; }
+        
+        /// <summary>
         /// 获取使用此规则构建的资源包构建信息列表
         /// </summary>
         List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory, HashSet<string> lookedAssets);
