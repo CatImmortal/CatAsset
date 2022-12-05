@@ -186,17 +186,20 @@ namespace CatAsset.Editor
             string fileExtension = Path.GetExtension(assetName);
             if (string.IsNullOrEmpty(fileExtension))
             {
+                //无后缀的
                 return false;
             }
 
             if (ExcludeSet.Contains(fileExtension))
             {
+                //被排除的
                 return false;
             }
 
             Type type = AssetDatabase.GetMainAssetTypeAtPath(assetName);
             if (type == typeof(LightingDataAsset))
             {
+                //光照
                 return false;
             }
 
@@ -211,7 +214,7 @@ namespace CatAsset.Editor
         public static string FullNameToAssetName(string fullName)
         {
             int assetsIndex = fullName.IndexOf("Assets\\");
-            string assetsDir = fullName.Substring(assetsIndex).Replace('\\', '/');
+            string assetsDir = RuntimeUtil.GetRegularPath(fullName.Substring(assetsIndex));
             return assetsDir;
         }
 

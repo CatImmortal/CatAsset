@@ -36,38 +36,38 @@ namespace CatAsset.Editor
         protected BundleBuildInfo GetNAssetToOneBundle(string buildDirectory,string ruleRegex,string group)
         {
             //注意：buildDirectory在这里被假设为一个形如Assets/xxx/yyy....格式的目录
-            DirectoryInfo dirInfo = new DirectoryInfo(buildDirectory);
-            FileInfo[] files = dirInfo.GetFiles("*", SearchOption.AllDirectories);  //递归获取所有文件
             List<string> assetNames = new List<string>();
-            
-            foreach (FileInfo file in files)
+            string[] guids = AssetDatabase.FindAssets(string.Empty, new[] { buildDirectory });
+            foreach (string guid in guids)
             {
-                string assetName = EditorUtil.FullNameToAssetName(file.FullName);//Assets/xxx/yyy.zz
-                if (!EditorUtil.IsValidAsset(assetName))
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!EditorUtil.IsValidAsset(path))
                 {
+                    //不是有效的资源文件 跳过
                     continue;
                 }
                 
-                if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(assetName,ruleRegex))
+                if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(path,ruleRegex))
                 {
+                    //不匹配正则 跳过
                     continue;
                 }
                 
-                assetNames.Add(assetName);
+                assetNames.Add(path);
             }
-
+            
             //Assets/xxx/yyy
             int firstIndex = buildDirectory.IndexOf("/");
             int lastIndex = buildDirectory.LastIndexOf("/");
             string directoryName;
             if (firstIndex != lastIndex)
             {
-                //Assets/xxx/yyy -> //xxx
+                //Assets/xxx/yyy -> xxx
                 directoryName = buildDirectory.Substring(firstIndex + 1, lastIndex - firstIndex - 1);  
             }
             else
             {
-                //Assets/xxx -> //xxx
+                //Assets/xxx -> xxx
                 directoryName = buildDirectory.Substring(firstIndex + 1);
             }
           
@@ -81,6 +81,8 @@ namespace CatAsset.Editor
             }
 
             return bundleBuildInfo;
+            
+            
         }
     }
 }
