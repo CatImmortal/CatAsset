@@ -145,11 +145,9 @@ namespace CatAsset.Editor
 
                 //根据构建规则初始化资源包构建信息
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "初始化资源包构建信息...", curStep / stepNum);
-                RefreshDirectoryDict();  //这里要在第一次调用InitBundleBuildInfo前刷新构建目录映射，因为会在判断子构建目录时使用
                 ProfileTime((() => {InitBundleBuildInfo(false);}),sw,"初始化资源包构建信息");
                 curStep++;
-
-
+                
                 //将隐式依赖都转换为显式构建资源
                 EditorUtility.DisplayProgressBar("刷新资源包构建信息", "将隐式依赖都转换为显式构建资源...", curStep / stepNum);
                 ProfileTime(ImplicitDependencyToExplicitBuildAsset,sw,"将隐式依赖都转换为显式构建资源");
@@ -191,6 +189,7 @@ namespace CatAsset.Editor
             SortBundles();
 
             //刷新映射
+            RefreshDirectoryDict();
             RefreshAssetToBundleDict();
 
             EditorUtility.SetDirty(this);
@@ -220,15 +219,25 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitBundleBuildInfo(bool isRaw)
         {
-            for (int i = 0; i < Directories.Count; i++)
+            //降序遍历构建目录 实现非中序遍历效果 以支持嵌套构建目录
+            List<BundleBuildDirectory> tempDirectories = new List<BundleBuildDirectory>();
+            for (int i = Directories.Count - 1; i >= 0; i--)
             {
-                BundleBuildDirectory bundleBuildDirectory = Directories[i];
+                tempDirectories.Add(Directories[i]);
+            }
+            
+            //已被构建规则处理过的资源的集合
+            HashSet<string> lookedAssets = new HashSet<string>();
+            
+            for (int i = 0; i < tempDirectories.Count; i++)
+            {
+                BundleBuildDirectory bundleBuildDirectory = tempDirectories[i];
 
                 IBundleBuildRule rule = ruleDict[bundleBuildDirectory.BuildRuleName];
                 if (rule.IsRaw == isRaw)
                 {
                     //获取根据构建规则形成的资源包构建信息列表
-                    List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory);
+                    List<BundleBuildInfo> bundles = rule.GetBundleList(bundleBuildDirectory, lookedAssets);
                     Bundles.AddRange(bundles);
                 }
             }

@@ -24,6 +24,7 @@ namespace CatAsset.Editor
             ".meta",
             ".cs",
             ".asmdef",
+            ".asmref",
             ".giparams",
             ".so",
             ".dll",
