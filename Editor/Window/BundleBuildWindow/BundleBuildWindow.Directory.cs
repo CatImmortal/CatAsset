@@ -100,13 +100,10 @@ namespace CatAsset.Editor
             if (ruleNames == null || ruleNameDict.Count == 0)
             {
                 List<string> list = new List<string>();
-                Type[] types = typeof(BundleBuildConfigSO).Assembly.GetTypes();
+                TypeCache.TypeCollection types = TypeCache.GetTypesDerivedFrom<IBundleBuildRule>();
                 foreach (Type type in types)
                 {
-                    if (!type.IsInterface && typeof(IBundleBuildRule).IsAssignableFrom(type))
-                    {
-                        list.Add(type.Name);
-                    }
+                    list.Add(type.Name);
                 }
                 ruleNames = list.ToArray();
                 ruleNameDict.Clear();

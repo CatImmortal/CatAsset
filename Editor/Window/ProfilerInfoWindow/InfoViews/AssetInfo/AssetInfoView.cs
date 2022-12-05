@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace CatAsset.Editor
@@ -26,6 +27,14 @@ namespace CatAsset.Editor
             };
 
             return columnList;
+        }
+
+        protected override void ProcessColumns(MultiColumnHeaderState.Column[] columns)
+        {
+            base.ProcessColumns(columns);
+
+            columns[2].minWidth = 150;
+            columns[4].minWidth = 400;
         }
 
         protected override void CreateTreeView()

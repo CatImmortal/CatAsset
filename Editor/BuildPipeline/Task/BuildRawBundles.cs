@@ -36,7 +36,7 @@ namespace CatAsset.Editor
             foreach (BundleBuildInfo rawBundleBuildInfo in rawBundleBuilds)
             {
                 string rawAssetName = rawBundleBuildInfo.Assets[0].Name;
-                string rawBundleDirectory = Path.Combine(directory, rawBundleBuildInfo.DirectoryName.ToLower());
+                string rawBundleDirectory = Path.Combine(directory, rawBundleBuildInfo.DirectoryName);
                 if (!Directory.Exists(rawBundleDirectory))
                 {
                     Directory.CreateDirectory(rawBundleDirectory);

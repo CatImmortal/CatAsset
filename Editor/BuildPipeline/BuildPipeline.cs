@@ -58,7 +58,7 @@ namespace CatAsset.Editor
                 out IBundleBuildResults result, taskList, infoParam,configParam);
             sw.Stop();
 
-            if (returnCode == ReturnCode.Success || returnCode == ReturnCode.SuccessCached)
+            if (returnCode == ReturnCode.Success)
             {
                 Debug.Log($"资源包构建成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
@@ -113,7 +113,7 @@ namespace CatAsset.Editor
             //运行构建任务
             ReturnCode returnCode = BuildTasksRunner.Run(taskList, buildContext);
 
-            if (returnCode == ReturnCode.Success || returnCode == ReturnCode.SuccessCached)
+            if (returnCode == ReturnCode.Success)
             {
                 Debug.Log($"原生资源包构建成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }

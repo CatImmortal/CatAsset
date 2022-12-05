@@ -28,38 +28,49 @@ namespace CatAsset.Editor
         /// <inheritdoc />
         public ReturnCode Run()
         {
-            BundleBuildConfigSO bundleBuildConfig = configParam.Config;
+                BundleBuildConfigSO bundleBuildConfig = configParam.Config;
                 BuildTarget targetPlatform = configParam.TargetPlatform;
                 string directory = ((BundleBuildParameters) buildParam).OutputFolder;
                 CatAssetManifest rawManifest = manifestParam.Manifest;
-                
-                //获取主资源清单(将清单版本号-1)
-                string mainOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
-                    bundleBuildConfig.ManifestVersion - 1);
-                string mainManifestPath = Path.Combine(mainOutputPath,RuntimeUtil.ManifestFileName);
 
-                //尝试加载主资源清单
+                //主资源清单
+                int mainManifestVersion = bundleBuildConfig.ManifestVersion;
                 CatAssetManifest mainManifest = null;
-                if (File.Exists(mainManifestPath))
+                string mainOutputPath = null;
+                do
                 {
-                    string json = File.ReadAllText(mainManifestPath);
-                    mainManifest = JsonUtility.FromJson<CatAssetManifest>(json);
-                }
+                    //尝试获取前一个版本的主资源清单
+                    //将清单版本号不断-1 直到0
+                    mainManifestVersion--;
+                    mainOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+                        bundleBuildConfig.ManifestVersion - 1);
+                    string mainManifestPath = Path.Combine(mainOutputPath,RuntimeUtil.ManifestFileName);
+
+                    if (File.Exists(mainManifestPath))
+                    {
+                        //存在前一个版本的主资源清单 读取
+                        string json = File.ReadAllText(mainManifestPath);
+                        mainManifest = JsonUtility.FromJson<CatAssetManifest>(json);
+                        break;
+                    }
+                    
+                } while (mainManifestVersion >= 0);
+
                 if (mainManifest == null)
                 {
-                    //没有主资源清单 不需要合并
+                    //不存在前一个版本的主资源清单 意味着不需要合并
                     return ReturnCode.SuccessNotRun;
                 }
-            
+                
                 foreach (BundleManifestInfo bundleManifestInfo in mainManifest.Bundles)
                 {
                     if (!bundleManifestInfo.IsRaw)
                     {
-                        //合并原生资源包
+                        //合并资源包
                         FileInfo fi = new FileInfo(Path.Combine(mainOutputPath, bundleManifestInfo.RelativePath));
 
                         string fullPath = Path.Combine(directory, bundleManifestInfo.RelativePath);
-                        string fullDirectory =  Path.Combine(directory, bundleManifestInfo.Directory.ToLower());
+                        string fullDirectory =  Path.Combine(directory, bundleManifestInfo.Directory);
                     
                         if (!Directory.Exists(fullDirectory))
                         {
