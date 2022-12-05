@@ -12,9 +12,10 @@ namespace CatAsset.Editor
         public override bool IsRaw => true;
 
         /// <inheritdoc />
-        public override List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
+        public override List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory,
+            HashSet<string> lookedAssets)
         {
-            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory.DirectoryName,bundleBuildDirectory.RuleRegex,bundleBuildDirectory.Group,true);
+            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory.DirectoryName,bundleBuildDirectory.RuleRegex,bundleBuildDirectory.Group,IsRaw,lookedAssets);
             return result;
         }
     }

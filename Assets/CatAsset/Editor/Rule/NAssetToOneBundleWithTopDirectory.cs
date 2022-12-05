@@ -9,7 +9,8 @@ namespace CatAsset.Editor
     public class NAssetToOneBundleWithTopDirectory : NAssetToOneBundle
     {
         /// <inheritdoc />
-        public override List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory)
+        public override List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory,
+            HashSet<string> lookedAssets)
         {
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();
 
@@ -24,7 +25,7 @@ namespace CatAsset.Editor
                 {
                     //每个一级目录构建成一个资源包
                     string assetsDir = EditorUtil.FullNameToAssetName(topDirInfo.FullName);
-                    BundleBuildInfo info = GetNAssetToOneBundle(assetsDir,bundleBuildDirectory.RuleRegex, bundleBuildDirectory.Group);
+                    BundleBuildInfo info = GetNAssetToOneBundle(assetsDir,bundleBuildDirectory.RuleRegex, bundleBuildDirectory.Group,lookedAssets);
                     result.Add(info);
                 }
             }
