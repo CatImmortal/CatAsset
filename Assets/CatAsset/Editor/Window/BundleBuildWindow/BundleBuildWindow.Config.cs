@@ -117,6 +117,23 @@ namespace CatAsset.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
+                
+                if (GUILayout.Button("清理资源包目录",GUILayout.Width(200)))
+                {
+                    if (!Directory.Exists(bundleBuildConfig.OutputPath))
+                    {
+                        Debug.Log("资源包目录不存在");
+                        return;
+                    }
+                    
+                    if (EditorUtility.DisplayDialog("提示","是否确定清理资源包目录？","是","否"))
+                    {
+                        bundleBuildConfig.ManifestVersion = 1;
+                        Directory.Delete(bundleBuildConfig.OutputPath, true);
+                        Debug.Log("资源包目录已清理");
+                    }
+                }
+                
                 if (GUILayout.Button("清理SBP构建缓存",GUILayout.Width(200)))
                 {
                     BuildCache.PurgeCache(true);
@@ -131,10 +148,14 @@ namespace CatAsset.Editor
                         return;
                     }
                     
-                    Directory.Delete(atlasCachePath, true);
-                    Debug.Log("图集缓存已清理");
+                    if (EditorUtility.DisplayDialog("提示","是否确定清理图集缓存？","是","否"))
+                    {
+                        Directory.Delete(atlasCachePath, true);
+                        Debug.Log("图集缓存已清理");
+                    }
                 }
                 
+
             }
             
             using (new EditorGUILayout.HorizontalScope())

@@ -22,8 +22,8 @@ namespace CatAsset.Editor
         {
             List<string> columnList = GetColumns();
 
-            var columns = CreateColumns(columnList);
-            columns[0].minWidth = 400;
+            MultiColumnHeaderState.Column[] columns = CreateColumns(columnList);
+            ProcessColumns(columns);
 
             var state = new MultiColumnHeaderState(columns);
 
@@ -39,6 +39,14 @@ namespace CatAsset.Editor
         /// </summary>
         protected abstract List<string> GetColumns();
 
+        /// <summary>
+        /// 处理行数据
+        /// </summary>
+        protected virtual void ProcessColumns(MultiColumnHeaderState.Column[] columns)
+        {
+            columns[0].minWidth = 400;
+        }
+        
         /// <summary>
         /// 创建列的数组
         /// </summary>
