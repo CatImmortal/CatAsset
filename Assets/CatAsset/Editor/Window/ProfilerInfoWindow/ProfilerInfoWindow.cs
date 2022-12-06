@@ -32,21 +32,21 @@ namespace CatAsset.Editor
         private string[] tabs = { "资源包信息", "资源信息", "任务信息" ,"资源组信息" ,"更新器信息"};
 
         /// <summary>
-        /// 分析器信息界面
+        /// 子窗口列表
         /// </summary>
-        private BaseProfilerInfoView[] infoViews =
+        private BaseTreeViewSubWindow[] subWindows =
         {
-            new BundleInfoView(),
-            new AssetInfoView(),
-            new TaskInfoView(),
-            new GroupInfoView(),
-            new UpdaterInfoView()
+            new BundleInfoWindow(),
+            new AssetInfoWindow(),
+            new TaskInfoWindow(),
+            new GroupInfoWindow(),
+            new UpdaterInfoWindow()
         };
 
         /// <summary>
-        /// 当前的信息界面
+        /// 当前的子窗口
         /// </summary>
-        private BaseProfilerInfoView curInfoView;
+        private BaseTreeViewSubWindow curSubWindow;
 
         private SearchField searchField;
         private string searchString;
@@ -62,12 +62,12 @@ namespace CatAsset.Editor
 
         private void OnEnable()
         {
-            //初始化TreeView
-            foreach (var infoView in infoViews)
+            //初始化子窗口
+            foreach (var subWindow in subWindows)
             {
-                infoView.InitTreeView();
+                subWindow.InitSubWindow();
             }
-            curInfoView = infoViews[0];
+            curSubWindow = subWindows[0];
             searchField = new SearchField();
 
             EditorConnection.instance.Initialize();
@@ -152,7 +152,7 @@ namespace CatAsset.Editor
         private void OnGUI()
         {
             DrawUpToolbar();
-            DrawInfoView();
+            SubWindow();
         }
 
         /// <summary>
@@ -170,21 +170,21 @@ namespace CatAsset.Editor
             x += width;
             width = 500;
             searchString = searchField.OnGUI(new Rect(x, y, width, height), searchString);
-            curInfoView.TreeView.searchString = searchString;
+            curSubWindow.TreeView.SearchString = searchString;
 
             x += width;
             x += 10;
             width = 100;
             if (GUI.Button(new Rect(x,y,width,height),"全部展开"))
             {
-                curInfoView.TreeView.ExpandAll();
+                curSubWindow.TreeView.ExpandAll();
             }
 
             x += width;
             width = 100;
             if (GUI.Button(new Rect(x,y,width,height),"全部收起"))
             {
-                curInfoView.TreeView.CollapseAll();
+                curSubWindow.TreeView.CollapseAll();
             }
 
             x += width;
@@ -238,12 +238,12 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 绘制信息界面
+        /// 绘制子窗口
         /// </summary>
-        private void DrawInfoView()
+        private void SubWindow()
         {
-            curInfoView = infoViews[selectedTab];
-            curInfoView.DrawInfoView(position);
+            curSubWindow = subWindows[selectedTab];
+            curSubWindow.DrawSubWindow(position);
         }
 
         /// <summary>
@@ -267,9 +267,9 @@ namespace CatAsset.Editor
                 return;
             }
 
-            foreach (var infoView in infoViews)
+            foreach (var subWindow in subWindows)
             {
-                infoView.TreeView.Reload(info);
+                subWindow.TreeView.Reload(info);
             }
         }
 
