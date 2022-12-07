@@ -23,9 +23,14 @@ namespace CatAsset.Editor
         public string BuildRuleName;
 
         /// <summary>
-        /// 构建规则所使用的正则表达式
+        /// 过滤器
         /// </summary>
-        public string RuleRegex;
+        public string Filter;
+        
+        /// <summary>
+        /// 正则表达式
+        /// </summary>
+        public string Regex;
         
         /// <summary>
         /// 资源组
@@ -37,11 +42,11 @@ namespace CatAsset.Editor
         /// </summary>
         public string DirectoryName => AssetDatabase.GetAssetPath(DirectoryObj);
 
-        public BundleBuildDirectory(string directoryName, string buildRuleName, string ruleRegex, string group)
+        public BundleBuildDirectory(string directoryName, string buildRuleName, string regex, string group)
         {
             DirectoryObj = AssetDatabase.LoadAssetAtPath<Object>(directoryName);
             BuildRuleName = buildRuleName;
-            RuleRegex = ruleRegex;
+            Regex = regex;
             Group = group;
         }
 
