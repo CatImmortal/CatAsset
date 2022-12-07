@@ -22,14 +22,15 @@ namespace CatAsset.Editor
         public virtual List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory,
             HashSet<string> lookedAssets)
         {
-            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory.DirectoryName,bundleBuildDirectory.RuleRegex,bundleBuildDirectory.Group,lookedAssets);
+            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory.DirectoryName,
+                bundleBuildDirectory.Filter, bundleBuildDirectory.Regex, bundleBuildDirectory.Group, lookedAssets);
             return result;
         }
 
         /// <summary>
         /// 将指定目录下所有资源分别构建为一个资源包
         /// </summary>
-        protected List<BundleBuildInfo> GetNAssetToNBundle(string buildDirectory,string ruleRegex,string group,HashSet<string> lookedAssets)
+        protected List<BundleBuildInfo> GetNAssetToNBundle(string buildDirectory,string filter,string regex,string group,HashSet<string> lookedAssets)
         {
             //注意：buildDirectory在这里被假设为一个形如Assets/xxx/yyy....格式的目录
             
@@ -40,7 +41,7 @@ namespace CatAsset.Editor
                 return result;
             }
 
-            string[] guids = AssetDatabase.FindAssets(string.Empty, new[] { buildDirectory });
+            string[] guids = AssetDatabase.FindAssets(filter, new[] { buildDirectory });
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -58,7 +59,7 @@ namespace CatAsset.Editor
                     continue;
                 }
                 
-                if (!string.IsNullOrEmpty(ruleRegex) && !Regex.IsMatch(path,ruleRegex))
+                if (!string.IsNullOrEmpty(regex) && !Regex.IsMatch(path,regex))
                 {
                     //不匹配正则 跳过
                     continue;

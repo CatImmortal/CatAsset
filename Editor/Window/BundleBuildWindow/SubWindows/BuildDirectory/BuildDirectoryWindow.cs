@@ -16,6 +16,7 @@ namespace CatAsset.Editor
                 "名称",
                 "Object",
                 "构建规则",
+                "Filter",
                 "正则",
                 "资源组",
                 "删除",

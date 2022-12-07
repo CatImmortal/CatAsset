@@ -35,6 +35,11 @@ namespace CatAsset.Editor
             Rule,
 
             /// <summary>
+            /// 过滤器
+            /// </summary>
+            Filter,
+            
+            /// <summary>
             /// 正则
             /// </summary>
             Regex,
@@ -96,8 +101,12 @@ namespace CatAsset.Editor
                     ordered = TreeViewData.Directories.Order(info => info.BuildRuleName, ascending);
                     break;
 
+                case ColumnType.Filter:
+                    ordered = TreeViewData.Directories.Order(info => info.Filter, ascending);
+                    break;
+                
                 case ColumnType.Regex:
-                    ordered = TreeViewData.Directories.Order(info => info.RuleRegex, ascending);
+                    ordered = TreeViewData.Directories.Order(info => info.Regex, ascending);
                     break;
 
                 case ColumnType.Group:
@@ -199,8 +208,12 @@ namespace CatAsset.Editor
                     directoryItem.Data.BuildRuleName = ruleNames[index];
                     break;
 
+                case ColumnType.Filter:
+                    directoryItem.Data.Filter = EditorGUI.TextField(cellRect, directoryItem.Data.Filter);
+                    break;
+                
                 case ColumnType.Regex:
-                    directoryItem.Data.RuleRegex = EditorGUI.TextField(cellRect, directoryItem.Data.RuleRegex);
+                    directoryItem.Data.Regex = EditorGUI.TextField(cellRect, directoryItem.Data.Regex);
                     break;
 
                 case ColumnType.Group:
