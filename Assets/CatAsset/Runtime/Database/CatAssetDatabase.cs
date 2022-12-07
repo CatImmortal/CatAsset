@@ -322,7 +322,7 @@ namespace CatAsset.Runtime
                 else
                 {
                     var ari = GetAssetRuntimeInfo(bri.Manifest.Assets[0].Name);
-                    if (ari == null)
+                    if (ari.Asset == null)
                     {
                         //跳过未加载的原生资源
                         continue;

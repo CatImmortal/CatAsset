@@ -245,12 +245,14 @@ namespace CatAsset.Runtime
             BaseTask task;
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
-                task = LoadWebBundleTask.Create(Owner, builtInShaderBundleRuntimeInfo.Manifest.RelativePath,
+                task = LoadWebBundleTask.Create(Owner, builtInShaderBundleRuntimeInfo.LoadPath,
+                    BundleRuntimeInfo.Manifest.RelativePath,
                     onBuiltInShaderBundleLoadedCallback);
             }
             else
             {
-                task = Create(Owner, builtInShaderBundleRuntimeInfo.Manifest.RelativePath,
+                task = Create(Owner, builtInShaderBundleRuntimeInfo.LoadPath,
+                    builtInShaderBundleRuntimeInfo.Manifest.RelativePath,
                     onBuiltInShaderBundleLoadedCallback);
             }
             Owner.AddTask(task, TaskPriority.Middle);
@@ -365,13 +367,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建资源包加载任务的对象
         /// </summary>
-        public static LoadBundleTask Create(TaskRunner owner, string name,BundleLoadedCallback callback)
+        public static LoadBundleTask Create(TaskRunner owner, string name,string bundleRelativePath,BundleLoadedCallback callback)
         {
             LoadBundleTask task = ReferencePool.Get<LoadBundleTask>();
             task.CreateBase(owner,name);
 
             task.OnFinishedCallback = callback;
-            task.BundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(name);
+            task.BundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(bundleRelativePath);
 
             return task;
         }

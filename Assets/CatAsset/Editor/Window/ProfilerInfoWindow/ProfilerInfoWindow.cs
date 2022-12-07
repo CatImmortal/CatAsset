@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEditor;
 using CatAsset.Runtime;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.Networking.PlayerConnection;
 using UnityEngine.Networking.PlayerConnection;
+using Debug = UnityEngine.Debug;
 
 namespace CatAsset.Editor
 {
@@ -51,6 +53,13 @@ namespace CatAsset.Editor
         private SearchField searchField;
         private string searchString;
 
+        /// <summary>
+        /// 是否开启连续采样
+        /// </summary>
+        private bool isSampleMulti;
+        private float sampleInterval = 1 / 15f; //连续采样频率为15帧
+        private static Stopwatch sw = new Stopwatch();
+        
         [MenuItem("CatAsset/打开调试分析器窗口", priority = 1)]
         private static void OpenWindow()
         {
@@ -78,7 +87,7 @@ namespace CatAsset.Editor
             ProfilerComponent.Callback = OnProfilerInfo;
 
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
-
+            
 
         }
 
@@ -91,7 +100,7 @@ namespace CatAsset.Editor
             ProfilerComponent.Callback = null;
 
             EditorApplication.playModeStateChanged -= OnPlayModeChanged;
-
+            EditorApplication.update -= EditorUpdate;
         }
 
         private void OnConnection(int arg0)
@@ -142,9 +151,16 @@ namespace CatAsset.Editor
 
                 case PlayModeStateChange.EnteredPlayMode:
                     curProfilerInfoIndex = 0;
+                    if (isSampleMulti)
+                    {
+                        //编辑器下启动游戏后 已注册的EditorUpdate 会被清理掉 如果是开启连续采样下启动的游戏 得重新注册
+                        EditorApplication.update += EditorUpdate;
+                        sw.Start();
+                    }
                     break;
 
                 case PlayModeStateChange.ExitingPlayMode:
+ 
                     break;
             }
         }
@@ -152,7 +168,7 @@ namespace CatAsset.Editor
         private void OnGUI()
         {
             DrawUpToolbar();
-            SubWindow();
+            DrawSubWindow();
         }
 
         /// <summary>
@@ -190,9 +206,34 @@ namespace CatAsset.Editor
             x += width;
             x += 20;
             width = 100;
-            if (GUI.Button(new Rect(x, y, width, height),"采样"))
+            if (GUI.Button(new Rect(x, y, width, height),"单次采样"))
             {
                 Send(ProfilerMessageType.SampleOnce);
+            }
+            
+            x += width;
+            width = 100;
+
+            string btnText = "开始连续采样";
+            if (isSampleMulti)
+            {
+                btnText = "停止连续采样";
+            }
+
+            if (GUI.Button(new Rect(x, y, width, height),btnText))
+            {
+                isSampleMulti = !isSampleMulti;
+
+                if (isSampleMulti)
+                {
+                    EditorApplication.update += EditorUpdate;
+                    sw.Start();
+                }
+                else
+                {
+                    EditorApplication.update -= EditorUpdate;
+                    sw.Reset();
+                }
             }
 
             x += width;
@@ -201,6 +242,10 @@ namespace CatAsset.Editor
             {
                 profilerPlayer.ClearProfilerInfo();
                 curProfilerInfoIndex = 0;
+                foreach (var subWindow in subWindows)
+                {
+                    subWindow.TreeView.Reload(null);
+                }
             }
 
             //绘制Slider
@@ -240,12 +285,21 @@ namespace CatAsset.Editor
         /// <summary>
         /// 绘制子窗口
         /// </summary>
-        private void SubWindow()
+        private void DrawSubWindow()
         {
             curSubWindow = subWindows[selectedTab];
             curSubWindow.DrawSubWindow(position);
         }
 
+        private void EditorUpdate()
+        {
+            if (sw.Elapsed.TotalSeconds >= sampleInterval)
+            {
+                Send(ProfilerMessageType.SampleOnce);
+                sw.Restart();
+            }
+        }
+        
         /// <summary>
         /// 向真机发送消息
         /// </summary>
@@ -272,7 +326,6 @@ namespace CatAsset.Editor
                 subWindow.TreeView.Reload(info);
             }
         }
-
 
 
 
