@@ -212,12 +212,14 @@ namespace CatAsset.Runtime
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
                 //WebGL平台特殊处理下
-                task = LoadWebBundleTask.Create(Owner, BundleRuntimeInfo.Manifest.RelativePath,
+                task = LoadWebBundleTask.Create(Owner, BundleRuntimeInfo.LoadPath,
+                    BundleRuntimeInfo.Manifest.RelativePath,
                     onBundleLoadedCallback);
             }
             else
             {
-                task = LoadBundleTask.Create(Owner, BundleRuntimeInfo.Manifest.RelativePath,
+                task = LoadBundleTask.Create(Owner, BundleRuntimeInfo.LoadPath,
+                    BundleRuntimeInfo.Manifest.RelativePath,
                     onBundleLoadedCallback);
             }
             Owner.AddTask(task, TaskPriority.Middle);

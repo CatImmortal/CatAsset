@@ -6,7 +6,7 @@
     public enum ProfilerMessageType
     {
         /// <summary>
-        /// 采样一次
+        /// 单次采样
         /// </summary>
         SampleOnce,
     }

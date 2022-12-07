@@ -49,13 +49,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建WebGL资源包加载任务的对象
         /// </summary>
-        public new static LoadWebBundleTask Create(TaskRunner owner, string name,BundleLoadedCallback callback)
+        public new static LoadWebBundleTask Create(TaskRunner owner, string name,string bundleRelativePath,BundleLoadedCallback callback)
         {
             LoadWebBundleTask task = ReferencePool.Get<LoadWebBundleTask>();
             task.CreateBase(owner,name);
             
             task.OnFinishedCallback = callback;
-            task.BundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(name);
+            task.BundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(bundleRelativePath);
             
             return task;
         }
