@@ -119,11 +119,6 @@ namespace CatAsset.Editor
                     break;
 
                 case ColumnType.Length:
-                    foreach (var bundleInfo in TreeViewData.BundleInfoList)
-                    {
-                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.MemorySize, ascending);
-                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
-                    }
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.Length, ascending);
                     break;
                 
@@ -136,6 +131,11 @@ namespace CatAsset.Editor
                     break;
                 
                 case ColumnType.InMemoryAssetSize:
+                    foreach (var bundleInfo in TreeViewData.BundleInfoList)
+                    {
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.MemorySize, ascending);
+                        bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
+                    }
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.InMemoryAssetSize, ascending);
                     break;
 
