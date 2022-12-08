@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Reflection;
 using UnityEditor;
+using UnityEngine;
 
 namespace CatAsset.Editor
 {
@@ -10,6 +12,12 @@ namespace CatAsset.Editor
     [Serializable]
     public class AssetBuildInfo : IComparable<AssetBuildInfo>,IEquatable<AssetBuildInfo>
     {
+        private static MethodInfo getStorageMemorySizeLongMethod =
+            typeof(EditorWindow).Assembly.GetType("UnityEditor.TextureUtil").GetMethod("GetStorageMemorySizeLong",
+                BindingFlags.Static | BindingFlags.Public);
+
+        private static object[] paramCache = new object[1];
+        
         /// <summary>
         /// 资源名
         /// </summary>
@@ -30,7 +38,18 @@ namespace CatAsset.Editor
         public AssetBuildInfo(string name)
         {
             Name = name;
-            Length = (ulong)new FileInfo(name).Length;
+            if (Type == typeof(Texture2D))
+            {
+                Texture2D texture2D = AssetDatabase.LoadAssetAtPath<Texture2D>(name);
+                paramCache[0] = texture2D;
+                long size = (long)getStorageMemorySizeLongMethod.Invoke(null, paramCache);
+                Length = (ulong)size;
+            }
+            else
+            {
+                Length = (ulong)new FileInfo(name).Length;
+            }
+         
         }
 
         public override string ToString()

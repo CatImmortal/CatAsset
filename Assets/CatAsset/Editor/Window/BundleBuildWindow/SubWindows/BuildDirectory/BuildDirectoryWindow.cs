@@ -19,6 +19,7 @@ namespace CatAsset.Editor
                 "Filter",
                 "正则",
                 "资源组",
+                "压缩设置",
                 "删除",
             };
 

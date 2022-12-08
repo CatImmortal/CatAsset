@@ -22,26 +22,25 @@ namespace CatAsset.Editor
         public virtual List<BundleBuildInfo> GetBundleList(BundleBuildDirectory bundleBuildDirectory,
             HashSet<string> lookedAssets)
         {
-            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory.DirectoryName,
-                bundleBuildDirectory.Filter, bundleBuildDirectory.Regex, bundleBuildDirectory.Group, lookedAssets);
+            List<BundleBuildInfo> result = GetNAssetToNBundle(bundleBuildDirectory, lookedAssets);
             return result;
         }
 
         /// <summary>
         /// 将指定目录下所有资源分别构建为一个资源包
         /// </summary>
-        protected List<BundleBuildInfo> GetNAssetToNBundle(string buildDirectory,string filter,string regex,string group,HashSet<string> lookedAssets)
+        protected List<BundleBuildInfo> GetNAssetToNBundle(BundleBuildDirectory bundleBuildDirectory,HashSet<string> lookedAssets)
         {
             //注意：buildDirectory在这里被假设为一个形如Assets/xxx/yyy....格式的目录
             
             List<BundleBuildInfo> result = new List<BundleBuildInfo>();
 
-            if (!Directory.Exists(buildDirectory))
+            if (!Directory.Exists(bundleBuildDirectory.DirectoryName))
             {
                 return result;
             }
 
-            string[] guids = AssetDatabase.FindAssets(filter, new[] { buildDirectory });
+            string[] guids = AssetDatabase.FindAssets(bundleBuildDirectory.Filter, new[] { bundleBuildDirectory.DirectoryName });
             foreach (string guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
@@ -59,7 +58,7 @@ namespace CatAsset.Editor
                     continue;
                 }
                 
-                if (!string.IsNullOrEmpty(regex) && !Regex.IsMatch(path,regex))
+                if (!string.IsNullOrEmpty(bundleBuildDirectory.Regex) && !Regex.IsMatch(path,bundleBuildDirectory.Regex))
                 {
                     //不匹配正则 跳过
                     continue;
@@ -80,8 +79,10 @@ namespace CatAsset.Editor
                     bundleName = fi.Name;
                 }
                 
+                
+                
                 BundleBuildInfo bundleBuildInfo =
-                    new BundleBuildInfo(directoryName,bundleName, group, IsRaw);
+                    new BundleBuildInfo(directoryName,bundleName, bundleBuildDirectory.Group, IsRaw,bundleBuildDirectory.GetCompressOption());
 
                 bundleBuildInfo.Assets.Add(new AssetBuildInfo(path));
                     

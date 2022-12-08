@@ -22,10 +22,5 @@ namespace CatAsset.Editor
         /// 附加MD5到资源包名中
         /// </summary>
         AppendMD5 = 1 << 2,
-
-        /// <summary>
-        /// LZ4压缩
-        /// </summary>
-        ChunkBasedCompression = 1 << 3,
     }
 }

@@ -73,13 +73,27 @@ namespace CatAsset.Editor
             }
 
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("选择资源包构建设置：");
-            BundleBuildConfigSO.Instance.Options =
-                (BundleBuildOptions) EditorGUILayout.EnumFlagsField(BundleBuildConfigSO.Instance.Options,GUILayout.Width(300));
 
-            EditorGUILayout.Space();
             using (new EditorGUILayout.HorizontalScope())
             {
+                EditorGUILayout.LabelField("资源包构建设置：",GUILayout.Width(100));
+                BundleBuildConfigSO.Instance.Options =
+                    (BundleBuildOptions)EditorGUILayout.EnumFlagsField(BundleBuildConfigSO.Instance.Options,
+                        GUILayout.Width(200));
+                
+                EditorGUILayout.Space();
+                
+                EditorGUILayout.LabelField("资源包全局压缩设置：",GUILayout.Width(120));
+                BundleCompressOptions compressOptions =
+                    (BundleCompressOptions)EditorGUILayout.EnumPopup(BundleBuildConfigSO.Instance.GlobalCompress,
+                        GUILayout.Width(100));
+                if (compressOptions != BundleCompressOptions.UseGlobal)
+                {
+                    BundleBuildConfigSO.Instance.GlobalCompress = compressOptions;
+                }
+                
+                EditorGUILayout.Space();
+                
                 GUILayout.Label("资源包构建输出根目录：", GUILayout.Width(150));
                 BundleBuildConfigSO.Instance.OutputPath = GUILayout.TextField(BundleBuildConfigSO.Instance.OutputPath,GUILayout.Width(300));
                 if (GUILayout.Button("选择目录", GUILayout.Width(100)))
@@ -91,6 +105,8 @@ namespace CatAsset.Editor
                     }
                 }
             }
+            EditorGUILayout.Space();
+            
 
 
             EditorGUILayout.Space();
@@ -112,8 +128,11 @@ namespace CatAsset.Editor
 
             if (BundleBuildConfigSO.Instance.IsCopyToReadOnlyDirectory)
             {
-                EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：");
-                BundleBuildConfigSO.Instance.CopyGroup = EditorGUILayout.TextField(BundleBuildConfigSO.Instance.CopyGroup,GUILayout.Width(600));
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：",GUILayout.Width(300));
+                    BundleBuildConfigSO.Instance.CopyGroup = EditorGUILayout.TextField(BundleBuildConfigSO.Instance.CopyGroup,GUILayout.Width(600));
+                }
             }
             
             EditorGUILayout.Space();

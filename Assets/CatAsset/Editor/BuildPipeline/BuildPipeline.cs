@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using CatAsset.Runtime;
@@ -187,14 +188,23 @@ namespace CatAsset.Editor
             //是否增量构建
             parameters.UseCache = !HasOption(bundleBuildConfig.Options,BundleBuildOptions.ForceRebuild);
 
-            //是否使用LZ4压缩
-            if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.ChunkBasedCompression))
+            //全局压缩格式
+            switch (bundleBuildConfig.GlobalCompress)
             {
-                parameters.BundleCompression = BuildCompression.LZ4;
-            }
-            else
-            {
-                parameters.BundleCompression = BuildCompression.Uncompressed;
+                case BundleCompressOptions.Uncompressed:
+                    parameters.BundleCompression = BuildCompression.Uncompressed;
+                    break;
+                
+                case BundleCompressOptions.LZ4:
+                    parameters.BundleCompression = BuildCompression.LZ4;
+                    break;
+                
+                case BundleCompressOptions.LZMA:
+                    parameters.BundleCompression = BuildCompression.LZMA;
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             return parameters;

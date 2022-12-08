@@ -17,7 +17,6 @@ namespace CatAsset.Editor
     /// </summary>
     public class BuildManifest : IBuildTask
     {
-      
         [InjectContext(ContextUsage.In)] 
         private IBundleBuildParameters buildParam;
 
@@ -74,7 +73,8 @@ namespace CatAsset.Editor
             if (results.BundleInfos.ContainsKey(builtInShadersBundleName))
             {
                 BundleBuildInfo bundleBuildInfo =
-                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, GroupInfo.DefaultGroup, false);
+                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, GroupInfo.DefaultGroup, false,
+                        configParam.Config.GlobalCompress);
                 infoParam.NormalBundleBuilds.Add(bundleBuildInfo);
             }
             

@@ -26,7 +26,7 @@ namespace CatAsset.Editor
                 return result;
             }
 
-            BundleBuildInfo info = GetOneAssetToOnBundle(path, bundleBuildDirectory.Group,lookedAssets);
+            BundleBuildInfo info = GetOneAssetToOnBundle(bundleBuildDirectory,lookedAssets);
             result.Add(info);
             
             return result;
@@ -35,8 +35,10 @@ namespace CatAsset.Editor
         /// <summary>
         /// 将单个资源构建为单个资源包
         /// </summary>
-        private BundleBuildInfo GetOneAssetToOnBundle(string path,string group,HashSet<string> lookedAssets)
+        private BundleBuildInfo GetOneAssetToOnBundle(BundleBuildDirectory bundleBuildDirectory,HashSet<string> lookedAssets)
         {
+            string path = bundleBuildDirectory.DirectoryName;
+            
             lookedAssets.Add(path);
 
             FileInfo fi = new FileInfo(path);
@@ -45,7 +47,7 @@ namespace CatAsset.Editor
             string bundleName = fi.Name.Replace('.','_') + ".bundle"; 
             
             BundleBuildInfo bundleBuildInfo =
-                new BundleBuildInfo(directoryName,bundleName, group, IsRaw);
+                new BundleBuildInfo(directoryName,bundleName, bundleBuildDirectory.Group, IsRaw,bundleBuildDirectory.GetCompressOption());
 
             bundleBuildInfo.Assets.Add(new AssetBuildInfo(path));
             

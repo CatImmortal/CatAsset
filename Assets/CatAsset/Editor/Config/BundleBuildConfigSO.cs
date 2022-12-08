@@ -72,8 +72,13 @@ namespace CatAsset.Editor
         /// <summary>
         /// 资源包构建设置
         /// </summary>
-        public BundleBuildOptions Options = BundleBuildOptions.WriteLinkXML | BundleBuildOptions.ChunkBasedCompression;
+        public BundleBuildOptions Options = BundleBuildOptions.WriteLinkXML;
 
+        /// <summary>
+        /// 资源包压缩全局压缩设置
+        /// </summary>
+        public BundleCompressOptions GlobalCompress = BundleCompressOptions.LZ4;
+        
         /// <summary>
         /// 资源包构建输出目录
         /// </summary>
@@ -362,7 +367,7 @@ namespace CatAsset.Editor
 
                 //重建场景资源包
                 BundleBuildInfo sceneBundleBuildInfo = new BundleBuildInfo(bundleBuildInfo.DirectoryName,
-                    bundleBuildInfo.BundleName, bundleBuildInfo.Group, false);
+                    bundleBuildInfo.BundleName, bundleBuildInfo.Group, false,bundleBuildInfo.CompressOption);
                 foreach (AssetBuildInfo sceneAsset in sceneAssets)
                 {
                     sceneBundleBuildInfo.Assets.Add(sceneAsset);
@@ -374,7 +379,7 @@ namespace CatAsset.Editor
                 string[] splitNames = bundleBuildInfo.BundleName.Split('.');
                 string bundleName = $"{splitNames[0]}_res.{splitNames[1]}";
                 BundleBuildInfo normalBundleBuildInfo = new BundleBuildInfo(bundleBuildInfo.DirectoryName, bundleName,
-                    bundleBuildInfo.Group, false);
+                    bundleBuildInfo.Group, false,bundleBuildInfo.CompressOption);
                 foreach (AssetBuildInfo normalAsset in normalAssets)
                 {
                     normalBundleBuildInfo.Assets.Add(normalAsset);

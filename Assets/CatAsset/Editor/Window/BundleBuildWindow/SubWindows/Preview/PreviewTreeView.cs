@@ -28,6 +28,11 @@ namespace CatAsset.Editor
             /// 对象引用
             /// </summary>
             Object,
+            
+            /// <summary>
+            /// 类型
+            /// </summary>
+            Type,
 
             /// <summary>
             /// 资源组
@@ -43,6 +48,11 @@ namespace CatAsset.Editor
             /// 长度
             /// </summary>
             Length,
+            
+            /// <summary>
+            /// 压缩设置
+            /// </summary>
+            CompressOption,
         }
         
         public PreviewTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader)
@@ -81,6 +91,15 @@ namespace CatAsset.Editor
                     bundleOrdered = TreeViewData.Bundles.Order(info => info.RelativePath, ascending);
                     break;
 
+                case ColumnType.Type:
+                    foreach (var bundleInfo in TreeViewData.Bundles)
+                    {
+                        assetOrdered = bundleInfo.Assets.Order(info => info.Type.Name, ascending);
+                        bundleInfo.Assets = new List<AssetBuildInfo>(assetOrdered);
+                    }
+                    bundleOrdered = TreeViewData.Bundles.Order(info => info.IsRaw, ascending);
+                    break;
+                
                 case ColumnType.Group:
                     bundleOrdered = TreeViewData.Bundles.Order(info => info.Group, ascending);
                     break;
@@ -98,6 +117,9 @@ namespace CatAsset.Editor
                     bundleOrdered = TreeViewData.Bundles.Order(info => info.AssetsLength, ascending);
                     break;
 
+                case ColumnType.CompressOption:
+                    bundleOrdered = TreeViewData.Bundles.Order(info => info.CompressOption, ascending);
+                    break;
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -185,6 +207,25 @@ namespace CatAsset.Editor
                     }
                     break;
 
+                case ColumnType.Type:
+                    if (bundleItem != null)
+                    {
+                        if (!bundleItem.Data.IsRaw)
+                        {
+                            EditorGUI.LabelField(cellRect,"AssetBundle",centerStyle);
+                        }
+                        else
+                        {
+                            EditorGUI.LabelField(cellRect,"Bytes",centerStyle);
+                        }
+                       
+                    }
+                    else
+                    {
+                        EditorGUI.LabelField(cellRect,assetItem.Data.Type.Name,centerStyle);
+                    }
+                    break;
+                
                 case ColumnType.Group:
                     if (bundleItem != null)
                     {
@@ -212,6 +253,20 @@ namespace CatAsset.Editor
                     EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(length),centerStyle);
                     break;
 
+                case ColumnType.CompressOption:
+                    if (bundleItem != null)
+                    {
+                        if (bundleItem.Data.IsRaw)
+                        {
+                            return;
+                        }
+                        
+                        EditorGUI.BeginDisabledGroup(true);
+                        EditorGUI.EnumPopup(cellRect, bundleItem.Data.CompressOption);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    break;
+                
                 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(column), column, null);
