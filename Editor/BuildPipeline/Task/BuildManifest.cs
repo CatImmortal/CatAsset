@@ -118,7 +118,6 @@ namespace CatAsset.Editor
                     AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                     {
                         Name = assetBuildInfo.Name,
-                        Length = assetBuildInfo.Length,
                         IsAtlasPackable = atlasPackableSet.Contains(assetBuildInfo.Name),
                     };
 
@@ -151,7 +150,6 @@ namespace CatAsset.Editor
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                 {
                     Name = bundleBuildInfo.Assets[0].Name,
-                    Length = bundleManifestInfo.Length,
                 };
                 bundleManifestInfo.Assets.Add(assetManifestInfo);
             }

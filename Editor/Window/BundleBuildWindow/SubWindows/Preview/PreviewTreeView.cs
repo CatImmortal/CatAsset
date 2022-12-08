@@ -45,7 +45,7 @@ namespace CatAsset.Editor
             AssetCount,
             
             /// <summary>
-            /// 长度
+            /// 预估长度
             /// </summary>
             Length,
             

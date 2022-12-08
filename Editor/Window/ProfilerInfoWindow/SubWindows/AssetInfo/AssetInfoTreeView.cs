@@ -38,22 +38,22 @@ namespace CatAsset.Editor
             /// 资源类型
             /// </summary>
             Type,
-
+            
             /// <summary>
-            /// 资源组
+            /// 内存大小
             /// </summary>
-            Group,
+            MemorySize,
 
             /// <summary>
             /// 资源包
             /// </summary>
             Bundle,
-
+            
             /// <summary>
-            /// 长度
+            /// 资源组
             /// </summary>
-            Length,
-
+            Group,
+            
             /// <summary>
             /// 引用计数
             /// </summary>
@@ -117,8 +117,8 @@ namespace CatAsset.Editor
                     assetOrdered = TreeViewData.AssetInfoList.Order(info => info.Bundle, ascending);
                     break;
 
-                case ColumnType.Length:
-                    assetOrdered = TreeViewData.AssetInfoList.Order(info => info.Length, ascending);
+                case ColumnType.MemorySize:
+                    assetOrdered = TreeViewData.AssetInfoList.Order(info => info.MemorySize, ascending);
                     break;
 
                 case ColumnType.RefCount:
@@ -219,15 +219,12 @@ namespace CatAsset.Editor
                     EditorGUI.LabelField(cellRect,assetItem.Data.Bundle,centerStyle);
                     break;
 
-                case ColumnType.Length:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(assetItem.Data.Length),centerStyle);
+                case ColumnType.MemorySize:
+                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(assetItem.Data.MemorySize),centerStyle);
                     break;
 
                 case ColumnType.RefCount:
-                    if (assetItem != null)
-                    {
-                        EditorGUI.LabelField(cellRect,assetItem.Data.RefCount.ToString(),centerStyle);
-                    }
+                    EditorGUI.LabelField(cellRect,assetItem.Data.RefCount.ToString(),centerStyle);
                     break;
 
                 case ColumnType.UpStreamCount:

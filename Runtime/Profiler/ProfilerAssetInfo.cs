@@ -32,9 +32,9 @@ namespace CatAsset.Runtime
         public string Type;
 
         /// <summary>
-        /// 文件长度
+        /// 内存大小
         /// </summary>
-        public ulong Length;
+        public ulong MemorySize;
 
         /// <summary>
         /// 引用计数
@@ -61,12 +61,12 @@ namespace CatAsset.Runtime
             return Name;
         }
 
-        public static ProfilerAssetInfo Create(string name,string type,ulong length,int refCount)
+        public static ProfilerAssetInfo Create(string name,string type,ulong memorySize,int refCount)
         {
             ProfilerAssetInfo info = ReferencePool.Get<ProfilerAssetInfo>();
             info.Name = name;
             info.Type = type;
-            info.Length = length;
+            info.MemorySize = memorySize;
             info.RefCount = refCount;
             return info;
         }
@@ -77,7 +77,7 @@ namespace CatAsset.Runtime
             Group = default;
             Bundle = default;
             Type = default;
-            Length = default;
+            MemorySize = default;
             RefCount = default;
 
             UpStreamIndexes.Clear();
