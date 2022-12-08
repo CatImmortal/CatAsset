@@ -51,10 +51,10 @@ namespace CatAsset.Runtime
         public List<ProfilerAssetInfo> InMemoryAssets = new List<ProfilerAssetInfo>();
 
         /// <summary>
-        /// 内存中资源长度
+        /// 内存中资源实例占用的大小
         /// </summary>
         [NonSerialized]
-        public ulong InMemoryAssetLength;
+        public ulong InMemoryAssetSize;
 
         /// <summary>
         /// 上游资源包索引
@@ -105,7 +105,7 @@ namespace CatAsset.Runtime
 
             InMemoryAssetIndexes.Clear();
             InMemoryAssets.Clear();
-            InMemoryAssetLength = default;
+            InMemoryAssetSize = default;
 
             UpStreamIndexes.Clear();
             DownStreamIndexes.Clear();

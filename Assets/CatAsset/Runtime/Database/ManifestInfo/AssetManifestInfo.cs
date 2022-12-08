@@ -17,11 +17,6 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
-        /// 文件长度
-        /// </summary>
-        public ulong Length;
-
-        /// <summary>
         /// 依赖资源名列表
         /// </summary>
         public List<string> Dependencies;

@@ -87,7 +87,7 @@ namespace CatAsset.Runtime
                     pai.Bundle = pbi.RelativePath;
 
                     pbi.InMemoryAssets.Add(pai);
-                    pbi.InMemoryAssetLength += pai.Length;
+                    pbi.InMemoryAssetSize += pai.MemorySize;
 
                     //资源依赖链
                     foreach (int upPaiIndex in pai.UpStreamIndexes)

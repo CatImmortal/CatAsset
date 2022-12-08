@@ -40,24 +40,24 @@ namespace CatAsset.Editor
             Group,
 
             /// <summary>
-            /// 内存中资源数
+            /// 长度
             /// </summary>
-            InMemoryAssetCount,
-
+            Length,
+            
             /// <summary>
             /// 引用中资源数
             /// </summary>
             ReferencingAssetCount,
-
+            
             /// <summary>
-            /// 长度
+            /// 内存中资源数
             /// </summary>
-            Length,
-
+            InMemoryAssetCount,
+            
             /// <summary>
             /// 内存中资源总长度
             /// </summary>
-            InMemoryAssetLength,
+            InMemoryAssetSize,
 
             /// <summary>
             /// 上游节点数
@@ -118,25 +118,25 @@ namespace CatAsset.Editor
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.Group, ascending);
                     break;
 
-                case ColumnType.InMemoryAssetCount:
-                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.InMemoryAssets.Count, ascending);
-                    break;
-
-                case ColumnType.ReferencingAssetCount:
-                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.ReferencingAssetCount, ascending);
-                    break;
-
                 case ColumnType.Length:
                     foreach (var bundleInfo in TreeViewData.BundleInfoList)
                     {
-                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.Length, ascending);
+                        assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.MemorySize, ascending);
                         bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
                     }
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.Length, ascending);
                     break;
-
-                case ColumnType.InMemoryAssetLength:
-                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.InMemoryAssetLength, ascending);
+                
+                case ColumnType.ReferencingAssetCount:
+                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.ReferencingAssetCount, ascending);
+                    break;
+                
+                case ColumnType.InMemoryAssetCount:
+                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.InMemoryAssets.Count, ascending);
+                    break;
+                
+                case ColumnType.InMemoryAssetSize:
+                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.InMemoryAssetSize, ascending);
                     break;
 
                 case ColumnType.UpStreamCount:
@@ -265,37 +265,36 @@ namespace CatAsset.Editor
                     }
                     break;
 
-                case ColumnType.InMemoryAssetCount:
+                case ColumnType.Length:
                     if (bundleItem != null)
                     {
-                        EditorGUI.LabelField(cellRect,$"{bundleItem.Data.InMemoryAssets.Count}/{bundleItem.Data.TotalAssetCount}",centerStyle);
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.Length),centerStyle);
                     }
+                  
                     break;
-
+                
                 case ColumnType.ReferencingAssetCount:
                     if (bundleItem != null)
                     {
                         EditorGUI.LabelField(cellRect,$"{bundleItem.Data.ReferencingAssetCount}/{bundleItem.Data.TotalAssetCount}",centerStyle);
                     }
                     break;
-
-                case ColumnType.Length:
-                    ulong length = 0;
+                
+                case ColumnType.InMemoryAssetCount:
                     if (bundleItem != null)
                     {
-                        length = bundleItem.Data.Length;
+                        EditorGUI.LabelField(cellRect,$"{bundleItem.Data.InMemoryAssets.Count}/{bundleItem.Data.TotalAssetCount}",centerStyle);
+                    }
+                    break;
+                
+                case ColumnType.InMemoryAssetSize:
+                    if (bundleItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.InMemoryAssetSize),centerStyle);
                     }
                     else
                     {
-                        length = assetItem.Data.Length;
-                    }
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(length),centerStyle);
-                    break;
-
-                case ColumnType.InMemoryAssetLength:
-                    if (bundleItem != null)
-                    {
-                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.Length),centerStyle);
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(assetItem.Data.MemorySize),centerStyle);
                     }
                     break;
 

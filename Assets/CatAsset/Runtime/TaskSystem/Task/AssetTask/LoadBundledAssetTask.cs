@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Object = UnityEngine.Object;
 
 namespace CatAsset.Runtime
@@ -384,6 +385,9 @@ namespace CatAsset.Runtime
 
             if (AssetRuntimeInfo.Asset != null)
             {
+
+                AssetRuntimeInfo.MemorySize = (ulong)Profiler.GetRuntimeMemorySizeLong((Object)AssetRuntimeInfo.Asset);
+                
                 //添加关联
                 CatAssetDatabase.SetAssetInstance(AssetRuntimeInfo.Asset, AssetRuntimeInfo);
             }

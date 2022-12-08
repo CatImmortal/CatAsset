@@ -26,6 +26,11 @@ namespace CatAsset.Runtime
         public object Asset;
 
         /// <summary>
+        /// 资源实例占用的内存大小
+        /// </summary>
+        public ulong MemorySize;
+        
+        /// <summary>
         /// 引用计数
         /// </summary>
         public int RefCount { get; internal set; }
