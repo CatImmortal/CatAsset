@@ -50,6 +50,11 @@ namespace CatAsset.Editor
             Group,
             
             /// <summary>
+            /// 压缩设置
+            /// </summary>
+            CompressOption,
+            
+            /// <summary>
             /// 删除按钮
             /// </summary>
             RemoveButton,
@@ -111,6 +116,10 @@ namespace CatAsset.Editor
 
                 case ColumnType.Group:
                     ordered = TreeViewData.Directories.Order(info => info.Group, ascending);
+                    break;
+                
+                case ColumnType.CompressOption:
+                    ordered = TreeViewData.Directories.Order(info => info.CompressOption.ToString(), ascending);
                     break;
                 
                 case ColumnType.RemoveButton:
@@ -218,6 +227,11 @@ namespace CatAsset.Editor
 
                 case ColumnType.Group:
                     directoryItem.Data.Group = EditorGUI.TextField(cellRect, directoryItem.Data.Group);
+                    break;
+                
+                case ColumnType.CompressOption:
+                    directoryItem.Data.CompressOption =
+                        (BundleCompressOptions)EditorGUI.EnumPopup(cellRect, directoryItem.Data.CompressOption);
                     break;
                 
                 case ColumnType.RemoveButton:

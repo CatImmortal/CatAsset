@@ -25,8 +25,7 @@ namespace CatAsset.Editor
                 {
                     //每个一级目录构建成一个资源包
                     string assetsDir = EditorUtil.FullNameToAssetName(topDirInfo.FullName);
-                    BundleBuildInfo info = GetNAssetToOneBundle(assetsDir, bundleBuildDirectory.Filter,
-                        bundleBuildDirectory.Regex, bundleBuildDirectory.Group, lookedAssets);
+                    BundleBuildInfo info = GetNAssetToOneBundle(assetsDir, bundleBuildDirectory, lookedAssets);
                     result.Add(info);
                 }
             }

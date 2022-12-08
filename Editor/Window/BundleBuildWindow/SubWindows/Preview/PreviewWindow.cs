@@ -10,10 +10,11 @@ namespace CatAsset.Editor
             {
                 "名称",
                 "Object",
+                "类型",
                 "资源组",
                 "资源数",
                 "长度",
-               
+                "压缩设置",
             };
 
             return columnList;

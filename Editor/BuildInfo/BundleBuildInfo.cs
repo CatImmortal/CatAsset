@@ -44,17 +44,24 @@ namespace CatAsset.Editor
         public ulong AssetsLength;
         
         /// <summary>
+        /// 资源包压缩设置
+        /// </summary>
+        public BundleCompressOptions CompressOption;
+        
+        /// <summary>
         /// 资源构建信息列表
         /// </summary>
         public List<AssetBuildInfo> Assets = new List<AssetBuildInfo>();
 
-        public BundleBuildInfo(string directoryName, string bundleName,string group,bool isRaw)
+        public BundleBuildInfo(string directoryName, string bundleName,string group,bool isRaw,BundleCompressOptions compressOption)
         {
             DirectoryName = directoryName;
             BundleName = bundleName;
             Group = group;
             IsRaw = isRaw;
+            CompressOption = compressOption;
             RelativePath = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
+            
         }
 
         /// <summary>

@@ -2,6 +2,7 @@
 using System.IO;
 using CatAsset.Runtime;
 using UnityEditor;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace CatAsset.Editor
@@ -38,21 +39,43 @@ namespace CatAsset.Editor
         public string Group;
 
         /// <summary>
+        /// 资源包压缩设置
+        /// </summary>
+        [SerializeField]
+        internal BundleCompressOptions CompressOption;
+        
+        /// <summary>
         /// 目录名
         /// </summary>
         public string DirectoryName => AssetDatabase.GetAssetPath(DirectoryObj);
 
-        public BundleBuildDirectory(string directoryName, string buildRuleName, string regex, string group)
+        public BundleBuildDirectory(string directoryName, string buildRuleName = nameof(NAssetToOneBundle),
+            string regex = null, string group = GroupInfo.DefaultGroup,
+            BundleCompressOptions compressOption = BundleCompressOptions.UseGlobal)
         {
             DirectoryObj = AssetDatabase.LoadAssetAtPath<Object>(directoryName);
             BuildRuleName = buildRuleName;
             Regex = regex;
             Group = group;
+            CompressOption = compressOption;
         }
 
         public int CompareTo(BundleBuildDirectory other)
         {
             return DirectoryName.CompareTo(other.DirectoryName);
+        }
+
+        /// <summary>
+        /// 获取压缩设置
+        /// </summary>
+        public BundleCompressOptions GetCompressOption()
+        {
+            BundleCompressOptions result = CompressOption;
+            if (result == BundleCompressOptions.UseGlobal)
+            {
+                result = BundleBuildConfigSO.Instance.GlobalCompress;
+            }
+            return result;
         }
         
         [MenuItem("Assets/添加为资源包构建目录（可多选）", false)]
@@ -65,7 +88,7 @@ namespace CatAsset.Editor
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 if (config.CanAddDirectory(path))
                 {
-                    BundleBuildDirectory directory = new BundleBuildDirectory(path,nameof(NAssetToOneBundle),null,GroupInfo.DefaultGroup);
+                    BundleBuildDirectory directory = new BundleBuildDirectory(path);
                     config.Directories.Add(directory);
                 }
             }
