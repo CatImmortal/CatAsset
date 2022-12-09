@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace CatAsset.Editor
 {
@@ -23,6 +24,16 @@ namespace CatAsset.Editor
         protected override void CreateTreeView()
         {
             TreeView = new PreviewTreeView(State, Header);
+        }
+        
+        /// <inheritdoc/>
+        public override void DrawSubWindow(Rect position)
+        {
+            if (!TreeView.CanShow())
+            {
+                return;
+            }
+            TreeView.OnGUI(new Rect(0, 60, position.width, position.height - 60));
         }
     }
 }
