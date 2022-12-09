@@ -105,7 +105,13 @@ namespace CatAsset.Runtime
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(relativePath, Length, MD5);
+            unchecked
+            {
+                var hashCode = (relativePath != null ? relativePath.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ Length.GetHashCode();
+                hashCode = (hashCode * 397) ^ (MD5 != null ? MD5.GetHashCode() : 0);
+                return hashCode;
+            }
         }
     }
 }

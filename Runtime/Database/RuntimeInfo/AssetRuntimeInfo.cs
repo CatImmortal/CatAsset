@@ -177,7 +177,10 @@ namespace CatAsset.Runtime
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(BundleManifest, AssetManifest);
+            unchecked
+            {
+                return ((BundleManifest != null ? BundleManifest.GetHashCode() : 0) * 397) ^ (AssetManifest != null ? AssetManifest.GetHashCode() : 0);
+            }
         }
     }
 }
