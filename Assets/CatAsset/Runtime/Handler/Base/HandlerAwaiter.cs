@@ -26,7 +26,7 @@ namespace CatAsset.Runtime
         {
             if (handler != null)
             {
-                handler.AsyncStateMachineMoveNext = continuation;
+                handler.AsyncStateMachineMoveNext += continuation;
             }
            
         }
