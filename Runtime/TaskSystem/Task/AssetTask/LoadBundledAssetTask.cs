@@ -256,12 +256,31 @@ namespace CatAsset.Runtime
 
             //加载依赖
             totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
+
+            if (totalDependencyCount == 0)
+            {
+                return;
+            }
+            
+#if UNITY_EDITOR
+            var oldLoader = CatAssetManager.GetAssetLoader();
+            if (oldLoader is PriorityEditorUpdatableAssetLoader)
+            {
+                CatAssetManager.SetAssetLoader<UpdatableAssetLoader>();  //加载资源依赖时 不能优先从编辑器加载 只能从资源包加载
+            }
+#endif
+          
             foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
                 AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,default,TaskPriority.Middle);
                 dependencyHandler.OnLoaded += onDependencyLoadedCallback;
                 dependencyHandlers.Add(dependencyHandler);
             }
+            
+#if UNITY_EDITOR
+            CatAssetManager.SetAssetLoader(oldLoader.GetType());
+#endif
+            
         }
 
         private void CheckStateWithDependenciesLoading()
