@@ -13,7 +13,7 @@ namespace CatAsset.Runtime
     {
 #if !UNITASK
         /// <summary>
-        /// 检查资源版本，可更新模式下专用（可等待）
+        /// 检查资源版本（可等待）
         /// </summary>
         public static Task<VersionCheckResult> CheckVersion()
         {
@@ -39,7 +39,7 @@ namespace CatAsset.Runtime
         }
 #else
         /// <summary>
-        /// 检查资源版本，可更新模式下专用（可等待）
+        /// 检查资源版本（可等待）
         /// </summary>
         public static UniTask<VersionCheckResult> CheckVersion()
         {
