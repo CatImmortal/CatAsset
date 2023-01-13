@@ -40,15 +40,16 @@ namespace CatAsset.Runtime
             new Dictionary<Type, CustomRawAssetConverter>();
 
         /// <summary>
-        /// 运行模式
+        /// 资源加载器类型 -> 资源加载器实例
         /// </summary>
-        public static RuntimeMode RuntimeMode { get; set; }
+        private static Dictionary<Type, BaseAssetLoader> loaderDict = new Dictionary<Type, BaseAssetLoader>();
 
         /// <summary>
-        /// 是否开启编辑器资源模式
+        /// 当前使用的资源加载器
         /// </summary>
-        public static bool IsEditorMode { get; set; }
-
+        private static BaseAssetLoader assetLoader;
+        
+        
         /// <summary>
         /// 资源包卸载延迟时间
         /// </summary>
@@ -123,6 +124,30 @@ namespace CatAsset.Runtime
                 downloadTaskRunner.Update(i);
             }
         }
+
+        /// <summary>
+        /// 设置资源加载器
+        /// </summary>
+        public static void SetAssetLoader<T>()
+        {
+            SetAssetLoader(typeof(T));
+        }
+
+        /// <summary>
+        /// 设置资源加载器
+        /// </summary>
+        public static void SetAssetLoader(Type type)
+        {
+            if (!loaderDict.TryGetValue(type,out var loader))
+            {
+                loader = (BaseAssetLoader)Activator.CreateInstance(type);
+                loaderDict.Add(type,loader);
+            }
+
+            assetLoader = loader;
+            
+            Debug.Log($"资源加载器被设置为了:{type.Name}");
+        }
         
         /// <summary>
         /// 注册自定义原生资源转换方法
@@ -173,6 +198,8 @@ namespace CatAsset.Runtime
             
             CatAssetDatabase.AddSceneBindHandler(scene, handler);
         }
+        
+
 
     }
 }

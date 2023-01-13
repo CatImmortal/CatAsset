@@ -8,6 +8,11 @@ namespace CatAsset.Runtime
     public readonly struct VersionCheckResult
     {
         /// <summary>
+        /// 是否检查成功
+        /// </summary>
+        public readonly bool Success;
+        
+        /// <summary>
         /// 检查失败时的异常信息
         /// </summary>
         public readonly string Error;
@@ -27,8 +32,9 @@ namespace CatAsset.Runtime
         /// </summary>
         public readonly List<GroupUpdater> GroupUpdaters;
 
-        public VersionCheckResult(string error,int totalCount, ulong totalLength)
+        public VersionCheckResult(bool success, string error,int totalCount, ulong totalLength)
         {
+            Success = success;
             Error = error;
             TotalCount = totalCount;
             TotalLength = totalLength;
@@ -41,7 +47,7 @@ namespace CatAsset.Runtime
 
         public override string ToString()
         {
-            return $"VersionCheckResult Error:{Error ?? "null"},TotalCount:{TotalCount},TotalLength:{TotalLength}";
+            return $"VersionCheckResult Success:{Success} Error:{Error ?? "null"},TotalCount:{TotalCount},TotalLength:{TotalLength}";
         }
     }
 }

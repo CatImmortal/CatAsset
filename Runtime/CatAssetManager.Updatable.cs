@@ -62,22 +62,7 @@ namespace CatAsset.Runtime
             CatAssetUpdater.PauseGroupUpdate(group, false);
         }
 
-        /// <summary>
-        /// 添加资源包下载任务
-        /// </summary>
-        internal static void AddDownLoadBundleTask(GroupUpdater updater, UpdateInfo updateInfo,
-            BundleDownloadedCallback onBundleDownloadedCallback, DownloadBundleRefreshCallback onDownloadRefreshCallback,
-            TaskPriority priority = TaskPriority.Middle)
-        {
-            string localFilePath = RuntimeUtil.GetReadWritePath(updateInfo.Info.RelativePath);
-            string downloadUri =
-                RuntimeUtil.GetRegularPath(Path.Combine(CatAssetUpdater.UpdateUriPrefix, updateInfo.Info.RelativePath));
 
-            DownloadBundleTask task =
-                DownloadBundleTask.Create(downloadTaskRunner, downloadUri, updateInfo, updater, downloadUri,
-                    localFilePath, onBundleDownloadedCallback, onDownloadRefreshCallback);
-            downloadTaskRunner.AddTask(task, priority);
-        }
 
 
     }

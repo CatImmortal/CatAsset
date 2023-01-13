@@ -41,25 +41,30 @@ namespace CatAsset.Runtime
             {
                 return;
             }
+
             isChecking = true;
 
             onVersionChecked = callback;
 
             //进行只读区 读写区 远端三方的资源清单检查
             string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
-            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName,true);
+            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName, true);
             string remoteManifestPath = RuntimeUtil.GetRemotePath(RuntimeUtil.ManifestFileName);
 
-            CatAssetManager.CheckUpdatableManifest(readOnlyManifestPath,CheckReadOnlyManifest);
-            CatAssetManager.CheckUpdatableManifest(readWriteManifestPath,CheckReadWriteManifest);
-            CatAssetManager.CheckUpdatableManifest(remoteManifestPath, CheckRemoteManifest);
+
+            CatAssetManager.AddWebRequestTask(readOnlyManifestPath, readOnlyManifestPath, CheckReadOnlyManifest,
+                TaskPriority.VeryLow);
+            CatAssetManager.AddWebRequestTask(readWriteManifestPath, readWriteManifestPath, CheckReadWriteManifest,
+                TaskPriority.VeryLow);
+            CatAssetManager.AddWebRequestTask(remoteManifestPath, remoteManifestPath, CheckRemoteManifest,
+                TaskPriority.VeryLow);
 
         }
 
         /// <summary>
         /// 检查只读区资源清单
         /// </summary>
-        private static void CheckReadOnlyManifest(bool success, UnityWebRequest uwr, object userdata)
+        private static void CheckReadOnlyManifest(bool success, UnityWebRequest uwr)
         {
             if (!success)
             {
@@ -84,7 +89,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 检查读写区资源清单
         /// </summary>
-        private static void CheckReadWriteManifest(bool success, UnityWebRequest uwr, object userdata)
+        private static void CheckReadWriteManifest(bool success, UnityWebRequest uwr)
         {
             if (!success)
             {
@@ -108,12 +113,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 检查远端资源清单
         /// </summary>
-        private static void CheckRemoteManifest(bool success, UnityWebRequest uwr, object userdata)
+        private static void CheckRemoteManifest(bool success, UnityWebRequest uwr)
         {
             if (!success)
             {
                 Debug.LogError($"远端资源清单检查失败:{uwr.error}");
-                VersionCheckResult result = new VersionCheckResult(uwr.error,0,0);
+                VersionCheckResult result = new VersionCheckResult(false, uwr.error,0,0);
                 onVersionChecked?.Invoke(result);
                 Clear();
                 return;
@@ -232,7 +237,7 @@ namespace CatAsset.Runtime
             }
 
             //调用版本检查完毕回调
-            VersionCheckResult result = new VersionCheckResult(null,totalCount, totalLength);
+            VersionCheckResult result = new VersionCheckResult(true, null,totalCount, totalLength);
             onVersionChecked?.Invoke(result);
 
             Clear();
