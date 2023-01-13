@@ -145,8 +145,14 @@ namespace CatAsset.Runtime
             }
 
             assetLoader = loader;
-            
-            Debug.Log($"资源加载器被设置为了:{type.Name}");
+        }
+
+        /// <summary>
+        /// 获取资源加载器
+        /// </summary>
+        public static BaseAssetLoader GetAssetLoader()
+        {
+            return assetLoader;
         }
         
         /// <summary>
