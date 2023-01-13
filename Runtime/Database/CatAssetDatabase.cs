@@ -458,8 +458,8 @@ namespace CatAsset.Runtime
             foreach (var pair in CatAssetUpdater.GroupUpdaterDict)
             {
                 var updater = pair.Value;
-                ProfilerUpdaterInfo pui = ProfilerUpdaterInfo.Create(updater.GroupName, updater.TotalCount,
-                    updater.TotalLength, updater.UpdatedCount, updater.UpdatedLength, updater.Speed, updater.State);
+                ProfilerUpdaterInfo pui = ProfilerUpdaterInfo.Create(updater.GroupName, updater.UpdatedCount, updater.UpdatedLength, updater.TotalCount,
+                    updater.TotalLength,updater.Speed, updater.State);
 
                 info.UpdaterInfoList.Add(pui);
             }

@@ -64,6 +64,7 @@ namespace CatAsset.Runtime
                             loadPath = RuntimeUtil.GetReadOnlyPath(Manifest.RelativePath);
                             break;
                         case State.InReadWrite:
+                        case State.InRemote:
                             loadPath = RuntimeUtil.GetReadWritePath(Manifest.RelativePath,Manifest.IsRaw);
                             break;
                         default:
