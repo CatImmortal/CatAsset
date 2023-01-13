@@ -197,7 +197,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RuntimeMode: 0
-  IsEditorMode: 0
+  IsEditorMode: 1
   UnloadBundleDelayTime: 120
   UnloadAssetDelayTime: 60
   MaxTaskRunCount: 30

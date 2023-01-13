@@ -11,20 +11,24 @@ public class PackageOnlyExample : MonoBehaviour
 
     private GameObject go;
     
-    private void Awake()
+
+    private void Start()
     {
         //此脚本演示的是使用单机模式下的CatAsset
         //SteamingAssets目录下只有Base组的资源
 
-        //需要先调用CatAssetManager.CheckPackageManifest读取SteamingAssets目录内的资源清单文件，然后才能加载资源
-        CatAssetManager.CheckPackageManifest((success) => {
-            if (!success)
+        //需要先调用CatAssetManager.CheckVersion检查资源清单，然后才能加载资源
+
+        CatAssetManager.CheckVersion((result =>
+        {
+            if (!result.Success)
             {
                 return;
             }
+            
             Debug.Log("按A实例化预制体");
             inited = true;
-        });
+        }));
     }
 
     private void Update()

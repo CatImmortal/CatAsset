@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using CatAsset.Runtime;
 
@@ -25,8 +26,6 @@ namespace CatAsset.Runtime
 
         private void Awake()
         {
-            CatAssetManager.RuntimeMode= RuntimeMode;
-            CatAssetManager.IsEditorMode = IsEditorMode;
             CatAssetManager.UnloadBundleDelayTime = UnloadBundleDelayTime;
             CatAssetManager.UnloadAssetDelayTime = UnloadAssetDelayTime;
             CatAssetManager.MaxTaskRunCount = MaxTaskRunCount;
@@ -34,6 +33,22 @@ namespace CatAsset.Runtime
             //添加调试分析器组件
             gameObject.AddComponent<ProfilerComponent>();
 
+#if UNITY_EDITOR
+            if (IsEditorMode)
+            {
+                CatAssetManager.SetAssetLoader<EditorAssetLoader>();
+                return;
+            }
+#endif
+            switch (RuntimeMode)
+            {
+                case RuntimeMode.PackageOnly:
+                    CatAssetManager.SetAssetLoader<PackageOnlyAssetLoader>();
+                    break;
+                case RuntimeMode.Updatable:
+                    CatAssetManager.SetAssetLoader<UpdatableAssetLoader>();
+                    break;
+            }
         }
 
         private void Update()

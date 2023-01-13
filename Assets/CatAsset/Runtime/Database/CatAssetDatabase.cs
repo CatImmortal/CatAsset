@@ -61,9 +61,9 @@ namespace CatAsset.Runtime
         private static Dictionary<int, int> tempPaiIndex2PbiIndexDict = new Dictionary<int, int>();
 
         /// <summary>
-        /// 使用安装包资源清单进行初始化
+        /// 使用资源清单进行运行时信息的初始化
         /// </summary>
-        internal static void InitPackageManifest(CatAssetManifest manifest)
+        internal static void InitRuntimeInfoByManifest(CatAssetManifest manifest)
         {
             bundleRuntimeInfoDict.Clear();
             assetRuntimeInfoDict.Clear();

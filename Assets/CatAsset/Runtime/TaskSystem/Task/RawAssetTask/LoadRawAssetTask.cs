@@ -58,7 +58,7 @@ namespace CatAsset.Runtime
             }
             
             //未加载过
-            WebRequestTask task = WebRequestTask.Create(Owner,bundleRuntimeInfo.LoadPath,bundleRuntimeInfo.LoadPath,null,onWebRequestedCallback);
+            WebRequestTask task = WebRequestTask.Create(Owner,bundleRuntimeInfo.LoadPath,bundleRuntimeInfo.LoadPath,onWebRequestedCallback);
             Owner.AddTask(task,TaskPriority.Low);
             loadState = LoadRawAssetState.Loading;
             
@@ -93,7 +93,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// Web请求结束回调
         /// </summary>
-        private void OnWebRequested(bool success, UnityWebRequest uwr, object userdata)
+        private void OnWebRequested(bool success, UnityWebRequest uwr)
         {
             loadState = LoadRawAssetState.Loaded;
 

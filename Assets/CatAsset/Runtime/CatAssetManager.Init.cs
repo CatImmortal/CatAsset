@@ -7,120 +7,49 @@ namespace CatAsset.Runtime
     public static partial class CatAssetManager
     {
         /// <summary>
-        /// 检查安装包内资源清单,单机模式下专用
-        /// </summary>
-        public static void CheckPackageManifest(Action<bool> callback)
-        {
-#if UNITY_EDITOR
-            if (IsEditorMode)
-            {
-                callback?.Invoke(true);
-                return;
-            }
-#endif
-            
-            if (RuntimeMode != RuntimeMode.PackageOnly)
-            {
-                Debug.LogError("PackageOnly模式下才能调用CheckPackageManifest");
-                callback(false);
-                return;
-            }
-
-            string path = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
-
-            WebRequestTask task = WebRequestTask.Create(loadTaskRunner, path, path, callback,
-                (success, uwr, userdata) =>
-                {
-                    Action<bool> onChecked = (Action<bool>) userdata;
-
-                    if (!success)
-                    {
-                        Debug.LogError($"单机模式资源清单检查失败:{uwr.error}");
-                        onChecked?.Invoke(false);
-                    }
-                    else
-                    {
-                        CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
-                        CatAssetDatabase.InitPackageManifest(manifest);
-
-                        Debug.Log("单机模式资源清单检查完毕");
-                        onChecked?.Invoke(true);
-                    }
-                });
-
-            loadTaskRunner.AddTask(task, TaskPriority.VeryLow);
-        }
-
-        /// <summary>
-        /// 检查资源版本，可更新模式下专用
+        /// 检查资源版本
         /// </summary>
         public static void CheckVersion(OnVersionChecked onVersionChecked)
         {
-#if UNITY_EDITOR
-            if (IsEditorMode)
-            {
-                onVersionChecked?.Invoke(new VersionCheckResult(null,0,0));
-                return;
-            }
-#endif
-
-            if (RuntimeMode != RuntimeMode.Updatable)
-            {
-                Debug.LogError("Updatable模式下才能调用CheckVersion");
-                return;
-            }
-
-            VersionChecker.CheckVersion(onVersionChecked);
+            assetLoader.CheckVersion(onVersionChecked);
         }
 
         /// <summary>
-        /// 检查可更新模式下指定路径的资源清单
+        /// 从外部导入额外的读写区资源清单
         /// </summary>
-        internal static void CheckUpdatableManifest(string path, WebRequestedCallback callback)
-        {
-            WebRequestTask task = WebRequestTask.Create(downloadTaskRunner, path, path, null, callback);
-            downloadTaskRunner.AddTask(task, TaskPriority.VeryLow);
-        }
-
-        /// <summary>
-        /// 从外部导入资源清单
-        /// </summary>
-        public static void ImportInternalAsset(string manifestPath, Action<bool> callback,
+        public static void ImportReadWriteManifest(string manifestPath, Action<bool> callback,
             string bundleRelativePathPrefix = null)
         {
-            manifestPath = RuntimeUtil.GetReadWritePath(manifestPath);
-            WebRequestTask task = WebRequestTask.Create(loadTaskRunner, manifestPath, manifestPath, callback,
-                (success, uwr, userdata) =>
+            manifestPath = RuntimeUtil.GetReadWritePath(manifestPath,true);
+            
+            AddWebRequestTask(manifestPath,manifestPath,((success, uwr) =>
+            {
+                if (!success)
                 {
-                    Action<bool> onChecked = (Action<bool>) userdata;
-
-                    if (!success)
+                    Debug.LogError($"资源导入失败:{uwr.error}");
+                    callback?.Invoke(false);
+                }
+                else
+                {
+                    CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
+        
+                    foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
                     {
-                        Debug.LogError($"内置资源导入失败:{uwr.error}");
-                        onChecked?.Invoke(false);
-                    }
-                    else
-                    {
-                        CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
-
-                        foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
+                        if (!string.IsNullOrEmpty(bundleRelativePathPrefix))
                         {
-                            if (!string.IsNullOrEmpty(bundleRelativePathPrefix))
-                            {
-                                //为资源包目录名添加额外前缀
-                                bundleManifestInfo.Directory = RuntimeUtil.GetRegularPath(Path.Combine(bundleRelativePathPrefix,
-                                    bundleManifestInfo.Directory));
-                            }
-
-                            CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo,BundleRuntimeInfo.State.InReadWrite);
+                            //为资源包目录名添加额外前缀
+                            bundleManifestInfo.Directory = RuntimeUtil.GetRegularPath(Path.Combine(bundleRelativePathPrefix,
+                                bundleManifestInfo.Directory));
                         }
-
-                        Debug.Log("内置资源导入完毕");
-                        onChecked?.Invoke(true);
+        
+                        CatAssetDatabase.InitRuntimeInfo(bundleManifestInfo,BundleRuntimeInfo.State.InReadWrite);
                     }
-                });
-
-            loadTaskRunner.AddTask(task, TaskPriority.Height);
+        
+                    Debug.Log("内置资源导入完毕");
+                    callback?.Invoke(true);
+                }
+                
+            }),TaskPriority.Height);
         }
     }
 }

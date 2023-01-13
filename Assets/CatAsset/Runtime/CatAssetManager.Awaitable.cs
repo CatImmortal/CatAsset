@@ -13,19 +13,6 @@ namespace CatAsset.Runtime
     {
 #if !UNITASK
         /// <summary>
-        /// 检查安装包内资源清单,单机模式下专用（可等待）
-        /// </summary>
-        public static Task<bool> CheckPackageManifest()
-        {
-            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-            CheckPackageManifest(success =>
-            {
-                tcs.SetResult(success);
-            });
-            return tcs.Task;
-        }
-
-        /// <summary>
         /// 检查资源版本，可更新模式下专用（可等待）
         /// </summary>
         public static Task<VersionCheckResult> CheckVersion()
@@ -51,19 +38,6 @@ namespace CatAsset.Runtime
             return tcs.Task;
         }
 #else
-        /// <summary>
-        /// 检查安装包内资源清单,单机模式下专用（可等待）
-        /// </summary>
-        public static UniTask<bool> CheckPackageManifest()
-        {
-            UniTaskCompletionSource<bool> tcs = new UniTaskCompletionSource<bool>();
-            CheckPackageManifest(success =>
-            {
-                tcs.TrySetResult(success);
-            });
-            return tcs.Task;
-        }
-
         /// <summary>
         /// 检查资源版本，可更新模式下专用（可等待）
         /// </summary>
