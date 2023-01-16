@@ -256,6 +256,8 @@ namespace CatAsset.Runtime
                 }
                 else
                 {
+                    State = TaskState.Waiting;
+                    
                     BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
                     if (builtInShaderBundleRuntimeInfo.Bundle != null)
                     {
@@ -301,9 +303,8 @@ namespace CatAsset.Runtime
 
         private void CheckStateWhileBuiltInShaderBundleLoaded()
         {
-            State = TaskState.Waiting;
-            loadState = LoadBundleState.BundleNotLoad;
-            
+            State = TaskState.Finished;
+
             BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
             if (builtInShaderBundleRuntimeInfo.Bundle != null)
             {
@@ -313,7 +314,6 @@ namespace CatAsset.Runtime
             }
             
             //通知主资源包加载结束
-            State = TaskState.Finished;
             CallFinished(true);
         }
         
