@@ -24,7 +24,7 @@ namespace CatAsset.Editor
         /// </summary>
         public static ReturnCode BuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
-            OnPreprocessBuildBundles(bundleBuildConfig,targetPlatform);
+            OnBundleBuildPreProcess(bundleBuildConfig,targetPlatform);
             
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
 
@@ -68,7 +68,7 @@ namespace CatAsset.Editor
                 Debug.LogError($"资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
 
-            OnPostprocessBuildBundles(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,result);
+            OnBundleBuildPostProcess(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,result);
             
             return returnCode;
         }
@@ -79,7 +79,7 @@ namespace CatAsset.Editor
         public static ReturnCode BuildRawBundles(BundleBuildConfigSO bundleBuildConfig,
             BuildTarget targetPlatform)
         {
-            OnPreprocessBuildBundles(bundleBuildConfig,targetPlatform);
+            OnBundleBuildPreProcess(bundleBuildConfig,targetPlatform);
             
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
 
@@ -123,7 +123,7 @@ namespace CatAsset.Editor
                 Debug.LogError($"原生资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
             
-            OnPostprocessBuildBundles(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,null);
+            OnBundleBuildPostProcess(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,null);
             
             return returnCode;
         }
@@ -131,25 +131,25 @@ namespace CatAsset.Editor
         /// <summary>
         /// 构建资源包前调用
         /// </summary>
-        private static void OnPreprocessBuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        private static void OnBundleBuildPreProcess(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
-            List<IPreprocessBuildBundles> objs = EditorUtil.GetAssignableTypeObjects<IPreprocessBuildBundles>();
+            List<IBundleBuildPreProcessor> objs = EditorUtil.GetAssignableTypeObjects<IBundleBuildPreProcessor>();
             foreach (var obj in objs)
             {
-                obj.OnPreprocessBuildBundles(bundleBuildConfig,targetPlatform);
+                obj.OnBundleBuildPreProcess(bundleBuildConfig,targetPlatform);
             }
         }
 
         /// <summary>
         /// 构建资源包后调用
         /// </summary>
-        private static void OnPostprocessBuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform,string outputFolder,
+        private static void OnBundleBuildPostProcess(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform,string outputFolder,
             ReturnCode returnCode, IBundleBuildResults result)
         {
-            List<IPostProcessBuildBundles> objs = EditorUtil.GetAssignableTypeObjects<IPostProcessBuildBundles>();
+            List<IBundleBuildPostProcessor> objs = EditorUtil.GetAssignableTypeObjects<IBundleBuildPostProcessor>();
             foreach (var obj in objs)
             {
-                obj.OnPostProcessBuildBundles(bundleBuildConfig,targetPlatform,outputFolder,returnCode,result);
+                obj.OnBundleBuildPostProcess(bundleBuildConfig,targetPlatform,outputFolder,returnCode,result);
             }
         }
 
