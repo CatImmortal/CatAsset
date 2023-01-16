@@ -72,12 +72,12 @@ namespace CatAsset.Runtime
 
                 case LoadRawAssetState.Loading:
                     //加载中
-                    CheckStateWithLoading();
+                    CheckStateWhileLoading();
                     break;
                 
                 case LoadRawAssetState.Loaded:
                     //加载结束
-                    CheckStateWithLoaded();
+                    CheckStateWhileLoaded();
                     break;
 
             }
@@ -107,12 +107,12 @@ namespace CatAsset.Runtime
             }
         }
         
-        private void CheckStateWithLoading()
+        private void CheckStateWhileLoading()
         {
             State = TaskState.Waiting;
         }
         
-        private void CheckStateWithLoaded()
+        private void CheckStateWhileLoaded()
         {
             State = TaskState.Finished;
 

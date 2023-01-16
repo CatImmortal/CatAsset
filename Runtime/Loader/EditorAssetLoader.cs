@@ -35,7 +35,7 @@ namespace CatAsset.Runtime
 
             Type assetType = typeof(T);
 
-            AssetCategory category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName, assetType);
+            AssetCategory category = RuntimeUtil.GetAssetCategoryInEditorMode(assetName, assetType);
             handler = AssetHandler<T>.Create(assetName,token, category);
 
             object asset;

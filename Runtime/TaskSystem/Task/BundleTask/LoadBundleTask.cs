@@ -118,55 +118,55 @@ namespace CatAsset.Runtime
             if (loadState == LoadBundleState.BundleNotExist)
             {
                 //资源包不存在于本地
-                CheckStateWithBundleNotExist();
+                CheckStateWhileBundleNotExist();
             }
 
             if (loadState == LoadBundleState.BundleDownloading)
             {
                 //资源包下载中
-                CheckStateWithBundleDownloading();
+                CheckStateWhileBundleDownloading();
             }
 
             if (loadState == LoadBundleState.BundleDownloaded)
             {
                 //资源包下载结束
-                CheckStateWithBundleDownloaded();
+                CheckStateWhileBundleDownloaded();
             }
 
             if (loadState == LoadBundleState.BuiltInShaderBundleNotLoad)
             {
                 //内置Shader资源包未加载
-                CheckStateWithBuiltInShaderBundleNotLoad();
+                CheckStateWhileBuiltInShaderBundleNotLoad();
             }
 
             if (loadState == LoadBundleState.BuiltInShaderBundleLoading)
             {
                 //内置Shader资源包加载中
-                CheckStateWithBuiltInShaderBundleLoading();
+                CheckStateWhileBuiltInShaderBundleLoading();
             }
 
             if (loadState == LoadBundleState.BuiltInShaderBundleLoaded)
             {
                 //内置Shader资源包加载结束
-                CheckStateWithBuiltInShaderBundleLoaded();
+                CheckStateWhileBuiltInShaderBundleLoaded();
             }
 
             if (loadState == LoadBundleState.BundleNotLoad)
             {
                 //资源包未加载
-                CheckStateWithBundleNotLoad();
+                CheckStateWhileBundleNotLoad();
             }
 
             if (loadState == LoadBundleState.BundleLoading)
             {
                 //资源包加载中
-                CheckStateWithBundleLoading();
+                CheckStateWhileBundleLoading();
             }
 
             if (loadState == LoadBundleState.BundleLoaded)
             {
                 //资源包加载结束
-                CheckStateWithBundleLoaded();
+                CheckStateWhileBundleLoaded();
             }
         }
 
@@ -195,7 +195,7 @@ namespace CatAsset.Runtime
             loadState = LoadBundleState.BuiltInShaderBundleLoaded;
         }
 
-        private void CheckStateWithBundleNotExist()
+        private void CheckStateWhileBundleNotExist()
         {
             State = TaskState.Waiting;
             loadState = LoadBundleState.BundleDownloading;
@@ -205,12 +205,12 @@ namespace CatAsset.Runtime
             CatAssetManager.UpdateBundle(BundleRuntimeInfo.Manifest.Group,BundleRuntimeInfo.Manifest,onBundleUpdatedCallback);
         }
 
-        private void CheckStateWithBundleDownloading()
+        private void CheckStateWhileBundleDownloading()
         {
             State = TaskState.Waiting;
         }
 
-        private void CheckStateWithBundleDownloaded()
+        private void CheckStateWhileBundleDownloaded()
         {
             State = TaskState.Waiting;
 
@@ -236,7 +236,7 @@ namespace CatAsset.Runtime
             }
         }
 
-        private void CheckStateWithBuiltInShaderBundleNotLoad()
+        private void CheckStateWhileBuiltInShaderBundleNotLoad()
         {
             State = TaskState.Waiting;
             loadState = LoadBundleState.BuiltInShaderBundleLoading;
@@ -258,12 +258,12 @@ namespace CatAsset.Runtime
             Owner.AddTask(task, TaskPriority.Middle);
         }
 
-        private void CheckStateWithBuiltInShaderBundleLoading()
+        private void CheckStateWhileBuiltInShaderBundleLoading()
         {
             State = TaskState.Waiting;
         }
 
-        private void CheckStateWithBuiltInShaderBundleLoaded()
+        private void CheckStateWhileBuiltInShaderBundleLoaded()
         {
             State = TaskState.Waiting;
             loadState = LoadBundleState.BundleNotLoad;
@@ -279,7 +279,7 @@ namespace CatAsset.Runtime
 
         }
 
-        private void CheckStateWithBundleNotLoad()
+        private void CheckStateWhileBundleNotLoad()
         {
             State = TaskState.Running;
             loadState = LoadBundleState.BundleLoading;
@@ -287,7 +287,7 @@ namespace CatAsset.Runtime
             LoadAsync();
         }
 
-        private void CheckStateWithBundleLoading()
+        private void CheckStateWhileBundleLoading()
         {
             State = TaskState.Running;
 
@@ -299,7 +299,7 @@ namespace CatAsset.Runtime
             }
         }
 
-        private void CheckStateWithBundleLoaded()
+        private void CheckStateWhileBundleLoaded()
         {
             State = TaskState.Finished;
 

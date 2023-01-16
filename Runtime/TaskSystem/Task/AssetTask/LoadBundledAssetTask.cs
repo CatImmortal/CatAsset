@@ -129,55 +129,55 @@ namespace CatAsset.Runtime
             if (LoadState == LoadBundledAssetState.BundleNotLoad)
             {
                 //资源包未加载
-                CheckStateWithBundleNotLoad();
+                CheckStateWhileBundleNotLoad();
             }
 
             if (LoadState == LoadBundledAssetState.BundleLoading)
             {
                 //资源包加载中
-                CheckStateWithBundleLoading();
+                CheckStateWhileBundleLoading();
             }
 
             if (LoadState == LoadBundledAssetState.BundleLoaded)
             {
                 //资源包加载结束
-                CheckStateWithBundleLoaded();
+                CheckStateWhileBundleLoaded();
             }
 
             if (LoadState == LoadBundledAssetState.DependenciesNotLoad)
             {
                 //依赖资源未加载
-                CheckStateWithDependenciesNotLoad();
+                CheckStateWhileDependenciesNotLoad();
             }
 
             if (LoadState == LoadBundledAssetState.DependenciesLoading)
             {
                 //依赖资源加载中
-                CheckStateWithDependenciesLoading();
+                CheckStateWhileDependenciesLoading();
             }
 
             if (LoadState == LoadBundledAssetState.DependenciesLoaded)
             {
                 //依赖资源加载结束
-                CheckStateWithDependenciesLoaded();
+                CheckStateWhileDependenciesLoaded();
             }
 
             if (LoadState == LoadBundledAssetState.AssetNotLoad)
             {
                 //资源未加载
-                CheckStateWithAssetNotLoad();
+                CheckStateWhileAssetNotLoad();
             }
 
             if (LoadState == LoadBundledAssetState.AssetLoading)
             {
                 //资源加载中
-                CheckStateWithAssetLoading();
+                CheckStateWhileAssetLoading();
             }
 
             if (LoadState == LoadBundledAssetState.AssetLoaded)
             {
                 //资源加载结束
-                CheckStateWithAssetLoaded();
+                CheckStateWhileAssetLoaded();
             }
         }
 
@@ -204,7 +204,7 @@ namespace CatAsset.Runtime
         }
 
 
-        private void CheckStateWithBundleNotLoad()
+        private void CheckStateWhileBundleNotLoad()
         {
             State = TaskState.Waiting;
             LoadState = LoadBundledAssetState.BundleLoading;
@@ -212,13 +212,14 @@ namespace CatAsset.Runtime
             BaseTask task;
             if (Application.platform == RuntimePlatform.WebGLPlayer)
             {
-                //WebGL平台特殊处理下
+                //WebGL平台的资源包加载
                 task = LoadWebBundleTask.Create(Owner, BundleRuntimeInfo.LoadPath,
                     BundleRuntimeInfo.Manifest.RelativePath,
                     onBundleLoadedCallback);
             }
             else
             {
+                //其他平台的资源包加载
                 task = LoadBundleTask.Create(Owner, BundleRuntimeInfo.LoadPath,
                     BundleRuntimeInfo.Manifest.RelativePath,
                     onBundleLoadedCallback);
@@ -226,12 +227,12 @@ namespace CatAsset.Runtime
             Owner.AddTask(task, TaskPriority.Middle);
         }
 
-        private void CheckStateWithBundleLoading()
+        private void CheckStateWhileBundleLoading()
         {
             State = TaskState.Waiting;
         }
 
-        private void CheckStateWithBundleLoaded()
+        private void CheckStateWhileBundleLoaded()
         {
             if (BundleRuntimeInfo.Bundle == null)
             {
@@ -249,7 +250,7 @@ namespace CatAsset.Runtime
             }
         }
 
-        private void CheckStateWithDependenciesNotLoad()
+        private void CheckStateWhileDependenciesNotLoad()
         {
             State = TaskState.Waiting;
             LoadState = LoadBundledAssetState.DependenciesLoading;
@@ -283,7 +284,7 @@ namespace CatAsset.Runtime
             
         }
 
-        private void CheckStateWithDependenciesLoading()
+        private void CheckStateWhileDependenciesLoading()
         {
             State = TaskState.Waiting;
 
@@ -296,7 +297,7 @@ namespace CatAsset.Runtime
             LoadState = LoadBundledAssetState.DependenciesLoaded;
         }
 
-        private void CheckStateWithDependenciesLoaded()
+        private void CheckStateWhileDependenciesLoaded()
         {
             State = TaskState.Waiting;
 
@@ -312,7 +313,7 @@ namespace CatAsset.Runtime
             }
         }
 
-        private void CheckStateWithAssetNotLoad()
+        private void CheckStateWhileAssetNotLoad()
         {
             State = TaskState.Running;
             LoadState = LoadBundledAssetState.AssetLoading;
@@ -320,7 +321,7 @@ namespace CatAsset.Runtime
             LoadAsync();
         }
 
-        private void CheckStateWithAssetLoading()
+        private void CheckStateWhileAssetLoading()
         {
             State = TaskState.Running;
 
@@ -331,7 +332,7 @@ namespace CatAsset.Runtime
             }
         }
 
-        private void CheckStateWithAssetLoaded()
+        private void CheckStateWhileAssetLoaded()
         {
             State = TaskState.Finished;
 

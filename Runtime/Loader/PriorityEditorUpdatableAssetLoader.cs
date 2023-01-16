@@ -15,8 +15,6 @@ namespace CatAsset.Runtime
         protected override AssetHandler<T> InternalLoadAssetAsync<T>(string assetName, CancellationToken token,
             TaskPriority priority)
         {
-            
-            
             AssetHandler<T> handler;
 
             if (string.IsNullOrEmpty(assetName))
@@ -29,7 +27,7 @@ namespace CatAsset.Runtime
 
             Type assetType = typeof(T);
 
-            AssetCategory category = RuntimeUtil.GetAssetCategoryWithEditorMode(assetName, assetType);
+            AssetCategory category = RuntimeUtil.GetAssetCategoryInEditorMode(assetName, assetType);
             object asset;
 
             if (category == AssetCategory.InternalBundledAsset)

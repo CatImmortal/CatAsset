@@ -6,7 +6,7 @@ namespace CatAsset.Editor
     /// <summary>
     /// 将单个资源构建为单个资源包
     /// </summary>
-    public class OneAssetToOnBundle : IBundleBuildRule
+    public class OneAssetToOneBundle : IBundleBuildRule
     {
         /// <inheritdoc />
         public virtual bool IsRaw => false;
