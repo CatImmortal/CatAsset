@@ -36,21 +36,6 @@ namespace CatAsset.Runtime
             BundleDownloaded,
 
             /// <summary>
-            /// 内置Shader资源包未加载
-            /// </summary>
-            BuiltInShaderBundleNotLoad,
-
-            /// <summary>
-            /// 内置Shader资源包加载中
-            /// </summary>
-            BuiltInShaderBundleLoading,
-
-            /// <summary>
-            /// 内置Shader资源包加载结束
-            /// </summary>
-            BuiltInShaderBundleLoaded,
-
-            /// <summary>
             /// 资源包未加载
             /// </summary>
             BundleNotLoad,
@@ -64,6 +49,21 @@ namespace CatAsset.Runtime
             /// 资源包加载结束
             /// </summary>
             BundleLoaded,
+            
+            /// <summary>
+            /// 内置Shader资源包未加载
+            /// </summary>
+            BuiltInShaderBundleNotLoad,
+
+            /// <summary>
+            /// 内置Shader资源包加载中
+            /// </summary>
+            BuiltInShaderBundleLoading,
+
+            /// <summary>
+            /// 内置Shader资源包加载结束
+            /// </summary>
+            BuiltInShaderBundleLoaded,
 
         }
 
@@ -107,7 +107,7 @@ namespace CatAsset.Runtime
             }
             else
             {
-                //在本地了 不需要下载 检查是否需要加载内置Shader资源包
+                //在本地了
                 loadState = LoadBundleState.BundleDownloaded;
             }
         }
@@ -133,24 +133,6 @@ namespace CatAsset.Runtime
                 CheckStateWhileBundleDownloaded();
             }
 
-            if (loadState == LoadBundleState.BuiltInShaderBundleNotLoad)
-            {
-                //内置Shader资源包未加载
-                CheckStateWhileBuiltInShaderBundleNotLoad();
-            }
-
-            if (loadState == LoadBundleState.BuiltInShaderBundleLoading)
-            {
-                //内置Shader资源包加载中
-                CheckStateWhileBuiltInShaderBundleLoading();
-            }
-
-            if (loadState == LoadBundleState.BuiltInShaderBundleLoaded)
-            {
-                //内置Shader资源包加载结束
-                CheckStateWhileBuiltInShaderBundleLoaded();
-            }
-
             if (loadState == LoadBundleState.BundleNotLoad)
             {
                 //资源包未加载
@@ -167,6 +149,24 @@ namespace CatAsset.Runtime
             {
                 //资源包加载结束
                 CheckStateWhileBundleLoaded();
+            }
+            
+            if (loadState == LoadBundleState.BuiltInShaderBundleNotLoad)
+            {
+                //内置Shader资源包未加载
+                CheckStateWhileBuiltInShaderBundleNotLoad();
+            }
+
+            if (loadState == LoadBundleState.BuiltInShaderBundleLoading)
+            {
+                //内置Shader资源包加载中
+                CheckStateWhileBuiltInShaderBundleLoading();
+            }
+
+            if (loadState == LoadBundleState.BuiltInShaderBundleLoaded)
+            {
+                //内置Shader资源包加载结束
+                CheckStateWhileBuiltInShaderBundleLoaded();
             }
         }
 
@@ -213,26 +213,62 @@ namespace CatAsset.Runtime
         private void CheckStateWhileBundleDownloaded()
         {
             State = TaskState.Waiting;
+            loadState = LoadBundleState.BundleNotLoad;
+        }
 
-            if (BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
+
+        private void CheckStateWhileBundleNotLoad()
+        {
+            State = TaskState.Running;
+            loadState = LoadBundleState.BundleLoading;
+
+            LoadAsync();
+        }
+
+        private void CheckStateWhileBundleLoading()
+        {
+            State = TaskState.Running;
+
+            if (IsLoadDone())
             {
-                //此资源包依赖内置Shader资源包
-                BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
-                if (builtInShaderBundleRuntimeInfo.Bundle == null)
-                {
-                    //内置Shader资源包未加载 需要加载
-                    loadState = LoadBundleState.BuiltInShaderBundleNotLoad;
-                }
-                else
-                {
-                    //内置Shader资源包已加载 添加依赖链记录
-                    loadState = LoadBundleState.BuiltInShaderBundleLoaded;
-                }
+                loadState = LoadBundleState.BundleLoaded;
+                LoadDone();
+            }
+        }
+
+        private void CheckStateWhileBundleLoaded()
+        {
+            if (BundleRuntimeInfo.Bundle == null)
+            {
+                //加载失败
+                State = TaskState.Finished;
+                CallFinished(false);
             }
             else
             {
-                //不需要加载内置Shader资源包
-                loadState = LoadBundleState.BundleNotLoad;
+                //加载成功
+                
+                if (!BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
+                {
+                    //不依赖内置Shader资源包 直接结束
+                    State = TaskState.Finished;
+                    CallFinished(true);
+                }
+                else
+                {
+                    BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
+                    if (builtInShaderBundleRuntimeInfo.Bundle != null)
+                    {
+                        //依赖内置Shader资源包 但其已加载过了 直接添加依赖链记录
+                        loadState = LoadBundleState.BuiltInShaderBundleLoaded;
+                    }
+                    else
+                    {
+                        //加载内置Shader资源包
+                        loadState = LoadBundleState.BuiltInShaderBundleNotLoad;
+                    }
+                }
+                
             }
         }
 
@@ -267,8 +303,7 @@ namespace CatAsset.Runtime
         {
             State = TaskState.Waiting;
             loadState = LoadBundleState.BundleNotLoad;
-
-
+            
             BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
             if (builtInShaderBundleRuntimeInfo.Bundle != null)
             {
@@ -276,69 +311,12 @@ namespace CatAsset.Runtime
                 builtInShaderBundleRuntimeInfo.DependencyChain.DownStream.Add(BundleRuntimeInfo);
                 BundleRuntimeInfo.DependencyChain.UpStream.Add(builtInShaderBundleRuntimeInfo);
             }
-
-        }
-
-        private void CheckStateWhileBundleNotLoad()
-        {
-            State = TaskState.Running;
-            loadState = LoadBundleState.BundleLoading;
-
-            LoadAsync();
-        }
-
-        private void CheckStateWhileBundleLoading()
-        {
-            State = TaskState.Running;
-
-            if (IsLoadDone())
-            {
-                loadState = LoadBundleState.BundleLoaded;
-
-                LoadDone();
-            }
-        }
-
-        private void CheckStateWhileBundleLoaded()
-        {
+            
+            //通知主资源包加载结束
             State = TaskState.Finished;
-
-            if (BundleRuntimeInfo.Bundle == null)
-            {
-                Debug.LogError($"资源包加载失败：{BundleRuntimeInfo.Manifest}");
-
-                if (BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
-                {
-                    BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
-                    if (builtInShaderBundleRuntimeInfo.Bundle != null)
-                    {
-                        //加载失败 并且加载过内置Shader资源包
-                        //移除依赖链记录
-                        builtInShaderBundleRuntimeInfo.DependencyChain.DownStream.Remove(BundleRuntimeInfo);
-                        BundleRuntimeInfo.DependencyChain.UpStream.Remove(builtInShaderBundleRuntimeInfo);
-
-                        //尝试卸载内置Shader资源包
-                        CatAssetManager.TryUnloadBundle(builtInShaderBundleRuntimeInfo);
-                    }
-                }
-
-                OnFinishedCallback?.Invoke(false);
-                foreach (LoadBundleTask task in MergedTasks)
-                {
-                    task.OnFinishedCallback?.Invoke(false);
-                }
-            }
-            else
-            {
-                //Debug.Log($"资源包加载成功：{bundleRuntimeInfo.Manifest}");
-                OnFinishedCallback?.Invoke(true);
-                foreach (LoadBundleTask task in MergedTasks)
-                {
-                    task.OnFinishedCallback?.Invoke(true);
-                }
-            }
+            CallFinished(true);
         }
-
+        
         /// <summary>
         /// 发起异步加载
         /// </summary>
@@ -350,7 +328,6 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 是否异步加载结束
         /// </summary>
-        /// <returns></returns>
         protected virtual bool IsLoadDone()
         {
             return request.isDone;
@@ -362,6 +339,24 @@ namespace CatAsset.Runtime
         protected virtual void LoadDone()
         {
             BundleRuntimeInfo.Bundle = request.assetBundle;
+        }
+
+        /// <summary>
+        /// 调用加载完毕回调
+        /// </summary>
+        private void CallFinished(bool success)
+        {
+            if (!success)
+            {
+                Debug.LogError($"资源包加载失败：{BundleRuntimeInfo.Manifest}");
+            }
+
+            
+            OnFinishedCallback?.Invoke(success);
+            foreach (LoadBundleTask task in MergedTasks)
+            {
+                task.OnFinishedCallback?.Invoke(success);
+            }
         }
 
         /// <summary>

@@ -313,9 +313,9 @@ namespace CatAsset.Runtime
 
                 if (!bri.Manifest.IsRaw)
                 {
-                    if (bri.Bundle == null && bri.DependencyChain.UpStream.Count == 0)
+                    if (bri.Bundle == null)
                     {
-                        //跳过未加载的 并且 没有上游资源包 的非原生资源包
+                        //跳过未加载的 的非原生资源包
                         continue;
                     }
                 }
