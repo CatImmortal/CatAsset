@@ -98,7 +98,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取编辑器资源模式下的资源类别
         /// </summary>
-        public static AssetCategory GetAssetCategoryWithEditorMode(string assetName, Type assetType)
+        public static AssetCategory GetAssetCategoryInEditorMode(string assetName, Type assetType)
         {
             if (assetName.StartsWith("Assets/"))
             {
