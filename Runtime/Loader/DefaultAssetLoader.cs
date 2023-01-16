@@ -166,9 +166,12 @@ namespace CatAsset.Runtime
                 {
                     AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
 
-                    //删除依赖链记录
-                    dependencyRuntimeInfo.DependencyChain.DownStream.Remove(assetRuntimeInfo);
-                    assetRuntimeInfo.DependencyChain.UpStream.Remove(dependencyRuntimeInfo);
+                    //场景资源 要在这里删除依赖链记录
+                    //非场景资源在从内存中卸载时删除依赖链记录
+                    if (assetRuntimeInfo.BundleManifest.IsScene)
+                    {
+                        assetRuntimeInfo.ClearDependencyChainUpStream();
+                    }
 
                     //递归卸载依赖
                     InternalUnloadAsset(dependencyRuntimeInfo);

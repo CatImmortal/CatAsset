@@ -119,6 +119,7 @@ namespace CatAsset.Runtime
         {
             if (Asset == null)
             {
+                //Asset为空 也可能是个场景资源 也是无法被UnloadAsset卸载的
                 return false;
             }
 
@@ -149,6 +150,17 @@ namespace CatAsset.Runtime
             return true;
         }
 
+        /// <summary>
+        /// 清空依赖链上游
+        /// </summary>
+        public void ClearDependencyChainUpStream()
+        {
+            foreach (AssetRuntimeInfo upStream in DependencyChain.UpStream)
+            {
+                upStream.DependencyChain.DownStream.Remove(this);
+            }
+            DependencyChain.UpStream.Clear();
+        }
 
         public int CompareTo(AssetRuntimeInfo other)
         {
