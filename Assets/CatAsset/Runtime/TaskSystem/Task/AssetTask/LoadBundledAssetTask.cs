@@ -76,8 +76,7 @@ namespace CatAsset.Runtime
         private int loadFinishDependencyCount;
         private readonly List<AssetHandler> dependencyHandlers = new List<AssetHandler>();
         private readonly AssetLoadedCallback<Object> onDependencyLoadedCallback;
-
-
+        
         protected LoadBundledAssetState LoadState;
         protected AsyncOperation Operation;
 
@@ -238,7 +237,6 @@ namespace CatAsset.Runtime
             {
                 //资源包加载失败
                 State = TaskState.Finished;
-
                 CallFinished(false);
 
             }
@@ -328,14 +326,45 @@ namespace CatAsset.Runtime
             if (Operation != null && Operation.isDone)
             {
                 LoadState = LoadBundledAssetState.AssetLoaded;
+
+                //调用加载结束方法
                 LoadDone();
+
+                if (!IsLoadFailed())
+                {
+                    //成功加载资源到内存中
+                    //添加依赖链记录
+                    foreach (AssetHandler dependencyHandler in dependencyHandlers)
+                    {
+                        if (!dependencyHandler.IsSuccess)
+                        {
+                            continue;
+                        }
+                    
+                        AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyHandler.AssetObj);
+
+                        //更新自身与依赖资源的上下游关系
+                        depInfo.DependencyChain.DownStream.Add(AssetRuntimeInfo);
+                        depInfo.DownStreamRecord.Add(AssetRuntimeInfo);
+                        AssetRuntimeInfo.DependencyChain.UpStream.Add(depInfo);
+
+                        //如果依赖了其他资源包里的资源 还需要设置 自身所在资源包 与 依赖所在资源包 的上下游关系
+                        if (!depInfo.BundleManifest.Equals(AssetRuntimeInfo.BundleManifest))
+                        {
+                            BundleRuntimeInfo depBundleInfo =
+                                CatAssetDatabase.GetBundleRuntimeInfo(depInfo.BundleManifest.RelativePath);
+
+                            depBundleInfo.DependencyChain.DownStream.Add(BundleRuntimeInfo);
+                            BundleRuntimeInfo.DependencyChain.UpStream.Add(depBundleInfo);
+                        }
+                    }
+                }
             }
         }
 
         private void CheckStateWhileAssetLoaded()
         {
             State = TaskState.Finished;
-
 
             if (IsLoadFailed())
             {
@@ -355,35 +384,8 @@ namespace CatAsset.Runtime
             else
             {
                 //资源加载成功 或 是已加载好的
-
-                //添加依赖链记录
-                foreach (AssetHandler dependencyHandler in dependencyHandlers)
-                {
-                    if (dependencyHandler.IsSuccess)
-                    {
-                        AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyHandler.AssetObj);
-
-                        //更新自身与依赖资源的上下游关系
-                        depInfo.DependencyChain.DownStream.Add(AssetRuntimeInfo);
-                        depInfo.DownStreamRecord.Add(AssetRuntimeInfo);
-                        AssetRuntimeInfo.DependencyChain.UpStream.Add(depInfo);
-
-                        //如果依赖了其他资源包里的资源 还需要设置 自身所在资源包 与 依赖所在资源包 的上下游关系
-                        if (!depInfo.BundleManifest.Equals(AssetRuntimeInfo.BundleManifest))
-                        {
-                            BundleRuntimeInfo depBundleInfo =
-                                CatAssetDatabase.GetBundleRuntimeInfo(depInfo.BundleManifest.RelativePath);
-
-                            depBundleInfo.DependencyChain.DownStream.Add(BundleRuntimeInfo);
-                            BundleRuntimeInfo.DependencyChain.UpStream.Add(depBundleInfo);
-                        }
-                    }
-                }
-
                 CallFinished(true);
             }
-
-
         }
 
 

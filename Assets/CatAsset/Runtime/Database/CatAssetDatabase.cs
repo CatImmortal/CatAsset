@@ -408,6 +408,11 @@ namespace CatAsset.Runtime
 
                 foreach (var downAri in ari.DependencyChain.DownStream)
                 {
+                    if (!tempPaiDict.ContainsKey(downAri.AssetManifest.Name))
+                    {
+                        continue;
+                    }
+                    
                     var downPaiIndex = tempPaiDict[downAri.AssetManifest.Name];
                     pai.DownStreamIndexes.Add(downPaiIndex);
                 }

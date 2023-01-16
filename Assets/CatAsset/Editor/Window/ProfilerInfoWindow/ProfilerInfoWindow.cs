@@ -293,6 +293,12 @@ namespace CatAsset.Editor
 
         private void EditorUpdate()
         {
+            if (EditorApplication.isPaused)
+            {
+                //编辑器运行游戏后的暂停状态 停止连续采样
+                return;
+            }
+            
             if (sw.Elapsed.TotalSeconds >= sampleInterval)
             {
                 Send(ProfilerMessageType.SampleOnce);

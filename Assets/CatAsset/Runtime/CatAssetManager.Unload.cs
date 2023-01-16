@@ -87,7 +87,9 @@ namespace CatAsset.Runtime
                 }
             }
 
+            //置空资源引用 清空依赖链上游
             info.Asset = null;
+            info.ClearDependencyChainUpStream();
 
             Debug.Log($"已卸载资源:{info}");
 
@@ -131,12 +133,15 @@ namespace CatAsset.Runtime
             foreach (AssetManifestInfo assetManifestInfo in bundleRuntimeInfo.Manifest.Assets)
             {
                 AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetManifestInfo.Name);
+
                 if (assetRuntimeInfo.Asset != null)
                 {
-                    //解除此资源包中已加载的资源实例与AssetRuntimeInfo的关联
+                    //对于此时还在内存中的资源
+                    //置空资源引用 清空依赖链上游
                     CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
                     assetRuntimeInfo.Asset = null;
-
+                    assetRuntimeInfo.ClearDependencyChainUpStream();
+                    
                     //尝试将可卸载的依赖从内存中卸载
                     foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
