@@ -7,6 +7,7 @@ using System.Reflection;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Video;
 using Debug = UnityEngine.Debug;
 
 namespace CatAsset.Editor
@@ -31,6 +32,19 @@ namespace CatAsset.Editor
             ".cginc",
         };
 
+        /// <summary>
+        /// 无依赖的资源类型
+        /// </summary>
+        public static readonly HashSet<Type> NotDependencyAssetType = new HashSet<Type>()
+        {
+            typeof(Texture2D),
+            typeof(Texture3D),
+            typeof(Shader),
+            typeof(TextAsset),
+            typeof(AudioClip),
+            typeof(VideoClip),
+            typeof(DefaultAsset),
+        };
 
         [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 3)]
         private static void OpenAssetBundleOutputPath()

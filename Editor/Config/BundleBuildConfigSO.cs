@@ -4,6 +4,7 @@ using System.Diagnostics;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
 
@@ -120,6 +121,16 @@ namespace CatAsset.Editor
         public Dictionary<string, BundleBuildInfo> AssetToBundleDict = new Dictionary<string, BundleBuildInfo>();
 
         /// <summary>
+        /// 资源包数量
+        /// </summary>
+        public int BundleCount;
+        
+        /// <summary>
+        /// 资源数量
+        /// </summary>
+        public int AssetCount;
+
+        /// <summary>
         /// 刷新资源包构建信息
         /// </summary>
         public void RefreshBundleBuildInfos()
@@ -132,11 +143,19 @@ namespace CatAsset.Editor
 
             void ProfileTime(Action action,Stopwatch sw,string name)
             {
-                //sw.Restart();
+                // long oldMemory = Profiler.GetTotalAllocatedMemoryLong();
+                // sw.Restart();
                 action?.Invoke();
                 // sw.Stop();
-                // sw.Reset();
-                //Debug.Log($"{name}执行完毕，耗时：{sw.Elapsed.TotalSeconds}秒");
+                // long newMemory = Profiler.GetTotalAllocatedMemoryLong();
+                // long usedMemory = newMemory - oldMemory;
+                // if (usedMemory <= 0)
+                // {
+                //     usedMemory = 0;
+                // }
+                
+                //Debug.Log($"【{name}】 执行完毕，耗时：{sw.Elapsed.TotalSeconds}秒，使用内存：{RuntimeUtil.GetByteLengthDesc((ulong)usedMemory)}");
+                //sw.Reset();
             }
 
             try
@@ -250,7 +269,7 @@ namespace CatAsset.Editor
             for (int i = 0; i < tempDirectories.Count; i++)
             {
                 BundleBuildDirectory bundleBuildDirectory = tempDirectories[i];
-
+                EditorUtility.DisplayProgressBar("初始化资源包构建信息", $"{bundleBuildDirectory.DirectoryName}", i / (tempDirectories.Count * 1.0f));
                 IBundleBuildRule rule = ruleDict[bundleBuildDirectory.BuildRuleName];
                 if (rule.IsRaw == isRaw)
                 {
@@ -287,6 +306,12 @@ namespace CatAsset.Editor
 
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
+                    if (EditorUtil.NotDependencyAssetType.Contains(assetBuildInfo.Type))
+                    {
+                        //跳过不会依赖其他资源的资源类型
+                        continue;
+                    }
+                    
                     //检查依赖列表
                     string assetName = assetBuildInfo.Name;
                     List<string> dependencies = EditorUtil.GetDependencies(assetName);
@@ -452,11 +477,14 @@ namespace CatAsset.Editor
 
         private void RefreshAssetToBundleDict()
         {
+            AssetCount = 0;
+            BundleCount = Bundles.Count;
             AssetToBundleDict.Clear();
             foreach (BundleBuildInfo bundleBuildInfo in Bundles)
             {
                 foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
                 {
+                    AssetCount++;
                     AssetToBundleDict.Add(assetBuildInfo.Name,bundleBuildInfo);
                 }
             }

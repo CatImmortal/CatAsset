@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
 
 namespace CatAsset.Editor
 {
@@ -20,10 +21,11 @@ namespace CatAsset.Editor
 
                 //获取所有一级目录
                 DirectoryInfo[] topDirectories = dirInfo.GetDirectories("*", SearchOption.TopDirectoryOnly);
-
-                foreach (DirectoryInfo topDirInfo in topDirectories)
+                for (int i = 0; i < topDirectories.Length; i++)
                 {
                     //每个一级目录构建成一个资源包
+                    DirectoryInfo topDirInfo = topDirectories[i];
+                    EditorUtility.DisplayProgressBar($"{nameof(TopDirectoryBasedNAssetToOneBundle)}", $"{topDirInfo.FullName}", i / (topDirectories.Length * 1.0f));
                     string assetsDir = EditorUtil.FullNameToAssetName(topDirInfo.FullName);
                     BundleBuildInfo info = GetNAssetToOneBundle(assetsDir, bundleBuildDirectory, lookedAssets);
                     result.Add(info);

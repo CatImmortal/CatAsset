@@ -41,9 +41,14 @@ namespace CatAsset.Editor
             }
 
             string[] guids = AssetDatabase.FindAssets(bundleBuildDirectory.Filter, new[] { bundleBuildDirectory.DirectoryName });
-            foreach (string guid in guids)
+            result.Capacity = guids.Length;
+
+            for (int i = 0; i < guids.Length; i++)
             {
+                string guid = guids[i];
                 string path = AssetDatabase.GUIDToAssetPath(guid);
+                
+                EditorUtility.DisplayProgressBar($"{nameof(NAssetToNBundle)}", $"{path}", i / (guids.Length * 1.0f));
                 
                 if (lookedAssets.Contains(path))
                 {
@@ -78,17 +83,15 @@ namespace CatAsset.Editor
                     //直接以文件名作为原生资源包名
                     bundleName = fi.Name;
                 }
-                
-                
-                
+
                 BundleBuildInfo bundleBuildInfo =
                     new BundleBuildInfo(directoryName,bundleName, bundleBuildDirectory.Group, IsRaw,bundleBuildDirectory.GetCompressOption());
 
                 bundleBuildInfo.Assets.Add(new AssetBuildInfo(path));
                     
                 result.Add(bundleBuildInfo);
-                
             }
+            
 
             return result;
         }
