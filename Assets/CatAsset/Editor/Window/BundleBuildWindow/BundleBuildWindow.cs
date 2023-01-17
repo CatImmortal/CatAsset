@@ -133,7 +133,12 @@ namespace CatAsset.Editor
                 {
                     LoopDependencyAnalyzer.AnalyzeBundle(BundleBuildConfigSO.Instance.Bundles);
                 }
-
+                
+                x += width;
+                x += 10;
+                width = 150;
+                BundleBuildConfigSO.Instance.IsExactTextureSize = GUI.Toggle(new Rect(x,y,width,height),BundleBuildConfigSO.Instance.IsExactTextureSize,"准确预估贴图大小");
+                
                 x += width;
                 x += 10;
                 width = 100;

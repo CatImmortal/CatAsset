@@ -39,8 +39,9 @@ namespace CatAsset.Editor
         {
             Name = name;
 
-            if (Type == typeof(Texture2D))
+            if (BundleBuildConfigSO.Instance.IsExactTextureSize && Type == typeof(Texture2D))
             {
+                //记录精准的贴图大小
                 Texture2D texture2D = AssetDatabase.LoadAssetAtPath<Texture2D>(name);
                 paramCache[0] = texture2D;
                 long size = (long)getStorageMemorySizeLongMethod.Invoke(null, paramCache);
@@ -49,6 +50,7 @@ namespace CatAsset.Editor
             }
             else
             {
+                //直接使用文件长度
                 Length = (ulong)new FileInfo(name).Length;
             }
             

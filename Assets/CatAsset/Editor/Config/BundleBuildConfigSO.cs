@@ -131,6 +131,11 @@ namespace CatAsset.Editor
         public int AssetCount;
 
         /// <summary>
+        /// 是否记录精准的贴图长度
+        /// </summary>
+        public bool IsExactTextureSize;
+        
+        /// <summary>
         /// 刷新资源包构建信息
         /// </summary>
         public void RefreshBundleBuildInfos()
@@ -153,9 +158,9 @@ namespace CatAsset.Editor
                 // {
                 //     usedMemory = 0;
                 // }
-                
-                //Debug.Log($"【{name}】 执行完毕，耗时：{sw.Elapsed.TotalSeconds}秒，使用内存：{RuntimeUtil.GetByteLengthDesc((ulong)usedMemory)}");
-                //sw.Reset();
+                //
+                // Debug.Log($"【{name}】 执行完毕，耗时：{sw.Elapsed.TotalSeconds}秒，使用内存：{RuntimeUtil.GetByteLengthDesc((ulong)usedMemory)}");
+                // sw.Reset();
             }
 
             try
