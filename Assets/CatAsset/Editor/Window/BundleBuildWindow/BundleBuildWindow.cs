@@ -133,6 +133,16 @@ namespace CatAsset.Editor
                 {
                     LoopDependencyAnalyzer.AnalyzeBundle(BundleBuildConfigSO.Instance.Bundles);
                 }
+
+                x += width;
+                x += 10;
+                width = 100;
+                GUI.Label(new Rect(x,y,width,height),$"资源包数:{BundleBuildConfigSO.Instance.BundleCount}");
+                
+                x += width;
+                x += 10;
+                width = 100;
+                GUI.Label(new Rect(x,y,width,height),$"资源数:{BundleBuildConfigSO.Instance.AssetCount}");
             }
             
            

@@ -40,10 +40,13 @@ namespace CatAsset.Editor
         protected BundleBuildInfo GetNAssetToOneBundle(string buildDirectory,BundleBuildDirectory bundleBuildDirectory,HashSet<string> lookedAssets)
         {
             //注意：buildDirectory在这里被假设为一个形如Assets/xxx/yyy....格式的目录
-            List<string> assetNames = new List<string>();
+          
             string[] guids = AssetDatabase.FindAssets(bundleBuildDirectory.Filter, new[] { buildDirectory });
-            foreach (string guid in guids)
+            List<string> assetNames = new List<string>(guids.Length);
+            
+            for (int i = 0; i < guids.Length; i++)
             {
+                string guid = guids[i];
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 
                 if (lookedAssets.Contains(path))
@@ -63,9 +66,9 @@ namespace CatAsset.Editor
                     //不匹配正则 跳过
                     continue;
                 }
-                
                 assetNames.Add(path);
             }
+            
             
             //Assets/xxx/yyy
             int firstIndex = buildDirectory.IndexOf("/");
@@ -85,6 +88,8 @@ namespace CatAsset.Editor
             string bundleName = buildDirectory.Substring(lastIndex + 1) + ".bundle"; //以构建目录名作为资源包名 yyy.bundle
             
             BundleBuildInfo bundleBuildInfo = new BundleBuildInfo(directoryName,bundleName,bundleBuildDirectory.Group,false,bundleBuildDirectory.GetCompressOption());
+            bundleBuildInfo.Assets.Capacity = assetNames.Count;
+            
             for (int i = 0; i < assetNames.Count; i++)
             {
                 AssetBuildInfo assetBuildInfo = new AssetBuildInfo(assetNames[i]);
@@ -92,8 +97,6 @@ namespace CatAsset.Editor
             }
 
             return bundleBuildInfo;
-            
-            
         }
     }
 }

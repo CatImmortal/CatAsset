@@ -38,20 +38,22 @@ namespace CatAsset.Editor
         public AssetBuildInfo(string name)
         {
             Name = name;
+
             if (Type == typeof(Texture2D))
             {
                 Texture2D texture2D = AssetDatabase.LoadAssetAtPath<Texture2D>(name);
                 paramCache[0] = texture2D;
                 long size = (long)getStorageMemorySizeLongMethod.Invoke(null, paramCache);
                 Length = (ulong)size;
+                Resources.UnloadAsset(texture2D);
             }
             else
             {
                 Length = (ulong)new FileInfo(name).Length;
             }
-         
+            
         }
-
+        
         public override string ToString()
         {
             return Name;
