@@ -22,7 +22,16 @@ namespace CatAsset.Runtime
             {
                 if (relativePath == null)
                 {
-                    relativePath = RuntimeUtil.GetRegularPath(Path.Combine(Directory, BundleName));
+                    if (IsAppendMD5)
+                    {
+                        string[] nameArray = BundleName.Split('.');
+                        string md5BundleName =   $"{nameArray[0]}_{MD5}.{nameArray[1]}";  
+                        relativePath = RuntimeUtil.GetRegularPath(Path.Combine(Directory,md5BundleName));
+                    }
+                    else
+                    {
+                        relativePath = UniqueBundleName;
+                    }
                 }
                 return relativePath;
             }
@@ -38,6 +47,23 @@ namespace CatAsset.Runtime
         /// </summary>
         public string BundleName;
 
+        private string uniqueBundleName;
+        /// <summary>
+        /// 唯一资源包名
+        /// </summary>
+        public string UniqueBundleName
+        {
+            get
+            {
+                if (uniqueBundleName == null)
+                {
+                    uniqueBundleName = RuntimeUtil.GetRegularPath(Path.Combine(Directory,BundleName));
+                }
+
+                return uniqueBundleName;
+            }
+        }
+        
         /// <summary>
         /// 资源组
         /// </summary>
@@ -64,6 +90,11 @@ namespace CatAsset.Runtime
         public string MD5;
 
         /// <summary>
+        /// 是否附加MD5值到资源包名中
+        /// </summary>
+        public bool IsAppendMD5;
+        
+        /// <summary>
         /// 文件Hash值
         /// </summary>
         public string Hash;
@@ -80,19 +111,19 @@ namespace CatAsset.Runtime
 
         public int CompareTo(BundleManifestInfo other)
         {
-            return RelativePath.CompareTo(other.RelativePath);
+            return UniqueBundleName.CompareTo(other.UniqueBundleName);
         }
         
         public override string ToString()
         {
-            return RelativePath;
+            return UniqueBundleName;
         }
 
         public bool Equals(BundleManifestInfo other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return relativePath == other.relativePath && Length == other.Length && MD5 == other.MD5;
+            return UniqueBundleName== other.UniqueBundleName && Length == other.Length && MD5 == other.MD5;
         }
 
         public override bool Equals(object obj)
@@ -107,7 +138,7 @@ namespace CatAsset.Runtime
         {
             unchecked
             {
-                var hashCode = (relativePath != null ? relativePath.GetHashCode() : 0);
+                var hashCode = (UniqueBundleName != null ? UniqueBundleName.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ Length.GetHashCode();
                 hashCode = (hashCode * 397) ^ (MD5 != null ? MD5.GetHashCode() : 0);
                 return hashCode;

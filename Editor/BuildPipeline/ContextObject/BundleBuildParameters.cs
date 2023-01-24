@@ -20,7 +20,7 @@ namespace CatAsset.Editor
         {
             foreach (BundleBuildInfo bundleBuildInfo in BundleBuildConfigSO.Instance.Bundles)
             {
-                bundleBuildInfos.Add(bundleBuildInfo.RelativePath,bundleBuildInfo);
+                bundleBuildInfos.Add(bundleBuildInfo.UniqueBundleName,bundleBuildInfo);
             }
         }
 

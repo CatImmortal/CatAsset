@@ -14,11 +14,6 @@ namespace CatAsset.Editor
     public class BundleBuildInfo : IComparable<BundleBuildInfo>,IEquatable<BundleBuildInfo>
     {
         /// <summary>
-        /// 相对路径
-        /// </summary>
-        public string RelativePath;
-        
-        /// <summary>
         /// 目录名
         /// </summary>
         public string DirectoryName;
@@ -28,6 +23,11 @@ namespace CatAsset.Editor
         /// </summary>
         public string BundleName;
 
+        /// <summary>
+        /// 唯一资源包名
+        /// </summary>
+        public string UniqueBundleName;
+        
         /// <summary>
         /// 资源组
         /// </summary>
@@ -60,8 +60,7 @@ namespace CatAsset.Editor
             Group = group;
             IsRaw = isRaw;
             CompressOption = compressOption;
-            RelativePath = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
-            
+            UniqueBundleName = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
         }
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace CatAsset.Editor
         {
             AssetBundleBuild bundleBuild = new AssetBundleBuild
             {
-                assetBundleName = RelativePath
+                assetBundleName = UniqueBundleName
             };
 
             List<string> assetNames = new List<string>();
@@ -98,22 +97,22 @@ namespace CatAsset.Editor
         
         public override string ToString()
         {
-            return RelativePath;
+            return UniqueBundleName;
         }
         
         public int CompareTo(BundleBuildInfo other)
         {
-            return RelativePath.CompareTo(other.RelativePath);
+            return UniqueBundleName.CompareTo(other.UniqueBundleName);
         }
         
         public bool Equals(BundleBuildInfo other)
         {
-            return RelativePath.Equals(other.RelativePath);
+            return UniqueBundleName.Equals(other.UniqueBundleName);
         }
 
         public override int GetHashCode()
         {
-            return RelativePath.GetHashCode();
+            return UniqueBundleName.GetHashCode();
         }
         
         

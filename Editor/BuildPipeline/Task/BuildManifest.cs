@@ -96,11 +96,11 @@ namespace CatAsset.Editor
                     bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].Name.EndsWith(".unity");
                 }
 
-                string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
+                string fullPath = Path.Combine(outputFolder, bundleBuildInfo.UniqueBundleName);
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = (ulong)fi.Length;
                 bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
-                BundleDetails details = results.BundleInfos[bundleManifestInfo.RelativePath];
+                BundleDetails details = results.BundleInfos[bundleManifestInfo.UniqueBundleName];
                 if (configParam.TargetPlatform == BuildTarget.WebGL)
                 {
                     //WebGL平台 记录Hash128用于缓存系统
@@ -141,7 +141,7 @@ namespace CatAsset.Editor
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
 
-                string fullPath = Path.Combine(outputFolder, bundleBuildInfo.RelativePath);
+                string fullPath = Path.Combine(outputFolder, bundleBuildInfo.UniqueBundleName);
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = (ulong)fi.Length;
                 bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
