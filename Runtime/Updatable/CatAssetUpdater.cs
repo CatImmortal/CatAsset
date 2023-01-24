@@ -31,6 +31,7 @@ namespace CatAsset.Runtime
                 Platform = Application.platform.ToString()
             };
 
+            //遍历所有资源包 找出存在于读写区的
             List<BundleManifestInfo> bundleInfos = new List<BundleManifestInfo>();
             foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
             {
