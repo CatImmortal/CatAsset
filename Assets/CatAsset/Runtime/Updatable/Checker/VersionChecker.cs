@@ -77,7 +77,7 @@ namespace CatAsset.Runtime
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                CheckInfo checkInfo = GetOrAddCheckInfo(item.RelativePath);
+                CheckInfo checkInfo = GetOrAddCheckInfo(item.UniqueBundleName);
                 checkInfo.ReadOnlyInfo = item;
             }
 
@@ -102,7 +102,7 @@ namespace CatAsset.Runtime
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                CheckInfo checkInfo = GetOrAddCheckInfo(item.RelativePath);
+                CheckInfo checkInfo = GetOrAddCheckInfo(item.UniqueBundleName);
                 checkInfo.ReadWriteInfo = item;
             }
 
@@ -127,7 +127,7 @@ namespace CatAsset.Runtime
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                CheckInfo checkInfo = GetOrAddCheckInfo(item.RelativePath);
+                CheckInfo checkInfo = GetOrAddCheckInfo(item.UniqueBundleName);
                 checkInfo.RemoteInfo = item;
             }
 
@@ -222,8 +222,8 @@ namespace CatAsset.Runtime
                 if (checkInfo.NeedRemove)
                 {
                     //需要删除读写区的那份
-                    Debug.Log($"删除读写区资源:{checkInfo.Name}");
-                    string path = RuntimeUtil.GetReadWritePath(checkInfo.Name);
+                    Debug.Log($"删除读写区资源:{checkInfo.ReadWriteInfo.RelativePath}");
+                    string path = RuntimeUtil.GetReadWritePath(checkInfo.ReadWriteInfo.RelativePath);
                     File.Delete(path);
 
                     needGenerateReadWriteManifest = true;
