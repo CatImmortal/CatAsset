@@ -123,7 +123,7 @@ namespace CatAsset.Runtime
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return UniqueBundleName== other.UniqueBundleName && Length == other.Length && MD5 == other.MD5;
+            return UniqueBundleName == other.UniqueBundleName && Length == other.Length && MD5 == other.MD5;
         }
 
         public override bool Equals(object obj)

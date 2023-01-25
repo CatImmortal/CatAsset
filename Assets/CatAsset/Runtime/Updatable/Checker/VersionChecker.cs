@@ -70,7 +70,7 @@ namespace CatAsset.Runtime
             {
                 isReadOnlyLoaded = true;
                 RefreshCheckInfos();
-                Debug.LogWarning($"未加载到只读区资源清单:{uwr.error}");
+                Debug.Log($"未加载到只读区资源清单:{uwr.error}");
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace CatAsset.Runtime
             {
                 isReadWriteLoaded = true;
                 RefreshCheckInfos();
-                Debug.LogWarning($"未加载到读写区资源清单：{uwr.error}");
+                Debug.Log($"未加载到读写区资源清单：{uwr.error}");
                 return;
             }
 
@@ -170,6 +170,12 @@ namespace CatAsset.Runtime
             foreach (KeyValuePair<string,CheckInfo> pair in checkInfoDict)
             {
                 CheckInfo checkInfo = pair.Value;
+
+                if (TryFixReadWriteInfo(checkInfo))
+                {
+                    needGenerateReadWriteManifest = true;
+                }
+                
                 checkInfo.RefreshState();
 
                 if (checkInfo.State != CheckState.Disuse)
@@ -232,7 +238,7 @@ namespace CatAsset.Runtime
 
             if (needGenerateReadWriteManifest)
             {
-                //删除过读写区资源 需要重新生成读写区资源清单
+                //删除过读写区资源 或修复过读写区资源信息 需要重新生成新的读写区资源清单
                 CatAssetUpdater.GenerateReadWriteManifest();
             }
 
@@ -243,6 +249,33 @@ namespace CatAsset.Runtime
             Clear();
         }
 
+        /// <summary>
+        /// 尝试修复读写区资源信息
+        /// </summary>
+        private static bool TryFixReadWriteInfo(CheckInfo checkInfo)
+        {
+            //如果修复过 就要重新生成新的读写区资源清单
+            bool needGenerateReadWriteManifest = false;
+            
+            if (checkInfo.RemoteInfo != null  && checkInfo.ReadWriteInfo == null)
+            {
+                //没有读写区资源清单信息 尝试修复 防止是意外删除读写区资源清单导致的
+                string path = RuntimeUtil.GetReadWritePath(checkInfo.RemoteInfo.RelativePath);
+                if (File.Exists(path))
+                {
+                    bool isVerify = RuntimeUtil.VerifyReadWriteBundle(path, checkInfo.RemoteInfo);
+                    if (isVerify)
+                    {
+                        checkInfo.ReadWriteInfo = checkInfo.RemoteInfo;
+                        needGenerateReadWriteManifest = true;
+                        Debug.LogWarning($"修复读写区资源信息:{checkInfo.RemoteInfo.RelativePath}");
+                    }
+                }
+            }
+
+            return needGenerateReadWriteManifest;
+        }
+        
         private static void Clear()
         {
             checkInfoDict.Clear();

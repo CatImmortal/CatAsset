@@ -122,15 +122,7 @@ namespace CatAsset.Runtime
             }
 
             //下载成功 开始校验
-            //先对比文件长度
-            FileInfo fi = new FileInfo(localTempFilePath);
-            bool isVerify = (ulong)fi.Length == updateInfo.Info.Length;
-            if (isVerify)
-            {
-                //文件长度对得上 再校验MD5
-                string md5 = RuntimeUtil.GetFileMD5(localTempFilePath);
-                isVerify = md5 == updateInfo.Info.MD5;
-            }
+            bool isVerify = RuntimeUtil.VerifyReadWriteBundle(localTempFilePath, updateInfo.Info);
 
             if (!isVerify)
             {

@@ -1,4 +1,7 @@
-﻿namespace CatAsset.Runtime
+﻿using System.IO;
+using UnityEngine;
+
+namespace CatAsset.Runtime
 {
     /// <summary>
     /// 版本检查信息
