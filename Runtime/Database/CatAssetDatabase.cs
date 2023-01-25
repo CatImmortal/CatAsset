@@ -282,6 +282,14 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 清空所有资源组信息
+        /// </summary>
+        internal static void ClearAllGroupInfo()
+        {
+            groupInfoDict.Clear();
+        }
+
+        /// <summary>
         /// 获取调试分析器数据
         /// </summary>
         public static ProfilerInfo GetProfilerInfo()
