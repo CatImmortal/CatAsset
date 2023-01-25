@@ -24,9 +24,9 @@ namespace CatAsset.Editor
         public string BundleName;
 
         /// <summary>
-        /// 唯一资源包名
+        /// 资源包标识名
         /// </summary>
-        public string UniqueBundleName;
+        public string BundleIdentifyName;
         
         /// <summary>
         /// 资源组
@@ -60,7 +60,7 @@ namespace CatAsset.Editor
             Group = group;
             IsRaw = isRaw;
             CompressOption = compressOption;
-            UniqueBundleName = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
+            BundleIdentifyName = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace CatAsset.Editor
         {
             AssetBundleBuild bundleBuild = new AssetBundleBuild
             {
-                assetBundleName = UniqueBundleName
+                assetBundleName = BundleIdentifyName
             };
 
             List<string> assetNames = new List<string>();
@@ -97,22 +97,22 @@ namespace CatAsset.Editor
         
         public override string ToString()
         {
-            return UniqueBundleName;
+            return BundleIdentifyName;
         }
         
         public int CompareTo(BundleBuildInfo other)
         {
-            return UniqueBundleName.CompareTo(other.UniqueBundleName);
+            return BundleIdentifyName.CompareTo(other.BundleIdentifyName);
         }
         
         public bool Equals(BundleBuildInfo other)
         {
-            return UniqueBundleName.Equals(other.UniqueBundleName);
+            return BundleIdentifyName.Equals(other.BundleIdentifyName);
         }
 
         public override int GetHashCode()
         {
-            return UniqueBundleName.GetHashCode();
+            return BundleIdentifyName.GetHashCode();
         }
         
         

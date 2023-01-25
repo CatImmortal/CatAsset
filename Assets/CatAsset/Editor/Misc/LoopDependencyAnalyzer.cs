@@ -52,7 +52,7 @@ namespace CatAsset.Editor
                     continue;
                 }
 
-                CheckDependencies(bundleBuildInfo.UniqueBundleName, loops,
+                CheckDependencies(bundleBuildInfo.BundleIdentifyName, loops,
                     (bundleName, _) =>
                     {
                         bundleDependencies.TryGetValue(bundleName, out List<string> dependencies);
@@ -110,15 +110,15 @@ namespace CatAsset.Editor
                     {
                         BundleBuildInfo dependencyBundle = assetToBundle[dependency];
 
-                        if (!bundleDependency.TryGetValue(bundleBuildInfo.UniqueBundleName, out List<string> list))
+                        if (!bundleDependency.TryGetValue(bundleBuildInfo.BundleIdentifyName, out List<string> list))
                         {
                             list = new List<string>();
-                            bundleDependency.Add(bundleBuildInfo.UniqueBundleName, list);
+                            bundleDependency.Add(bundleBuildInfo.BundleIdentifyName, list);
                         }
 
-                        if (!bundleBuildInfo.Equals(dependencyBundle) && !list.Contains(dependencyBundle.UniqueBundleName))
+                        if (!bundleBuildInfo.Equals(dependencyBundle) && !list.Contains(dependencyBundle.BundleIdentifyName))
                         {
-                            list.Add(dependencyBundle.UniqueBundleName);
+                            list.Add(dependencyBundle.BundleIdentifyName);
                         }
                     }
                 }
