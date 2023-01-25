@@ -48,8 +48,8 @@ namespace CatAsset.Editor
             {
                 if (BundleBuildConfigSO.Instance.AssetToBundleDict.TryGetValue(path,out BundleBuildInfo bbi))
                 {
-                    //绘制资源包相对路径在文件后面
-                    string desc = bbi.UniqueBundleName;
+                    //绘制资源包标识名在文件后面
+                    string desc = bbi.BundleIdentifyName;
                     DrawDesc(desc,selectionRect,assetColor);
                 }
             }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace CatAsset.Runtime
@@ -14,36 +10,36 @@ namespace CatAsset.Runtime
     public static class CatAssetDatabase
     {
         /// <summary>
-        /// 资源包相对路径->资源包运行时信息（只有在这个字典里的才是在本地可加载的）
+        /// 资源包标识名 -> 资源包运行时信息（只有在这个字典里的才是在本地可加载的）
         /// </summary>
         private static Dictionary<string, BundleRuntimeInfo> bundleRuntimeInfoDict =
             new Dictionary<string, BundleRuntimeInfo>();
 
         /// <summary>
-        /// 资源名->资源运行时信息（只有在这个字典里的才是在本地可加载的）
+        /// 资源名 -> 资源运行时信息（只有在这个字典里的才是在本地可加载的）
         /// </summary>
         private static Dictionary<string, AssetRuntimeInfo> assetRuntimeInfoDict =
             new Dictionary<string, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 资源实例->资源运行时信息
+        /// 资源实例 -> 资源运行时信息
         /// </summary>
         private static Dictionary<object, AssetRuntimeInfo> assetInstanceDict =
             new Dictionary<object, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 场景实例handler->资源运行时信息
+        /// 场景实例handler -> 资源运行时信息
         /// </summary>
         private static Dictionary<int, AssetRuntimeInfo> sceneInstanceDict = new Dictionary<int, AssetRuntimeInfo>();
 
         /// <summary>
-        /// 场景实例handler->绑定的资源句柄
+        /// 场景实例handler -> 绑定的资源句柄
         /// </summary>
         private static Dictionary<int, List<IBindableHandler>> sceneBindHandlers =
             new Dictionary<int, List<IBindableHandler>>();
 
         /// <summary>
-        /// 资源组名->资源组信息
+        /// 资源组名 -> 资源组信息
         /// </summary>
         private static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
 
@@ -80,7 +76,7 @@ namespace CatAsset.Runtime
         internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, BundleRuntimeInfo.State state)
         {
             BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
-            bundleRuntimeInfoDict.Add(bundleManifestInfo.RelativePath, bundleRuntimeInfo);
+            bundleRuntimeInfoDict.Add(bundleManifestInfo.BundleIdentifyName, bundleRuntimeInfo);
             bundleRuntimeInfo.Manifest = bundleManifestInfo;
             bundleRuntimeInfo.BundleState = state;
 
@@ -165,7 +161,7 @@ namespace CatAsset.Runtime
                     Manifest = assetRuntimeInfo.BundleManifest,
                     BundleState = BundleRuntimeInfo.State.InReadWrite,
                 };
-                bundleRuntimeInfoDict.Add(bundleRuntimeInfo.Manifest.RelativePath,bundleRuntimeInfo);
+                bundleRuntimeInfoDict.Add(bundleRuntimeInfo.Manifest.BundleIdentifyName,bundleRuntimeInfo);
             }
         }
 
@@ -337,7 +333,7 @@ namespace CatAsset.Runtime
                     }
                 }
 
-                ProfilerBundleInfo pbi = ProfilerBundleInfo.Create(bri.Manifest.RelativePath, bri.Manifest.Group,
+                ProfilerBundleInfo pbi = ProfilerBundleInfo.Create(bri.Manifest.BundleIdentifyName, bri.Manifest.Group,
                     bri.Manifest.IsRaw, bri.Manifest.Length,bri.ReferencingAssets.Count, bri.Manifest.Assets.Count);
 
                 int pbiIndex = info.BundleInfoList.Count;
@@ -386,12 +382,12 @@ namespace CatAsset.Runtime
                 //资源包依赖链索引
                 foreach (var upBri in bri.DependencyChain.UpStream)
                 {
-                    var upPbiIndex = tempPbiDict[upBri.Manifest.RelativePath];
+                    var upPbiIndex = tempPbiDict[upBri.Manifest.BundleIdentifyName];
                     pbi.UpStreamIndexes.Add(upPbiIndex);
                 }
                 foreach (var downBri in bri.DependencyChain.DownStream)
                 {
-                    var downPbiIndex = tempPbiDict[downBri.Manifest.RelativePath];
+                    var downPbiIndex = tempPbiDict[downBri.Manifest.BundleIdentifyName];
                     pbi.DownStreamIndexes.Add(downPbiIndex);
                 }
             }

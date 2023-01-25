@@ -42,7 +42,7 @@ namespace CatAsset.Editor
                     Directory.CreateDirectory(rawBundleDirectory);
                 }
 
-                string targetFileName = Path.Combine(directory, rawBundleBuildInfo.UniqueBundleName);
+                string targetFileName = Path.Combine(directory, rawBundleBuildInfo.BundleIdentifyName);
                 File.Copy(rawAssetName, targetFileName); //直接将原生资源复制过去
             }
 

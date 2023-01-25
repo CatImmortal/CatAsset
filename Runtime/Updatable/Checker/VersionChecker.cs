@@ -82,7 +82,7 @@ namespace CatAsset.Runtime
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                CheckInfo checkInfo = GetOrAddCheckInfo(item.UniqueBundleName);
+                CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
                 checkInfo.ReadOnlyInfo = item;
             }
 
@@ -117,7 +117,7 @@ namespace CatAsset.Runtime
                     continue;
                 }
                 
-                CheckInfo checkInfo = GetOrAddCheckInfo(info.UniqueBundleName);
+                CheckInfo checkInfo = GetOrAddCheckInfo(info.BundleIdentifyName);
                 checkInfo.ReadWriteInfo = info;
             }
 
@@ -142,7 +142,7 @@ namespace CatAsset.Runtime
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
-                CheckInfo checkInfo = GetOrAddCheckInfo(item.UniqueBundleName);
+                CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
                 checkInfo.RemoteInfo = item;
             }
 
@@ -206,7 +206,7 @@ namespace CatAsset.Runtime
                 {
                     //添加资源组的远端资源包信息
                     GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.RemoteInfo.Group);
-                    groupInfo.AddRemoteBundle(checkInfo.RemoteInfo.RelativePath);
+                    groupInfo.AddRemoteBundle(checkInfo.RemoteInfo.BundleIdentifyName);
                     groupInfo.RemoteLength += checkInfo.RemoteInfo.Length;
                 }
 
@@ -231,7 +231,7 @@ namespace CatAsset.Runtime
                     case CheckState.InReadWrite:
                         //不需要更新 最新版本存在于读写区
                         GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.RemoteInfo.Group);
-                        groupInfo.AddLocalBundle(checkInfo.RemoteInfo.RelativePath);
+                        groupInfo.AddLocalBundle(checkInfo.RemoteInfo.BundleIdentifyName);
                         groupInfo.LocalLength += checkInfo.RemoteInfo.Length;
 
                         //添加运行时信息 此资源可从本地读写区加载
@@ -241,7 +241,7 @@ namespace CatAsset.Runtime
                     case CheckState.InReadOnly:
                         //不需要更新 最新版本存在于只读区
                         groupInfo = CatAssetDatabase.GetOrAddGroupInfo(checkInfo.RemoteInfo.Group);
-                        groupInfo.AddLocalBundle(checkInfo.RemoteInfo.RelativePath);
+                        groupInfo.AddLocalBundle(checkInfo.RemoteInfo.BundleIdentifyName);
                         groupInfo.LocalLength += checkInfo.RemoteInfo.Length;
 
                         //添加运行时信息 此资源可从本地只读区加载

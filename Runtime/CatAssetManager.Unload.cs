@@ -70,7 +70,7 @@ namespace CatAsset.Runtime
             CatAssetDatabase.RemoveAssetInstance(info.Asset);
 
             BundleRuntimeInfo bundleRuntimeInfo =
-                CatAssetDatabase.GetBundleRuntimeInfo(info.BundleManifest.RelativePath);
+                CatAssetDatabase.GetBundleRuntimeInfo(info.BundleManifest.BundleIdentifyName);
 
             if (!bundleRuntimeInfo.Manifest.IsRaw)
             {
@@ -115,7 +115,7 @@ namespace CatAsset.Runtime
             {
                 //不立即卸载 创建卸载任务
                 UnloadBundleTask task = UnloadBundleTask.Create(unloadTaskRunner,
-                    info.Manifest.RelativePath, info);
+                    info.Manifest.BundleIdentifyName, info);
                 unloadTaskRunner.AddTask(task, TaskPriority.Low);
             }
             else
@@ -164,7 +164,7 @@ namespace CatAsset.Runtime
             bundleRuntimeInfo.Bundle.Unload(true);
             bundleRuntimeInfo.Bundle = null;
 
-            Debug.Log($"已卸载资源包:{bundleRuntimeInfo.Manifest.RelativePath}");
+            Debug.Log($"已卸载资源包:{bundleRuntimeInfo.Manifest.BundleIdentifyName}");
         }
 
         /// <summary>

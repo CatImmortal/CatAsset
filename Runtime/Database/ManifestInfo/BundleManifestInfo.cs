@@ -24,13 +24,14 @@ namespace CatAsset.Runtime
                 {
                     if (IsAppendMD5)
                     {
+                        //附加了MD5值到资源包文件名中
                         string[] nameArray = BundleName.Split('.');
                         string md5BundleName =   $"{nameArray[0]}_{MD5}.{nameArray[1]}";  
                         relativePath = RuntimeUtil.GetRegularPath(Path.Combine(Directory,md5BundleName));
                     }
                     else
                     {
-                        relativePath = UniqueBundleName;
+                        relativePath = BundleIdentifyName;
                     }
                 }
                 return relativePath;
@@ -47,20 +48,20 @@ namespace CatAsset.Runtime
         /// </summary>
         public string BundleName;
 
-        private string uniqueBundleName;
+        private string bundleIdentifyName;
         /// <summary>
-        /// 唯一资源包名
+        /// 资源包标识名
         /// </summary>
-        public string UniqueBundleName
+        public string BundleIdentifyName
         {
             get
             {
-                if (uniqueBundleName == null)
+                if (bundleIdentifyName == null)
                 {
-                    uniqueBundleName = RuntimeUtil.GetRegularPath(Path.Combine(Directory,BundleName));
+                    bundleIdentifyName = RuntimeUtil.GetRegularPath(Path.Combine(Directory,BundleName));
                 }
 
-                return uniqueBundleName;
+                return bundleIdentifyName;
             }
         }
         
@@ -111,19 +112,19 @@ namespace CatAsset.Runtime
 
         public int CompareTo(BundleManifestInfo other)
         {
-            return UniqueBundleName.CompareTo(other.UniqueBundleName);
+            return BundleIdentifyName.CompareTo(other.BundleIdentifyName);
         }
         
         public override string ToString()
         {
-            return UniqueBundleName;
+            return BundleIdentifyName;
         }
 
         public bool Equals(BundleManifestInfo other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return UniqueBundleName == other.UniqueBundleName && Length == other.Length && MD5 == other.MD5;
+            return BundleIdentifyName == other.BundleIdentifyName && Length == other.Length && MD5 == other.MD5;
         }
 
         public override bool Equals(object obj)
@@ -138,7 +139,7 @@ namespace CatAsset.Runtime
         {
             unchecked
             {
-                var hashCode = (UniqueBundleName != null ? UniqueBundleName.GetHashCode() : 0);
+                var hashCode = (BundleIdentifyName != null ? BundleIdentifyName.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ Length.GetHashCode();
                 hashCode = (hashCode * 397) ^ (MD5 != null ? MD5.GetHashCode() : 0);
                 return hashCode;

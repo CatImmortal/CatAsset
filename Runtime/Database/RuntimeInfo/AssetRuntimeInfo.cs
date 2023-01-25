@@ -56,7 +56,7 @@ namespace CatAsset.Runtime
             {
                 //被重新使用了
                 BundleRuntimeInfo bundleRuntimeInfo =
-                    CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+                    CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.BundleIdentifyName);
                 bundleRuntimeInfo.AddReferencingAsset(this);
             }
         }
@@ -80,7 +80,7 @@ namespace CatAsset.Runtime
 
                 //从资源包的引用中资源集合删除
                 BundleRuntimeInfo bundleRuntimeInfo =
-                    CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.RelativePath);
+                    CatAssetDatabase.GetBundleRuntimeInfo(BundleManifest.BundleIdentifyName);
                 bundleRuntimeInfo.RemoveReferencingAsset(this);
 
                 //尝试从内存卸载

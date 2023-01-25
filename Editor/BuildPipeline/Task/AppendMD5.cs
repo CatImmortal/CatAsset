@@ -28,7 +28,7 @@ namespace CatAsset.Editor
             {
                 bundleManifestInfo.IsAppendMD5 = true;
                 
-                string oldPath = Path.Combine(outputFolder,  bundleManifestInfo.UniqueBundleName);
+                string oldPath = Path.Combine(outputFolder,  bundleManifestInfo.BundleIdentifyName);
                 string newPath = Path.Combine(outputFolder,  bundleManifestInfo.RelativePath);
 
                 File.Move(oldPath,newPath);

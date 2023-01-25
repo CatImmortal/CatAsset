@@ -213,14 +213,14 @@ namespace CatAsset.Runtime
             {
                 //WebGL平台的资源包加载
                 task = LoadWebBundleTask.Create(Owner, BundleRuntimeInfo.LoadPath,
-                    BundleRuntimeInfo.Manifest.RelativePath,
+                    BundleRuntimeInfo.Manifest,
                     onBundleLoadedCallback);
             }
             else
             {
                 //其他平台的资源包加载
                 task = LoadBundleTask.Create(Owner, BundleRuntimeInfo.LoadPath,
-                    BundleRuntimeInfo.Manifest.RelativePath,
+                    BundleRuntimeInfo.Manifest,
                     onBundleLoadedCallback);
             }
             Owner.AddTask(task, TaskPriority.Middle);
@@ -352,7 +352,7 @@ namespace CatAsset.Runtime
                         if (!depInfo.BundleManifest.Equals(AssetRuntimeInfo.BundleManifest))
                         {
                             BundleRuntimeInfo depBundleInfo =
-                                CatAssetDatabase.GetBundleRuntimeInfo(depInfo.BundleManifest.RelativePath);
+                                CatAssetDatabase.GetBundleRuntimeInfo(depInfo.BundleManifest.BundleIdentifyName);
 
                             depBundleInfo.DependencyChain.DownStream.Add(BundleRuntimeInfo);
                             BundleRuntimeInfo.DependencyChain.UpStream.Add(depBundleInfo);
@@ -504,7 +504,7 @@ namespace CatAsset.Runtime
 
             task.AssetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(name);
             task.BundleRuntimeInfo =
-                CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.RelativePath);
+                CatAssetDatabase.GetBundleRuntimeInfo(task.AssetRuntimeInfo.BundleManifest.BundleIdentifyName);
 
 
             return task;

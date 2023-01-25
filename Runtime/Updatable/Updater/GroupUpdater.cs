@@ -275,12 +275,12 @@ namespace CatAsset.Runtime
             deltaUpdatedLength += updateInfo.Info.Length;
 
             //将下载好的资源包的状态从 InRemote 修改为 InReadWrite，表示可从本地读写区加载
-            BundleRuntimeInfo bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(updateInfo.Info.RelativePath);
+            BundleRuntimeInfo bundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(updateInfo.Info.BundleIdentifyName);
             bundleRuntimeInfo.BundleState = BundleRuntimeInfo.State.InReadWrite;
 
             //刷新资源组本地资源信息
             GroupInfo groupInfo = CatAssetDatabase.GetOrAddGroupInfo(updateInfo.Info.Group);
-            groupInfo.AddLocalBundle(updateInfo.Info.RelativePath);
+            groupInfo.AddLocalBundle(updateInfo.Info.BundleIdentifyName);
             groupInfo.LocalLength += updateInfo.Info.Length;
 
             if (IsAllUpdated || deltaUpdatedLength >= generateManifestLength)
