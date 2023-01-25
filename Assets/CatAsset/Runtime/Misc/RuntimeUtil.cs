@@ -175,7 +175,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 校验读写区资源包文件
         /// </summary>
-        public static bool VerifyReadWriteBundle(string path,BundleManifestInfo info)
+        public static bool VerifyReadWriteBundle(string path,BundleManifestInfo info,bool onlyLength = false)
         {
             if (!File.Exists(path))
             {
@@ -184,9 +184,9 @@ namespace CatAsset.Runtime
             
             FileInfo fi = new FileInfo(path);
             bool isVerify = (ulong)fi.Length == info.Length;
-            if (isVerify)
+            if (isVerify && !onlyLength)
             {
-                //文件长度对得上 再校验MD5
+                //不是仅校验文件长度 就再校验MD5
                 string md5 = GetFileMD5(path);
                 isVerify = md5 == info.MD5;
             }
