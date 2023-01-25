@@ -107,17 +107,18 @@ namespace CatAsset.Runtime
             }
 
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
-            foreach (BundleManifestInfo item in manifest.Bundles)
+            foreach (BundleManifestInfo info in manifest.Bundles)
             {
-                string path = RuntimeUtil.GetReadWritePath(item.RelativePath);
-                if (!File.Exists(path))
+                string path = RuntimeUtil.GetReadWritePath(info.RelativePath);
+                bool isVerify = RuntimeUtil.VerifyReadWriteBundle(path,info, true);
+                if (!isVerify)
                 {
-                    //读写区资源清单中记录的资源被意外删除了 就视为其清单信息不存在
+                    //读写区资源清单中记录的资源不能通过校验 就视为其清单信息不存在
                     continue;
                 }
                 
-                CheckInfo checkInfo = GetOrAddCheckInfo(item.UniqueBundleName);
-                checkInfo.ReadWriteInfo = item;
+                CheckInfo checkInfo = GetOrAddCheckInfo(info.UniqueBundleName);
+                checkInfo.ReadWriteInfo = info;
             }
 
             isReadWriteLoaded = true;
