@@ -160,16 +160,38 @@ namespace CatAsset.Runtime
                 using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
                 {
                    byte[] bytes = md5.ComputeHash(fs);
-                   CachedSB.Clear();
                    foreach (byte b in bytes)
                    {
                        CachedSB.Append(b.ToString("x2"));
                    }
                    string result = CachedSB.ToString();
+                   CachedSB.Clear();
                    return result;
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 校验读写区资源包文件
+        /// </summary>
+        public static bool VerifyReadWriteBundle(string path,BundleManifestInfo info)
+        {
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+            
+            FileInfo fi = new FileInfo(path);
+            bool isVerify = (ulong)fi.Length == info.Length;
+            if (isVerify)
+            {
+                //文件长度对得上 再校验MD5
+                string md5 = GetFileMD5(path);
+                isVerify = md5 == info.MD5;
+            }
+
+            return isVerify;
         }
 
         /// <summary>
