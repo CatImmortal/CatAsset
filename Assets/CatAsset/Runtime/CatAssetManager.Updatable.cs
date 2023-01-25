@@ -62,8 +62,42 @@ namespace CatAsset.Runtime
             CatAssetUpdater.PauseGroupUpdate(group, false);
         }
 
+        /// <summary>
+        /// 校验所有读写区资源包文件
+        /// </summary>
+        public static int VerifyRearWriteBundles()
+        {
+            //需要通过更新修复的资源包文件数
+            int count = 0;
+            
+            foreach (var pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
+            {
+                BundleRuntimeInfo runtimeInfo = pair.Value;
+                if (runtimeInfo.BundleState != BundleRuntimeInfo.State.InReadWrite)
+                {
+                    //不在读写区 跳过
+                    continue;
+                }
 
+                bool isVerify = RuntimeUtil.VerifyReadWriteBundle(runtimeInfo.LoadPath, runtimeInfo.Manifest);
+                if (isVerify)
+                {
+                    //校验通过 跳过
+                    continue;
+                }
+                
+                //校验未通过
+                runtimeInfo.BundleState = BundleRuntimeInfo.State.InRemote;
+                count++;
+            }
 
+            if (count > 0)
+            {
+                CatAssetUpdater.GenerateReadWriteManifest();
+            }
+
+            return count;
+        }
 
     }
 }

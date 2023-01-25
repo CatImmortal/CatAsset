@@ -33,6 +33,11 @@ namespace CatAsset.Runtime
         private static bool isRemoteLoaded;
 
         /// <summary>
+        /// 是否有读写区资源清单
+        /// </summary>
+        private static bool hasReadWriteManifest;
+        
+        /// <summary>
         /// 检查版本
         /// </summary>
         public static void CheckVersion(OnVersionChecked callback)
@@ -91,6 +96,8 @@ namespace CatAsset.Runtime
         /// </summary>
         private static void CheckReadWriteManifest(bool success, UnityWebRequest uwr)
         {
+            hasReadWriteManifest = success;
+            
             if (!success)
             {
                 isReadWriteLoaded = true;
@@ -102,6 +109,13 @@ namespace CatAsset.Runtime
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
+                string path = RuntimeUtil.GetReadWritePath(item.RelativePath);
+                if (!File.Exists(path))
+                {
+                    //读写区资源清单中记录的资源被意外删除了 就视为其清单信息不存在
+                    continue;
+                }
+                
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.UniqueBundleName);
                 checkInfo.ReadWriteInfo = item;
             }
@@ -160,6 +174,8 @@ namespace CatAsset.Runtime
                 //三方资源清单未加载完毕
                 return;
             }
+            CatAssetDatabase.ClearAllGroupInfo();
+            CatAssetUpdater.ClearAllGroupUpdater();
 
             //需要更新的所有资源包的数量与长度
             int totalCount = 0;
@@ -170,13 +186,20 @@ namespace CatAsset.Runtime
             foreach (KeyValuePair<string,CheckInfo> pair in checkInfoDict)
             {
                 CheckInfo checkInfo = pair.Value;
-
-                if (TryFixReadWriteInfo(checkInfo))
-                {
-                    needGenerateReadWriteManifest = true;
-                }
-                
                 checkInfo.RefreshState();
+                
+                //如果此资源需要更新 并且 不存在读写区资源清单 
+                if (checkInfo.State == CheckState.NeedUpdate && !hasReadWriteManifest)
+                {
+                    //可能是读写区资源清单被意外删除了
+                    //尝试修复此资源的读写区资源信息
+                    if (TryFixReadWriteInfo(checkInfo))
+                    {
+                        //修复成功 就重新刷新下资源检查状态
+                        checkInfo.RefreshState();
+                        needGenerateReadWriteManifest = true;
+                    }
+                }
 
                 if (checkInfo.State != CheckState.Disuse)
                 {
@@ -257,7 +280,7 @@ namespace CatAsset.Runtime
             //如果修复过 就要重新生成新的读写区资源清单
             bool needGenerateReadWriteManifest = false;
             
-            if (checkInfo.RemoteInfo != null  && checkInfo.ReadWriteInfo == null)
+            if (checkInfo.RemoteInfo != null)
             {
                 //没有读写区资源清单信息 尝试修复 防止是意外删除读写区资源清单导致的
                 string path = RuntimeUtil.GetReadWritePath(checkInfo.RemoteInfo.RelativePath);
@@ -284,6 +307,7 @@ namespace CatAsset.Runtime
             isRemoteLoaded = false;
             isReadOnlyLoaded = false;
             isReadWriteLoaded = false;
+            hasReadWriteManifest = false;
 
         }
     }

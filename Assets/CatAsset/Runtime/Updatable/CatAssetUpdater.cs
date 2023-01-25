@@ -89,6 +89,14 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 清空所有资源组的更新器
+        /// </summary>
+        internal static void ClearAllGroupUpdater()
+        {
+            GroupUpdaterDict.Clear();
+        }
+
+        /// <summary>
         /// 更新资源组
         /// </summary>
         internal static void UpdateGroup(string group,BundleUpdatedCallback callback,TaskPriority priority = TaskPriority.Middle)
