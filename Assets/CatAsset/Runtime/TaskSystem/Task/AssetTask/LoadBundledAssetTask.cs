@@ -76,7 +76,7 @@ namespace CatAsset.Runtime
         private int loadFinishDependencyCount;
         private readonly List<AssetHandler> dependencyHandlers = new List<AssetHandler>();
         private readonly AssetLoadedCallback<Object> onDependencyLoadedCallback;
-        
+
         protected LoadBundledAssetState LoadState;
         protected AsyncOperation Operation;
 
@@ -260,7 +260,7 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-            
+
 #if UNITY_EDITOR
             var oldLoader = CatAssetManager.GetAssetLoader();
             if (oldLoader is PriorityEditorUpdatableAssetLoader)
@@ -268,18 +268,18 @@ namespace CatAsset.Runtime
                 CatAssetManager.SetAssetLoader<UpdatableAssetLoader>();  //加载资源依赖时 不能优先从编辑器加载 只能从资源包加载
             }
 #endif
-          
-            foreach (string dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
+
+            foreach (var dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
-                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,default,TaskPriority.Middle);
+                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency.Name,default,TaskPriority.Middle);
                 dependencyHandler.OnLoaded += onDependencyLoadedCallback;
                 dependencyHandlers.Add(dependencyHandler);
             }
-            
+
 #if UNITY_EDITOR
             CatAssetManager.SetAssetLoader(oldLoader.GetType());
 #endif
-            
+
         }
 
         private void CheckStateWhileDependenciesLoading()
@@ -340,7 +340,7 @@ namespace CatAsset.Runtime
                         {
                             continue;
                         }
-                    
+
                         AssetRuntimeInfo depInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependencyHandler.AssetObj);
 
                         //更新自身与依赖资源的上下游关系
@@ -409,7 +409,7 @@ namespace CatAsset.Runtime
             {
 
                 AssetRuntimeInfo.MemorySize = (ulong)Profiler.GetRuntimeMemorySizeLong((Object)AssetRuntimeInfo.Asset);
-                
+
                 //添加关联
                 CatAssetDatabase.SetAssetInstance(AssetRuntimeInfo.Asset, AssetRuntimeInfo);
             }

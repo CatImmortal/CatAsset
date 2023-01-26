@@ -36,7 +36,7 @@ namespace CatAsset.Runtime
         /// 是否有读写区资源清单
         /// </summary>
         private static bool hasReadWriteManifest;
-        
+
         /// <summary>
         /// 检查版本
         /// </summary>
@@ -52,9 +52,9 @@ namespace CatAsset.Runtime
             onVersionChecked = callback;
 
             //进行只读区 读写区 远端三方的资源清单检查
-            string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
-            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName, true);
-            string remoteManifestPath = RuntimeUtil.GetRemotePath(RuntimeUtil.ManifestFileName);
+            string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestJsonFileName);
+            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestJsonFileName, true);
+            string remoteManifestPath = RuntimeUtil.GetRemotePath(CatAssetManifest.ManifestJsonFileName);
 
 
             CatAssetManager.AddWebRequestTask(readOnlyManifestPath, readOnlyManifestPath, CheckReadOnlyManifest,
@@ -79,7 +79,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
+            CatAssetManifest manifest = CatAssetManifest.DeserializeFromJson(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
@@ -97,7 +97,7 @@ namespace CatAsset.Runtime
         private static void CheckReadWriteManifest(bool success, UnityWebRequest uwr)
         {
             hasReadWriteManifest = success;
-            
+
             if (!success)
             {
                 isReadWriteLoaded = true;
@@ -106,7 +106,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
+            CatAssetManifest manifest = CatAssetManifest.DeserializeFromJson(uwr.downloadHandler.text);
             foreach (BundleManifestInfo info in manifest.Bundles)
             {
                 string path = RuntimeUtil.GetReadWritePath(info.RelativePath);
@@ -116,7 +116,7 @@ namespace CatAsset.Runtime
                     //读写区资源清单中记录的资源不能通过校验 就视为其清单信息不存在
                     continue;
                 }
-                
+
                 CheckInfo checkInfo = GetOrAddCheckInfo(info.BundleIdentifyName);
                 checkInfo.ReadWriteInfo = info;
             }
@@ -139,7 +139,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
+            CatAssetManifest manifest = CatAssetManifest.DeserializeFromJson(uwr.downloadHandler.text);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
@@ -188,8 +188,8 @@ namespace CatAsset.Runtime
             {
                 CheckInfo checkInfo = pair.Value;
                 checkInfo.RefreshState();
-                
-                //如果此资源需要更新 并且 不存在读写区资源清单 
+
+                //如果此资源需要更新 并且 不存在读写区资源清单
                 if (checkInfo.State == CheckState.NeedUpdate && !hasReadWriteManifest)
                 {
                     //可能是读写区资源清单被意外删除了
@@ -280,7 +280,7 @@ namespace CatAsset.Runtime
         {
             //如果修复过 就要重新生成新的读写区资源清单
             bool needGenerateReadWriteManifest = false;
-            
+
             if (checkInfo.RemoteInfo != null)
             {
                 //没有读写区资源清单信息 尝试修复 防止是意外删除读写区资源清单导致的
@@ -299,7 +299,7 @@ namespace CatAsset.Runtime
 
             return needGenerateReadWriteManifest;
         }
-        
+
         private static void Clear()
         {
             checkInfoDict.Clear();

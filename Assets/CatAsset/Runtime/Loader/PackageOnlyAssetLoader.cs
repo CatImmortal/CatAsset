@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void CheckVersion(OnVersionChecked onVersionChecked)
         {
-            string path = RuntimeUtil.GetReadOnlyPath(RuntimeUtil.ManifestFileName);
+            string path = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestJsonFileName);
 
             CatAssetManager.AddWebRequestTask(path,path,((success, uwr) =>
             {
@@ -23,12 +23,12 @@ namespace CatAsset.Runtime
                 }
                 else
                 {
-                    CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(uwr.downloadHandler.text);
+                    CatAssetManifest manifest = CatAssetManifest.DeserializeFromJson(uwr.downloadHandler.text);
                     CatAssetDatabase.InitRuntimeInfoByManifest(manifest);
                     Debug.Log("单机模式资源清单检查完毕");
                     result = new VersionCheckResult(true, null, 0, 0);
                 }
-                
+
                 onVersionChecked?.Invoke(result);
             } ),TaskPriority.VeryLow);
         }

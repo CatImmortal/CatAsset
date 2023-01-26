@@ -45,8 +45,8 @@ namespace CatAsset.Runtime
             manifest.Bundles = bundleInfos;
 
             //写入清单文件json
-            string json = JsonUtility.ToJson(manifest, true);
-            string path = RuntimeUtil.GetReadWritePath(RuntimeUtil.ManifestFileName);
+            string json = manifest.SerializeToJson();
+            string path = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestJsonFileName);
             if (File.Exists(path))
             {
                 File.Delete(path);

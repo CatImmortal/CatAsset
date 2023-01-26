@@ -37,7 +37,7 @@ namespace CatAsset.Runtime
         {
             assetLoader.UnloadScene(scene);
         }
-        
+
         /// <summary>
         /// 尝试将资源从内存中卸载
         /// </summary>
@@ -94,9 +94,9 @@ namespace CatAsset.Runtime
             Debug.Log($"已卸载资源:{info}");
 
             //尝试将可卸载的依赖也从内存中卸载
-            foreach (string dependency in info.AssetManifest.Dependencies)
+            foreach (var dependency in info.AssetManifest.Dependencies)
             {
-                AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency.Name);
                 TryUnloadAssetFromMemory(dependencyRuntimeInfo,isImmediate);
             }
         }
@@ -141,11 +141,11 @@ namespace CatAsset.Runtime
                     CatAssetDatabase.RemoveAssetInstance(assetRuntimeInfo.Asset);
                     assetRuntimeInfo.Asset = null;
                     assetRuntimeInfo.ClearDependencyChainUpStream();
-                    
+
                     //尝试将可卸载的依赖从内存中卸载
-                    foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
+                    foreach (var dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
-                        AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                        AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency.Name);
                         TryUnloadAssetFromMemory(dependencyRuntimeInfo,isImmediate);
                     }
                 }
