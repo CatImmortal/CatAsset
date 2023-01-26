@@ -164,7 +164,7 @@ namespace CatAsset.Runtime
                 //引用计数为0
                 foreach (var dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency.Name);
+                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
 
                     //场景资源 要在这里删除依赖链记录
                     //非场景资源在从内存中卸载时删除依赖链记录

@@ -50,7 +50,7 @@ namespace CatAsset.Editor
                     {
                         //存在前一个版本的主资源清单 读取
                         string json = File.ReadAllText(mainManifestPath);
-                        mainManifest = JsonUtility.FromJson<CatAssetManifest>(json);
+                        mainManifest = CatAssetManifest.DeserializeFromJson(json);
                         break;
                     }
 

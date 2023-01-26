@@ -40,8 +40,7 @@ namespace CatAsset.Runtime
                     bundleInfos.Add(pair.Value.Manifest);
                 }
             }
-
-            bundleInfos.Sort();
+            
             manifest.Bundles = bundleInfos;
 
             //写入清单文件json

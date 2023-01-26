@@ -96,7 +96,7 @@ namespace CatAsset.Runtime
             //尝试将可卸载的依赖也从内存中卸载
             foreach (var dependency in info.AssetManifest.Dependencies)
             {
-                AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency.Name);
+                AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
                 TryUnloadAssetFromMemory(dependencyRuntimeInfo,isImmediate);
             }
         }
@@ -145,7 +145,7 @@ namespace CatAsset.Runtime
                     //尝试将可卸载的依赖从内存中卸载
                     foreach (var dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
-                        AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency.Name);
+                        AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
                         TryUnloadAssetFromMemory(dependencyRuntimeInfo,isImmediate);
                     }
                 }

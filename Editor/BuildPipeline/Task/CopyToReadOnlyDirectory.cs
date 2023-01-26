@@ -32,7 +32,6 @@ namespace CatAsset.Editor
 
             CatAssetManifest manifest = manifestParam.Manifest;
 
-
             //复制指定资源组的资源到只读目录下
 
             //要复制的资源组的Set
