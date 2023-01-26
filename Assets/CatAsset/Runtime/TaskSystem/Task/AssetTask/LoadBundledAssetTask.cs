@@ -271,7 +271,7 @@ namespace CatAsset.Runtime
 
             foreach (var dependency in AssetRuntimeInfo.AssetManifest.Dependencies)
             {
-                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency.Name,default,TaskPriority.Middle);
+                AssetHandler<Object> dependencyHandler = CatAssetManager.LoadAssetAsync<Object>(dependency,default,TaskPriority.Middle);
                 dependencyHandler.OnLoaded += onDependencyLoadedCallback;
                 dependencyHandlers.Add(dependencyHandler);
             }

@@ -66,8 +66,6 @@ namespace CatAsset.Editor
                 ManifestVersion = configParam.Config.ManifestVersion,
                 Platform = configParam.TargetPlatform.ToString(),
                 Bundles = new List<BundleManifestInfo>(),
-                Assets = new List<AssetManifestInfo>(),
-
             };
 
             //增加内置Shader资源包的构建信息
@@ -123,10 +121,10 @@ namespace CatAsset.Editor
                     {
                         Name = assetBuildInfo.Name,
                         IsAtlasPackable = atlasPackableSet.Contains(assetBuildInfo.Name),
-                        DependencyIDs = new List<int>(),
+                        DependencyNodeIDs = new List<int>(),
+                        Dependencies = EditorUtil.GetDependencies(assetBuildInfo.Name,false),
                     };
-
-                    manifest.Assets.Add(assetManifestInfo);
+                    
                     bundleManifestInfo.Assets.Add(assetManifestInfo);
                 }
             }
@@ -155,43 +153,11 @@ namespace CatAsset.Editor
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                 {
                     Name = bundleBuildInfo.Assets[0].Name,
+                    DependencyNodeIDs = new List<int>(),
+                    Dependencies = new List<string>(),
                 };
-
-                manifest.Assets.Add(assetManifestInfo);
+                
                 bundleManifestInfo.Assets.Add(assetManifestInfo);
-            }
-
-            //排序清单列表
-            manifest.Bundles.Sort();
-            manifest.Assets.Sort();
-
-            //资源名 -> ID
-            Dictionary<string, int> assetNameToID = new Dictionary<string, int>();
-
-            //建立ID映射
-            for (int i = 0; i < manifest.Assets.Count; i++)
-            {
-                assetNameToID.Add(manifest.Assets[i].Name,i);
-            }
-
-            //写入ID记录
-            foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
-            {
-                foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
-                {
-                    int id = assetNameToID[assetManifestInfo.Name];
-                    bundleManifestInfo.AssetIDs.Add(id);
-                }
-            }
-            foreach (AssetManifestInfo assetManifestInfo in manifest.Assets)
-            {
-                //依赖列表不需要进行递归记录 因为加载的时候会对依赖进行递归加载
-                List<string> dependencies = EditorUtil.GetDependencies(assetManifestInfo.Name, false);
-                foreach (string dependency in dependencies)
-                {
-                    int id = assetNameToID[dependency];
-                    assetManifestInfo.DependencyIDs.Add(id);
-                }
             }
 
             manifestParam = new ManifestParam(manifest,outputFolder);
