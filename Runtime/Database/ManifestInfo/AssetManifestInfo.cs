@@ -19,18 +19,24 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 依赖资源名列表
         /// </summary>
-        public List<string> Dependencies;
+        [NonSerialized]
+        public List<AssetManifestInfo> Dependencies;
+
+        /// <summary>
+        /// 依赖资源ID列表
+        /// </summary>
+        public List<int> DependencyIDs;
 
         /// <summary>
         /// 是否是图集散图
         /// </summary>
         public bool IsAtlasPackable;
-        
+
         public int CompareTo(AssetManifestInfo other)
         {
             return Name.CompareTo(other.Name);
         }
-        
+
         public override string ToString()
         {
             return Name;

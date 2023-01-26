@@ -12,20 +12,20 @@ namespace CatAsset.Editor
     /// </summary>
     public class WriteManifestFile : IBuildTask
     {
-        [InjectContext(ContextUsage.In)] 
+        [InjectContext(ContextUsage.In)]
         private IManifestParam manifestParam;
- 
+
         /// <inheritdoc />
         public int Version => 1;
-        
+
         public ReturnCode Run()
         {
             string writePath = manifestParam.WritePath;
             CatAssetManifest manifest = manifestParam.Manifest;
-                
+
             //写入清单文件json
-            string json = JsonUtility.ToJson(manifest,true);
-            using (StreamWriter sw = new StreamWriter(Path.Combine(writePath, RuntimeUtil.ManifestFileName)))
+            string json = manifest.SerializeToJson();
+            using (StreamWriter sw = new StreamWriter(Path.Combine(writePath, CatAssetManifest.ManifestJsonFileName)))
             {
                 sw.Write(json);
             }
@@ -33,6 +33,6 @@ namespace CatAsset.Editor
             return ReturnCode.Success;
         }
 
-      
+
     }
 }

@@ -117,55 +117,6 @@ namespace CatAsset.Runtime
 
 
         /// <summary>
-        /// 尝试创建外置原生资源的运行时信息
-        /// </summary>
-        internal static void TryCreateExternalRawAssetRuntimeInfo(string assetName)
-        {
-            if (!assetRuntimeInfoDict.TryGetValue(assetName,out AssetRuntimeInfo assetRuntimeInfo))
-            {
-                int index = assetName.LastIndexOf('/');
-                string dir = null;
-                string name;
-                if (index >= 0)
-                {
-                    //处理多级路径
-                    dir = assetName.Substring(0, index - 1);
-                    name = assetName.Substring(index + 1);
-                }
-                else
-                {
-                    name = assetName;
-                }
-
-
-                //创建外置原生资源的资源运行时信息
-                assetRuntimeInfo = new AssetRuntimeInfo();
-                assetRuntimeInfo.AssetManifest = new AssetManifestInfo
-                {
-                    Name = assetName,
-                };
-                assetRuntimeInfo.BundleManifest = new BundleManifestInfo
-                {
-                    Directory = dir,
-                    BundleName = name,
-                    Group = string.Empty,
-                    IsRaw = true,
-                    IsScene = false,
-                    Assets = new List<AssetManifestInfo>(){assetRuntimeInfo.AssetManifest},
-                };
-                assetRuntimeInfoDict.Add(assetName,assetRuntimeInfo);
-
-                //创建外置原生资源的资源包运行时信息（是虚拟的）
-                BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo
-                {
-                    Manifest = assetRuntimeInfo.BundleManifest,
-                    BundleState = BundleRuntimeInfo.State.InReadWrite,
-                };
-                bundleRuntimeInfoDict.Add(bundleRuntimeInfo.Manifest.BundleIdentifyName,bundleRuntimeInfo);
-            }
-        }
-
-        /// <summary>
         /// 获取资源运行时信息
         /// </summary>
         internal static AssetRuntimeInfo GetAssetRuntimeInfo(object asset)
@@ -214,6 +165,55 @@ namespace CatAsset.Runtime
         internal static void RemoveSceneInstance(Scene scene)
         {
             sceneInstanceDict.Remove(scene.handle);
+        }
+
+        /// <summary>
+        /// 尝试创建外置原生资源的运行时信息
+        /// </summary>
+        internal static void TryCreateExternalRawAssetRuntimeInfo(string assetName)
+        {
+            if (!assetRuntimeInfoDict.TryGetValue(assetName,out AssetRuntimeInfo assetRuntimeInfo))
+            {
+                int index = assetName.LastIndexOf('/');
+                string dir = null;
+                string name;
+                if (index >= 0)
+                {
+                    //处理多级路径
+                    dir = assetName.Substring(0, index - 1);
+                    name = assetName.Substring(index + 1);
+                }
+                else
+                {
+                    name = assetName;
+                }
+
+
+                //创建外置原生资源的资源运行时信息
+                assetRuntimeInfo = new AssetRuntimeInfo();
+                assetRuntimeInfo.AssetManifest = new AssetManifestInfo
+                {
+                    Name = assetName,
+                };
+                assetRuntimeInfo.BundleManifest = new BundleManifestInfo
+                {
+                    Directory = dir,
+                    BundleName = name,
+                    Group = string.Empty,
+                    IsRaw = true,
+                    IsScene = false,
+                    Assets = new List<AssetManifestInfo>(){assetRuntimeInfo.AssetManifest},
+                };
+                assetRuntimeInfoDict.Add(assetName,assetRuntimeInfo);
+
+                //创建外置原生资源的资源包运行时信息（是虚拟的）
+                BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo
+                {
+                    Manifest = assetRuntimeInfo.BundleManifest,
+                    BundleState = BundleRuntimeInfo.State.InReadWrite,
+                };
+                bundleRuntimeInfoDict.Add(bundleRuntimeInfo.Manifest.BundleIdentifyName,bundleRuntimeInfo);
+            }
         }
 
         /// <summary>
@@ -416,7 +416,7 @@ namespace CatAsset.Runtime
                     {
                         continue;
                     }
-                    
+
                     var downPaiIndex = tempPaiDict[downAri.AssetManifest.Name];
                     pai.DownStreamIndexes.Add(downPaiIndex);
                 }

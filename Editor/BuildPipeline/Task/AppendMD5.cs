@@ -11,32 +11,34 @@ namespace CatAsset.Editor
     /// </summary>
     public class AppendMD5 : IBuildTask
     {
-        [InjectContext(ContextUsage.In)] 
+        [InjectContext(ContextUsage.In)]
         private IManifestParam manifestParam;
-        
-        [InjectContext(ContextUsage.In)] 
+
+        [InjectContext(ContextUsage.In)]
         private IBundleBuildParameters buildParam;
-        
+
         public int Version { get; }
-        
+
         public ReturnCode Run()
         {
             CatAssetManifest manifest = manifestParam.Manifest;
+            manifest.IsAppendMD5 = true;
+
             string outputFolder = ((BundleBuildParameters) buildParam).OutputFolder;
 
             foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
             {
                 bundleManifestInfo.IsAppendMD5 = true;
-                
+
                 string oldPath = Path.Combine(outputFolder,  bundleManifestInfo.BundleIdentifyName);
                 string newPath = Path.Combine(outputFolder,  bundleManifestInfo.RelativePath);
 
                 File.Move(oldPath,newPath);
             }
-            
+
             return ReturnCode.Success;
         }
 
-        
+
     }
 }

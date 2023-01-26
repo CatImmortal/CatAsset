@@ -14,10 +14,6 @@ namespace CatAsset.Runtime
     /// </summary>
     public static class RuntimeUtil
     {
-        /// <summary>
-        /// 资源清单文件名
-        /// </summary>
-        public const string ManifestFileName = "CatAssetManifest.json";
 
         /// <summary>
         /// 内置Shader资源包名
@@ -181,7 +177,7 @@ namespace CatAsset.Runtime
             {
                 return false;
             }
-            
+
             FileInfo fi = new FileInfo(path);
             bool isVerify = (ulong)fi.Length == info.Length;
             if (isVerify && !onlyLength)

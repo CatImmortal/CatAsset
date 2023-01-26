@@ -29,7 +29,7 @@ namespace CatAsset.Runtime
 
             Type assetType = typeof(T);
             AssetCategory category;
-            
+
             category = RuntimeUtil.GetAssetCategory(assetName);
             handler = AssetHandler<T>.Create(assetName,token, category);
 
@@ -40,7 +40,7 @@ namespace CatAsset.Runtime
                 handler.SetAsset(null);
                 return handler;
             }
-            
+
             if (assetRuntimeInfo.RefCount > 0)
             {
                 //引用计数>0
@@ -124,7 +124,7 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-            
+
             AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(scene);
 
             if (info == null)
@@ -150,7 +150,7 @@ namespace CatAsset.Runtime
 
             InternalUnloadAsset(info);
         }
-        
+
         /// <summary>
         /// 卸载资源
         /// </summary>
@@ -162,9 +162,9 @@ namespace CatAsset.Runtime
             if (assetRuntimeInfo.IsUnused())
             {
                 //引用计数为0
-                foreach (string dependency in assetRuntimeInfo.AssetManifest.Dependencies)
+                foreach (var dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                 {
-                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
+                    AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency.Name);
 
                     //场景资源 要在这里删除依赖链记录
                     //非场景资源在从内存中卸载时删除依赖链记录

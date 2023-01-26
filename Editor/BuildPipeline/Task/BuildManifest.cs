@@ -17,31 +17,31 @@ namespace CatAsset.Editor
     /// </summary>
     public class BuildManifest : IBuildTask
     {
-        [InjectContext(ContextUsage.In)] 
+        [InjectContext(ContextUsage.In)]
         private IBundleBuildParameters buildParam;
 
-        [InjectContext(ContextUsage.In)] 
+        [InjectContext(ContextUsage.In)]
         private IBundleBuildResults results;
-        
-        [InjectContext(ContextUsage.In)] 
+
+        [InjectContext(ContextUsage.In)]
         private IBundleBuildConfigParam configParam;
 
-        [InjectContext(ContextUsage.In)] 
+        [InjectContext(ContextUsage.In)]
         private IBundleBuildInfoParam infoParam;
 
-        [InjectContext(ContextUsage.Out)] 
+        [InjectContext(ContextUsage.Out)]
         private IManifestParam manifestParam;
-        
+
         /// <inheritdoc />
         public int Version => 1;
 
-        
+
         /// <inheritdoc />
         public ReturnCode Run()
         {
             string outputFolder = ((BundleBuildParameters) buildParam).OutputFolder;
 
-            
+
             HashSet<string> atlasPackableSet = new HashSet<string>();
             if (infoParam.NormalBundleBuilds.Count > 0)
             {
@@ -57,8 +57,8 @@ namespace CatAsset.Editor
                     }
                 }
             }
-           
-            
+
+
             //创建资源清单
             CatAssetManifest manifest = new CatAssetManifest
             {
@@ -66,6 +66,8 @@ namespace CatAsset.Editor
                 ManifestVersion = configParam.Config.ManifestVersion,
                 Platform = configParam.TargetPlatform.ToString(),
                 Bundles = new List<BundleManifestInfo>(),
+                Assets = new List<AssetManifestInfo>(),
+
             };
 
             //增加内置Shader资源包的构建信息
@@ -77,7 +79,7 @@ namespace CatAsset.Editor
                         configParam.Config.GlobalCompress);
                 infoParam.NormalBundleBuilds.Add(bundleBuildInfo);
             }
-            
+
             //创建普通资源包的清单信息
             foreach (BundleBuildInfo bundleBuildInfo in infoParam.NormalBundleBuilds)
             {
@@ -87,6 +89,8 @@ namespace CatAsset.Editor
                     BundleName = bundleBuildInfo.BundleName,
                     Group = bundleBuildInfo.Group,
                     IsRaw = false,
+                    Assets = new List<AssetManifestInfo>(),
+                    AssetIDs = new List<int>(),
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
 
@@ -119,12 +123,11 @@ namespace CatAsset.Editor
                     {
                         Name = assetBuildInfo.Name,
                         IsAtlasPackable = atlasPackableSet.Contains(assetBuildInfo.Name),
+                        DependencyIDs = new List<int>(),
                     };
 
+                    manifest.Assets.Add(assetManifestInfo);
                     bundleManifestInfo.Assets.Add(assetManifestInfo);
-
-                    //依赖列表不需要进行递归记录 因为加载的时候会对依赖进行递归加载
-                    assetManifestInfo.Dependencies = EditorUtil.GetDependencies(assetManifestInfo.Name, false);
                 }
             }
 
@@ -138,6 +141,8 @@ namespace CatAsset.Editor
                     Group = bundleBuildInfo.Group,
                     IsRaw = true,
                     IsScene = false,
+                    Assets = new List<AssetManifestInfo>(),
+                    AssetIDs = new List<int>(),
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
 
@@ -145,19 +150,52 @@ namespace CatAsset.Editor
                 FileInfo fi = new FileInfo(fullPath);
                 bundleManifestInfo.Length = (ulong)fi.Length;
                 bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
-                
+
                 //资源信息
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                 {
                     Name = bundleBuildInfo.Assets[0].Name,
                 };
+
+                manifest.Assets.Add(assetManifestInfo);
                 bundleManifestInfo.Assets.Add(assetManifestInfo);
             }
 
+            //排序清单列表
             manifest.Bundles.Sort();
+            manifest.Assets.Sort();
+
+            //资源名 -> ID
+            Dictionary<string, int> assetNameToID = new Dictionary<string, int>();
+
+            //建立ID映射
+            for (int i = 0; i < manifest.Assets.Count; i++)
+            {
+                assetNameToID.Add(manifest.Assets[i].Name,i);
+            }
+
+            //写入ID记录
+            foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
+            {
+                foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
+                {
+                    int id = assetNameToID[assetManifestInfo.Name];
+                    bundleManifestInfo.AssetIDs.Add(id);
+                }
+            }
+            foreach (AssetManifestInfo assetManifestInfo in manifest.Assets)
+            {
+                //依赖列表不需要进行递归记录 因为加载的时候会对依赖进行递归加载
+                List<string> dependencies = EditorUtil.GetDependencies(assetManifestInfo.Name, false);
+                foreach (string dependency in dependencies)
+                {
+                    int id = assetNameToID[dependency];
+                    assetManifestInfo.DependencyIDs.Add(id);
+                }
+            }
 
             manifestParam = new ManifestParam(manifest,outputFolder);
-            
+
             return ReturnCode.Success;
         }
     }

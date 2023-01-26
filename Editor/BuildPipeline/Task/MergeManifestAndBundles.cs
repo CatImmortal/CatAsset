@@ -13,18 +13,18 @@ namespace CatAsset.Editor
     /// </summary>
     public class MergeManifestAndBundles : IBuildTask
     {
-        [InjectContext(ContextUsage.In)] 
+        [InjectContext(ContextUsage.In)]
         private IBundleBuildParameters buildParam;
-        
-        [InjectContext(ContextUsage.In)] 
+
+        [InjectContext(ContextUsage.In)]
         private IBundleBuildConfigParam configParam;
-        
-        [InjectContext(ContextUsage.In)] 
+
+        [InjectContext(ContextUsage.In)]
         private IManifestParam manifestParam;
-        
+
         /// <inheritdoc />
         public int Version => 1;
-        
+
         /// <inheritdoc />
         public ReturnCode Run()
         {
@@ -44,7 +44,7 @@ namespace CatAsset.Editor
                     mainManifestVersion--;
                     mainOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                         bundleBuildConfig.ManifestVersion - 1);
-                    string mainManifestPath = Path.Combine(mainOutputPath,RuntimeUtil.ManifestFileName);
+                    string mainManifestPath = Path.Combine(mainOutputPath,CatAssetManifest.ManifestJsonFileName);
 
                     if (File.Exists(mainManifestPath))
                     {
@@ -53,7 +53,7 @@ namespace CatAsset.Editor
                         mainManifest = JsonUtility.FromJson<CatAssetManifest>(json);
                         break;
                     }
-                    
+
                 } while (mainManifestVersion >= 0);
 
                 if (mainManifest == null)
@@ -61,7 +61,7 @@ namespace CatAsset.Editor
                     //不存在前一个版本的主资源清单 意味着不需要合并
                     return ReturnCode.SuccessNotRun;
                 }
-                
+
                 foreach (BundleManifestInfo bundleManifestInfo in mainManifest.Bundles)
                 {
                     if (!bundleManifestInfo.IsRaw)
@@ -71,7 +71,7 @@ namespace CatAsset.Editor
 
                         string fullPath = Path.Combine(directory, bundleManifestInfo.RelativePath);
                         string fullDirectory =  Path.Combine(directory, bundleManifestInfo.Directory);
-                    
+
                         if (!Directory.Exists(fullDirectory))
                         {
                             //目录不存在则创建
@@ -79,17 +79,17 @@ namespace CatAsset.Editor
                         }
 
                         fi.CopyTo(fullPath);
-                    
+
                         //合并资源清单记录
                         rawManifest.Bundles.Add(bundleManifestInfo);
                     }
                 }
 
                 rawManifest.Bundles.Sort();
-            
+
             return ReturnCode.Success;
         }
 
-  
+
     }
 }
