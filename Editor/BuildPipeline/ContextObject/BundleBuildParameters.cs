@@ -12,7 +12,7 @@ namespace CatAsset.Editor
     {
 
         /// <summary>
-        /// 资源包相对路径 -> 资源包构建信息
+        /// 资源包标识名 -> 资源包构建信息
         /// </summary>
         private Dictionary<string, BundleBuildInfo> bundleBuildInfos = new Dictionary<string, BundleBuildInfo>();
 
