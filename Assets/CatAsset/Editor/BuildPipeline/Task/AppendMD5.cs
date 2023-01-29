@@ -22,7 +22,6 @@ namespace CatAsset.Editor
         public ReturnCode Run()
         {
             CatAssetManifest manifest = manifestParam.Manifest;
-            manifest.IsAppendMD5 = true;
 
             string outputFolder = ((BundleBuildParameters) buildParam).OutputFolder;
 

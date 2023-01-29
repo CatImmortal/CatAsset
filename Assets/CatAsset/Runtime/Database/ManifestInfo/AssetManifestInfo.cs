@@ -14,18 +14,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源名
         /// </summary>
-        [NonSerialized]
         public string Name;
-        
-        public int NameNodeID;
-        
+
         /// <summary>
         /// 依赖资源名列表
         /// </summary>
-        [NonSerialized]
-        public List<string> Dependencies = new List<string>();
-        
-        public List<int> DependencyNodeIDs;
+        public List<string> Dependencies;
 
         /// <summary>
         /// 是否是图集散图

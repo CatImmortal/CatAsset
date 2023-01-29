@@ -88,7 +88,6 @@ namespace CatAsset.Editor
                     Group = bundleBuildInfo.Group,
                     IsRaw = false,
                     Assets = new List<AssetManifestInfo>(),
-                    AssetIDs = new List<int>(),
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
 
@@ -121,7 +120,6 @@ namespace CatAsset.Editor
                     {
                         Name = assetBuildInfo.Name,
                         IsAtlasPackable = atlasPackableSet.Contains(assetBuildInfo.Name),
-                        DependencyNodeIDs = new List<int>(),
                         Dependencies = EditorUtil.GetDependencies(assetBuildInfo.Name,false),
                     };
                     
@@ -140,7 +138,6 @@ namespace CatAsset.Editor
                     IsRaw = true,
                     IsScene = false,
                     Assets = new List<AssetManifestInfo>(),
-                    AssetIDs = new List<int>(),
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
 
@@ -153,8 +150,6 @@ namespace CatAsset.Editor
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                 {
                     Name = bundleBuildInfo.Assets[0].Name,
-                    DependencyNodeIDs = new List<int>(),
-                    Dependencies = new List<string>(),
                 };
                 
                 bundleManifestInfo.Assets.Add(assetManifestInfo);

@@ -130,7 +130,7 @@ namespace CatAsset.Editor
         /// </summary>
         public static List<string> GetDependencies(string assetName,bool recursive = true)
         {
-            List<string> result  = new List<string>();
+            List<string> result = new List<string>();
             
             string[] dependencies = AssetDatabase.GetDependencies(assetName,recursive);
 
@@ -138,7 +138,7 @@ namespace CatAsset.Editor
             {
                 return result;
             }
-
+            
             for (int i = 0; i < dependencies.Length; i++)
             {
                 string dependencyName = dependencies[i];

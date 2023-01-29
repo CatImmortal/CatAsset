@@ -41,18 +41,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 目录名
         /// </summary>
-        [NonSerialized]
         public string Directory;
-
-        public int DirectoryNodeID;
-
+        
         /// <summary>
         /// 资源包名
         /// </summary>
-        [NonSerialized]
         public string BundleName;
-
-        public int BundleNameNodeID;
 
         private string bundleIdentifyName;
         /// <summary>
@@ -74,10 +68,8 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源组
         /// </summary>
-        [NonSerialized]
         public string Group;
 
-        public int GroupNodeID;
         
         /// <summary>
         /// 是否为原生资源包
@@ -117,13 +109,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源清单信息列表
         /// </summary>
-        [NonSerialized]
         public List<AssetManifestInfo> Assets;
-
-        /// <summary>
-        /// 资源清单信息ID列表
-        /// </summary>
-        public List<int> AssetIDs;
 
         public int CompareTo(BundleManifestInfo other)
         {
