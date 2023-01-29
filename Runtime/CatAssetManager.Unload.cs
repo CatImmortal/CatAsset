@@ -94,6 +94,10 @@ namespace CatAsset.Runtime
             Debug.Log($"已卸载资源:{info}");
 
             //尝试将可卸载的依赖也从内存中卸载
+            if (info.AssetManifest.Dependencies == null)
+            {
+                return;
+            }
             foreach (var dependency in info.AssetManifest.Dependencies)
             {
                 AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);
@@ -143,6 +147,10 @@ namespace CatAsset.Runtime
                     assetRuntimeInfo.ClearDependencyChainUpStream();
 
                     //尝试将可卸载的依赖从内存中卸载
+                    if (assetRuntimeInfo.AssetManifest.Dependencies == null)
+                    {
+                        continue;
+                    }
                     foreach (var dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                     {
                         AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);

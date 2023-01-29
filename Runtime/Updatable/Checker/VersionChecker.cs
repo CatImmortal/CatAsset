@@ -52,9 +52,9 @@ namespace CatAsset.Runtime
             onVersionChecked = callback;
 
             //进行只读区 读写区 远端三方的资源清单检查
-            string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestJsonFileName);
-            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestJsonFileName, true);
-            string remoteManifestPath = RuntimeUtil.GetRemotePath(CatAssetManifest.ManifestJsonFileName);
+            string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestBinaryFileName);
+            string readWriteManifestPath = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestBinaryFileName, true);
+            string remoteManifestPath = RuntimeUtil.GetRemotePath(CatAssetManifest.ManifestBinaryFileName);
 
 
             CatAssetManager.AddWebRequestTask(readOnlyManifestPath, readOnlyManifestPath, CheckReadOnlyManifest,
@@ -79,7 +79,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManifest manifest = CatAssetManifest.DeserializeFromJson(uwr.downloadHandler.text);
+            CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
@@ -106,7 +106,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManifest manifest = CatAssetManifest.DeserializeFromJson(uwr.downloadHandler.text);
+            CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
             foreach (BundleManifestInfo info in manifest.Bundles)
             {
                 string path = RuntimeUtil.GetReadWritePath(info.RelativePath);
@@ -139,7 +139,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManifest manifest = CatAssetManifest.DeserializeFromJson(uwr.downloadHandler.text);
+            CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
