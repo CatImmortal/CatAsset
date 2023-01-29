@@ -23,12 +23,8 @@ namespace CatAsset.Editor
             string writePath = manifestParam.WritePath;
             CatAssetManifest manifest = manifestParam.Manifest;
 
-            //写入清单文件json
-            string json = manifest.SerializeToJson();
-            using (StreamWriter sw = new StreamWriter(Path.Combine(writePath, CatAssetManifest.ManifestJsonFileName)))
-            {
-                sw.Write(json);
-            }
+            manifest.WriteFile(writePath,false);
+            manifest.WriteFile(writePath,true);
 
             return ReturnCode.Success;
         }

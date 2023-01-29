@@ -43,17 +43,13 @@ namespace CatAsset.Runtime
             
             manifest.Bundles = bundleInfos;
 
-            //写入清单文件json
-            string json = manifest.SerializeToJson();
-            string path = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestJsonFileName);
+            //写入清单文件
+            string path = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestBinaryFileName);
             if (File.Exists(path))
             {
                 File.Delete(path);
             }
-            using (StreamWriter sw = new StreamWriter(path))
-            {
-                sw.Write(json);
-            }
+            manifest.WriteFile(path,true);
         }
 
         /// <summary>

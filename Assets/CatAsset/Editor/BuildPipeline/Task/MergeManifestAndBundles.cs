@@ -44,13 +44,13 @@ namespace CatAsset.Editor
                     mainManifestVersion--;
                     mainOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
                         bundleBuildConfig.ManifestVersion - 1);
-                    string mainManifestPath = Path.Combine(mainOutputPath,CatAssetManifest.ManifestJsonFileName);
+                    string mainManifestPath = Path.Combine(mainOutputPath,CatAssetManifest.ManifestBinaryFileName);
 
                     if (File.Exists(mainManifestPath))
                     {
                         //存在前一个版本的主资源清单 读取
-                        string json = File.ReadAllText(mainManifestPath);
-                        mainManifest = CatAssetManifest.DeserializeFromJson(json);
+                        byte[] bytes = File.ReadAllBytes(mainManifestPath);
+                        mainManifest = CatAssetManifest.DeserializeFromBinary(bytes);
                         break;
                     }
 

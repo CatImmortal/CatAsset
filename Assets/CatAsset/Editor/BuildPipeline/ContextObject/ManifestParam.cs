@@ -17,6 +17,5 @@ namespace CatAsset.Editor
             WritePath = writePath;
         }
         
-        
     }
 }

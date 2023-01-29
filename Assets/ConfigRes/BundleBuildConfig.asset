@@ -15,41 +15,55 @@ MonoBehaviour:
   ManifestVersion: 3
   TargetPlatforms: 13000000
   Options: 9
+  GlobalCompress: 2
   OutputPath: ./AssetBundles
   IsCopyToReadOnlyDirectory: 1
   CopyGroup: Base
   Directories:
   - DirectoryObj: {fileID: 102900000, guid: 30fa06d01ac125747a7588bc1cbcd1c8, type: 3}
     BuildRuleName: NAssetToOneBundle
-    RuleRegex: 
+    Filter: 
+    Regex: 
     Group: Chapter1
+    CompressOption: 0
   - DirectoryObj: {fileID: 102900000, guid: 6eb4a8b392a514541a05bf070f7287f4, type: 3}
     BuildRuleName: NAssetToOneBundle
-    RuleRegex: 
+    Filter: 
+    Regex: 
     Group: Chapter2
+    CompressOption: 0
   - DirectoryObj: {fileID: 102900000, guid: 1cec1ff63c363df46904108f5ec5e3aa, type: 3}
     BuildRuleName: NAssetToOneBundle
-    RuleRegex: 
+    Filter: 
+    Regex: 
     Group: Base
+    CompressOption: 0
   - DirectoryObj: {fileID: 102900000, guid: e4acd43a91815634797bdbb510ca081c, type: 3}
     BuildRuleName: NAssetToOneBundle
-    RuleRegex: 
+    Filter: 
+    Regex: 
     Group: Base
+    CompressOption: 0
   - DirectoryObj: {fileID: 102900000, guid: 2121d2e301b5b414789785d52758288c, type: 3}
     BuildRuleName: NAssetToNRawBundle
-    RuleRegex: 
+    Filter: 
+    Regex: 
     Group: Base
+    CompressOption: 0
   - DirectoryObj: {fileID: 102900000, guid: c4d1233b78447df4b846e8d135deebd3, type: 3}
     BuildRuleName: NAssetToNBundle
-    RuleRegex: 
+    Filter: 
+    Regex: 
     Group: Base
+    CompressOption: 0
   Bundles:
-  - RelativePath: BundleRes/Chapter1.bundle
-    DirectoryName: BundleRes
+  - DirectoryName: BundleRes
     BundleName: Chapter1.bundle
+    BundleIdentifyName: BundleRes/Chapter1.bundle
     Group: Chapter1
     IsRaw: 0
     AssetsLength: 3704
+    CompressOption: 2
     Assets:
     - Name: Assets/BundleRes/Chapter1/B1.prefab
       Length: 926
@@ -59,12 +73,13 @@ MonoBehaviour:
       Length: 926
     - Name: Assets/BundleRes/Chapter1/B4.prefab
       Length: 926
-  - RelativePath: BundleRes/Chpater2.bundle
-    DirectoryName: BundleRes
+  - DirectoryName: BundleRes
     BundleName: Chpater2.bundle
+    BundleIdentifyName: BundleRes/Chpater2.bundle
     Group: Chapter2
     IsRaw: 0
     AssetsLength: 3704
+    CompressOption: 2
     Assets:
     - Name: Assets/BundleRes/Chpater2/B1.prefab
       Length: 926
@@ -74,12 +89,13 @@ MonoBehaviour:
       Length: 926
     - Name: Assets/BundleRes/Chpater2/B4.prefab
       Length: 926
-  - RelativePath: BundleRes/PrefabA.bundle
-    DirectoryName: BundleRes
+  - DirectoryName: BundleRes
     BundleName: PrefabA.bundle
+    BundleIdentifyName: BundleRes/PrefabA.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 5830
+    CompressOption: 2
     Assets:
     - Name: Assets/BundleRes/PrefabA/A1.prefab
       Length: 1457
@@ -89,12 +105,13 @@ MonoBehaviour:
       Length: 1457
     - Name: Assets/BundleRes/PrefabA/A4.prefab
       Length: 1459
-  - RelativePath: BundleRes/PrefabB.bundle
-    DirectoryName: BundleRes
+  - DirectoryName: BundleRes
     BundleName: PrefabB.bundle
+    BundleIdentifyName: BundleRes/PrefabB.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 3704
+    CompressOption: 2
     Assets:
     - Name: Assets/BundleRes/PrefabB/B1.prefab
       Length: 926
@@ -104,30 +121,36 @@ MonoBehaviour:
       Length: 926
     - Name: Assets/BundleRes/PrefabB/B4.prefab
       Length: 926
-  - RelativePath: BundleRes/RawText/rawText1.txt
-    DirectoryName: BundleRes/RawText
+  - DirectoryName: BundleRes/RawText
     BundleName: rawText1.txt
+    BundleIdentifyName: BundleRes/RawText/rawText1.txt
     Group: Base
     IsRaw: 1
     AssetsLength: 17
+    CompressOption: 2
     Assets:
     - Name: Assets/BundleRes/RawText/rawText1.txt
       Length: 17
-  - RelativePath: BundleRes/Scene/New Scene_unity.bundle
-    DirectoryName: BundleRes/Scene
+  - DirectoryName: BundleRes/Scene
     BundleName: New Scene_unity.bundle
+    BundleIdentifyName: BundleRes/Scene/New Scene_unity.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 5801
+    CompressOption: 2
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
       Length: 5801
-  - RelativePath: BundleRes/Scene/New Scene2_unity.bundle
-    DirectoryName: BundleRes/Scene
+  - DirectoryName: BundleRes/Scene
     BundleName: New Scene2_unity.bundle
+    BundleIdentifyName: BundleRes/Scene/New Scene2_unity.bundle
     Group: Base
     IsRaw: 0
     AssetsLength: 5801
+    CompressOption: 2
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene2.unity
       Length: 5801
+  BundleCount: 7
+  AssetCount: 19
+  IsExactTextureSize: 0

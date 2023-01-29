@@ -70,7 +70,6 @@ namespace CatAsset.Runtime
         /// </summary>
         public string Group;
 
-        
         /// <summary>
         /// 是否为原生资源包
         /// </summary>
@@ -99,7 +98,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 文件Hash值
         /// </summary>
-        public string Hash;
+        public string Hash = string.Empty;
 
         /// <summary>
         /// 是否依赖内置Shader资源包
@@ -150,17 +149,50 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 序列化为二进制数据
         /// </summary>
-        public static byte[] Serialize()
+        public void Serialize(BinaryWriter writer)
         {
-            return null;
+            writer.Write(Directory);
+            writer.Write(BundleName);
+            writer.Write(Group);
+            writer.Write(IsRaw);
+            writer.Write(IsScene);
+            writer.Write(Length);
+            writer.Write(MD5);
+            writer.Write(IsAppendMD5);
+            writer.Write(Hash);
+            writer.Write(IsDependencyBuiltInShaderBundle);
+            writer.Write(Assets.Count);
+            foreach (AssetManifestInfo assetManifestInfo in Assets)
+            {
+                assetManifestInfo.Serialize(writer);
+            }
         }
 
         /// <summary>
         /// 从二进制数据反序列化
         /// </summary>
-        public BundleManifestInfo Deserialize(byte[] bytes)
+        public static BundleManifestInfo Deserialize(BinaryReader reader,int serializeVersion)
         {
-            return null;
+            BundleManifestInfo info = new BundleManifestInfo();
+            info.Directory = reader.ReadString();
+            info.BundleName = reader.ReadString();
+            info.Group = reader.ReadString();
+            info.IsRaw = reader.ReadBoolean();
+            info.IsScene = reader.ReadBoolean();
+            info.Length = reader.ReadUInt64();
+            info.MD5 = reader.ReadString();
+            info.IsAppendMD5 = reader.ReadBoolean();
+            info.Hash = reader.ReadString();
+            info.IsDependencyBuiltInShaderBundle = reader.ReadBoolean();
+
+            int count = reader.ReadInt32();
+            info.Assets = new List<AssetManifestInfo>(count);
+            for (int i = 0; i < count; i++)
+            {
+                AssetManifestInfo assetManifestInfo = AssetManifestInfo.Deserialize(reader,serializeVersion);
+                info.Assets.Add(assetManifestInfo);
+            }
+            return info;
         }
     }
 }

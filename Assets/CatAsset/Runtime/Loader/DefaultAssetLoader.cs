@@ -162,6 +162,10 @@ namespace CatAsset.Runtime
             if (assetRuntimeInfo.IsUnused())
             {
                 //引用计数为0
+                if (assetRuntimeInfo.AssetManifest.Dependencies == null)
+                {
+                    return;
+                }
                 foreach (var dependency in assetRuntimeInfo.AssetManifest.Dependencies)
                 {
                     AssetRuntimeInfo dependencyRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(dependency);

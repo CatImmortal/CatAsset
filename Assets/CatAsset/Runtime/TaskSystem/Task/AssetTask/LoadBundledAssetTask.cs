@@ -254,12 +254,11 @@ namespace CatAsset.Runtime
             LoadState = LoadBundledAssetState.DependenciesLoading;
 
             //加载依赖
-            totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
-
-            if (totalDependencyCount == 0)
+            if (AssetRuntimeInfo.AssetManifest.Dependencies == null)
             {
                 return;
             }
+            totalDependencyCount = AssetRuntimeInfo.AssetManifest.Dependencies.Count;
 
 #if UNITY_EDITOR
             var oldLoader = CatAssetManager.GetAssetLoader();
