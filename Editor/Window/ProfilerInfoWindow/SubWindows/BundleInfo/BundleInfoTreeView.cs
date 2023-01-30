@@ -111,7 +111,7 @@ namespace CatAsset.Editor
                         assetOrdered = bundleInfo.InMemoryAssets.Order(info => info.Name, ascending);
                         bundleInfo.InMemoryAssets = new List<ProfilerAssetInfo>(assetOrdered);
                     }
-                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.RelativePath, ascending);
+                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.BundleIdentifyName, ascending);
                     break;
 
                 case ColumnType.Group:
@@ -183,7 +183,7 @@ namespace CatAsset.Editor
             {
                 var bundleNode = new TreeViewDataItem<ProfilerBundleInfo>()
                 {
-                    id = bundleInfo.RelativePath.GetHashCode(), displayName = $"{bundleInfo.RelativePath},{bundleInfo.Group}",Data = bundleInfo,
+                    id = bundleInfo.BundleIdentifyName.GetHashCode(), displayName = $"{bundleInfo.BundleIdentifyName},{bundleInfo.Group}",Data = bundleInfo,
                 };
 
                 foreach (var assetInfo in bundleInfo.InMemoryAssets)
@@ -239,7 +239,7 @@ namespace CatAsset.Editor
                     args.rowRect = cellRect;
                     if (bundleItem != null)
                     {
-                        args.label = bundleItem.Data.RelativePath;
+                        args.label = bundleItem.Data.BundleIdentifyName;
                     }
                     else
                     {

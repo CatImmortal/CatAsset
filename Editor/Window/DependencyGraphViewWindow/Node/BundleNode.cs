@@ -12,7 +12,7 @@ namespace CatAsset.Editor
             set
             {
                 base.Owner = value;
-                title = Owner.RelativePath;
+                title = Owner.BundleIdentifyName;
             }
         }
     }

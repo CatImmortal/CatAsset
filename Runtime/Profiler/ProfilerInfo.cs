@@ -84,7 +84,7 @@ namespace CatAsset.Runtime
                     //资源包中在内存中的资源
                     var pai = AssetInfoList[paiIndex];
                     pai.Group = pbi.Group;
-                    pai.Bundle = pbi.RelativePath;
+                    pai.Bundle = pbi.BundleIdentifyName;
 
                     pbi.InMemoryAssets.Add(pai);
                     pbi.InMemoryAssetSize += pai.MemorySize;
