@@ -92,9 +92,9 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取资源包运行时信息
         /// </summary>
-        internal static BundleRuntimeInfo GetBundleRuntimeInfo(string bundleRelativePath)
+        internal static BundleRuntimeInfo GetBundleRuntimeInfo(string bundleIdentifyName)
         {
-            bundleRuntimeInfoDict.TryGetValue(bundleRelativePath, out BundleRuntimeInfo info);
+            bundleRuntimeInfoDict.TryGetValue(bundleIdentifyName, out BundleRuntimeInfo info);
             return info;
         }
 
@@ -338,7 +338,7 @@ namespace CatAsset.Runtime
 
                 int pbiIndex = info.BundleInfoList.Count;
                 info.BundleInfoList.Add(pbi);
-                tempPbiDict.Add(pbi.RelativePath, pbiIndex);
+                tempPbiDict.Add(pbi.BundleIdentifyName, pbiIndex);
 
                 foreach (var ami in bri.Manifest.Assets)
                 {
@@ -377,7 +377,7 @@ namespace CatAsset.Runtime
             {
                 var pbiIndex = pbiPair.Value;
                 var pbi = info.BundleInfoList[pbiIndex];
-                var bri = GetBundleRuntimeInfo(pbi.RelativePath);
+                var bri = GetBundleRuntimeInfo(pbi.BundleIdentifyName);
 
                 //资源包依赖链索引
                 foreach (var upBri in bri.DependencyChain.UpStream)

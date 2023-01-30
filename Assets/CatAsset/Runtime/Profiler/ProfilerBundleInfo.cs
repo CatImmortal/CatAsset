@@ -10,9 +10,9 @@ namespace CatAsset.Runtime
     public class ProfilerBundleInfo : IReference, IComparable<ProfilerBundleInfo>,IDependencyChainOwner<ProfilerBundleInfo>
     {
         /// <summary>
-        /// 相对路径
+        /// 资源包标识名
         /// </summary>
-        public string RelativePath;
+        public string BundleIdentifyName;
 
         /// <summary>
         /// 资源组
@@ -73,18 +73,18 @@ namespace CatAsset.Runtime
 
         public override string ToString()
         {
-            return RelativePath;
+            return BundleIdentifyName;
         }
 
         public int CompareTo(ProfilerBundleInfo other)
         {
-            return RelativePath.CompareTo(other.RelativePath);
+            return BundleIdentifyName.CompareTo(other.BundleIdentifyName);
         }
 
-        public static ProfilerBundleInfo Create(string relativePath,string group,bool isRaw,ulong length,int referencingAssetCount,int totalAssetCount)
+        public static ProfilerBundleInfo Create(string bundleIdentifyName,string group,bool isRaw,ulong length,int referencingAssetCount,int totalAssetCount)
         {
             ProfilerBundleInfo info = ReferencePool.Get<ProfilerBundleInfo>();
-            info.RelativePath = relativePath;
+            info.BundleIdentifyName = bundleIdentifyName;
             info.Group = group;
             info.IsRaw = isRaw;
             info.Length = length;
@@ -95,7 +95,7 @@ namespace CatAsset.Runtime
 
         public void Clear()
         {
-            RelativePath = default;
+            BundleIdentifyName = default;
             Group = default;
             IsRaw = default;
             Length = default;
