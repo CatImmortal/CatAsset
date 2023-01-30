@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using UnityEngine;
 
@@ -24,10 +25,15 @@ namespace CatAsset.Runtime
         public List<int> ChildIDs;
 
         [NonSerialized]
-        public Dictionary<string, PrefixTreeNode> ChildDict = new Dictionary<string, PrefixTreeNode>();
+        public Dictionary<string, PrefixTreeNode> ChildDict;
 
         public PrefixTreeNode GetChild(string content)
         {
+            if (ChildDict == null)
+            {
+                ChildDict = new Dictionary<string, PrefixTreeNode>();
+            }
+            
             if (!ChildDict.TryGetValue(content,out var child))
             {
                 child = new PrefixTreeNode();
@@ -70,6 +76,53 @@ namespace CatAsset.Runtime
             string str = cachedSB.ToString();
             cachedSB.Clear();
             return str;
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(Content);
+            writer.Write(ParentID);
+            if (ChildIDs == null)
+            {
+                writer.Write(0);
+                return;
+            }
+            writer.Write(ChildIDs.Count);
+            foreach (int id in ChildIDs)
+            {
+                writer.Write(id);
+            }
+        }
+
+        public static PrefixTreeNode Deserialize(BinaryReader reader, int serializeVersion)
+        {
+            PrefixTreeNode node = new PrefixTreeNode();
+            try
+            {
+                node.Content = reader.ReadString();
+                node.ParentID = reader.ReadInt32();
+                int count = reader.ReadInt32();
+                if (count == 0)
+                {
+                    return node;
+                }
+
+                node.ChildIDs = new List<int>(count);
+                for (int i = 0; i < count; i++)
+                {
+                    int id = reader.ReadInt32();
+                    node.ChildIDs.Add(id);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"前缀树节点{node.Content}反序列化失败:{e}");
+                throw;
+            }
+           
+            
+
+            return node;
         }
     }
 }

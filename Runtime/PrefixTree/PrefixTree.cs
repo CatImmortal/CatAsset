@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace CatAsset.Runtime
 {
@@ -9,16 +10,14 @@ namespace CatAsset.Runtime
     [Serializable]
     public class PrefixTree
     {
-
-        public List<PrefixTreeNode> AllNodes = new List<PrefixTreeNode>();
-
+        public List<PrefixTreeNode> AllNodes;
+        public List<int> RootIDs;
+        
         /// <summary>
         /// 节点 -> 节点ID 从0开始
         /// </summary>
         [NonSerialized]
         public Dictionary<PrefixTreeNode, int> NodeToID = new Dictionary<PrefixTreeNode, int>();
-
-        public List<int> RootIDs = new List<int>();
 
         [NonSerialized]
         private Dictionary<string, PrefixTreeNode> rootDict = new Dictionary<string, PrefixTreeNode>();
@@ -45,7 +44,7 @@ namespace CatAsset.Runtime
         public void PreSerialize()
         {
             NodeToID.Clear();
-            AllNodes.Clear();
+            AllNodes = new List<PrefixTreeNode>();
             
             //收集所有节点
             foreach (var pair in rootDict)
@@ -55,7 +54,7 @@ namespace CatAsset.Runtime
             }
             
             //记录ID
-            RootIDs.Clear();
+            RootIDs = new List<int>();
             foreach (var pair in rootDict)
             {
                 var root = pair.Value;
@@ -69,7 +68,11 @@ namespace CatAsset.Runtime
         {
             NodeToID.Add(node,AllNodes.Count);
             AllNodes.Add(node);
-            
+
+            if (node.ChildDict == null)
+            {
+                return;
+            }
             
             foreach (var pair in node.ChildDict)
             {
@@ -84,15 +87,20 @@ namespace CatAsset.Runtime
             {
                 node.ParentID = NodeToID[node.Parent];
             }
-          
-            node.ChildIDs = new List<int>();
-            foreach (var pair in node.ChildDict)
+
+            if (node.ChildDict != null)
             {
-                PrefixTreeNode child = pair.Value;
-                node.ChildIDs.Add(NodeToID[child]);
+                node.ChildIDs = new List<int>(node.ChildDict.Count);
+                foreach (var pair in node.ChildDict)
+                {
+                    PrefixTreeNode child = pair.Value;
+                    node.ChildIDs.Add(NodeToID[child]);
                 
-                BuildIDRecord(child);
+                    BuildIDRecord(child);
+                }
             }
+            
+            
         }
 
         public void PostDeserialize()
@@ -110,7 +118,13 @@ namespace CatAsset.Runtime
         private void BuildReference(PrefixTreeNode node)
         {
             node.Parent = GetNode(node.ParentID);
-            
+
+            if (node.ChildIDs == null)
+            {
+                return;
+            }
+
+            node.ChildDict = new Dictionary<string, PrefixTreeNode>(node.ChildIDs.Count);
             foreach (int childID in node.ChildIDs)
             {
                 var child = GetNode(childID);
@@ -128,6 +142,43 @@ namespace CatAsset.Runtime
             }
             
             return AllNodes[id];
+        }
+
+        public void Serialize(BinaryWriter writer)
+        {
+            writer.Write(AllNodes.Count);
+            foreach (PrefixTreeNode node in AllNodes)
+            {
+                node.Serialize(writer);
+            }
+            
+            writer.Write(RootIDs.Count);
+            foreach (int id in RootIDs)
+            {
+                writer.Write(id);
+            }
+        }
+
+        public static PrefixTree Deserialize(BinaryReader reader, int serializeVersion)
+        {
+            PrefixTree prefixTree = new PrefixTree();
+            int count = reader.ReadInt32();
+            prefixTree.AllNodes = new List<PrefixTreeNode>(count);
+            for (int i = 0; i < count; i++)
+            {
+                var node = PrefixTreeNode.Deserialize(reader, serializeVersion);
+                prefixTree.AllNodes.Add(node);
+            }
+
+            count = reader.ReadInt32();
+            prefixTree.RootIDs = new List<int>(count);
+            for (int i = 0; i < count; i++)
+            {
+                int id = reader.ReadInt32();
+                prefixTree.RootIDs.Add(id);
+            }
+
+            return prefixTree;
         }
     }
 }

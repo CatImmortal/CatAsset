@@ -43,28 +43,113 @@ namespace CatAsset.Runtime
         public string Platform;
 
         /// <summary>
+        /// 前缀树
+        /// </summary>
+        public PrefixTree PrefixTree;
+        
+        /// <summary>
         /// 资源包清单信息列表
         /// </summary>
         public List<BundleManifestInfo> Bundles;
 
         /// <summary>
-        /// 序列化前的预处理方法
+        /// 序列化二进制数据前的预处理方法
         /// </summary>
-        private void PreSerialize()
+        private void PreSerializeToBinary()
         {
             Bundles.Sort();
             foreach (BundleManifestInfo bundleManifestInfo in Bundles)
             {
                 bundleManifestInfo.Assets.Sort();
             }
+
+            PrefixTree = new PrefixTree();
+            //创建前缀树节点
+            foreach (BundleManifestInfo bundleManifestInfo in Bundles)
+            {
+                PrefixTree.GetOrCreateNode(bundleManifestInfo.Directory);
+                PrefixTree.GetOrCreateNode(bundleManifestInfo.BundleName);
+                PrefixTree.GetOrCreateNode(bundleManifestInfo.Group);
+
+                foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
+                {
+                    PrefixTree.GetOrCreateNode(assetManifestInfo.Name);
+                    if (assetManifestInfo.Dependencies == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (string dependency in assetManifestInfo.Dependencies)
+                    {
+                        PrefixTree.GetOrCreateNode(dependency);
+                    }
+                }
+            }
+            
+            //生成节点ID
+            PrefixTree.PreSerialize();
+            
+            //将字符串引用转为ID记录
+            foreach (BundleManifestInfo bundleManifestInfo in Bundles)
+            {
+                var node = PrefixTree.GetOrCreateNode(bundleManifestInfo.Directory);
+                bundleManifestInfo.DirectoryNodeID = PrefixTree.NodeToID[node];
+                node = PrefixTree.GetOrCreateNode(bundleManifestInfo.BundleName);
+                bundleManifestInfo.BundleNameNodeID = PrefixTree.NodeToID[node];
+                node = PrefixTree.GetOrCreateNode(bundleManifestInfo.Group);
+                bundleManifestInfo.GroupNodeID = PrefixTree.NodeToID[node];
+                foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
+                {
+                    node = PrefixTree.GetOrCreateNode(assetManifestInfo.Name);
+                    assetManifestInfo.NameNodeID = PrefixTree.NodeToID[node];
+                    if (assetManifestInfo.Dependencies == null)
+                    {
+                        continue;
+                    }
+
+                    assetManifestInfo.DependencyIDList = new List<int>(assetManifestInfo.Dependencies.Count);
+                    foreach (string dependency in assetManifestInfo.Dependencies)
+                    {
+                        node = PrefixTree.GetOrCreateNode(dependency);
+                        int id = PrefixTree.NodeToID[node];
+                        assetManifestInfo.DependencyIDList.Add(id);
+                    }
+                }
+            }
         }
         
         /// <summary>
-        /// 反序列化的后处理方法
+        /// 反序列化二进制数据的后处理方法
         /// </summary>
-        private void PostDeserialize()
+        private void PostDeserializeFromBinary()
         {
+            PrefixTree.PostDeserialize();
+            
+            //将前缀树节点转换为字符串
+            foreach (BundleManifestInfo bundleManifestInfo in Bundles)
+            {
+                bundleManifestInfo.Directory = PrefixTree.AllNodes[bundleManifestInfo.DirectoryNodeID].ToString();
+                bundleManifestInfo.BundleName = PrefixTree.AllNodes[bundleManifestInfo.BundleNameNodeID].ToString();
+                bundleManifestInfo.Group = PrefixTree.AllNodes[bundleManifestInfo.GroupNodeID].ToString();
 
+                foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
+                {
+                    assetManifestInfo.Name = PrefixTree.AllNodes[assetManifestInfo.NameNodeID].ToString();
+
+                    if (assetManifestInfo.DependencyIDList == null)
+                    {
+                        continue;
+                    }
+
+                    assetManifestInfo.Dependencies = new List<string>(assetManifestInfo.DependencyIDList.Count);
+                    foreach (int id in assetManifestInfo.DependencyIDList)
+                    {
+                        string dependency = PrefixTree.AllNodes[id].ToString();
+                        assetManifestInfo.Dependencies.Add(dependency);
+                    }
+                    
+                }
+            }
         }
 
         /// <summary>
@@ -72,7 +157,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public byte[] SerializeToBinary()
         {
-            PreSerialize();
+            PreSerializeToBinary();
 
             using MemoryStream ms = new MemoryStream();
             using BinaryWriter writer = new BinaryWriter(ms,Encoding.UTF8);
@@ -81,6 +166,8 @@ namespace CatAsset.Runtime
             writer.Write(GameVersion);
             writer.Write(ManifestVersion);
             writer.Write(Platform);
+            
+            PrefixTree.Serialize(writer);
             
             writer.Write(Bundles.Count);
             foreach (BundleManifestInfo bundleManifestInfo in Bundles)
@@ -108,6 +195,8 @@ namespace CatAsset.Runtime
             manifest.ManifestVersion = reader.ReadInt32();
             manifest.Platform = reader.ReadString();
 
+            manifest.PrefixTree = PrefixTree.Deserialize(reader,serializeVersion);
+            
             int count = reader.ReadInt32();
             manifest.Bundles = new List<BundleManifestInfo>(count);
             for (int i = 0; i < count; i++)
@@ -116,7 +205,7 @@ namespace CatAsset.Runtime
                 manifest.Bundles.Add(bundleManifestInfo);
             }
 
-            manifest.PostDeserialize();
+            manifest.PostDeserializeFromBinary();
             
             return manifest;
         }
@@ -126,7 +215,12 @@ namespace CatAsset.Runtime
         /// </summary>
         public string SerializeToJson()
         {
-            PreSerialize();
+            Bundles.Sort();
+            foreach (BundleManifestInfo bundleManifestInfo in Bundles)
+            {
+                bundleManifestInfo.Assets.Sort();
+            }
+            
             string json = JsonUtility.ToJson(this,true);
             return json;
         }
@@ -137,7 +231,6 @@ namespace CatAsset.Runtime
         public static CatAssetManifest DeserializeFromJson(string json)
         {
             CatAssetManifest manifest = JsonUtility.FromJson<CatAssetManifest>(json);
-            manifest.PostDeserialize();
             return manifest;
         }
 
@@ -146,7 +239,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public void WriteFile(string path, bool isBinary)
         {
-            if (isBinary)
+            if (!isBinary)
             {
                 //写入清单文件json
                 string json = SerializeToJson();

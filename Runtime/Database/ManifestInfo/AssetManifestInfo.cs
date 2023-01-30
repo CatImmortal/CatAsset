@@ -17,6 +17,8 @@ namespace CatAsset.Runtime
         /// </summary>
         public string Name;
 
+        public int NameNodeID;
+        
         /// <summary>
         /// 是否是图集散图
         /// </summary>
@@ -26,7 +28,8 @@ namespace CatAsset.Runtime
         /// 依赖资源名列表
         /// </summary>
         public List<string> Dependencies;
-        
+
+        public List<int> DependencyIDList;
 
         public int CompareTo(AssetManifestInfo other)
         {
@@ -63,17 +66,23 @@ namespace CatAsset.Runtime
         /// </summary>
         public void Serialize(BinaryWriter writer)
         {
-            writer.Write(Name);
+            //writer.Write(Name);
+            writer.Write(NameNodeID);
             writer.Write(IsAtlasPackable);
-            if (Dependencies == null)
+            if (DependencyIDList == null)
             {
                 writer.Write(0);
                 return;
             }
-            writer.Write(Dependencies.Count);
-            foreach (string dependency in Dependencies)
+            // writer.Write(Dependencies.Count);
+            // foreach (string dependency in Dependencies)
+            // {
+            //     writer.Write(dependency);
+            // }
+            writer.Write(DependencyIDList.Count);
+            foreach (int id in DependencyIDList)
             {
-                writer.Write(dependency);
+                writer.Write(id);
             }
         }
         
@@ -83,7 +92,8 @@ namespace CatAsset.Runtime
         public static AssetManifestInfo Deserialize(BinaryReader reader,int serializeVersion)
         {
             AssetManifestInfo info = new AssetManifestInfo();
-            info.Name = reader.ReadString();
+            //info.Name = reader.ReadString();
+            info.NameNodeID = reader.ReadInt32();
             info.IsAtlasPackable = reader.ReadBoolean();
             int count = reader.ReadInt32();
             if (count == 0)
@@ -91,11 +101,17 @@ namespace CatAsset.Runtime
                 return info;
             }
 
-            info.Dependencies = new List<string>(count);
+            // info.Dependencies = new List<string>(count);
+            // for (int i = 0; i < count; i++)
+            // {
+            //     string dependency = reader.ReadString();
+            //     info.Dependencies.Add(dependency);
+            // }
+            info.DependencyIDList = new List<int>(count);
             for (int i = 0; i < count; i++)
             {
-                string dependency = reader.ReadString();
-                info.Dependencies.Add(dependency);
+                int id = reader.ReadInt32();
+                info.DependencyIDList.Add(id);
             }
             return info;
         }
