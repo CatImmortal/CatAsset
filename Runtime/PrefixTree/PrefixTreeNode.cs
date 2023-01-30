@@ -9,7 +9,6 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 前缀树节点
     /// </summary>
-    [Serializable]
     public class PrefixTreeNode
     {
         private static List<string> cachedList = new List<string>();
@@ -19,12 +18,10 @@ namespace CatAsset.Runtime
 
         public int ParentID = -1;
         
-        [NonSerialized]
         public PrefixTreeNode Parent;
         
         public List<int> ChildIDs;
-
-        [NonSerialized]
+        
         public Dictionary<string, PrefixTreeNode> ChildDict;
 
         public PrefixTreeNode GetChild(string content)
@@ -48,30 +45,23 @@ namespace CatAsset.Runtime
         public override string ToString()
         {
             PrefixTreeNode cur = this;
-
-            int counter = 0;
+            
             while (cur != null)
             {
                 cachedList.Add(cur.Content);
                 cur = cur.Parent;
-
-                counter++;
-                if (counter >= 100)
-                {
-                    Debug.LogError($"{Content}溢出");
-                    break;
-                }
             }
 
             for (int i = cachedList.Count - 1; i >= 0; i--)
             {
                 string content = cachedList[i];
                 cachedSB.Append(content);
-
-                cachedSB.Append('/');
+                if (i > 0)
+                {
+                    cachedSB.Append('/');
+                }
             }
-
-            cachedSB.Remove(cachedSB.Length - 1,1); //删除最后多出来的一个 / 
+            
             cachedList.Clear();
             string str = cachedSB.ToString();
             cachedSB.Clear();
@@ -97,27 +87,19 @@ namespace CatAsset.Runtime
         public static PrefixTreeNode Deserialize(BinaryReader reader, int serializeVersion)
         {
             PrefixTreeNode node = new PrefixTreeNode();
-            try
+            node.Content = reader.ReadString();
+            node.ParentID = reader.ReadInt32();
+            int count = reader.ReadInt32();
+            if (count == 0)
             {
-                node.Content = reader.ReadString();
-                node.ParentID = reader.ReadInt32();
-                int count = reader.ReadInt32();
-                if (count == 0)
-                {
-                    return node;
-                }
-
-                node.ChildIDs = new List<int>(count);
-                for (int i = 0; i < count; i++)
-                {
-                    int id = reader.ReadInt32();
-                    node.ChildIDs.Add(id);
-                }
+                return node;
             }
-            catch (Exception e)
+
+            node.ChildIDs = new List<int>(count);
+            for (int i = 0; i < count; i++)
             {
-                Debug.LogError($"前缀树节点{node.Content}反序列化失败:{e}");
-                throw;
+                int id = reader.ReadInt32();
+                node.ChildIDs.Add(id);
             }
            
             

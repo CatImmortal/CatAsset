@@ -7,7 +7,7 @@ using UnityEngine;
 namespace CatAsset.Runtime
 {
     /// <summary>
-    /// Bundle清单信息
+    /// 资源包清单信息
     /// </summary>
     [Serializable]
     public class BundleManifestInfo : IComparable<BundleManifestInfo>,IEquatable<BundleManifestInfo>
@@ -157,11 +157,8 @@ namespace CatAsset.Runtime
         /// </summary>
         public void Serialize(BinaryWriter writer)
         {
-            // writer.Write(Directory);
             writer.Write(DirectoryNodeID);
-            // writer.Write(BundleName);
             writer.Write(BundleNameNodeID);
-            // writer.Write(Group);
             writer.Write(GroupNodeID);
             writer.Write(IsRaw);
             writer.Write(IsScene);
@@ -183,11 +180,8 @@ namespace CatAsset.Runtime
         public static BundleManifestInfo Deserialize(BinaryReader reader,int serializeVersion)
         {
             BundleManifestInfo info = new BundleManifestInfo();
-            // info.Directory = reader.ReadString();
             info.DirectoryNodeID = reader.ReadInt32();
-            // info.BundleName = reader.ReadString();
             info.BundleNameNodeID = reader.ReadInt32();
-            // info.Group = reader.ReadString();
             info.GroupNodeID = reader.ReadInt32();
             info.IsRaw = reader.ReadBoolean();
             info.IsScene = reader.ReadBoolean();

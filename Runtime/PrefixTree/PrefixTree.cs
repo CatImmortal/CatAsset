@@ -7,19 +7,23 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 前缀树
     /// </summary>
-    [Serializable]
     public class PrefixTree
     {
+        /// <summary>
+        /// 所有节点
+        /// </summary>
         public List<PrefixTreeNode> AllNodes;
+        
+        /// <summary>
+        /// 所有根节点的ID列表
+        /// </summary>
         public List<int> RootIDs;
         
         /// <summary>
         /// 节点 -> 节点ID 从0开始
         /// </summary>
-        [NonSerialized]
         public Dictionary<PrefixTreeNode, int> NodeToID = new Dictionary<PrefixTreeNode, int>();
-
-        [NonSerialized]
+        
         private Dictionary<string, PrefixTreeNode> rootDict = new Dictionary<string, PrefixTreeNode>();
 
         public PrefixTreeNode GetOrCreateNode(string path)
@@ -81,6 +85,9 @@ namespace CatAsset.Runtime
             }
         }
 
+        /// <summary>
+        /// 记录ID
+        /// </summary>
         private void BuildIDRecord(PrefixTreeNode node)
         {
             if (node.Parent != null)
@@ -115,6 +122,9 @@ namespace CatAsset.Runtime
             }
         }
 
+        /// <summary>
+        /// 将ID重建为引用
+        /// </summary>
         private void BuildReference(PrefixTreeNode node)
         {
             node.Parent = GetNode(node.ParentID);

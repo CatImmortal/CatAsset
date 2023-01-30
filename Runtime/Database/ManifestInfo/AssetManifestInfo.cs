@@ -66,7 +66,6 @@ namespace CatAsset.Runtime
         /// </summary>
         public void Serialize(BinaryWriter writer)
         {
-            //writer.Write(Name);
             writer.Write(NameNodeID);
             writer.Write(IsAtlasPackable);
             if (DependencyIDList == null)
@@ -74,11 +73,6 @@ namespace CatAsset.Runtime
                 writer.Write(0);
                 return;
             }
-            // writer.Write(Dependencies.Count);
-            // foreach (string dependency in Dependencies)
-            // {
-            //     writer.Write(dependency);
-            // }
             writer.Write(DependencyIDList.Count);
             foreach (int id in DependencyIDList)
             {
@@ -92,7 +86,6 @@ namespace CatAsset.Runtime
         public static AssetManifestInfo Deserialize(BinaryReader reader,int serializeVersion)
         {
             AssetManifestInfo info = new AssetManifestInfo();
-            //info.Name = reader.ReadString();
             info.NameNodeID = reader.ReadInt32();
             info.IsAtlasPackable = reader.ReadBoolean();
             int count = reader.ReadInt32();
@@ -100,13 +93,6 @@ namespace CatAsset.Runtime
             {
                 return info;
             }
-
-            // info.Dependencies = new List<string>(count);
-            // for (int i = 0; i < count; i++)
-            // {
-            //     string dependency = reader.ReadString();
-            //     info.Dependencies.Add(dependency);
-            // }
             info.DependencyIDList = new List<int>(count);
             for (int i = 0; i < count; i++)
             {
