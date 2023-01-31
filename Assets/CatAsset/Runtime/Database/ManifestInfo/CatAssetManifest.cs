@@ -159,25 +159,29 @@ namespace CatAsset.Runtime
         {
             PreSerializeToBinary();
 
-            using MemoryStream ms = new MemoryStream();
-            using BinaryWriter writer = new BinaryWriter(ms,Encoding.UTF8);
-            
-            writer.Write(SerializeVersion);
-            writer.Write(GameVersion);
-            writer.Write(ManifestVersion);
-            writer.Write(Platform);
-            
-            PrefixTree.Serialize(writer);
-            
-            writer.Write(Bundles.Count);
-            foreach (BundleManifestInfo bundleManifestInfo in Bundles)
+            using (MemoryStream ms = new MemoryStream())
             {
-                bundleManifestInfo.Serialize(writer);
+                using (BinaryWriter writer = new BinaryWriter(ms,Encoding.UTF8))
+                {
+                    writer.Write(SerializeVersion);
+                    writer.Write(GameVersion);
+                    writer.Write(ManifestVersion);
+                    writer.Write(Platform);
+            
+                    PrefixTree.Serialize(writer);
+            
+                    writer.Write(Bundles.Count);
+                    foreach (BundleManifestInfo bundleManifestInfo in Bundles)
+                    {
+                        bundleManifestInfo.Serialize(writer);
+                    }
+
+                    byte[] bytes = ms.ToArray();
+            
+                    return bytes;
+                }
             }
 
-            byte[] bytes = ms.ToArray();
-            
-            return bytes;
         }
 
         /// <summary>
@@ -185,29 +189,35 @@ namespace CatAsset.Runtime
         /// </summary>
         public static CatAssetManifest DeserializeFromBinary(byte[] bytes)
         {
-            using MemoryStream ms = new MemoryStream(bytes);
-            using BinaryReader reader = new BinaryReader(ms,Encoding.UTF8);
 
-            CatAssetManifest manifest = new CatAssetManifest();
-            
-            int serializeVersion = reader.ReadInt32();
-            manifest.GameVersion = reader.ReadString();
-            manifest.ManifestVersion = reader.ReadInt32();
-            manifest.Platform = reader.ReadString();
-
-            manifest.PrefixTree = PrefixTree.Deserialize(reader,serializeVersion);
-            
-            int count = reader.ReadInt32();
-            manifest.Bundles = new List<BundleManifestInfo>(count);
-            for (int i = 0; i < count; i++)
+            using (MemoryStream ms = new MemoryStream(bytes))
             {
-                BundleManifestInfo bundleManifestInfo = BundleManifestInfo.Deserialize(reader,serializeVersion);
-                manifest.Bundles.Add(bundleManifestInfo);
-            }
-
-            manifest.PostDeserializeFromBinary();
+                using (BinaryReader reader = new BinaryReader(ms,Encoding.UTF8))
+                {
+                    CatAssetManifest manifest = new CatAssetManifest();
             
-            return manifest;
+                    int serializeVersion = reader.ReadInt32();
+                    manifest.GameVersion = reader.ReadString();
+                    manifest.ManifestVersion = reader.ReadInt32();
+                    manifest.Platform = reader.ReadString();
+
+                    manifest.PrefixTree = PrefixTree.Deserialize(reader,serializeVersion);
+            
+                    int count = reader.ReadInt32();
+                    manifest.Bundles = new List<BundleManifestInfo>(count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        BundleManifestInfo bundleManifestInfo = BundleManifestInfo.Deserialize(reader,serializeVersion);
+                        manifest.Bundles.Add(bundleManifestInfo);
+                    }
+
+                    manifest.PostDeserializeFromBinary();
+            
+                    return manifest;
+                }
+            }
+            
+           
         }
 
         /// <summary>
@@ -264,7 +274,7 @@ namespace CatAsset.Runtime
                 byte[] bytes = SerializeToBinary();
                 using (FileStream fs = new FileStream(path, FileMode.Create))
                 {
-                    fs.Write(bytes);
+                    fs.Write(bytes,0,bytes.Length);
                 }
             }
         }
