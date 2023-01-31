@@ -20,12 +20,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此资源组的所有本地资源包
         /// </summary>
-        private List<string> localBundles = new List<string>();
+        internal List<string> LocalBundles = new List<string>();
 
         /// <summary>
         /// 此资源组的所有本地资源包数量
         /// </summary>
-        public int LocalCount => localBundles.Count;
+        public int LocalCount => LocalBundles.Count;
 
         /// <summary>
         /// 此资源组的所有本地资源包长度
@@ -35,12 +35,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此资源组的所有远端资源包
         /// </summary>
-        private List<string> remoteBundles = new List<string>();
+        internal List<string> RemoteBundles = new List<string>();
 
         /// <summary>
         /// 此资源组的所有远端资源包数量
         /// </summary>
-        public int RemoteCount => remoteBundles.Count;
+        public int RemoteCount => RemoteBundles.Count;
 
         /// <summary>
         /// 此资源组的所有远端资源包长度
@@ -52,7 +52,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void AddLocalBundle(string bundleRelativePath)
         {
-            localBundles.Add(bundleRelativePath);
+            LocalBundles.Add(bundleRelativePath);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void AddRemoteBundle(string bundleRelativePath)
         {
-            remoteBundles.Add(bundleRelativePath);
+            RemoteBundles.Add(bundleRelativePath);
         }
 
 

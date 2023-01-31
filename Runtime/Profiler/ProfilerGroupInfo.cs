@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CatAsset.Runtime
 {
@@ -14,6 +15,11 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
+        /// 此资源组的所有本地资源包
+        /// </summary>
+        public List<string> LocalBundles;
+        
+        /// <summary>
         /// 本地资源数
         /// </summary>
         public int LocalCount;
@@ -23,6 +29,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public ulong LocalLength;
 
+        /// <summary>
+        /// 此资源组的所有远端资源包
+        /// </summary>
+        public List<string> RemoteBundles;
+        
         /// <summary>
         /// 远端资源数
         /// </summary>
@@ -35,12 +46,14 @@ namespace CatAsset.Runtime
 
 
 
-        public static ProfilerGroupInfo Create(string name,int localCount,ulong localLength,int remoteCount,ulong remoteLength)
+        public static ProfilerGroupInfo Create(string name,List<string> localBundles,int localCount,ulong localLength,List<string> remoteBundles,int remoteCount,ulong remoteLength)
         {
             ProfilerGroupInfo info = ReferencePool.Get<ProfilerGroupInfo>();
             info.Name = name;
+            info.LocalBundles = localBundles;
             info.LocalCount = localCount;
             info.LocalLength = localLength;
+            info.RemoteBundles = remoteBundles;
             info.RemoteCount = remoteCount;
             info.RemoteLength = remoteLength;
             return info;
@@ -49,8 +62,10 @@ namespace CatAsset.Runtime
         public void Clear()
         {
             Name = default;
+            LocalBundles = default;
             LocalCount = default;
             LocalLength = default;
+            RemoteBundles = default;
             RemoteCount = default;
             RemoteLength = default;
         }

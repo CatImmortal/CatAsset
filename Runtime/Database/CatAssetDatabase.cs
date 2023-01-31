@@ -333,8 +333,9 @@ namespace CatAsset.Runtime
                     }
                 }
 
-                ProfilerBundleInfo pbi = ProfilerBundleInfo.Create(bri.Manifest.BundleIdentifyName, bri.Manifest.Group,
-                    bri.Manifest.IsRaw, bri.Manifest.Length,bri.ReferencingAssets.Count, bri.Manifest.Assets.Count);
+                ProfilerBundleInfo pbi = ProfilerBundleInfo.Create(bri.Manifest.BundleIdentifyName, bri.BundleState,
+                    bri.Manifest.Group,
+                    bri.Manifest.IsRaw, bri.Manifest.Length, bri.ReferencingAssets.Count, bri.Manifest.Assets.Count);
 
                 int pbiIndex = info.BundleInfoList.Count;
                 info.BundleInfoList.Add(pbi);
@@ -450,7 +451,8 @@ namespace CatAsset.Runtime
             {
                 var group = pair.Value;
 
-                ProfilerGroupInfo pgi = ProfilerGroupInfo.Create(group.GroupName, group.LocalCount, group.LocalLength,
+                ProfilerGroupInfo pgi = ProfilerGroupInfo.Create(group.GroupName, group.LocalBundles, group.LocalCount,
+                    group.LocalLength, group.RemoteBundles,
                     group.RemoteCount, group.RemoteLength
                 );
 

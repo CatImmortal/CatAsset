@@ -28,6 +28,11 @@ namespace CatAsset.Editor
             /// 名称
             /// </summary>
             Name,
+            
+            /// <summary>
+            /// 状态
+            /// </summary>
+            State,
 
             /// <summary>
             /// 对象引用
@@ -113,6 +118,11 @@ namespace CatAsset.Editor
                     }
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.BundleIdentifyName, ascending);
                     break;
+                
+                case ColumnType.State:
+                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.State, ascending);
+                    break;
+                
 
                 case ColumnType.Group:
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.Group, ascending);
@@ -246,6 +256,13 @@ namespace CatAsset.Editor
                         args.label = assetItem.Data.Name;
                     }
                     base.RowGUI(args);
+                    break;
+                
+                case ColumnType.State:
+                    if (bundleItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,bundleItem.Data.State.ToString(),centerStyle);
+                    }
                     break;
 
                 case ColumnType.Object:

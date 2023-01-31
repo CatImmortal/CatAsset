@@ -133,7 +133,10 @@ namespace CatAsset.Editor
                     break;
 
                 case ColumnType.LocalCount:
-                    EditorGUI.LabelField(cellRect,groupItem.Data.LocalCount.ToString(),centerStyle);
+                    if (GUI.Button(cellRect, groupItem.Data.LocalCount.ToString()))
+                    {
+                       GroupBundleListWindow.Open($"{groupItem.Data.Name}组本地资源包列表",groupItem.Data.LocalBundles);
+                    }
                     break;
 
                 case ColumnType.LocalLength:
@@ -141,7 +144,10 @@ namespace CatAsset.Editor
                     break;
 
                 case ColumnType.RemoteCount:
-                    EditorGUI.LabelField(cellRect,groupItem.Data.RemoteCount.ToString(),centerStyle);
+                    if (GUI.Button(cellRect, groupItem.Data.RemoteCount.ToString()))
+                    {
+                        GroupBundleListWindow.Open($"{groupItem.Data.Name}组远端资源包列表",groupItem.Data.RemoteBundles);
+                    }
                     break;
 
                 case ColumnType.RemoteLength:
