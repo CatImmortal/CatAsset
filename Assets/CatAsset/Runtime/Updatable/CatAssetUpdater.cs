@@ -44,12 +44,7 @@ namespace CatAsset.Runtime
             manifest.Bundles = bundleInfos;
 
             //写入清单文件
-            string path = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestBinaryFileName);
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-            manifest.WriteFile(path,true);
+            manifest.WriteFile(Application.persistentDataPath,true);
         }
 
         /// <summary>
