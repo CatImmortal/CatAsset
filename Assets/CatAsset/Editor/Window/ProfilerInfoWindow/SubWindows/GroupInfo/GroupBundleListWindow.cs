@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using UnityEditor;
+using UnityEngine;
 
 namespace CatAsset.Editor
 {
     public class GroupBundleListWindow : EditorWindow
     {
         private List<string> bundles;
+
+        private Vector2 scrollPos;
         
         public static void Open(string title, List<string> bundles)
         {
@@ -17,10 +21,15 @@ namespace CatAsset.Editor
 
         private void OnGUI()
         {
-            foreach (string bundle in bundles)
+            using (var scroll = new EditorGUILayout.ScrollViewScope(scrollPos))
             {
-                EditorGUILayout.LabelField(bundle);
+                scrollPos = scroll.scrollPosition;
+                foreach (string bundle in bundles)
+                {
+                    EditorGUILayout.LabelField(bundle);
+                }
             }
+           
         }
     }
 }
