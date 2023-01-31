@@ -261,7 +261,7 @@ namespace CatAsset.Editor
         /// </summary>
         private void InitBundleBuildInfo(bool isRaw)
         {
-            //降序遍历构建目录 实现非中序遍历效果 以支持嵌套构建目录
+            //降序遍历构建目录 实现后序遍历效果 子目录一定在父目录前被处理到 以支持嵌套构建目录
             List<BundleBuildDirectory> tempDirectories = new List<BundleBuildDirectory>();
             for (int i = Directories.Count - 1; i >= 0; i--)
             {
