@@ -14,6 +14,7 @@ namespace CatAsset.Editor
             List<string> columnList = new List<string>()
             {
                 "名称",
+                "状态",
                 "Object",
                 "资源组",
                 "长度",

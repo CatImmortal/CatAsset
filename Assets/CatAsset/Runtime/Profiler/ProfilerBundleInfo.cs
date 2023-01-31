@@ -15,6 +15,11 @@ namespace CatAsset.Runtime
         public string BundleIdentifyName;
 
         /// <summary>
+        /// 资源包状态
+        /// </summary>
+        public BundleRuntimeInfo.State State;
+        
+        /// <summary>
         /// 资源组
         /// </summary>
         public string Group;
@@ -81,10 +86,11 @@ namespace CatAsset.Runtime
             return BundleIdentifyName.CompareTo(other.BundleIdentifyName);
         }
 
-        public static ProfilerBundleInfo Create(string bundleIdentifyName,string group,bool isRaw,ulong length,int referencingAssetCount,int totalAssetCount)
+        public static ProfilerBundleInfo Create(string bundleIdentifyName,BundleRuntimeInfo.State state,string group,bool isRaw,ulong length,int referencingAssetCount,int totalAssetCount)
         {
             ProfilerBundleInfo info = ReferencePool.Get<ProfilerBundleInfo>();
             info.BundleIdentifyName = bundleIdentifyName;
+            info.State = state;
             info.Group = group;
             info.IsRaw = isRaw;
             info.Length = length;
@@ -96,6 +102,7 @@ namespace CatAsset.Runtime
         public void Clear()
         {
             BundleIdentifyName = default;
+            State = default;
             Group = default;
             IsRaw = default;
             Length = default;
