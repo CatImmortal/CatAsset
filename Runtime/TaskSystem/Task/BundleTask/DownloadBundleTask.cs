@@ -73,7 +73,15 @@ namespace CatAsset.Runtime
             if (oldFileLength > 0)
             {
                 //处理断点续传
-                uwr.SetRequestHeader("Range", $"bytes={oldFileLength}-");
+                if (oldFileLength < updateInfo.Info.Length)
+                {
+                    uwr.SetRequestHeader("Range", $"bytes={oldFileLength}-");
+                }
+                else
+                {
+                    File.Delete(localTempFilePath);
+                }
+               
             }
             uwr.downloadHandler = new DownloadHandlerFile(localTempFilePath, oldFileLength > 0);
             op = uwr.SendWebRequest();

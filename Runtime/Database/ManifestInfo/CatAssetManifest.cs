@@ -237,13 +237,18 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 将清单写入文件
         /// </summary>
-        public void WriteFile(string path, bool isBinary)
+        public void WriteFile(string directory, bool isBinary)
         {
             if (!isBinary)
             {
                 //写入清单文件json
+                string path = RuntimeUtil.GetRegularPath(Path.Combine(directory, ManifestJsonFileName));
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
                 string json = SerializeToJson();
-                using (StreamWriter sw = new StreamWriter(Path.Combine(path, ManifestJsonFileName)))
+                using (StreamWriter sw = new StreamWriter(path))
                 {
                     sw.Write(json);
                 }
@@ -251,8 +256,13 @@ namespace CatAsset.Runtime
             else
             {
                 //写入清单文件binary
+                string path = RuntimeUtil.GetRegularPath(Path.Combine(directory, ManifestBinaryFileName));
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
                 byte[] bytes = SerializeToBinary();
-                using (FileStream fs = new FileStream(Path.Combine(path, ManifestBinaryFileName), FileMode.Create))
+                using (FileStream fs = new FileStream(path, FileMode.Create))
                 {
                     fs.Write(bytes);
                 }
