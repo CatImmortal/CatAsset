@@ -10,7 +10,7 @@
         /// <summary>
         /// 待更新
         /// </summary>
-        Wait,
+        Waiting,
         
         /// <summary>
         /// 更新中

@@ -53,37 +53,53 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此更新器的所有资源包集合（待更新的+更新中+已更新的）
         /// </summary>
-        private readonly HashSet<UpdateInfo> updaterBundles = new HashSet<UpdateInfo>();
+        internal readonly HashSet<UpdateInfo> UpdaterBundles = new HashSet<UpdateInfo>();
 
+        /// <summary>
+        /// 待更新的资源包总数
+        /// </summary>
+        public int WaitingCount => GetCount(UpdateState.Waiting);
+        
+        /// <summary>
+        /// 待更新的资源包总长度
+        /// </summary>
+        public ulong WaitingLength => GetLength(UpdateState.Waiting);
+        
         /// <summary>
         /// 更新中的资源包总数
         /// </summary>
         public int UpdatingCount => GetCount(UpdateState.Updating);
+        
+        /// <summary>
+        /// 更新中的资源包总长度
+        /// </summary>
+        public ulong UpdatingLength => GetLength(UpdateState.Updating);
 
         /// <summary>
         /// 已更新的资源包总数
         /// </summary>
         public int UpdatedCount => GetCount(UpdateState.Updated);
-
+        
         /// <summary>
         /// 已更新的资源包总长度
         /// </summary>
-        public ulong UpdatedLength { get; private set; }
-
+        public ulong UpdatedLength => GetLength(UpdateState.Updated);
+        
         /// <summary>
         /// 此更新器的资源包总数（待更新的+更新中+已更新的）
         /// </summary>
-        public int TotalCount => updaterBundles.Count;
+        public int TotalCount => UpdaterBundles.Count;
 
         /// <summary>
         /// 此更新器的资源包总长度（待更新的+更新中+已更新的）
         /// </summary>
         public ulong TotalLength { get; internal set; }
+        
 
         /// <summary>
         /// 是否已全部更新完毕
         /// </summary>
-        public bool IsAllUpdated => UpdatedCount == updaterBundles.Count;
+        public bool IsAllUpdated => UpdatedCount == UpdaterBundles.Count;
 
         /// <summary>
         /// 上一次记录的已下载字节数
@@ -100,6 +116,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public ulong Speed { get; private set; }
 
+        /// <summary>
+        /// 已下载字节数
+        /// </summary>
+        public ulong DownloadedBytesLength { get; private set; }
+        
         public GroupUpdater()
         {
             onBundleDownloadedCallback = OnBundleDownloaded;
@@ -111,7 +132,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void AddUpdaterBundle(BundleManifestInfo info)
         {
-            updaterBundles.Add(new UpdateInfo(info,UpdateState.Wait));
+            UpdaterBundles.Add(new UpdateInfo(info,UpdateState.Waiting));
         }
 
         /// <summary>
@@ -127,7 +148,7 @@ namespace CatAsset.Runtime
 
             State = GroupUpdaterState.Running;
 
-            foreach (UpdateInfo updateInfo in updaterBundles)
+            foreach (UpdateInfo updateInfo in UpdaterBundles)
             {
                 if (updateInfo.State == UpdateState.Updated)
                 {
@@ -150,7 +171,7 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void UpdateBundle(BundleManifestInfo info, BundleUpdatedCallback callback,TaskPriority priority = TaskPriority.VeryHeight)
         {
-            foreach (UpdateInfo updateInfo in updaterBundles)
+            foreach (UpdateInfo updateInfo in UpdaterBundles)
             {
                 if (updateInfo.Info.Equals(info))
                 {
@@ -181,7 +202,7 @@ namespace CatAsset.Runtime
         private int GetCount(UpdateState state)
         {
             int count = 0;
-            foreach (UpdateInfo updateInfo in updaterBundles)
+            foreach (UpdateInfo updateInfo in UpdaterBundles)
             {
                 if (updateInfo.State == state)
                 {
@@ -190,6 +211,22 @@ namespace CatAsset.Runtime
             }
 
             return count;
+        }
+
+        /// <summary>
+        /// 获取指定状态的更新器的长度
+        /// </summary>
+        private ulong GetLength(UpdateState state)
+        {
+            ulong length = 0;
+            foreach (UpdateInfo updateInfo in UpdaterBundles)
+            {
+                if (updateInfo.State == state)
+                {
+                    length += updateInfo.Info.Length;
+                }
+            }
+            return length;
         }
 
         /// <summary>
@@ -214,7 +251,7 @@ namespace CatAsset.Runtime
         private void OnDownloadUpdate(UpdateInfo updateInfo,ulong deltaDownloadedBytes, ulong totalDownloadedBytes)
         {
             //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 一个下载中的资源包只会回调到这里一次
-            UpdatedLength += deltaDownloadedBytes;
+            DownloadedBytesLength += deltaDownloadedBytes;
 
             if (lastRecordTime == 0)
             {
@@ -227,9 +264,9 @@ namespace CatAsset.Runtime
             {
                 //每秒计算一次下载速度
                 lastRecordTime = Time.unscaledTime;
-                Speed = UpdatedLength - lastRecordDownloadBytes;
+                Speed = DownloadedBytesLength - lastRecordDownloadBytes;
 
-                lastRecordDownloadBytes = UpdatedLength;
+                lastRecordDownloadBytes = DownloadedBytesLength;
             }
         }
 
@@ -240,7 +277,7 @@ namespace CatAsset.Runtime
         {
             //这里由DownloadBundleTask不处理已合并任务来保证不会被重复回调 一个下载完毕的资源包只会回调到这里一次
 
-            updateInfo.State = success ? UpdateState.Updated : UpdateState.Wait;
+            updateInfo.State = success ? UpdateState.Updated : UpdateState.Waiting;
 
             //没有资源需要更新了 改变状态为Free
             if (UpdatingCount == 0)

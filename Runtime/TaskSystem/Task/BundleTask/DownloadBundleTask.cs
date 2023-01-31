@@ -80,6 +80,7 @@ namespace CatAsset.Runtime
                 else
                 {
                     File.Delete(localTempFilePath);
+                    oldFileLength = 0;
                 }
                
             }

@@ -14,12 +14,17 @@ namespace CatAsset.Editor
             List<string> columnList = new List<string>()
             {
                 "资源组",
+                "状态",
+                "待更新资源数",
+                "待更新资源长度",
+                "更新中资源数",
+                "更新中资源长度",
                 "已更新资源数",
                 "已更新资源长度",
                 "总资源数",
                 "总资源长度",
+                "已下载字节数",
                 "下载速度",
-                "状态"
             };
 
             return columnList;
