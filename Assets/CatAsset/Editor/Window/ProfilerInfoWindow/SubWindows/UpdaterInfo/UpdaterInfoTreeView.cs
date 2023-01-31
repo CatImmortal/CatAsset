@@ -18,17 +18,24 @@ namespace CatAsset.Editor
         /// </summary>
         private enum ColumnType
         {
-            /// <summary>
-            /// 名称
-            /// </summary>
-            Name,
 
+            Name,
+            State,
+            
+            WaitingCount,
+            WaitingLength,
+            UpdatingCount,
+            UpdatingLength,
             UpdatedCount,
             UpdatedLength,
             TotalCount,
             TotalLength,
+            
+            DownloadBytesLength,
             Speed,
-            State
+            
+
+           
         }
 
         public UpdaterInfoTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader)
@@ -59,6 +66,21 @@ namespace CatAsset.Editor
                 case ColumnType.Name:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.Name, ascending);
                     break;
+                case ColumnType.State:
+                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.State, ascending);
+                    break;
+                case ColumnType.WaitingCount:
+                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.WaitingCount, ascending);
+                    break;
+                case ColumnType.WaitingLength:
+                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.WaitingLength, ascending);
+                    break;
+                case ColumnType.UpdatingCount:
+                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.UpdatingCount, ascending);
+                    break;
+                case ColumnType.UpdatingLength:
+                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.UpdatingLength, ascending);
+                    break;
                 case ColumnType.UpdatedCount:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.UpdatedCount, ascending);
                     break;
@@ -71,16 +93,16 @@ namespace CatAsset.Editor
                 case ColumnType.TotalLength:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.TotalLength, ascending);
                     break;
+                case ColumnType.DownloadBytesLength:
+                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.DownloadedBytesLength, ascending);
+                    break;
                 case ColumnType.Speed:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.Speed, ascending);
-                    break;
-                case ColumnType.State:
-                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.State, ascending);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
+            
             if (updaterOrdered != null)
             {
                 TreeViewData.UpdaterInfoList = new List<ProfilerUpdaterInfo>(updaterOrdered);
@@ -126,6 +148,7 @@ namespace CatAsset.Editor
             TreeViewDataItem<ProfilerUpdaterInfo> updaterItem = (TreeViewDataItem<ProfilerUpdaterInfo>)item;
             GUIStyle centerStyle = new GUIStyle() { alignment = TextAnchor.MiddleCenter };
             centerStyle.normal = new GUIStyleState(){textColor = Color.white};
+
             switch (column)
             {
                 case ColumnType.Name:
@@ -133,31 +156,51 @@ namespace CatAsset.Editor
                     args.label = updaterItem.Data.Name;
                     base.RowGUI(args);
                     break;
-
-                case ColumnType.UpdatedCount:
-                    EditorGUI.LabelField(cellRect,updaterItem.Data.UpdatedCount.ToString(),centerStyle);
-                    break;
-
-                case ColumnType.UpdatedLength:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.UpdatedLength),centerStyle);
-                    break;
-
-                case ColumnType.TotalCount:
-                    EditorGUI.LabelField(cellRect,updaterItem.Data.TotalCount.ToString(),centerStyle);
-                    break;
-
-                case ColumnType.TotalLength:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.TotalLength),centerStyle);
-                    break;
-
-                case ColumnType.Speed:
-                    EditorGUI.LabelField(cellRect,$"{RuntimeUtil.GetByteLengthDesc(updaterItem.Data.Speed)}/S",centerStyle);
-                    break;
-
+                
                 case ColumnType.State:
                     EditorGUI.LabelField(cellRect,updaterItem.Data.State.ToString(),centerStyle);
                     break;
-
+                
+                case ColumnType.WaitingCount:
+                    EditorGUI.LabelField(cellRect,updaterItem.Data.WaitingCount.ToString(),centerStyle);
+                    break;
+                
+                case ColumnType.WaitingLength:
+                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.WaitingLength),centerStyle);
+                    break;
+                
+                case ColumnType.UpdatingCount:
+                    EditorGUI.LabelField(cellRect,updaterItem.Data.UpdatingCount.ToString(),centerStyle);
+                    break;
+                
+                case ColumnType.UpdatingLength:
+                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.UpdatingLength),centerStyle);
+                    break;
+                
+                case ColumnType.UpdatedCount:
+                    EditorGUI.LabelField(cellRect,updaterItem.Data.UpdatedCount.ToString(),centerStyle);
+                    break;
+                
+                case ColumnType.UpdatedLength:
+                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.UpdatedLength),centerStyle);
+                    break;
+                
+                case ColumnType.TotalCount:
+                    EditorGUI.LabelField(cellRect,updaterItem.Data.TotalCount.ToString(),centerStyle);
+                    break;
+                
+                case ColumnType.TotalLength:
+                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.TotalLength),centerStyle);
+                    break;
+                
+                case ColumnType.DownloadBytesLength:
+                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.DownloadedBytesLength),centerStyle);
+                    break;
+                
+                case ColumnType.Speed:
+                    EditorGUI.LabelField(cellRect,$"{RuntimeUtil.GetByteLengthDesc(updaterItem.Data.Speed)}/S",centerStyle);
+                    break;
+                
                 default:
                     throw new ArgumentOutOfRangeException(nameof(column), column, null);
             }

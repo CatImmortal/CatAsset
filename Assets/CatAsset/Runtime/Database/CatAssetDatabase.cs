@@ -468,9 +468,18 @@ namespace CatAsset.Runtime
         {
             foreach (var pair in CatAssetUpdater.GroupUpdaterDict)
             {
-                var updater = pair.Value;
-                ProfilerUpdaterInfo pui = ProfilerUpdaterInfo.Create(updater.GroupName, updater.UpdatedCount, updater.UpdatedLength, updater.TotalCount,
-                    updater.TotalLength,updater.Speed, updater.State);
+                GroupUpdater updater = pair.Value;
+
+                List<ProfilerUpdateBundleInfo> pubiList = new List<ProfilerUpdateBundleInfo>(updater.TotalCount);
+                foreach (UpdateInfo updateInfo in updater.UpdaterBundles)
+                {
+                    ProfilerUpdateBundleInfo pubi = ProfilerUpdateBundleInfo.Create(updateInfo.Info.BundleName,
+                        updateInfo.State, updateInfo.Info.Length, updateInfo.UpdatedLength);
+                    pubiList.Add(pubi);
+                }
+
+                ProfilerUpdaterInfo pui =
+                    ProfilerUpdaterInfo.Create(updater.GroupName, updater.State, pubiList,updater.DownloadedBytesLength, updater.Speed);
 
                 info.UpdaterInfoList.Add(pui);
             }
