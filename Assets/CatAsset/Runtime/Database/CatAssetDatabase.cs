@@ -451,10 +451,26 @@ namespace CatAsset.Runtime
             {
                 var group = pair.Value;
 
+                List<ProfilerGroupInfo.BundleInfo> localBundles = new List<ProfilerGroupInfo.BundleInfo>();
+                foreach (string bundle in group.LocalBundles)
+                {
+                    var bri =  GetBundleRuntimeInfo(bundle);
+                    ProfilerGroupInfo.BundleInfo pgiBundleInfo = ProfilerGroupInfo.BundleInfo.Create(bri.Manifest.BundleIdentifyName,bri.BundleState,bri.Manifest.Length);
+                    localBundles.Add(pgiBundleInfo);
+                }
+                localBundles.Sort();
                 
-                
-                ProfilerGroupInfo pgi = ProfilerGroupInfo.Create(group.GroupName, group.LocalBundles,
-                    group.LocalLength, group.RemoteBundles, group.RemoteLength
+                List<ProfilerGroupInfo.BundleInfo> remoteBundles = new List<ProfilerGroupInfo.BundleInfo>();
+                foreach (string bundle in group.RemoteBundles)
+                {
+                    var bri =  GetBundleRuntimeInfo(bundle);
+                    ProfilerGroupInfo.BundleInfo pgiBundleInfo = ProfilerGroupInfo.BundleInfo.Create(bri.Manifest.BundleIdentifyName,bri.BundleState,bri.Manifest.Length);
+                    remoteBundles.Add(pgiBundleInfo);
+                }
+                remoteBundles.Sort();
+
+                ProfilerGroupInfo pgi = ProfilerGroupInfo.Create(group.GroupName, localBundles,
+                    group.LocalLength, remoteBundles, group.RemoteLength
                 );
 
                 info.GroupInfoList.Add(pgi);
