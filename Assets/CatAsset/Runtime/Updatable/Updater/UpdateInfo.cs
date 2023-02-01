@@ -18,9 +18,9 @@ namespace CatAsset.Runtime
         public UpdateState State;
 
         /// <summary>
-        /// 已更新字节数
+        /// 已下载字节数
         /// </summary>
-        public ulong UpdatedLength;
+        public ulong DownloadedBytesLength;
 
         public UpdateInfo(BundleManifestInfo info, UpdateState state)
         {
@@ -50,7 +50,7 @@ namespace CatAsset.Runtime
 
         public override string ToString()
         {
-            return $"UpdateInfo {Info.BundleIdentifyName}, State:{State},UpdatedLength:{UpdatedLength}";
+            return $"UpdateInfo {Info.BundleIdentifyName}, State:{State},UpdatedLength:{DownloadedBytesLength}";
         }
     }
 }

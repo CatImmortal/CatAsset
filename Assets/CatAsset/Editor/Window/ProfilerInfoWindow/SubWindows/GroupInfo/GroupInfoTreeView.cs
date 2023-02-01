@@ -19,13 +19,11 @@ namespace CatAsset.Editor
         private enum ColumnType
         {
             Name,
-
-            LocalBundles,
             State,
+            
             LocalCount,
             LocalLength,
-            
-            RemoteBundles,
+
             RemoteCount,
             RemoteLength,
 
@@ -58,6 +56,11 @@ namespace CatAsset.Editor
             switch (column)
             {
                 case ColumnType.Name:
+                    foreach (var groupInfo in TreeViewData.GroupInfoList)
+                    {
+                        bundleOrdered = groupInfo.RemoteBundles.Order(info => info.Name, ascending);
+                        groupInfo.RemoteBundles = new List<ProfilerGroupInfo.BundleInfo>(bundleOrdered);
+                    }
                     groupOrdered = TreeViewData.GroupInfoList.Order(info => info.Name, ascending);
                     break;
                 
@@ -78,15 +81,6 @@ namespace CatAsset.Editor
                     groupOrdered = TreeViewData.GroupInfoList.Order(info => info.LocalLength, ascending);
                     break;
                 
-                case ColumnType.LocalBundles:
-                case ColumnType.RemoteBundles:
-                    foreach (var groupInfo in TreeViewData.GroupInfoList)
-                    {
-                        bundleOrdered = groupInfo.RemoteBundles.Order(info => info.Name, ascending);
-                        groupInfo.RemoteBundles = new List<ProfilerGroupInfo.BundleInfo>(bundleOrdered);
-                    }
-                    Reload();
-                    break;
                 
                 case ColumnType.RemoteCount:
                     groupOrdered = TreeViewData.GroupInfoList.Order(info => info.RemoteCount, ascending);
@@ -166,20 +160,14 @@ namespace CatAsset.Editor
                     }
                     else
                     {
-                        args.label = string.Empty;
+                        args.label = bundleItem.Data.Name;
                     }
                     base.RowGUI(args);
                     break;
-                
-                case ColumnType.LocalBundles:
-                    if (bundleItem != null && bundleItem.Data.State != BundleRuntimeInfo.State.InRemote)
-                    {
-                        EditorGUI.LabelField(cellRect,bundleItem.Data.Name,centerStyle);
-                    }
-                    break;
+
                 
                 case ColumnType.State:
-                    if (bundleItem != null && bundleItem.Data.State != BundleRuntimeInfo.State.InRemote)
+                    if (bundleItem != null)
                     {
                         EditorGUI.LabelField(cellRect,bundleItem.Data.State.ToString(),centerStyle);
                     }
@@ -189,6 +177,13 @@ namespace CatAsset.Editor
                     if (groupItem != null)
                     {
                         EditorGUI.LabelField(cellRect,groupItem.Data.LocalCount.ToString(),centerStyle);
+                    }
+                    else
+                    {
+                        if (bundleItem.Data.State != BundleRuntimeInfo.State.InRemote)
+                        {
+                            EditorGUI.LabelField(cellRect,"1",centerStyle);
+                        }
                     }
                     break;
                 
@@ -204,18 +199,18 @@ namespace CatAsset.Editor
                     }
                     EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(length),centerStyle);
                     break;
-                
-                case ColumnType.RemoteBundles:
-                    if (bundleItem != null)
-                    {
-                        EditorGUI.LabelField(cellRect,bundleItem.Data.Name,centerStyle);
-                    }
-                    break;
-                
+
                 case ColumnType.RemoteCount:
                     if (groupItem != null)
                     {
                         EditorGUI.LabelField(cellRect,groupItem.Data.RemoteCount.ToString(),centerStyle);
+                    }
+                    else
+                    {
+                        if (bundleItem.Data.State == BundleRuntimeInfo.State.InRemote)
+                        {
+                            EditorGUI.LabelField(cellRect,"1",centerStyle);
+                        }
                     }
                     break;
                 

@@ -102,7 +102,7 @@ namespace CatAsset.Runtime
             if (downloadedBytes != newDownloadedBytes)
             {
                 ulong deltaDownloadedBytes = newDownloadedBytes - downloadedBytes;
-                updateInfo.UpdatedLength = newDownloadedBytes;
+                updateInfo.DownloadedBytesLength = newDownloadedBytes;
                 onDownloadRefreshCallback?.Invoke(updateInfo,deltaDownloadedBytes,newDownloadedBytes);
                 downloadedBytes = newDownloadedBytes;
             }
