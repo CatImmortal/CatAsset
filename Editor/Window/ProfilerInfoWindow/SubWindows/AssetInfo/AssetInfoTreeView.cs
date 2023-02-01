@@ -156,16 +156,16 @@ namespace CatAsset.Editor
 
             foreach (var assetInfo in TreeViewData.AssetInfoList)
             {
+                if (IsOnlyShowActiveLoad && assetInfo.RefCount <= assetInfo.DependencyChain.DownStream.Count)
+                {
+                    //只显示主动加载的资源时 如果资源引用计数<=下游资源数 就是仅被依赖加载的资源 需要跳过
+                    continue;
+                }
+                
                 var assetNode = new TreeViewDataItem<ProfilerAssetInfo>()
                 {
                     id = assetInfo.Name.GetHashCode(), displayName = assetInfo.Name, Data = assetInfo,
                 };
-
-                if (IsOnlyShowActiveLoad && assetInfo.RefCount == assetInfo.DependencyChain.DownStream.Count)
-                {
-                    //只显示主动加载的资源时 如果资源引用计数与下游资源数相同 就是仅被依赖加载的资源 需要跳过
-                    continue;
-                }
 
                 root.AddChild(assetNode);
             }
