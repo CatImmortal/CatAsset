@@ -81,9 +81,9 @@ namespace CatAsset.Runtime
         private int GetCount(UpdateState state)
         {
             int count = 0;
-            foreach (ProfilerUpdateBundleInfo pubi in UpdateBundleInfos)
+            foreach (ProfilerUpdateBundleInfo info in UpdateBundleInfos)
             {
-                if (pubi.State == state)
+                if (info.State == state)
                 {
                     count++;
                 }
@@ -98,16 +98,33 @@ namespace CatAsset.Runtime
         private ulong GetLength(UpdateState state)
         {
             ulong length = 0;
-            foreach (ProfilerUpdateBundleInfo pubi in UpdateBundleInfos)
+            foreach (ProfilerUpdateBundleInfo info in UpdateBundleInfos)
             {
-                if (pubi.State == state)
+                if (info.State == state)
                 {
-                    length += pubi.Length;
+                    length += info.Length;
                 }
             }
 
             return length;
         }
+
+        /// <summary>
+        /// 获取指定状态的更新资源包列表
+        /// </summary>
+        public List<ProfilerUpdateBundleInfo> GetBundleInfos(UpdateState state)
+        {
+            List<ProfilerUpdateBundleInfo> result = new List<ProfilerUpdateBundleInfo>();
+            foreach (ProfilerUpdateBundleInfo info in UpdateBundleInfos)
+            {
+                if (info.State == state)
+                {
+                    result.Add(info);
+                }
+            }
+
+            return result;
+        } 
 
         public static ProfilerUpdaterInfo Create(string name, GroupUpdaterState state,List<ProfilerUpdateBundleInfo> updateBundleInfos,ulong downloadedBytesLength,ulong speed)
         {

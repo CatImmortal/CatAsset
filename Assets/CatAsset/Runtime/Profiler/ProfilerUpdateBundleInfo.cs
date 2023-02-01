@@ -28,6 +28,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public ulong UpdatedLength;
 
+        /// <summary>
+        /// 进度
+        /// </summary>
+        public float Progress => (UpdatedLength * 1.0f) / Length;
+
         public static ProfilerUpdateBundleInfo Create(string name, UpdateState state, ulong length, ulong updatedLength)
         {
             ProfilerUpdateBundleInfo info = ReferencePool.Get<ProfilerUpdateBundleInfo>();

@@ -47,5 +47,10 @@ namespace CatAsset.Runtime
         {
             return (Info != null ? Info.GetHashCode() : 0);
         }
+
+        public override string ToString()
+        {
+            return $"UpdateInfo {Info.BundleIdentifyName}, State:{State},UpdatedLength:{UpdatedLength}";
+        }
     }
 }

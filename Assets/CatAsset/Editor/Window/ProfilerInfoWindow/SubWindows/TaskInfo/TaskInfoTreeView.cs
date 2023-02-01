@@ -95,12 +95,12 @@ namespace CatAsset.Editor
 
             foreach (var taskInfo in TreeViewData.TaskInfoList)
             {
-                var groupNode = new TreeViewDataItem<ProfilerTaskInfo>()
+                var taskNode = new TreeViewDataItem<ProfilerTaskInfo>()
                 {
                     id = taskInfo.Name.GetHashCode(), displayName = taskInfo.Name, Data = taskInfo,
                 };
 
-                root.AddChild(groupNode);
+                root.AddChild(taskNode);
             }
             SetupDepthsFromParentsAndChildren(root);
 
@@ -138,7 +138,7 @@ namespace CatAsset.Editor
                     EditorGUI.LabelField(cellRect,taskItem.Data.State.ToString(),centerStyle);
                     break;
                 case ColumnType.Progress:
-                    EditorGUI.LabelField(cellRect,taskItem.Data.Progress.ToString("0.00"),centerStyle);
+                    EditorGUI.LabelField(cellRect,$"{(taskItem.Data.Progress * 100):0.00}%",centerStyle);
                     break;
                 case ColumnType.MergedTaskCount:
                     EditorGUI.LabelField(cellRect,taskItem.Data.MergedTaskCount.ToString(),centerStyle);
