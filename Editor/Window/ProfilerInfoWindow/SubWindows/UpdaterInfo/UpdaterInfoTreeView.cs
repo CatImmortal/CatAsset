@@ -24,15 +24,19 @@ namespace CatAsset.Editor
             
             WaitingCount,
             WaitingLength,
+            
             UpdatingCount,
             UpdatingLength,
+            
             UpdatedCount,
             UpdatedLength,
+            
             TotalCount,
             TotalLength,
             
             DownloadBytesLength,
             Speed,
+            Progress,
             
 
            
@@ -60,49 +64,112 @@ namespace CatAsset.Editor
             ColumnType column = (ColumnType)header.sortedColumnIndex;
 
             IOrderedEnumerable<ProfilerUpdaterInfo> updaterOrdered = null;
-
+            IOrderedEnumerable<ProfilerUpdaterInfo.BundleInfo> bundleOrdered = null;
             switch (column)
             {
                 case ColumnType.Name:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.Name, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.Name, ascending);
                     break;
+                
                 case ColumnType.State:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.State, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.State, ascending);
                     break;
+
                 case ColumnType.WaitingCount:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.WaitingCount, ascending);
                     break;
+                
                 case ColumnType.WaitingLength:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.Length, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
+
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.WaitingLength, ascending);
                     break;
+
                 case ColumnType.UpdatingCount:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.UpdatingCount, ascending);
                     break;
+                
                 case ColumnType.UpdatingLength:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.Length, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
+
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.UpdatingLength, ascending);
                     break;
+
                 case ColumnType.UpdatedCount:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.UpdatedCount, ascending);
                     break;
+                
                 case ColumnType.UpdatedLength:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.Length, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
+
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.UpdatedLength, ascending);
                     break;
+                
+
                 case ColumnType.TotalCount:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.TotalCount, ascending);
                     break;
+                
                 case ColumnType.TotalLength:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.Length, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
+
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.TotalLength, ascending);
                     break;
+                
                 case ColumnType.DownloadBytesLength:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.DownLoadedBytesLength, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
+
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.DownloadedBytesLength, ascending);
                     break;
+                
                 case ColumnType.Speed:
                     updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.Speed, ascending);
                     break;
+                
+                case ColumnType.Progress:
+                    foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
+                    {
+                        bundleOrdered = updaterInfo.UpdateBundleInfos.Order(info => info.Progress, ascending);
+                        updaterInfo.UpdateBundleInfos = new List<ProfilerUpdaterInfo.BundleInfo>(bundleOrdered);
+                    }
+
+                    updaterOrdered = TreeViewData.UpdaterInfoList.Order(info => info.Progress, ascending);
+                    break;
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
             if (updaterOrdered != null)
             {
                 TreeViewData.UpdaterInfoList = new List<ProfilerUpdaterInfo>(updaterOrdered);
@@ -123,6 +190,16 @@ namespace CatAsset.Editor
                 {
                     id = updaterInfo.Name.GetHashCode(), displayName = updaterInfo.Name, Data = updaterInfo,
                 };
+
+                foreach (var bundleInfo in updaterInfo.UpdateBundleInfos)
+                {
+                    var bundleNode = new TreeViewDataItem<ProfilerUpdaterInfo.BundleInfo>()
+                    {
+                        id = bundleInfo.Name.GetHashCode(), displayName = updaterInfo.Name, Data = bundleInfo,
+                    };
+                    
+                    updaterNode.AddChild(bundleNode);
+                }
 
                 root.AddChild(updaterNode);
             }
@@ -145,7 +222,8 @@ namespace CatAsset.Editor
         /// </summary>
         private void CellGUI(Rect cellRect, TreeViewItem item, ColumnType column, ref RowGUIArgs args)
         {
-            TreeViewDataItem<ProfilerUpdaterInfo> updaterItem = (TreeViewDataItem<ProfilerUpdaterInfo>)item;
+            var updaterItem = item as TreeViewDataItem<ProfilerUpdaterInfo>;
+            var bundleItem = item as TreeViewDataItem<ProfilerUpdaterInfo.BundleInfo>;
             GUIStyle centerStyle = new GUIStyle() { alignment = TextAnchor.MiddleCenter };
             centerStyle.normal = new GUIStyleState(){textColor = Color.white};
 
@@ -153,69 +231,168 @@ namespace CatAsset.Editor
             {
                 case ColumnType.Name:
                     args.rowRect = cellRect;
-                    args.label = updaterItem.Data.Name;
+                    if (updaterItem != null)
+                    {
+                        args.label = updaterItem.Data.Name;
+                    }
+                    else
+                    {
+                        args.label = bundleItem.Data.Name;
+                    }
                     base.RowGUI(args);
                     break;
                 
                 case ColumnType.State:
-                    EditorGUI.LabelField(cellRect,updaterItem.Data.State.ToString(),centerStyle);
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,updaterItem.Data.State.ToString(),centerStyle);
+                    }
+                    else
+                    {
+                        EditorGUI.LabelField(cellRect,bundleItem.Data.State.ToString(),centerStyle);
+                    }
                     break;
                 
+               
+                
                 case ColumnType.WaitingCount:
-                    if (GUI.Button(cellRect,updaterItem.Data.WaitingCount.ToString()))
+                    if (updaterItem != null)
                     {
-                        UpdateBundleListWindow.Open(updaterItem.Data.GetBundleInfos(UpdateState.Waiting));
+                        EditorGUI.LabelField(cellRect,updaterItem.Data.WaitingCount.ToString(),centerStyle);
+                    }
+                    else
+                    {
+                        if (bundleItem.Data.State == UpdateState.Waiting)
+                        {
+                            EditorGUI.LabelField(cellRect,"1",centerStyle);
+                        }
                     }
                     break;
                 
                 case ColumnType.WaitingLength:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.WaitingLength),centerStyle);
-                    break;
-                
-                case ColumnType.UpdatingCount:
-                    if (GUI.Button(cellRect,updaterItem.Data.UpdatingCount.ToString()))
+                    if (updaterItem != null)
                     {
-                        UpdateBundleListWindow.Open(updaterItem.Data.GetBundleInfos(UpdateState.Updating));
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.WaitingLength),centerStyle);
+                    }
+                    else 
+                    {
+                        if (bundleItem.Data.State == UpdateState.Waiting)
+                        {
+                            EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.Length),centerStyle);
+                        }
+                    }
+                    break;
+
+                case ColumnType.UpdatingCount:
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,updaterItem.Data.UpdatingCount.ToString(),centerStyle);
+                    }
+                    else
+                    {
+                        if (bundleItem.Data.State == UpdateState.Updating)
+                        {
+                            EditorGUI.LabelField(cellRect,"1",centerStyle);
+                        }
                     }
                     break;
                 
                 case ColumnType.UpdatingLength:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.UpdatingLength),centerStyle);
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.UpdatingLength),centerStyle);
+                    }
+                    else 
+                    {
+                        if (bundleItem.Data.State == UpdateState.Updating)
+                        {
+                            EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.Length),centerStyle);
+                        }
+                    }
                     break;
+
                 
                 case ColumnType.UpdatedCount:
-                    if (GUI.Button(cellRect,updaterItem.Data.UpdatedCount.ToString()))
+                    if (updaterItem != null)
                     {
-                        UpdateBundleListWindow.Open(updaterItem.Data.GetBundleInfos(UpdateState.Updated));
+                        EditorGUI.LabelField(cellRect,updaterItem.Data.UpdatedCount.ToString(),centerStyle);
+                    }
+                    else
+                    {
+                        if (bundleItem.Data.State == UpdateState.Updated)
+                        {
+                            EditorGUI.LabelField(cellRect,"1",centerStyle);
+                        }
                     }
                     break;
                 
                 case ColumnType.UpdatedLength:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.UpdatedLength),centerStyle);
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.UpdatedLength),centerStyle);
+                    }
+                    else 
+                    {
+                        if (bundleItem.Data.State == UpdateState.Updated)
+                        {
+                            EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.Length),centerStyle);
+                        }
+                    }
                     break;
                 
+
+                
                 case ColumnType.TotalCount:
-                    if (GUI.Button(cellRect,updaterItem.Data.TotalCount.ToString()))
+                    if (updaterItem != null)
                     {
-                        UpdateBundleListWindow.Open(updaterItem.Data.UpdateBundleInfos);
+                        EditorGUI.LabelField(cellRect,updaterItem.Data.UpdateBundleInfos.Count.ToString(),centerStyle);
                     }
                     break;
                 
                 case ColumnType.TotalLength:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.TotalLength),centerStyle);
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.TotalLength),centerStyle);
+                    }
+                    else 
+                    {
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.Length),centerStyle);
+                    }
                     break;
                 
                 case ColumnType.DownloadBytesLength:
-                    EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.DownloadedBytesLength),centerStyle);
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(updaterItem.Data.DownloadedBytesLength),centerStyle);
+                    }
+                    else 
+                    {
+                        EditorGUI.LabelField(cellRect,RuntimeUtil.GetByteLengthDesc(bundleItem.Data.DownLoadedBytesLength),centerStyle);
+                    }
                     break;
                 
                 case ColumnType.Speed:
-                    EditorGUI.LabelField(cellRect,$"{RuntimeUtil.GetByteLengthDesc(updaterItem.Data.Speed)}/s",centerStyle);
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,$"{RuntimeUtil.GetByteLengthDesc(updaterItem.Data.Speed)}/s",centerStyle);
+                    }
+                    break;
+                
+                case ColumnType.Progress:
+                    if (updaterItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,$"{updaterItem.Data.Progress * 100:0.00}%",centerStyle);
+                    }
+                    else 
+                    {
+                        EditorGUI.LabelField(cellRect,$"{bundleItem.Data.Progress * 100:0.00}%",centerStyle);
+                    }
                     break;
                 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(column), column, null);
             }
+       
         }
     }
 }

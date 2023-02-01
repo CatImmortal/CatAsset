@@ -9,6 +9,58 @@ namespace CatAsset.Runtime
     [Serializable]
     public class ProfilerUpdaterInfo : IReference,IComparable<ProfilerUpdaterInfo>
     {
+
+        public class BundleInfo : IReference,IComparable<BundleInfo>
+        {
+            /// <summary>
+            /// 名称
+            /// </summary>
+            public string Name;
+        
+            /// <summary>
+            /// 状态
+            /// </summary>
+            public UpdateState State;
+
+            /// <summary>
+            /// 总长度
+            /// </summary>
+            public ulong Length;
+        
+            /// <summary>
+            /// 已下载字节数
+            /// </summary>
+            public ulong DownLoadedBytesLength;
+
+            /// <summary>
+            /// 进度
+            /// </summary>
+            public float Progress => (DownLoadedBytesLength * 1.0f) / Length;
+
+            public static BundleInfo Create(string name, UpdateState state, ulong length, ulong downLoadedBytesLength)
+            {
+                BundleInfo info = ReferencePool.Get<BundleInfo>();
+                info.Name = name;
+                info.State = state;
+                info.Length = length;
+                info.DownLoadedBytesLength = downLoadedBytesLength;
+                return info;
+            }
+        
+            public void Clear()
+            {
+                Name = default;
+                State = default;
+                Length = default;
+                DownLoadedBytesLength = default;
+            }
+
+            public int CompareTo(BundleInfo other)
+            {
+                return Name.CompareTo(other.Name);
+            }
+        }
+        
         /// <summary>
         /// 名称
         /// </summary>
@@ -22,7 +74,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此更新器的所有资源包信息列表
         /// </summary>
-        public List<ProfilerUpdateBundleInfo> UpdateBundleInfos;
+        public List<BundleInfo> UpdateBundleInfos;
         
         /// <summary>
         /// 待更新的资源包总数
@@ -71,6 +123,11 @@ namespace CatAsset.Runtime
         public ulong DownloadedBytesLength;
         
         /// <summary>
+        /// 进度
+        /// </summary>
+        public float Progress => (DownloadedBytesLength * 1.0f) / TotalLength;
+        
+        /// <summary>
         /// 下载速度
         /// </summary>
         public ulong Speed;
@@ -81,7 +138,7 @@ namespace CatAsset.Runtime
         private int GetCount(UpdateState state)
         {
             int count = 0;
-            foreach (ProfilerUpdateBundleInfo info in UpdateBundleInfos)
+            foreach (BundleInfo info in UpdateBundleInfos)
             {
                 if (info.State == state)
                 {
@@ -98,7 +155,7 @@ namespace CatAsset.Runtime
         private ulong GetLength(UpdateState state)
         {
             ulong length = 0;
-            foreach (ProfilerUpdateBundleInfo info in UpdateBundleInfos)
+            foreach (BundleInfo info in UpdateBundleInfos)
             {
                 if (info.State == state)
                 {
@@ -112,10 +169,10 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取指定状态的更新资源包列表
         /// </summary>
-        public List<ProfilerUpdateBundleInfo> GetBundleInfos(UpdateState state)
+        public List<BundleInfo> GetBundleInfos(UpdateState state)
         {
-            List<ProfilerUpdateBundleInfo> result = new List<ProfilerUpdateBundleInfo>();
-            foreach (ProfilerUpdateBundleInfo info in UpdateBundleInfos)
+            List<BundleInfo> result = new List<BundleInfo>();
+            foreach (BundleInfo info in UpdateBundleInfos)
             {
                 if (info.State == state)
                 {
@@ -126,14 +183,14 @@ namespace CatAsset.Runtime
             return result;
         } 
 
-        public static ProfilerUpdaterInfo Create(string name, GroupUpdaterState state,List<ProfilerUpdateBundleInfo> updateBundleInfos,ulong downloadedBytesLength,ulong speed)
+        public static ProfilerUpdaterInfo Create(string name, GroupUpdaterState state,List<BundleInfo> updateBundleInfos,ulong downloadedBytesLength,ulong speed)
         {
             ProfilerUpdaterInfo info = ReferencePool.Get<ProfilerUpdaterInfo>();
             info.Name = name;
             info.State = state;
             
             info.UpdateBundleInfos = updateBundleInfos;
-            foreach (ProfilerUpdateBundleInfo pubi in updateBundleInfos)
+            foreach (BundleInfo pubi in updateBundleInfos)
             {
                 info.TotalLength += pubi.Length;
             }
@@ -148,7 +205,7 @@ namespace CatAsset.Runtime
         {
             Name = default;
             State = default;
-            foreach (ProfilerUpdateBundleInfo pubi in UpdateBundleInfos)
+            foreach (BundleInfo pubi in UpdateBundleInfos)
             {
                 ReferencePool.Release(pubi);
             }

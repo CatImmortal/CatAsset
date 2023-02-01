@@ -110,16 +110,23 @@ namespace CatAsset.Runtime
         /// 上一次记录已下载字节数的时间
         /// </summary>
         private float lastRecordTime;
-
+        
+        /// <summary>
+        /// 已下载字节数
+        /// </summary>
+        public ulong DownloadedBytesLength { get; private set; }
+        
+        /// <summary>
+        /// 进度
+        /// </summary>
+        public float Progress => (DownloadedBytesLength * 1.0f) / TotalLength;
+        
         /// <summary>
         /// 下载速度 单位：字节/秒
         /// </summary>
         public ulong Speed { get; private set; }
 
-        /// <summary>
-        /// 已下载字节数
-        /// </summary>
-        public ulong DownloadedBytesLength { get; private set; }
+       
         
         public GroupUpdater()
         {

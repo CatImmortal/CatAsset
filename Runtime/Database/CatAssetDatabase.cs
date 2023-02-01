@@ -487,12 +487,12 @@ namespace CatAsset.Runtime
             {
                 GroupUpdater updater = pair.Value;
 
-                List<ProfilerUpdateBundleInfo> pubiList = new List<ProfilerUpdateBundleInfo>(updater.TotalCount);
+                List<ProfilerUpdaterInfo.BundleInfo> pubiList = new List<ProfilerUpdaterInfo.BundleInfo>(updater.TotalCount);
                 foreach (UpdateInfo updateInfo in updater.UpdaterBundles)
                 {
-                    ProfilerUpdateBundleInfo pubi = ProfilerUpdateBundleInfo.Create(updateInfo.Info.BundleIdentifyName,
-                        updateInfo.State, updateInfo.Info.Length, updateInfo.UpdatedLength);
-                    pubiList.Add(pubi);
+                    var bundleInfo = ProfilerUpdaterInfo.BundleInfo.Create(updateInfo.Info.BundleIdentifyName,
+                        updateInfo.State, updateInfo.Info.Length, updateInfo.DownloadedBytesLength);
+                    pubiList.Add(bundleInfo);
                 }
 
                 ProfilerUpdaterInfo pui =
