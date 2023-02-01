@@ -17,6 +17,7 @@ namespace CatAsset.Editor
             var window = CreateWindow<GroupBundleListWindow>();
             window.titleContent.text = title;
             window.bundles = bundles;
+            window.Show();
         }
 
         private void OnGUI()

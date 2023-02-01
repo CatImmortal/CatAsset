@@ -119,12 +119,12 @@ namespace CatAsset.Editor
 
             foreach (var updaterInfo in TreeViewData.UpdaterInfoList)
             {
-                var groupNode = new TreeViewDataItem<ProfilerUpdaterInfo>()
+                var updaterNode = new TreeViewDataItem<ProfilerUpdaterInfo>()
                 {
                     id = updaterInfo.Name.GetHashCode(), displayName = updaterInfo.Name, Data = updaterInfo,
                 };
 
-                root.AddChild(groupNode);
+                root.AddChild(updaterNode);
             }
             SetupDepthsFromParentsAndChildren(root);
 
@@ -162,7 +162,10 @@ namespace CatAsset.Editor
                     break;
                 
                 case ColumnType.WaitingCount:
-                    EditorGUI.LabelField(cellRect,updaterItem.Data.WaitingCount.ToString(),centerStyle);
+                    if (GUI.Button(cellRect,updaterItem.Data.WaitingCount.ToString()))
+                    {
+                        UpdateBundleListWindow.Open(updaterItem.Data.GetBundleInfos(UpdateState.Waiting));
+                    }
                     break;
                 
                 case ColumnType.WaitingLength:
@@ -170,7 +173,10 @@ namespace CatAsset.Editor
                     break;
                 
                 case ColumnType.UpdatingCount:
-                    EditorGUI.LabelField(cellRect,updaterItem.Data.UpdatingCount.ToString(),centerStyle);
+                    if (GUI.Button(cellRect,updaterItem.Data.UpdatingCount.ToString()))
+                    {
+                        UpdateBundleListWindow.Open(updaterItem.Data.GetBundleInfos(UpdateState.Updating));
+                    }
                     break;
                 
                 case ColumnType.UpdatingLength:
@@ -178,7 +184,10 @@ namespace CatAsset.Editor
                     break;
                 
                 case ColumnType.UpdatedCount:
-                    EditorGUI.LabelField(cellRect,updaterItem.Data.UpdatedCount.ToString(),centerStyle);
+                    if (GUI.Button(cellRect,updaterItem.Data.UpdatedCount.ToString()))
+                    {
+                        UpdateBundleListWindow.Open(updaterItem.Data.GetBundleInfos(UpdateState.Updated));
+                    }
                     break;
                 
                 case ColumnType.UpdatedLength:
@@ -186,7 +195,10 @@ namespace CatAsset.Editor
                     break;
                 
                 case ColumnType.TotalCount:
-                    EditorGUI.LabelField(cellRect,updaterItem.Data.TotalCount.ToString(),centerStyle);
+                    if (GUI.Button(cellRect,updaterItem.Data.TotalCount.ToString()))
+                    {
+                        UpdateBundleListWindow.Open(updaterItem.Data.UpdateBundleInfos);
+                    }
                     break;
                 
                 case ColumnType.TotalLength:
@@ -198,7 +210,7 @@ namespace CatAsset.Editor
                     break;
                 
                 case ColumnType.Speed:
-                    EditorGUI.LabelField(cellRect,$"{RuntimeUtil.GetByteLengthDesc(updaterItem.Data.Speed)}/S",centerStyle);
+                    EditorGUI.LabelField(cellRect,$"{RuntimeUtil.GetByteLengthDesc(updaterItem.Data.Speed)}/s",centerStyle);
                     break;
                 
                 default:

@@ -98,18 +98,19 @@ namespace CatAsset.Runtime
                 return;
             }
 
+            ulong newDownloadedBytes = op.webRequest.downloadedBytes;
+            if (downloadedBytes != newDownloadedBytes)
+            {
+                ulong deltaDownloadedBytes = newDownloadedBytes - downloadedBytes;
+                updateInfo.UpdatedLength = newDownloadedBytes;
+                onDownloadRefreshCallback?.Invoke(updateInfo,deltaDownloadedBytes,newDownloadedBytes);
+                downloadedBytes = newDownloadedBytes;
+            }
+            
             if (!op.webRequest.isDone)
             {
                 //下载中
                 State = TaskState.Running;
-                ulong newDownloadedBytes = op.webRequest.downloadedBytes;
-                if (downloadedBytes != newDownloadedBytes)
-                {
-                    ulong deltaDownloadedBytes = newDownloadedBytes - downloadedBytes;
-                    updateInfo.UpdatedLength = newDownloadedBytes;
-                    onDownloadRefreshCallback?.Invoke(updateInfo,deltaDownloadedBytes,newDownloadedBytes);
-                    downloadedBytes = newDownloadedBytes;
-                }
                 return;
             }
 

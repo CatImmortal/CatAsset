@@ -474,7 +474,7 @@ namespace CatAsset.Runtime
                 List<ProfilerUpdateBundleInfo> pubiList = new List<ProfilerUpdateBundleInfo>(updater.TotalCount);
                 foreach (UpdateInfo updateInfo in updater.UpdaterBundles)
                 {
-                    ProfilerUpdateBundleInfo pubi = ProfilerUpdateBundleInfo.Create(updateInfo.Info.BundleName,
+                    ProfilerUpdateBundleInfo pubi = ProfilerUpdateBundleInfo.Create(updateInfo.Info.BundleIdentifyName,
                         updateInfo.State, updateInfo.Info.Length, updateInfo.UpdatedLength);
                     pubiList.Add(pubi);
                 }
