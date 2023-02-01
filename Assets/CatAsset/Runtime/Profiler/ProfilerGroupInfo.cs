@@ -17,12 +17,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此资源组的所有本地资源包
         /// </summary>
-        public List<string> LocalBundles;
-        
+        public List<string> LocalBundles = new List<string>();
+
         /// <summary>
         /// 本地资源数
         /// </summary>
-        public int LocalCount;
+        public int LocalCount => LocalBundles.Count;
 
         /// <summary>
         /// 本地资源长度
@@ -32,12 +32,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 此资源组的所有远端资源包
         /// </summary>
-        public List<string> RemoteBundles;
-        
+        public List<string> RemoteBundles = new List<string>();
+
         /// <summary>
         /// 远端资源数
         /// </summary>
-        public int RemoteCount;
+        public int RemoteCount => RemoteBundles.Count;
 
         /// <summary>
         /// 远端资源长度
@@ -46,15 +46,13 @@ namespace CatAsset.Runtime
 
 
 
-        public static ProfilerGroupInfo Create(string name,List<string> localBundles,int localCount,ulong localLength,List<string> remoteBundles,int remoteCount,ulong remoteLength)
+        public static ProfilerGroupInfo Create(string name,List<string> localBundles,ulong localLength,List<string> remoteBundles,ulong remoteLength)
         {
             ProfilerGroupInfo info = ReferencePool.Get<ProfilerGroupInfo>();
             info.Name = name;
-            info.LocalBundles = localBundles;
-            info.LocalCount = localCount;
+            info.LocalBundles.AddRange(localBundles);
             info.LocalLength = localLength;
-            info.RemoteBundles = remoteBundles;
-            info.RemoteCount = remoteCount;
+            info.RemoteBundles.AddRange(remoteBundles);
             info.RemoteLength = remoteLength;
             return info;
         }
@@ -62,11 +60,9 @@ namespace CatAsset.Runtime
         public void Clear()
         {
             Name = default;
-            LocalBundles = default;
-            LocalCount = default;
+            LocalBundles.Clear();
             LocalLength = default;
-            RemoteBundles = default;
-            RemoteCount = default;
+            RemoteBundles.Clear();
             RemoteLength = default;
         }
 
