@@ -18,9 +18,6 @@ namespace CatAsset.Editor
         /// </summary>
         private enum ColumnType
         {
-            /// <summary>
-            /// 名称
-            /// </summary>
             Name,
 
             LocalCount,
