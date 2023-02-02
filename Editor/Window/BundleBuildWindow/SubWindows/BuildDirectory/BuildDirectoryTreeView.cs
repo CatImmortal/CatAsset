@@ -55,6 +55,11 @@ namespace CatAsset.Editor
             CompressOption,
             
             /// <summary>
+            /// 加密设置
+            /// </summary>
+            EncryptOption,
+            
+            /// <summary>
             /// 删除按钮
             /// </summary>
             RemoveButton,
@@ -232,6 +237,11 @@ namespace CatAsset.Editor
                 case ColumnType.CompressOption:
                     directoryItem.Data.CompressOption =
                         (BundleCompressOptions)EditorGUI.EnumPopup(cellRect, directoryItem.Data.CompressOption);
+                    break;
+                
+                case ColumnType.EncryptOption:
+                    directoryItem.Data.EncryptOption =
+                        (BundleEncryptOptions)EditorGUI.EnumPopup(cellRect, directoryItem.Data.EncryptOption);
                     break;
                 
                 case ColumnType.RemoveButton:

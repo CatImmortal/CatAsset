@@ -20,6 +20,7 @@ namespace CatAsset.Editor
                 "正则",
                 "资源组",
                 "压缩设置",
+                "加密设置",
                 "删除",
             };
 

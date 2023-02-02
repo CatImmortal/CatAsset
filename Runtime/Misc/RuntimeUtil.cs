@@ -1,11 +1,15 @@
 ﻿
 using System;
+using System.Buffers;
+using System.Collections.Concurrent;
 using System.IO;
 using UnityEngine;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
+using Random = UnityEngine.Random;
 
 namespace CatAsset.Runtime
 {
@@ -19,12 +23,13 @@ namespace CatAsset.Runtime
         /// 内置Shader资源包名
         /// </summary>
         public const string BuiltInShaderBundleName = "UnityBuiltInShaders.bundle";
-
-        private const int oneKB = 1024;
-        private const int oneMB = oneKB * 1024;
-        private const int oneGB = oneMB * 1024;
-
+        
         private static StringBuilder CachedSB = new StringBuilder();
+        
+        public const int OneKB = 1024;
+        public const int OneMB = OneKB * 1024;
+        public const int OneGB = OneMB * 1024;
+        
 
         /// <summary>
         /// 获取规范的路径
@@ -75,17 +80,17 @@ namespace CatAsset.Runtime
         /// </summary>
         public static string GetByteLengthDesc(ulong length)
         {
-            if (length > oneGB)
+            if (length > OneGB)
             {
-                return (length / (oneGB * 1f)).ToString("0.00") + "G" ;
+                return (length / (OneGB * 1f)).ToString("0.00") + "G" ;
             }
-            if (length > oneMB)
+            if (length > OneMB)
             {
-                return (length / (oneMB * 1f)).ToString("0.00") + "M";
+                return (length / (OneMB * 1f)).ToString("0.00") + "M";
             }
-            if (length > oneKB)
+            if (length > OneKB)
             {
-                return (length / (oneKB * 1f)).ToString("0.00") + "K";
+                return (length / (OneKB * 1f)).ToString("0.00") + "K";
             }
 
             return length + "B";
@@ -117,7 +122,7 @@ namespace CatAsset.Runtime
                 return AssetCategory.ExternalRawAsset;
             }
         }
-
+        
         /// <summary>
         /// 获取资源类别
         /// </summary>
@@ -201,5 +206,7 @@ namespace CatAsset.Runtime
             return uwr.isNetworkError || uwr.isHttpError;
 #endif
         }
+
+       
     }
 }

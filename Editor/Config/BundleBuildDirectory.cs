@@ -45,19 +45,28 @@ namespace CatAsset.Editor
         internal BundleCompressOptions CompressOption;
         
         /// <summary>
+        /// 资源包加密设置
+        /// </summary>
+        [SerializeField]
+        public BundleEncryptOptions EncryptOption; 
+        
+        /// <summary>
         /// 目录名
         /// </summary>
         public string DirectoryName => AssetDatabase.GetAssetPath(DirectoryObj);
 
         public BundleBuildDirectory(string directoryName, string buildRuleName = nameof(NAssetToOneBundle),
             string regex = null, string group = GroupInfo.DefaultGroup,
-            BundleCompressOptions compressOption = BundleCompressOptions.UseGlobal)
+            BundleCompressOptions compressOption = BundleCompressOptions.UseGlobal,
+            BundleEncryptOptions encryptOption = BundleEncryptOptions.UseGlobal
+            )
         {
             DirectoryObj = AssetDatabase.LoadAssetAtPath<Object>(directoryName);
             BuildRuleName = buildRuleName;
             Regex = regex;
             Group = group;
             CompressOption = compressOption;
+            EncryptOption = encryptOption;
         }
 
         public int CompareTo(BundleBuildDirectory other)
@@ -75,6 +84,20 @@ namespace CatAsset.Editor
             {
                 result = BundleBuildConfigSO.Instance.GlobalCompress;
             }
+            return result;
+        }
+
+        /// <summary>
+        /// 获取加密设置
+        /// </summary>
+        public BundleEncryptOptions GetEncryptOption()
+        {
+            BundleEncryptOptions result = EncryptOption;
+            if (result == BundleEncryptOptions.UseGlobal)
+            {
+                result = BundleBuildConfigSO.Instance.GlobalEncrypt;
+            }
+
             return result;
         }
         

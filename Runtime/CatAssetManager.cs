@@ -16,7 +16,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 加载相关任务运行器
         /// </summary>
-        private static TaskRunner loadTaskRunner = new TaskRunner();
+        private static TaskRunner taskRunner = new TaskRunner();
 
         /// <summary>
         /// 卸载相关任务运行器
@@ -67,7 +67,7 @@ namespace CatAsset.Runtime
         {
             set
             {
-                loadTaskRunner.MaxRunCount = value;
+                taskRunner.MaxRunCount = value;
                 downloadTaskRunner.MaxRunCount = value;
             }
         }
@@ -112,14 +112,14 @@ namespace CatAsset.Runtime
         public static void Update()
         {
             //每帧开始轮询前 清空计数
-            loadTaskRunner.PreUpdate();
+            taskRunner.PreUpdate();
             unloadTaskRunner.PreUpdate();
             downloadTaskRunner.PreUpdate();
                 
             //按优先级轮询任务组
             for (int i = 0; i < priorityNum; i++)
             {
-                loadTaskRunner.Update(i);
+                taskRunner.Update(i);
                 unloadTaskRunner.Update(i);
                 downloadTaskRunner.Update(i);
             }

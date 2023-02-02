@@ -134,7 +134,8 @@ namespace CatAsset.Editor
                 //将这些冗余资源放进同一个冗余资源包中
                 string group = pair.Value[0].Group;
                 BundleBuildInfo redundancyBundle =
-                    new BundleBuildInfo(string.Empty, $"Redundancy_{redundancyBundles.Count}.bundle", group, false,BundleBuildConfigSO.Instance.GlobalCompress);
+                    new BundleBuildInfo(string.Empty, $"Redundancy_{redundancyBundles.Count}.bundle", group, false,
+                        BundleBuildConfigSO.Instance.GlobalCompress, BundleBuildConfigSO.Instance.GlobalEncrypt);
                 redundancyBundle.Assets = redundancyBundleAssets;
 
                 redundancyBundles.Add(redundancyBundle);

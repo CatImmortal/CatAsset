@@ -53,6 +53,11 @@ namespace CatAsset.Editor
             /// 压缩设置
             /// </summary>
             CompressOption,
+            
+            /// <summary>
+            /// 加密设置
+            /// </summary>
+            EncryptOption,
         }
         
         public PreviewTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader)
@@ -119,6 +124,10 @@ namespace CatAsset.Editor
 
                 case ColumnType.CompressOption:
                     bundleOrdered = TreeViewData.Bundles.Order(info => info.CompressOption, ascending);
+                    break;
+                
+                case ColumnType.EncryptOption:
+                    bundleOrdered = TreeViewData.Bundles.Order(info => info.EncryptOption, ascending);
                     break;
 
                 default:
@@ -263,6 +272,15 @@ namespace CatAsset.Editor
                         
                         EditorGUI.BeginDisabledGroup(true);
                         EditorGUI.EnumPopup(cellRect, bundleItem.Data.CompressOption);
+                        EditorGUI.EndDisabledGroup();
+                    }
+                    break;
+                
+                case ColumnType.EncryptOption:
+                    if (bundleItem != null)
+                    {
+                        EditorGUI.BeginDisabledGroup(true);
+                        EditorGUI.EnumPopup(cellRect, bundleItem.Data.EncryptOption);
                         EditorGUI.EndDisabledGroup();
                     }
                     break;

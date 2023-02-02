@@ -86,8 +86,9 @@ namespace CatAsset.Editor
             }
           
             string bundleName = buildDirectory.Substring(lastIndex + 1) + ".bundle"; //以构建目录名作为资源包名 yyy.bundle
-            
-            BundleBuildInfo bundleBuildInfo = new BundleBuildInfo(directoryName,bundleName,bundleBuildDirectory.Group,false,bundleBuildDirectory.GetCompressOption());
+
+            BundleBuildInfo bundleBuildInfo = new BundleBuildInfo(directoryName, bundleName, bundleBuildDirectory.Group,
+                false, bundleBuildDirectory.GetCompressOption(), bundleBuildDirectory.GetEncryptOption());
             bundleBuildInfo.Assets.Capacity = assetNames.Count;
             
             for (int i = 0; i < assetNames.Count; i++)

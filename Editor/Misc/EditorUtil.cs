@@ -82,9 +82,6 @@ namespace CatAsset.Editor
             }
         }
 
-      
-        
-        
         [MenuItem("Assets/刷新资源包构建信息")]
         private static void RefreshBundleBuildInfo()
         {
@@ -244,7 +241,7 @@ namespace CatAsset.Editor
             dirInfo.Delete();
         }
         
-
+       
 
     }
 }

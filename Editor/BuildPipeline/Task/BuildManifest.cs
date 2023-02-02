@@ -74,7 +74,7 @@ namespace CatAsset.Editor
             {
                 BundleBuildInfo bundleBuildInfo =
                     new BundleBuildInfo(string.Empty, builtInShadersBundleName, GroupInfo.DefaultGroup, false,
-                        configParam.Config.GlobalCompress);
+                        configParam.Config.GlobalCompress,configParam.Config.GlobalEncrypt);
                 infoParam.NormalBundleBuilds.Add(bundleBuildInfo);
             }
 
@@ -87,6 +87,7 @@ namespace CatAsset.Editor
                     BundleName = bundleBuildInfo.BundleName,
                     Group = bundleBuildInfo.Group,
                     IsRaw = false,
+                    EncryptOption = bundleBuildInfo.EncryptOption,
                     Assets = new List<AssetManifestInfo>(),
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
@@ -137,6 +138,7 @@ namespace CatAsset.Editor
                     Group = bundleBuildInfo.Group,
                     IsRaw = true,
                     IsScene = false,
+                    EncryptOption = bundleBuildInfo.EncryptOption,
                     Assets = new List<AssetManifestInfo>(),
                 };
                 manifest.Bundles.Add(bundleManifestInfo);

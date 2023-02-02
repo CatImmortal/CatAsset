@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using CatAsset.Runtime;
 using UnityEditor;
 using UnityEditor.Build.Pipeline.Utilities;
 using UnityEngine;
@@ -90,6 +91,17 @@ namespace CatAsset.Editor
                 if (compressOptions != BundleCompressOptions.UseGlobal)
                 {
                     BundleBuildConfigSO.Instance.GlobalCompress = compressOptions;
+                }
+                
+                EditorGUILayout.Space();
+                
+                EditorGUILayout.LabelField("资源包全局加密设置：",GUILayout.Width(120));
+                BundleEncryptOptions encryptOption =
+                    (BundleEncryptOptions)EditorGUILayout.EnumPopup(BundleBuildConfigSO.Instance.GlobalEncrypt,
+                        GUILayout.Width(100));
+                if (encryptOption != BundleEncryptOptions.UseGlobal)
+                {
+                    BundleBuildConfigSO.Instance.GlobalEncrypt = encryptOption;
                 }
                 
                 EditorGUILayout.Space();
