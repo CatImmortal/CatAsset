@@ -112,6 +112,11 @@ namespace CatAsset.Runtime
         public bool IsDependencyBuiltInShaderBundle;
 
         /// <summary>
+        /// 加密设置
+        /// </summary>
+        public BundleEncryptOptions EncryptOption; 
+        
+        /// <summary>
         /// 资源清单信息列表
         /// </summary>
         public List<AssetManifestInfo> Assets;
@@ -167,6 +172,7 @@ namespace CatAsset.Runtime
             writer.Write(IsAppendMD5);
             writer.Write(Hash);
             writer.Write(IsDependencyBuiltInShaderBundle);
+            writer.Write((byte)EncryptOption);
             writer.Write(Assets.Count);
             foreach (AssetManifestInfo assetManifestInfo in Assets)
             {
@@ -190,7 +196,8 @@ namespace CatAsset.Runtime
             info.IsAppendMD5 = reader.ReadBoolean();
             info.Hash = reader.ReadString();
             info.IsDependencyBuiltInShaderBundle = reader.ReadBoolean();
-
+            info.EncryptOption = (BundleEncryptOptions)reader.ReadByte();
+            
             int count = reader.ReadInt32();
             info.Assets = new List<AssetManifestInfo>(count);
             for (int i = 0; i < count; i++)

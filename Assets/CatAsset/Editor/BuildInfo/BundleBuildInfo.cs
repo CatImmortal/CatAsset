@@ -49,17 +49,27 @@ namespace CatAsset.Editor
         public BundleCompressOptions CompressOption;
         
         /// <summary>
+        /// 资源包加密设置
+        /// </summary>
+        public BundleEncryptOptions EncryptOption; 
+        
+        /// <summary>
         /// 资源构建信息列表
         /// </summary>
         public List<AssetBuildInfo> Assets = new List<AssetBuildInfo>();
 
-        public BundleBuildInfo(string directoryName, string bundleName,string group,bool isRaw,BundleCompressOptions compressOption)
+        public BundleBuildInfo(string directoryName, string bundleName,string group,bool isRaw,BundleCompressOptions compressOption,BundleEncryptOptions encryptOption)
         {
             DirectoryName = directoryName;
             BundleName = bundleName;
             Group = group;
             IsRaw = isRaw;
             CompressOption = compressOption;
+            EncryptOption = encryptOption;
+            if (isRaw && encryptOption == BundleEncryptOptions.Offset)
+            {
+                EncryptOption = BundleEncryptOptions.XOr;
+            }
             BundleIdentifyName = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
         }
 

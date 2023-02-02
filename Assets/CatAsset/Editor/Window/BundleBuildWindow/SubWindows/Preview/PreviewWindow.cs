@@ -16,6 +16,7 @@ namespace CatAsset.Editor
                 "资源数",
                 "预估长度",
                 "压缩设置",
+                "加密设置",
             };
 
             return columnList;

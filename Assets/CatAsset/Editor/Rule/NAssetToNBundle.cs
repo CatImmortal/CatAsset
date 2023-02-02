@@ -85,7 +85,8 @@ namespace CatAsset.Editor
                 }
 
                 BundleBuildInfo bundleBuildInfo =
-                    new BundleBuildInfo(directoryName,bundleName, bundleBuildDirectory.Group, IsRaw,bundleBuildDirectory.GetCompressOption());
+                    new BundleBuildInfo(directoryName, bundleName, bundleBuildDirectory.Group, IsRaw,
+                        bundleBuildDirectory.GetCompressOption(), bundleBuildDirectory.GetEncryptOption());
 
                 bundleBuildInfo.Assets.Add(new AssetBuildInfo(path));
                     

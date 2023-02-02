@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace CatAsset.Runtime
 {
@@ -76,6 +78,9 @@ namespace CatAsset.Runtime
         private LoadBundleState loadState;
         private AssetBundleCreateRequest request;
 
+        private WebRequestedCallback onBundleBinaryLoadedCallback;
+        private DecryptXOrStream stream;
+        
         /// <inheritdoc />
         public override float Progress
         {
@@ -94,7 +99,10 @@ namespace CatAsset.Runtime
         {
             onBundleUpdatedCallback = OnBundleUpdated;
             onBuiltInShaderBundleLoadedCallback = OnBuiltInShaderBundleLoadedCallback;
+            onBundleBinaryLoadedCallback = OnBundleBinaryLoadedCallback;
         }
+
+       
 
 
         /// <inheritdoc />
@@ -193,6 +201,22 @@ namespace CatAsset.Runtime
         private void OnBuiltInShaderBundleLoadedCallback(bool success)
         {
             loadState = LoadBundleState.BuiltInShaderBundleLoaded;
+        }
+        
+        /// <summary>
+        /// 资源包二进制数据加载完毕回调
+        /// </summary>
+        private void OnBundleBinaryLoadedCallback(bool success, UnityWebRequest uwr)
+        {
+            if (!success)
+            {
+                loadState = LoadBundleState.BundleLoaded;
+                return;
+            }
+
+            byte[] bytes = uwr.downloadHandler.data;
+            EncryptUtil.EncryptXOr(bytes);
+            request = AssetBundle.LoadFromMemoryAsync(bytes);
         }
 
         private void CheckStateWhileBundleNotExist()
@@ -322,7 +346,36 @@ namespace CatAsset.Runtime
         /// </summary>
         protected virtual void LoadAsync()
         {
-            request = AssetBundle.LoadFromFileAsync(BundleRuntimeInfo.LoadPath);
+            switch (BundleRuntimeInfo.Manifest.EncryptOption)
+            {
+
+                case BundleEncryptOptions.NotEncrypt:
+                    request = AssetBundle.LoadFromFileAsync(BundleRuntimeInfo.LoadPath);
+                    break;
+                
+                case BundleEncryptOptions.Offset:
+                    request = AssetBundle.LoadFromFileAsync(BundleRuntimeInfo.LoadPath,0,EncryptUtil.EncryptBytesLength);
+                    break;
+                
+                case BundleEncryptOptions.XOr:
+                    if (BundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InReadWrite)
+                    {
+                        //存在于读写区 使用Stream进行解密
+                        stream = new DecryptXOrStream(BundleRuntimeInfo.LoadPath, FileMode.Open, FileAccess.Read);
+                        request = AssetBundle.LoadFromStreamAsync(stream);
+                    }
+                    else
+                    {
+                        //存在于只读区 使用二进制数据解密
+                        CatAssetManager.AddWebRequestTask(BundleRuntimeInfo.LoadPath,BundleRuntimeInfo.LoadPath,onBundleBinaryLoadedCallback,TaskPriority.Middle);
+                    }
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            
         }
 
         /// <summary>
@@ -330,7 +383,7 @@ namespace CatAsset.Runtime
         /// </summary>
         protected virtual bool IsLoadDone()
         {
-            return request.isDone;
+            return request != null && request.isDone;
         }
 
         /// <summary>
@@ -380,8 +433,10 @@ namespace CatAsset.Runtime
 
             OnFinishedCallback = default;
             BundleRuntimeInfo = default;
-            request = default;
             loadState = default;
+            request = default;
+            stream?.Dispose();
+            stream = default;
         }
     }
 }
