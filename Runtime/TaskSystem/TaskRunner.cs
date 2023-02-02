@@ -17,8 +17,8 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 任务运行器->(任务名->主任务)
         /// </summary>
-        internal static readonly Dictionary<TaskRunner, Dictionary<string, BaseTask>> MainTaskDict =
-            new Dictionary<TaskRunner, Dictionary<string, BaseTask>>();
+        internal static readonly Dictionary<TaskRunner, Dictionary<Type, Dictionary<string, BaseTask>>> MainTaskDict =
+            new Dictionary<TaskRunner, Dictionary<Type, Dictionary<string, BaseTask>>>();
 
         /// <summary>
         /// 任务组列表
@@ -52,15 +52,22 @@ namespace CatAsset.Runtime
         /// </summary>
         public void AddTask(BaseTask task, TaskPriority priority)
         {
-            if (!MainTaskDict.TryGetValue(task.Owner,out Dictionary<string, BaseTask> dict))
+            if (!MainTaskDict.TryGetValue(task.Owner,out var typeDict))
             {
-                dict = new Dictionary<string, BaseTask>();
-                MainTaskDict.Add(task.Owner,dict);
+                typeDict = new Dictionary<Type, Dictionary<string, BaseTask>>();
+                MainTaskDict.Add(task.Owner,typeDict);
             }
 
-            if (dict.TryGetValue(task.Name,out BaseTask mainTask))
+            Type type = task.GetType();
+            if (!typeDict.TryGetValue(type,out var NameDict))
             {
-                //合并同名任务到主任务里
+                NameDict = new Dictionary<string, BaseTask>();
+                typeDict.Add(type,NameDict);
+            }
+
+            if (NameDict.TryGetValue(task.Name,out BaseTask mainTask))
+            {
+                //合并同类型同名任务到主任务里
                 mainTask.MergeTask(task);
 
                 if ((int)priority > (int)mainTask.Group.Priority)
@@ -71,7 +78,7 @@ namespace CatAsset.Runtime
             }
             else
             {
-                dict.Add(task.Name,task);
+                NameDict.Add(task.Name,task);
                 taskGroups[(int)priority].AddTask(task);
             }
         }

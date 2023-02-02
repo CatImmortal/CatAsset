@@ -15,8 +15,8 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void AddLoadSceneTask(string sceneName,SceneHandler handler,TaskPriority priority)
         {
-            LoadSceneTask task = LoadSceneTask.Create(taskRunner, sceneName, handler);
-            taskRunner.AddTask(task, priority);
+            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, handler);
+            loadTaskRunner.AddTask(task, priority);
 
             handler.Task = task;
         }

@@ -10,8 +10,8 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void AddWebRequestTask(string name, string uri, WebRequestedCallback callback,TaskPriority priority)
         {
-            WebRequestTask task = WebRequestTask.Create(taskRunner, name, uri, callback);
-            taskRunner.AddTask(task, priority);
+            WebRequestTask task = WebRequestTask.Create(loadTaskRunner, name, uri, callback);
+            loadTaskRunner.AddTask(task, priority);
         }
         
         /// <summary>
@@ -20,8 +20,8 @@ namespace CatAsset.Runtime
         public static void AddLoadBundledAssetTask(string assetName,Type assetType,AssetHandler handler,TaskPriority priority)
         {
             LoadBundledAssetTask loadBundledAssetTask =
-                LoadBundledAssetTask.Create(taskRunner, assetName, assetType, handler);
-            taskRunner.AddTask(loadBundledAssetTask, priority);
+                LoadBundledAssetTask.Create(loadTaskRunner, assetName, assetType, handler);
+            loadTaskRunner.AddTask(loadBundledAssetTask, priority);
 
             handler.Task = loadBundledAssetTask;
         }
@@ -32,8 +32,8 @@ namespace CatAsset.Runtime
         public static void AddLoadRawAssetTask(string assetName,AssetCategory category,AssetHandler handler,TaskPriority priority)
         {
             LoadRawAssetTask loadRawAssetTask =
-                LoadRawAssetTask.Create(taskRunner, assetName, category, handler);
-            taskRunner.AddTask(loadRawAssetTask, priority);
+                LoadRawAssetTask.Create(loadTaskRunner, assetName, category, handler);
+            loadTaskRunner.AddTask(loadRawAssetTask, priority);
             
             handler.Task = loadRawAssetTask;
         }

@@ -433,10 +433,13 @@ namespace CatAsset.Runtime
             {
                 foreach (var pair2 in pair.Value)
                 {
-                    var task = pair2.Value;
+                    foreach (var pair3 in pair2.Value)
+                    {
+                        var task = pair3.Value;
 
-                    ProfilerTaskInfo pti = ProfilerTaskInfo.Create(task.Name,task.GetType().Name,task.State,task.Progress,task.MergedTaskCount);
-                    info.TaskInfoList.Add(pti);
+                        ProfilerTaskInfo pti = ProfilerTaskInfo.Create(task.Name,task.GetType().Name,task.State,task.Progress,task.MergedTaskCount);
+                        info.TaskInfoList.Add(pti);
+                    }
                 }
             }
             info.TaskInfoList.Sort();
