@@ -104,7 +104,7 @@ namespace CatAsset.Runtime
                     case TaskState.Finished:
                         //任务运行结束 需要删除
                         RemoveTask(task);
-                        TaskRunner.MainTaskDict[task.Owner].Remove(task.Name);
+                        TaskRunner.MainTaskDict[task.Owner][task.GetType()].Remove(task.Name);
                         ReferencePool.Release(task);
                         break;
                 };
