@@ -10,6 +10,9 @@ namespace CatAsset.Runtime
     /// </summary>
     public class DecryptXOrStream : FileStream
     {
+        public override bool CanRead => true;
+        public override bool CanSeek => true;
+
         public DecryptXOrStream([NotNull] SafeFileHandle handle, FileAccess access) : base(handle, access)
         {
         }
@@ -65,7 +68,7 @@ namespace CatAsset.Runtime
         public override int Read(byte[] array, int offset, int count)
         {
             long oldPos = Position;
-            var index =  base.Read(array, offset, count);
+            var byteCount =  base.Read(array, offset, count);
 
             if (oldPos < EncryptUtil.EncryptBytesLength)
             {
@@ -74,15 +77,15 @@ namespace CatAsset.Runtime
                 if (Position < EncryptUtil.EncryptBytesLength)
                 {
                     //读取后的位置 0-63
-                    //直接将array的前count个字节解密
-                    EncryptUtil.EncryptXOr(array,count);
+                    //直接将array的前byteCount个字节解密
+                    EncryptUtil.EncryptXOr(array,byteCount);
                 }
                 else
                 {
                     //读取后的位置 >=64
                     //解密 从读取前的位置 到 63 的长度的字节
-                    //比如读取前的位置60 读取后的位置70 那么就要解密array的前(64 - (60 + 1) = 3)个字节
-                    long length = EncryptUtil.EncryptBytesLength - (oldPos + 1);
+                    //比如读取前的位置60 读取后的位置70 那么就要解密array的前(64 - 60 = 4)个字节
+                    long length = EncryptUtil.EncryptBytesLength - oldPos;
                     EncryptUtil.EncryptXOr(array,length);
                 }
                 
@@ -91,7 +94,7 @@ namespace CatAsset.Runtime
             
             
             
-            return index;
+            return byteCount;
         }
     }
 }

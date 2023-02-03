@@ -171,6 +171,10 @@ namespace CatAsset.Runtime
             //卸载资源包
             bundleRuntimeInfo.Bundle.Unload(true);
             bundleRuntimeInfo.Bundle = null;
+            
+            bundleRuntimeInfo.Stream?.Close();
+            bundleRuntimeInfo.Stream?.Dispose();
+            bundleRuntimeInfo.Stream = null;
 
             Debug.Log($"已卸载资源包:{bundleRuntimeInfo.Manifest.BundleIdentifyName}");
         }

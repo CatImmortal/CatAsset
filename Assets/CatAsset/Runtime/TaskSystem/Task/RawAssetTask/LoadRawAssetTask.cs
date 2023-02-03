@@ -100,6 +100,13 @@ namespace CatAsset.Runtime
             if (success)
             {
                 byte[] rawAsset = uwr.downloadHandler.data;
+
+                if (bundleRuntimeInfo.Manifest.EncryptOption == BundleEncryptOptions.XOr)
+                {
+                    //异或解密二进制
+                    EncryptUtil.EncryptXOr(rawAsset);
+                }
+                
                 assetRuntimeInfo.Asset = rawAsset;
                 assetRuntimeInfo.MemorySize = (ulong)rawAsset.Length;
 
