@@ -42,6 +42,7 @@ namespace CatAsset.Editor
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
+            taskList.Add(new CalculateVerifyInfo());
             taskList.Add(new AppendMD5());
             taskList.Add(new WriteManifestFile());
             if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
@@ -96,6 +97,7 @@ namespace CatAsset.Editor
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
+            taskList.Add(new CalculateVerifyInfo());
             taskList.Add(new AppendMD5());
             taskList.Add(new MergeManifestAndBundles());
             taskList.Add(new WriteManifestFile());

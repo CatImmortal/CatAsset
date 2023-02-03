@@ -12,8 +12,19 @@ namespace CatAsset.Runtime
         [Serializable]
         public class BundleInfo: IReference,IComparable<BundleInfo>
         {
+            /// <summary>
+            /// 名称
+            /// </summary>
             public string Name;
+            
+            /// <summary>
+            /// 状态
+            /// </summary>
             public BundleRuntimeInfo.State State;
+            
+            /// <summary>
+            /// 长度
+            /// </summary>
             public ulong Length;
 
             public static BundleInfo Create(string name,BundleRuntimeInfo.State state,ulong length)

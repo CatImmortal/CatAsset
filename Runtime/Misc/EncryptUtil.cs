@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace CatAsset.Runtime
 {
@@ -78,12 +79,15 @@ namespace CatAsset.Runtime
         public static void EncryptXOr(string filePath)
         {
             byte[] cachedBytes = GetCachedBytes(EncryptBytesLength);
+
             using (FileStream fs = File.Open(filePath, FileMode.Open))
             {
                 int _ = fs.Read(cachedBytes, 0, EncryptBytesLength);
                 EncryptXOr(cachedBytes);
+                fs.Position = 0;
                 fs.Write(cachedBytes,0,encryptXOrKey);
             }
+
             Array.Clear(cachedBytes,0,cachedBytes.Length);
             ReleaseCachedBytes(cachedBytes);
         }

@@ -79,7 +79,7 @@ namespace CatAsset.Runtime
         private AssetBundleCreateRequest request;
 
         private WebRequestedCallback onBundleBinaryLoadedCallback;
-        private DecryptXOrStream stream;
+       
         
         /// <inheritdoc />
         public override float Progress
@@ -358,17 +358,21 @@ namespace CatAsset.Runtime
                     break;
                 
                 case BundleEncryptOptions.XOr:
-                    if (BundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InReadWrite)
+                    if (BundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InReadWrite ||
+                        Application.platform != RuntimePlatform.Android) 
                     {
-                        //存在于读写区 使用Stream进行解密
-                        stream = new DecryptXOrStream(BundleRuntimeInfo.LoadPath, FileMode.Open, FileAccess.Read);
-                        request = AssetBundle.LoadFromStreamAsync(stream);
+                        //存在于读写区 或 非安卓平台 可以进行IO操作 使用Stream进行解密
+                        BundleRuntimeInfo.Stream = new DecryptXOrStream(BundleRuntimeInfo.LoadPath, FileMode.Open, FileAccess.Read);
+                        request = AssetBundle.LoadFromStreamAsync(BundleRuntimeInfo.Stream,0,1024*1024);
                     }
                     else
                     {
-                        //存在于只读区 使用二进制数据解密
-                        CatAssetManager.AddWebRequestTask(BundleRuntimeInfo.LoadPath,BundleRuntimeInfo.LoadPath,onBundleBinaryLoadedCallback,TaskPriority.Middle);
+                        //安卓平台下 存在于只读区 使用二进制数据解密
+                        CatAssetManager.AddWebRequestTask(BundleRuntimeInfo.LoadPath, BundleRuntimeInfo.LoadPath,
+                            onBundleBinaryLoadedCallback, TaskPriority.Middle);
                     }
+                    
+
                     break;
                 
                 default:
@@ -435,8 +439,6 @@ namespace CatAsset.Runtime
             BundleRuntimeInfo = default;
             loadState = default;
             request = default;
-            stream?.Dispose();
-            stream = default;
         }
     }
 }

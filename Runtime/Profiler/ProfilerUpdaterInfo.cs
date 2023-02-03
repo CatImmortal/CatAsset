@@ -10,6 +10,7 @@ namespace CatAsset.Runtime
     public class ProfilerUpdaterInfo : IReference,IComparable<ProfilerUpdaterInfo>
     {
 
+        [Serializable]
         public class BundleInfo : IReference,IComparable<BundleInfo>
         {
             /// <summary>
@@ -23,7 +24,7 @@ namespace CatAsset.Runtime
             public UpdateState State;
 
             /// <summary>
-            /// 总长度
+            /// 长度
             /// </summary>
             public ulong Length;
         

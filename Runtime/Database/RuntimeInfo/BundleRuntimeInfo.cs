@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -9,6 +12,25 @@ namespace CatAsset.Runtime
     /// </summary>
     public class BundleRuntimeInfo : IComparable<BundleRuntimeInfo>, IEquatable<BundleRuntimeInfo>
     {
+#if UNITY_EDITOR
+        static BundleRuntimeInfo()
+        {
+            EditorApplication.playModeStateChanged += change =>
+            {
+                if (change == PlayModeStateChange.ExitingPlayMode)
+                {
+                    foreach (var pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
+                    {
+                        var info = pair.Value;
+                        info.Stream?.Close();
+                        info.Stream?.Dispose();
+                        info.Stream = null;
+                    }
+                }
+            };
+        }
+#endif
+        
         /// <summary>
         /// 状态
         /// </summary>
@@ -47,6 +69,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public State BundleState;
 
+        /// <summary>
+        /// 异或解密文件流
+        /// </summary>
+        public DecryptXOrStream Stream;
+        
         private string loadPath;
 
         /// <summary>

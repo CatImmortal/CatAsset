@@ -97,17 +97,7 @@ namespace CatAsset.Editor
                     //是场景资源包
                     bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].Name.EndsWith(".unity");
                 }
-
-                string fullPath = Path.Combine(outputFolder, bundleBuildInfo.BundleIdentifyName);
-                FileInfo fi = new FileInfo(fullPath);
-                bundleManifestInfo.Length = (ulong)fi.Length;
-                bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
                 BundleDetails details = results.BundleInfos[bundleManifestInfo.BundleIdentifyName];
-                if (configParam.TargetPlatform == BuildTarget.WebGL)
-                {
-                    //WebGL平台 记录Hash128用于缓存系统
-                    bundleManifestInfo.Hash = details.Hash.ToString();
-                }
                 if (details.Dependencies.Contains(builtInShadersBundleName))
                 {
                     //依赖内置Shader资源包
@@ -142,12 +132,7 @@ namespace CatAsset.Editor
                     Assets = new List<AssetManifestInfo>(),
                 };
                 manifest.Bundles.Add(bundleManifestInfo);
-
-                string fullPath = Path.Combine(outputFolder, bundleBuildInfo.BundleIdentifyName);
-                FileInfo fi = new FileInfo(fullPath);
-                bundleManifestInfo.Length = (ulong)fi.Length;
-                bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(fullPath);
-
+                
                 //资源信息
                 AssetManifestInfo assetManifestInfo = new AssetManifestInfo()
                 {
