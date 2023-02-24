@@ -76,14 +76,14 @@ namespace CatAsset.Runtime
         internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, BundleRuntimeInfo.State state)
         {
             BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
-            bundleRuntimeInfoDict.Add(bundleManifestInfo.BundleIdentifyName, bundleRuntimeInfo);
+            bundleRuntimeInfoDict[bundleManifestInfo.BundleIdentifyName] = bundleRuntimeInfo;  //使用覆盖的形式，以实现Mod资源覆盖功能
             bundleRuntimeInfo.Manifest = bundleManifestInfo;
             bundleRuntimeInfo.BundleState = state;
 
             foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
             {
                 AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
-                assetRuntimeInfoDict.Add(assetManifestInfo.Name, assetRuntimeInfo);
+                assetRuntimeInfoDict[assetManifestInfo.Name] = assetRuntimeInfo;  //使用覆盖的形式，以实现Mod资源覆盖功能
                 assetRuntimeInfo.BundleManifest = bundleManifestInfo;
                 assetRuntimeInfo.AssetManifest = assetManifestInfo;
             }

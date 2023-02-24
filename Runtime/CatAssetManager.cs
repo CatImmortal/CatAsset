@@ -205,7 +205,13 @@ namespace CatAsset.Runtime
             CatAssetDatabase.AddSceneBindHandler(scene, handler);
         }
         
-
+        /// <summary>
+        /// 指定资源是否存在
+        /// </summary>
+        public static bool HasAsset(string assetName)
+        {
+            return assetLoader.HasAsset(assetName);
+        }
 
     }
 }

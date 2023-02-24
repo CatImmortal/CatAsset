@@ -182,5 +182,11 @@ namespace CatAsset.Runtime
                 }
             }
         }
+
+        /// <inheritdoc />
+        public override bool HasAsset(string assetName)
+        {
+            return CatAssetDatabase.GetAssetRuntimeInfo(assetName) != null;
+        }
     }
 }

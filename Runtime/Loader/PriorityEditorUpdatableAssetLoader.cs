@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using UnityEditor;
 
 namespace CatAsset.Runtime
 {
@@ -33,7 +34,7 @@ namespace CatAsset.Runtime
             if (category == AssetCategory.InternalBundledAsset)
             {
                 //加载资源包资源
-                asset = UnityEditor.AssetDatabase.LoadAssetAtPath(assetName, assetType);
+                asset = AssetDatabase.LoadAssetAtPath(assetName, assetType);
             }
             else
             {
@@ -67,6 +68,18 @@ namespace CatAsset.Runtime
             }
             
             base.UnloadAsset(asset);
+        }
+        
+        /// <inheritdoc />
+        public override bool HasAsset(string assetName)
+        {
+            bool result = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetName) != null;
+            if (!result)
+            {
+                result = base.HasAsset(assetName);
+            }
+
+            return result;
         }
     }
 }
