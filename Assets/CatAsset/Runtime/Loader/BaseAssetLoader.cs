@@ -116,5 +116,10 @@ namespace CatAsset.Runtime
         /// 卸载场景
         /// </summary>
         public abstract void UnloadScene(Scene scene);
+
+        /// <summary>
+        /// 资源是否存在
+        /// </summary>
+        public abstract bool HasAsset(string assetName);
     }
 }
