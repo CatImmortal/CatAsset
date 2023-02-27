@@ -27,10 +27,15 @@ namespace CatAsset.Runtime
         private GameObject template;
 
         /// <summary>
+        /// 对象池失效时间
+        /// </summary>
+        public float PoolExpireTime;
+
+        /// <summary>
         /// 对象失效时间
         /// </summary>
-        private float expireTime;
-
+        public float ObjExpireTIme;
+        
         /// <summary>
         /// 游戏对象 -> 池对象
         /// </summary>
@@ -46,11 +51,12 @@ namespace CatAsset.Runtime
         /// </summary>
         private List<PoolObject> waitRemoveObjectList = new List<PoolObject>();
 
-        public GameObjectPool(GameObject template, float expireTime, Transform root)
+        public GameObjectPool(GameObject template , Transform root,float poolExpireTime,float objExpireTime)
         {
             this.template = template;
-            this.expireTime = expireTime;
             Root = root;
+            PoolExpireTime = poolExpireTime;
+            ObjExpireTIme = objExpireTime;
         }
 
 
@@ -82,7 +88,7 @@ namespace CatAsset.Runtime
             {
                 PoolObject poolObject = unusedPoolObjectList[i];
                 poolObject.UnusedTimer += deltaTime;
-                if (poolObject.UnusedTimer >= expireTime && !poolObject.IsLock)
+                if (poolObject.UnusedTimer >= ObjExpireTIme && !poolObject.IsLock)
                 {
                     //已失效且未锁定 销毁掉
                     poolObjectDict.Remove(poolObject.Target);
