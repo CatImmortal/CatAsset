@@ -81,7 +81,7 @@ namespace CatAsset.Runtime
             foreach (KeyValuePair<string, GameObject> pair in loadedPrefabDict)
             {
                 GameObjectPool pool = poolDict[pair.Value];
-                if (pool.UnusedTimer > DefaultPoolExpireTime)
+                if (pool.UnusedTimer > pool.PoolExpireTime)
                 {
                     waitUnloadPrefabNames.Add(pair.Key);
                 }
@@ -123,7 +123,7 @@ namespace CatAsset.Runtime
                 GameObject root = new GameObject($"Pool-{template.name}");
                 root.transform.SetParent(Root);
 
-                pool = new GameObjectPool(template, DefaultObjectExpireTime, root.transform);
+                pool = new GameObjectPool(template, root.transform,DefaultPoolExpireTime,DefaultObjectExpireTime);
                 poolDict.Add(template,pool);
             }
 
@@ -299,7 +299,57 @@ namespace CatAsset.Runtime
             pool.Release(go);
         }
 
+        /// <summary>
+        /// 锁定游戏对象，被锁定后不会被销毁
+        /// </summary>
+        public static void LockGameObject(string assetName, GameObject go, bool isLock = true)
+        {
+            if (!loadedPrefabDict.TryGetValue(assetName,out var prefab))
+            {
+                return;
+            }
+            LockGameObject(prefab,go,isLock);
+        }
+        
+        /// <summary>
+        /// 锁定游戏对象，被锁定后不会被销毁
+        /// </summary>
+        public static void LockGameObject(GameObject template, GameObject go, bool isLock = true)
+        {
+            if (!poolDict.TryGetValue(template, out var pool))
+            {
+                return;
+            }
+            pool.LockGameObject(go,isLock);
+        }
 
+        /// <summary>
+        /// 设置对象池的失效时间
+        /// </summary>
+        public static void SetExpireTime(string assetName, float poolExpireTime,float objExpireTime)
+        {
+            if (!loadedPrefabDict.TryGetValue(assetName,out var prefab))
+            {
+                return;
+            }
+            SetExpireTime(prefab,poolExpireTime,objExpireTime);
+        }
+        
+        /// <summary>
+        /// 设置对象池的失效时间
+        /// </summary>
+        public static void SetExpireTime(GameObject template, float poolExpireTime,float objExpireTime)
+        {
+            if (!poolDict.TryGetValue(template, out var pool))
+            {
+                return;
+            }
+
+            pool.PoolExpireTime = poolExpireTime;
+            pool.ObjExpireTIme = objExpireTime;
+        }
+
+        
         /// <summary>
         /// 分帧异步实例化
         /// </summary>
