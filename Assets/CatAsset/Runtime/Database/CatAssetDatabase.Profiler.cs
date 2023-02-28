@@ -272,7 +272,7 @@ namespace CatAsset.Runtime
                 }
 
                 ppi.UsedCount = usedCount;
-                ppi.UnusedTimer = ppi.AllCount - ppi.UsedCount;
+                ppi.UnusedCount = ppi.AllCount - ppi.UsedCount;
             }
             info.PoolInfoList.Sort();
         }

@@ -71,9 +71,10 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void Update(float deltaTime)
         {
-            //轮询池子
+
             foreach (var pair in PoolDict)
             {
+                //轮询对象池
                 pair.Value.OnUpdate(deltaTime);
             }
 
@@ -86,12 +87,10 @@ namespace CatAsset.Runtime
                     waitUnloadPrefabNames.Add(pair.Key);
                 }
             }
-
             foreach (string prefabName in waitUnloadPrefabNames)
             {
                 DestroyPool(prefabName);
             }
-
             waitUnloadPrefabNames.Clear();
 
             //处理分帧实例化
@@ -186,12 +185,9 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-
-            var pool = GetOrCreatePool(prefab);
-            pool.OnDestroy();
-
-            PoolDict.Remove(prefab);
+            
             loadedPrefabDict.Remove(assetName);
+            DestroyPool(prefab);
         }
 
         /// <summary>
@@ -199,6 +195,8 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void DestroyPool(GameObject template)
         {
+            var pool = GetOrCreatePool(template);
+            pool.OnDestroy();
             PoolDict.Remove(template);
         }
 
