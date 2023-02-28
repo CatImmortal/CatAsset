@@ -31,7 +31,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 页签
         /// </summary>
-        private string[] tabs = { "资源包信息", "资源信息", "任务信息" ,"资源组信息" ,"更新器信息"};
+        private string[] tabs = { "资源包信息", "资源信息", "任务信息" ,"资源组信息" ,"更新器信息","对象池信息"};
 
         /// <summary>
         /// 子窗口列表
@@ -42,7 +42,8 @@ namespace CatAsset.Editor
             new AssetInfoWindow(),
             new TaskInfoWindow(),
             new GroupInfoWindow(),
-            new UpdaterInfoWindow()
+            new UpdaterInfoWindow(),
+            new PoolInfoWindow(),
         };
 
         /// <summary>
