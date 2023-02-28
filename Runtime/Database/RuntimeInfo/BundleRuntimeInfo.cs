@@ -19,6 +19,7 @@ namespace CatAsset.Runtime
             {
                 if (change == PlayModeStateChange.ExitingPlayMode)
                 {
+                    //编辑器下退出游戏 需要把所有Stream都关了
                     foreach (var pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
                     {
                         var info = pair.Value;
