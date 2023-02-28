@@ -39,6 +39,11 @@ namespace CatAsset.Runtime
         public List<ProfilerUpdaterInfo> UpdaterInfoList = new List<ProfilerUpdaterInfo>();
 
         /// <summary>
+        /// 分析器对象池信息列表
+        /// </summary>
+        public List<ProfilerPoolInfo> PoolInfoList = new List<ProfilerPoolInfo>();
+
+        /// <summary>
         /// 序列化
         /// </summary>
         public static byte[] Serialize(ProfilerInfo profilerInfo)
@@ -146,6 +151,12 @@ namespace CatAsset.Runtime
                 ReferencePool.Release(pui);
             }
             UpdaterInfoList.Clear();
+
+            foreach (var ppi in PoolInfoList)
+            {
+                ReferencePool.Release(ppi);
+            }
+            PoolInfoList.Clear();
         }
     }
 }

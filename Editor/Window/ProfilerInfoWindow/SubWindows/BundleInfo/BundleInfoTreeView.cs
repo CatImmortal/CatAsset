@@ -82,10 +82,7 @@ namespace CatAsset.Editor
 
         public BundleInfoTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state,multiColumnHeader)
         {
-            useScrollView = true;
-            showAlternatingRowBackgrounds = true;  //启用交替的行背景颜色，使每行的显示更清楚
-            showBorder = true;  //在 TreeView 周围留出边距，以便显示一个细边框将其与其余内容分隔开
-            multiColumnHeader.sortingChanged += OnSortingChanged;
+
         }
         
         public override bool CanShow()

@@ -11,11 +11,7 @@ namespace CatAsset.Runtime
     /// </summary>
     public partial class GameObjectPool
     {
-        /// <summary>
-        /// 未使用时间的计时器
-        /// </summary>
-        public float UnusedTimer { get; private set; }
-
+        
         /// <summary>
         /// 根节点
         /// </summary>
@@ -25,7 +21,7 @@ namespace CatAsset.Runtime
         /// 模板
         /// </summary>
         private GameObject template;
-
+        
         /// <summary>
         /// 对象池失效时间
         /// </summary>
@@ -34,12 +30,17 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 对象失效时间
         /// </summary>
-        public float ObjExpireTIme;
+        public float ObjExpireTime;
+        
+        /// <summary>
+        /// 未使用时间的计时器
+        /// </summary>
+        public float UnusedTimer { get; private set; }
         
         /// <summary>
         /// 游戏对象 -> 池对象
         /// </summary>
-        private Dictionary<GameObject, PoolObject> poolObjectDict = new Dictionary<GameObject, PoolObject>();
+        internal Dictionary<GameObject, PoolObject> PoolObjectDict = new Dictionary<GameObject, PoolObject>();
 
         /// <summary>
         /// 未被使用的池对象列表
@@ -56,7 +57,7 @@ namespace CatAsset.Runtime
             this.template = template;
             Root = root;
             PoolExpireTime = poolExpireTime;
-            ObjExpireTIme = objExpireTime;
+            ObjExpireTime = objExpireTime;
         }
 
 
@@ -65,7 +66,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public void OnUpdate(float deltaTime)
         {
-            foreach (KeyValuePair<GameObject,PoolObject> pair in poolObjectDict)
+            foreach (KeyValuePair<GameObject,PoolObject> pair in PoolObjectDict)
             {
                 if (pair.Value.Target == null)
                 {
@@ -77,7 +78,7 @@ namespace CatAsset.Runtime
             {
                 foreach (PoolObject obj in waitRemoveObjectList)
                 {
-                    poolObjectDict.Remove(obj.Target);
+                    PoolObjectDict.Remove(obj.Target);
                     unusedPoolObjectList.Remove(obj);
                 }
                 waitRemoveObjectList.Clear();
@@ -88,10 +89,10 @@ namespace CatAsset.Runtime
             {
                 PoolObject poolObject = unusedPoolObjectList[i];
                 poolObject.UnusedTimer += deltaTime;
-                if (poolObject.UnusedTimer >= ObjExpireTIme && !poolObject.IsLock)
+                if (poolObject.UnusedTimer >= ObjExpireTime && !poolObject.IsLock)
                 {
                     //已失效且未锁定 销毁掉
-                    poolObjectDict.Remove(poolObject.Target);
+                    PoolObjectDict.Remove(poolObject.Target);
                     unusedPoolObjectList.RemoveAt(i);
 
                     poolObject.Destroy();
@@ -99,7 +100,7 @@ namespace CatAsset.Runtime
             }
 
             //判断当前对象池是否正在使用中
-            if (poolObjectDict.Count == 0)
+            if (PoolObjectDict.Count == 0)
             {
                 UnusedTimer += deltaTime;
             }
@@ -131,7 +132,7 @@ namespace CatAsset.Runtime
             }
 
             unusedPoolObjectList.Clear();
-            poolObjectDict.Clear();
+            PoolObjectDict.Clear();
         }
 
         /// <summary>
@@ -139,7 +140,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public void LockGameObject(GameObject go, bool isLock = true)
         {
-            if (!poolObjectDict.TryGetValue(go, out PoolObject poolObject))
+            if (!PoolObjectDict.TryGetValue(go, out PoolObject poolObject))
             {
                 return;
             }
@@ -157,7 +158,7 @@ namespace CatAsset.Runtime
             {
                 GameObject go = Object.Instantiate(template, parent);
                 poolObject = new PoolObject { Target = go, Used = true };
-                poolObjectDict.Add(go, poolObject);
+                PoolObjectDict.Add(go, poolObject);
                 go.SetActive(true);
                 return go;
             }
@@ -177,7 +178,7 @@ namespace CatAsset.Runtime
             {
                 //没有空闲的池对象
                 //实例化游戏对象
-                GameObjectPoolManager.InstantiateAsync(handler,poolObjectDict, (go, userdata) =>
+                GameObjectPoolManager.InstantiateAsync(handler,PoolObjectDict, (go, userdata) =>
                 {
                     var localPoolObjectDict = (Dictionary<GameObject, PoolObject>)userdata;
                     var poolObject = new PoolObject { Target = go,Used = true};
@@ -216,7 +217,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            if (!poolObjectDict.TryGetValue(go, out PoolObject poolObject))
+            if (!PoolObjectDict.TryGetValue(go, out PoolObject poolObject))
             {
                 Debug.LogWarning($"要释放的对象{go.name}不属于对象池{template.name}");
                 return;

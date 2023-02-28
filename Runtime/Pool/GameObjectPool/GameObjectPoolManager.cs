@@ -26,7 +26,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 模板->对象池
         /// </summary>
-        private static Dictionary<GameObject, GameObjectPool> poolDict = new Dictionary<GameObject, GameObjectPool>();
+        internal static Dictionary<GameObject, GameObjectPool> PoolDict = new Dictionary<GameObject, GameObjectPool>();
 
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace CatAsset.Runtime
         public static void Update(float deltaTime)
         {
             //轮询池子
-            foreach (var pair in poolDict)
+            foreach (var pair in PoolDict)
             {
                 pair.Value.OnUpdate(deltaTime);
             }
@@ -80,7 +80,7 @@ namespace CatAsset.Runtime
             //销毁长时间未使用的，且是由管理器加载了预制体资源的对象池
             foreach (KeyValuePair<string, GameObject> pair in loadedPrefabDict)
             {
-                GameObjectPool pool = poolDict[pair.Value];
+                GameObjectPool pool = PoolDict[pair.Value];
                 if (pool.UnusedTimer > pool.PoolExpireTime)
                 {
                     waitUnloadPrefabNames.Add(pair.Key);
@@ -118,13 +118,13 @@ namespace CatAsset.Runtime
         /// </summary>
         private static GameObjectPool GetOrCreatePool(GameObject template)
         {
-            if (!poolDict.TryGetValue(template,out var pool))
+            if (!PoolDict.TryGetValue(template,out var pool))
             {
                 GameObject root = new GameObject($"Pool-{template.name}");
                 root.transform.SetParent(Root);
 
                 pool = new GameObjectPool(template, root.transform,DefaultPoolExpireTime,DefaultObjectExpireTime);
-                poolDict.Add(template,pool);
+                PoolDict.Add(template,pool);
             }
 
             return pool;
@@ -190,7 +190,7 @@ namespace CatAsset.Runtime
             var pool = GetOrCreatePool(prefab);
             pool.OnDestroy();
 
-            poolDict.Remove(prefab);
+            PoolDict.Remove(prefab);
             loadedPrefabDict.Remove(assetName);
         }
 
@@ -199,7 +199,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void DestroyPool(GameObject template)
         {
-            poolDict.Remove(template);
+            PoolDict.Remove(template);
         }
 
         /// <summary>
@@ -291,7 +291,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void Release(GameObject template, GameObject go)
         {
-            if (!poolDict.TryGetValue(template, out var pool))
+            if (!PoolDict.TryGetValue(template, out var pool))
             {
                 Debug.LogWarning($"要释放游戏对象的对象池不存在：{go.name}");
                 return;
@@ -316,7 +316,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void LockGameObject(GameObject template, GameObject go, bool isLock = true)
         {
-            if (!poolDict.TryGetValue(template, out var pool))
+            if (!PoolDict.TryGetValue(template, out var pool))
             {
                 return;
             }
@@ -340,13 +340,13 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void SetExpireTime(GameObject template, float poolExpireTime,float objExpireTime)
         {
-            if (!poolDict.TryGetValue(template, out var pool))
+            if (!PoolDict.TryGetValue(template, out var pool))
             {
                 return;
             }
 
             pool.PoolExpireTime = poolExpireTime;
-            pool.ObjExpireTIme = objExpireTime;
+            pool.ObjExpireTime = objExpireTime;
         }
 
         
