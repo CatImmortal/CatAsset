@@ -202,8 +202,12 @@ namespace CatAsset.Runtime
         {
             PoolObject poolObject = unusedPoolObjectList[unusedPoolObjectList.Count - 1];
             unusedPoolObjectList.RemoveAt(unusedPoolObjectList.Count - 1);
+            
+            poolObject.Used = true;
+            poolObject.UnusedTimer = 0;
             poolObject.Target.transform.SetParent(parent);
             poolObject.Target.SetActive(true);
+            
             return poolObject;
         }
 
@@ -224,7 +228,7 @@ namespace CatAsset.Runtime
             }
 
             poolObject.Used = false;
-            poolObject.UnusedTimer = 0;
+
             go.SetActive(false);
             go.transform.SetParent(Root);
 
