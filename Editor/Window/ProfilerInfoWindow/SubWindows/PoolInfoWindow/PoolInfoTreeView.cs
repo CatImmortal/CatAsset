@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -38,6 +40,74 @@ namespace CatAsset.Editor
         public override bool CanShow()
         {
             return TreeViewData != null && TreeViewData.PoolInfoList.Count > 0;
+        }
+        
+          protected override void OnSortingChanged(MultiColumnHeader header)
+        {
+            if (header.sortedColumnIndex == -1)
+            {
+                return;
+            }
+
+            bool ascending = header.IsSortedAscending(header.sortedColumnIndex);
+
+            ColumnType column = (ColumnType)header.sortedColumnIndex;
+
+            IOrderedEnumerable<ProfilerPoolInfo> poolOrdered = null;
+
+            switch (column)
+            {
+                case ColumnType.Name:
+                    poolOrdered = TreeViewData.PoolInfoList.Order(info => info.Name, ascending);
+                    break;
+                
+                case ColumnType.PoolExpireTime:
+                    poolOrdered = TreeViewData.PoolInfoList.Order(info => info.PoolExpireTime, ascending);
+                    break;
+                
+                case ColumnType.ObjExpireTime:
+                    poolOrdered = TreeViewData.PoolInfoList.Order(info => info.ObjExpireTime, ascending);
+                    break;
+                
+                case ColumnType.UnusedTimer:
+                    foreach (var poolInfo in TreeViewData.PoolInfoList)
+                    {
+                        var objOrdered = poolInfo.PoolObjectList.Order((info) =>  info.UnusedTimer , ascending);
+                        poolInfo.PoolObjectList = new List<ProfilerPoolInfo.PoolObjectInfo>(objOrdered);
+                    }
+                    poolOrdered = TreeViewData.PoolInfoList.Order(info => info.UnusedTimer, ascending);
+                    break;
+                
+                case ColumnType.AllCount:
+                    poolOrdered = TreeViewData.PoolInfoList.Order(info => info.AllCount, ascending);
+                    break;
+                
+                case ColumnType.UsedCount:
+                    poolOrdered = TreeViewData.PoolInfoList.Order(info => info.UnusedCount, ascending);
+                    break;
+                
+                case ColumnType.UnusedCount:
+                    poolOrdered = TreeViewData.PoolInfoList.Order(info => info.UnusedCount, ascending);
+                    break;
+                
+                case ColumnType.IsLock:
+                    foreach (var poolInfo in TreeViewData.PoolInfoList)
+                    {
+                        var objOrdered = poolInfo.PoolObjectList.Order((info) =>  info.IsLock , ascending);
+                        poolInfo.PoolObjectList = new List<ProfilerPoolInfo.PoolObjectInfo>(objOrdered);
+                    }
+                    Reload();
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            if (poolOrdered != null)
+            {
+                TreeViewData.PoolInfoList = new List<ProfilerPoolInfo>(poolOrdered);
+                Reload();
+            }
         }
         
         protected override TreeViewItem BuildRoot()
