@@ -32,7 +32,7 @@ namespace CatAsset.Editor
         {
             if (configParam.TargetPlatform == BuildTarget.WebGL)
             {
-                //WebGL平台不加密 因为无法偏移加密 而异或加密内存开销太高会爆WebGL平台的内存
+                //WebGL平台不允许加密 因为无法偏移加密 而异或加密内存开销太高会爆WebGL平台的内存
                 return ReturnCode.SuccessNotRun;
             }
             

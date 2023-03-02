@@ -16,6 +16,11 @@ namespace CatAsset.Runtime
         /// 加密字节长度
         /// </summary>
         public const int EncryptBytesLength = 64;
+
+        /// <summary>
+        /// 偏移加密的头部字节值
+        /// </summary>
+        private const byte encryptOffsetHead = 64;
         
         /// <summary>
         /// 异或加密Key
@@ -58,18 +63,18 @@ namespace CatAsset.Runtime
             //写入额外的头部数据
             for (int i = 0; i < EncryptBytesLength; i++)
             {
-                cachedBytes[i] = (byte)UnityEngine.Random.Range(byte.MinValue, byte.MaxValue);
+                cachedBytes[i] = encryptOffsetHead;
             }
 
             //写入原始数据
             Array.Copy(bytes,0,cachedBytes,EncryptBytesLength,bytes.Length);
-
             using (FileStream fs = File.OpenWrite(filePath))
             {
-                fs.Write(cachedBytes, 0, cachedBytes.Length);
+                fs.Position = 0;
+                fs.Write(cachedBytes, 0, newLength);
             }
             
-            Array.Clear(cachedBytes,0,cachedBytes.Length);
+            Array.Clear(cachedBytes,0,newLength);
             ReleaseCachedBytes(cachedBytes);
         }
 

@@ -358,10 +358,12 @@ namespace CatAsset.Runtime
                     break;
                 
                 case BundleEncryptOptions.XOr:
+                    //异或加密的资源包
                     if (BundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InReadWrite ||
                         Application.platform != RuntimePlatform.Android) 
                     {
                         //存在于读写区 或 非安卓平台 可以进行IO操作 使用Stream进行解密
+                        //这里不考虑WebGL平台，因为WebGL平台不允许加密
                         BundleRuntimeInfo.Stream = new DecryptXOrStream(BundleRuntimeInfo.LoadPath, FileMode.Open, FileAccess.Read);
                         request = AssetBundle.LoadFromStreamAsync(BundleRuntimeInfo.Stream,0,1024*1024);
                     }
@@ -371,8 +373,6 @@ namespace CatAsset.Runtime
                         CatAssetManager.AddWebRequestTask(BundleRuntimeInfo.LoadPath, BundleRuntimeInfo.LoadPath,
                             onBundleBinaryLoadedCallback, TaskPriority.Middle);
                     }
-                    
-
                     break;
                 
                 default:
