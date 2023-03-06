@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEditor;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace CatAsset.Editor
 {
@@ -13,24 +14,30 @@ namespace CatAsset.Editor
         /// <summary>
         /// 分析资源的循环依赖
         /// </summary>
-        public static void AnalyzeAsset(List<BundleBuildInfo> Bundles)
+        public static void AnalyzeAsset(List<BundleBuildInfo> bundles)
         {
             List<string> loops = new List<string>();
+            HashSet<string> looked = new HashSet<string>();
+            List<AssetBuildInfo> assets = new List<AssetBuildInfo>();
 
-            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            foreach (BundleBuildInfo bundleBuildInfo in bundles)
             {
                 if (bundleBuildInfo.IsRaw)
                 {
                     //跳过原生资源包，因为加载原生资源时不会加载其依赖资源
                     continue;
                 }
-
-                foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
-                {
-                    CheckDependencies(assetBuildInfo.Name, loops, EditorUtil.GetDependencies);
-                }
+                assets.AddRange(bundleBuildInfo.Assets);
             }
 
+            for (int i = 0; i < assets.Count; i++)
+            {
+                AssetBuildInfo info = assets[i];
+                EditorUtility.DisplayProgressBar("检查资源循环依赖中...",info.Name, (float)i / assets.Count );
+                CheckDependencies(info.Name, loops,looked, EditorUtil.GetDependencies);
+            }
+
+            EditorUtility.ClearProgressBar();
             CheckLoops(loops);
         }
 
@@ -38,21 +45,18 @@ namespace CatAsset.Editor
         /// <summary>
         /// 分析资源包的循环依赖
         /// </summary>
-        public static void AnalyzeBundle(List<BundleBuildInfo> Bundles)
+        public static void AnalyzeBundle(List<BundleBuildInfo> bundles)
         {
-            Dictionary<string, List<string>> bundleDependencies = GetBundleDependencies(Bundles);
+            Dictionary<string, List<string>> bundleDependencies = GetBundleDependencies(bundles);
 
             List<string> loops = new List<string>();
-
-            foreach (BundleBuildInfo bundleBuildInfo in Bundles)
+            HashSet<string> looked = new HashSet<string>();
+            
+            for (int i = 0; i < bundles.Count; i++)
             {
-                if (bundleBuildInfo.IsRaw)
-                {
-                    //跳过原生资源包，因为加载原生资源时不会加载其依赖资源
-                    continue;
-                }
-
-                CheckDependencies(bundleBuildInfo.BundleIdentifyName, loops,
+                BundleBuildInfo info = bundles[i];
+                EditorUtility.DisplayProgressBar("检查资源包循环依赖中...",info.BundleIdentifyName, (float)i / bundles.Count );
+                CheckDependencies(info.BundleIdentifyName, loops,looked,
                     (bundleName, _) =>
                     {
                         bundleDependencies.TryGetValue(bundleName, out List<string> dependencies);
@@ -60,6 +64,7 @@ namespace CatAsset.Editor
                     });
             }
 
+            EditorUtility.ClearProgressBar();
             CheckLoops(loops);
         }
 
@@ -130,7 +135,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 检查依赖
         /// </summary>
-        private static void CheckDependencies(string name, List<string> loops,
+        private static void CheckDependencies(string name, List<string> loops,HashSet<string> lookedDep,
             Func<string, bool, List<string>> GetDependenciesFunc)
         {
             List<string> depChainList = new List<string>(); //记录依赖链的列表
@@ -139,7 +144,7 @@ namespace CatAsset.Editor
             HashSet<string> depChainSet = new HashSet<string>(); //记录依赖链的集合
             depChainSet.Add(name);
 
-            if (!RecursiveCheckDependencies(name, depChainSet, depChainList, GetDependenciesFunc))
+            if (!RecursiveCheckDependencies(name, depChainSet, depChainList,lookedDep, GetDependenciesFunc))
             {
                 string loopLog = "     ";
                 HashSet<string> lookedDepSet = new HashSet<string>(); //记录在依赖链上出现过资源
@@ -168,8 +173,15 @@ namespace CatAsset.Editor
         /// 递归检查依赖
         /// </summary>
         private static bool RecursiveCheckDependencies(string name, HashSet<string> depChainSet,
-            List<string> depChainList, Func<string, bool, List<string>> GetDependenciesFunc)
+            List<string> depChainList,HashSet<string> lookedDep, Func<string, bool, List<string>> GetDependenciesFunc)
         {
+            if (lookedDep.Contains(name))
+            {
+                //此资源已被检查过的了 不用重复检查 跳过
+                return true;
+            }
+            lookedDep.Add(name);
+            
             //获取所有直接依赖
             List<string> dependencies = GetDependenciesFunc(name, false);
 
@@ -191,7 +203,7 @@ namespace CatAsset.Editor
 
                 depChainList.Add(item);
                 depChainSet.Add(item);
-                if (!RecursiveCheckDependencies(item, depChainSet, depChainList, GetDependenciesFunc))
+                if (!RecursiveCheckDependencies(item, depChainSet, depChainList,lookedDep, GetDependenciesFunc))
                 {
                     return false;
                 }
