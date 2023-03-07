@@ -24,7 +24,12 @@ namespace CatAsset.Editor
         /// </summary>
         public static ReturnCode BuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
-            OnBundleBuildPreProcess(bundleBuildConfig,targetPlatform);
+            var preData = new BundleBuildPreProcessData
+            {
+                Config = bundleBuildConfig,
+                TargetPlatform = targetPlatform
+            };
+            OnBundleBuildPreProcess(preData);
             
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
 
@@ -67,7 +72,15 @@ namespace CatAsset.Editor
                 Debug.LogError($"资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
 
-            OnBundleBuildPostProcess(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,result);
+            var postData = new BundleBuildPostProcessData
+            {
+                Config = bundleBuildConfig,
+                TargetPlatform = targetPlatform,
+                OutputFolder = fullOutputPath,
+                ReturnCode = returnCode,
+                Result = result,
+            };
+            OnBundleBuildPostProcess(postData);
             
             return returnCode;
         }
@@ -78,7 +91,12 @@ namespace CatAsset.Editor
         public static ReturnCode BuildRawBundles(BundleBuildConfigSO bundleBuildConfig,
             BuildTarget targetPlatform)
         {
-            OnBundleBuildPreProcess(bundleBuildConfig,targetPlatform);
+            var preData = new BundleBuildPreProcessData
+            {
+                Config = bundleBuildConfig,
+                TargetPlatform = targetPlatform
+            };
+            OnBundleBuildPreProcess(preData);
             
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
 
@@ -121,7 +139,15 @@ namespace CatAsset.Editor
                 Debug.LogError($"原生资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
             }
             
-            OnBundleBuildPostProcess(bundleBuildConfig,targetPlatform,fullOutputPath,returnCode,null);
+            var postData = new BundleBuildPostProcessData
+            {
+                Config = bundleBuildConfig,
+                TargetPlatform = targetPlatform,
+                OutputFolder = fullOutputPath,
+                ReturnCode = returnCode,
+                Result = null,
+            };
+            OnBundleBuildPostProcess(postData);
             
             return returnCode;
         }
@@ -129,25 +155,24 @@ namespace CatAsset.Editor
         /// <summary>
         /// 构建资源包前调用
         /// </summary>
-        private static void OnBundleBuildPreProcess(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        private static void OnBundleBuildPreProcess(BundleBuildPreProcessData data)
         {
             List<IBundleBuildPreProcessor> objs = EditorUtil.GetAssignableTypeObjects<IBundleBuildPreProcessor>();
             foreach (var obj in objs)
             {
-                obj.OnBundleBuildPreProcess(bundleBuildConfig,targetPlatform);
+                obj.OnBundleBuildPreProcess(data);
             }
         }
 
         /// <summary>
         /// 构建资源包后调用
         /// </summary>
-        private static void OnBundleBuildPostProcess(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform,string outputFolder,
-            ReturnCode returnCode, IBundleBuildResults result)
+        private static void OnBundleBuildPostProcess(BundleBuildPostProcessData data)
         {
             List<IBundleBuildPostProcessor> objs = EditorUtil.GetAssignableTypeObjects<IBundleBuildPostProcessor>();
             foreach (var obj in objs)
             {
-                obj.OnBundleBuildPostProcess(bundleBuildConfig,targetPlatform,outputFolder,returnCode,result);
+                obj.OnBundleBuildPostProcess(data);
             }
         }
 
