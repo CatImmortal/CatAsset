@@ -43,14 +43,11 @@ namespace CatAsset.Runtime
         /// </summary>
         public string Directory;
 
-        public int DirectoryNodeID;
-        
         /// <summary>
         /// 资源包名
         /// </summary>
         public string BundleName;
-
-        public int BundleNameNodeID;
+        
 
         private string bundleIdentifyName;
         /// <summary>
@@ -74,8 +71,6 @@ namespace CatAsset.Runtime
         /// </summary>
         public string Group;
 
-        public int GroupNodeID;
-        
         /// <summary>
         /// 是否为原生资源包
         /// </summary>
@@ -162,9 +157,9 @@ namespace CatAsset.Runtime
         /// </summary>
         public void Serialize(BinaryWriter writer)
         {
-            writer.Write(DirectoryNodeID);
-            writer.Write(BundleNameNodeID);
-            writer.Write(GroupNodeID);
+            writer.Write(Directory);
+            writer.Write(BundleName);
+            writer.Write(Group);
             writer.Write(IsRaw);
             writer.Write(IsScene);
             writer.Write(Length);
@@ -186,9 +181,9 @@ namespace CatAsset.Runtime
         public static BundleManifestInfo Deserialize(BinaryReader reader,int serializeVersion)
         {
             BundleManifestInfo info = new BundleManifestInfo();
-            info.DirectoryNodeID = reader.ReadInt32();
-            info.BundleNameNodeID = reader.ReadInt32();
-            info.GroupNodeID = reader.ReadInt32();
+            info.Directory = reader.ReadString();
+            info.BundleName = reader.ReadString();
+            info.Group = reader.ReadString();
             info.IsRaw = reader.ReadBoolean();
             info.IsScene = reader.ReadBoolean();
             info.Length = reader.ReadUInt64();

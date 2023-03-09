@@ -114,6 +114,7 @@ namespace CatAsset.Runtime
                 if (!isVerify)
                 {
                     //读写区资源清单中记录的资源不能通过校验 就视为其清单信息不存在
+                    //防止读写区资源被删除或修改
                     continue;
                 }
 
@@ -283,7 +284,7 @@ namespace CatAsset.Runtime
 
             if (checkInfo.RemoteInfo != null)
             {
-                //没有读写区资源清单信息 尝试修复 防止是意外删除读写区资源清单导致的
+                //没有读写区资源清单信息 尝试修复 防止读写区资源清单被意外删除了
                 string path = RuntimeUtil.GetReadWritePath(checkInfo.RemoteInfo.RelativePath);
                 if (File.Exists(path))
                 {

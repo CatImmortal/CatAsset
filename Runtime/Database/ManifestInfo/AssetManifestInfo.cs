@@ -17,8 +17,6 @@ namespace CatAsset.Runtime
         /// </summary>
         public string Name;
 
-        public int NameNodeID;
-        
         /// <summary>
         /// 是否是图集散图
         /// </summary>
@@ -28,9 +26,7 @@ namespace CatAsset.Runtime
         /// 依赖资源名列表
         /// </summary>
         public List<string> Dependencies;
-
-        public List<int> DependencyIDList;
-
+        
         public int CompareTo(AssetManifestInfo other)
         {
             return Name.CompareTo(other.Name);
@@ -66,17 +62,17 @@ namespace CatAsset.Runtime
         /// </summary>
         public void Serialize(BinaryWriter writer)
         {
-            writer.Write(NameNodeID);
+            writer.Write(Name);
             writer.Write(IsAtlasPackable);
-            if (DependencyIDList == null)
+            if (Dependencies == null)
             {
                 writer.Write(0);
                 return;
             }
-            writer.Write(DependencyIDList.Count);
-            foreach (int id in DependencyIDList)
+            writer.Write(Dependencies.Count);
+            foreach (var dependency in Dependencies)
             {
-                writer.Write(id);
+                writer.Write(dependency);
             }
         }
         
@@ -86,18 +82,19 @@ namespace CatAsset.Runtime
         public static AssetManifestInfo Deserialize(BinaryReader reader,int serializeVersion)
         {
             AssetManifestInfo info = new AssetManifestInfo();
-            info.NameNodeID = reader.ReadInt32();
+            info.Name = reader.ReadString();
             info.IsAtlasPackable = reader.ReadBoolean();
             int count = reader.ReadInt32();
             if (count == 0)
             {
                 return info;
             }
-            info.DependencyIDList = new List<int>(count);
+
+            info.Dependencies = new List<string>(count);
             for (int i = 0; i < count; i++)
             {
-                int id = reader.ReadInt32();
-                info.DependencyIDList.Add(id);
+                string name = reader.ReadString();
+                info.Dependencies.Add(name);
             }
             return info;
         }
