@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 
@@ -38,18 +39,20 @@ namespace CatAsset.Runtime
         private static Dictionary<int, List<IBindableHandler>> sceneBindHandlers =
             new Dictionary<int, List<IBindableHandler>>();
 
-        /// <summary>
-        /// 资源组名 -> 资源组信息
-        /// </summary>
-        private static Dictionary<string, GroupInfo> groupInfoDict = new Dictionary<string, GroupInfo>();
-
+      
+        
+        
         /// <summary>
         /// 使用资源清单进行运行时信息的初始化
         /// </summary>
         internal static void InitRuntimeInfoByManifest(CatAssetManifest manifest)
         {
+            lazyBundleInfoDict.Clear();
+            lazyAssetInfoDict.Clear();
+            
             bundleRuntimeInfoDict.Clear();
             assetRuntimeInfoDict.Clear();
+
 
             foreach (BundleManifestInfo info in manifest.Bundles)
             {
@@ -62,17 +65,21 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static void InitRuntimeInfo(BundleManifestInfo bundleManifestInfo, BundleRuntimeInfo.State state)
         {
-            BundleRuntimeInfo bundleRuntimeInfo = new BundleRuntimeInfo();
-            bundleRuntimeInfoDict[bundleManifestInfo.BundleIdentifyName] = bundleRuntimeInfo;  //使用覆盖的形式，以实现Mod资源覆盖功能
-            bundleRuntimeInfo.Manifest = bundleManifestInfo;
-            bundleRuntimeInfo.BundleState = state;
+            LazyBundleInfo lazyBundleInfo = new LazyBundleInfo
+            {
+                Manifest = bundleManifestInfo,
+                State = state
+            };
+            lazyBundleInfoDict[bundleManifestInfo.BundleIdentifyName] = lazyBundleInfo;
 
             foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
             {
-                AssetRuntimeInfo assetRuntimeInfo = new AssetRuntimeInfo();
-                assetRuntimeInfoDict[assetManifestInfo.Name] = assetRuntimeInfo;  //使用覆盖的形式，以实现Mod资源覆盖功能
-                assetRuntimeInfo.BundleManifest = bundleManifestInfo;
-                assetRuntimeInfo.AssetManifest = assetManifestInfo;
+                LazyAssetInfo lazyAssetInfo = new LazyAssetInfo
+                {
+                    BundleManifestInfo = bundleManifestInfo,
+                    AssetManifestInfo =  assetManifestInfo,
+                };
+                lazyAssetInfoDict[assetManifestInfo.Name] = lazyAssetInfo;
             }
         }
 
@@ -81,7 +88,18 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static BundleRuntimeInfo GetBundleRuntimeInfo(string bundleIdentifyName)
         {
-            bundleRuntimeInfoDict.TryGetValue(bundleIdentifyName, out BundleRuntimeInfo info);
+            BundleRuntimeInfo info;
+            if (lazyBundleInfoDict.TryGetValue(bundleIdentifyName,out var lazy))
+            {
+                lazyBundleInfoDict.Remove(bundleIdentifyName);
+                info = new BundleRuntimeInfo();
+                info.Manifest = lazy.Manifest;
+                info.BundleState = lazy.State;
+                bundleRuntimeInfoDict[bundleIdentifyName] = info;
+                return info;
+            }
+            
+            bundleRuntimeInfoDict.TryGetValue(bundleIdentifyName, out info);
             return info;
         }
 
@@ -98,7 +116,18 @@ namespace CatAsset.Runtime
         /// </summary>
         internal static AssetRuntimeInfo GetAssetRuntimeInfo(string assetName)
         {
-            assetRuntimeInfoDict.TryGetValue(assetName, out var info);
+            AssetRuntimeInfo info;
+            if (lazyAssetInfoDict.TryGetValue(assetName ,out var lazy))
+            {
+                lazyAssetInfoDict.Remove(assetName);
+                info = new AssetRuntimeInfo();
+                info.BundleManifest = lazy.BundleManifestInfo;
+                info.AssetManifest = lazy.AssetManifestInfo;
+                assetRuntimeInfoDict[assetName] = info;
+                return info;
+            }
+            
+            assetRuntimeInfoDict.TryGetValue(assetName, out info);
             return info;
         }
 
@@ -231,46 +260,7 @@ namespace CatAsset.Runtime
             handlers.Add(handler);
         }
 
-        /// <summary>
-        /// 获取资源组信息，若不存在则添加
-        /// </summary>
-        internal static GroupInfo GetOrAddGroupInfo(string group)
-        {
-            if (!groupInfoDict.TryGetValue(group, out GroupInfo groupInfo))
-            {
-                groupInfo = new GroupInfo();
-                groupInfo.GroupName = group;
-                groupInfoDict.Add(group, groupInfo);
-            }
-
-            return groupInfo;
-        }
-
-        /// <summary>
-        /// 获取资源组信息
-        /// </summary>
-        internal static GroupInfo GetGroupInfo(string group)
-        {
-            groupInfoDict.TryGetValue(group, out GroupInfo groupInfo);
-            return groupInfo;
-        }
-
-        /// <summary>
-        /// 获取所有资源组信息
-        /// </summary>
-        internal static List<GroupInfo> GetAllGroupInfo()
-        {
-            List<GroupInfo> groupInfos = groupInfoDict.Values.ToList();
-            return groupInfos;
-        }
-
-        /// <summary>
-        /// 清空所有资源组信息
-        /// </summary>
-        internal static void ClearAllGroupInfo()
-        {
-            groupInfoDict.Clear();
-        }
+        
 
       
     }
