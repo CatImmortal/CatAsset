@@ -69,6 +69,12 @@ namespace CatAsset.Runtime
         {
             //需要通过更新修复的资源包文件数
             int count = 0;
+
+            foreach (var pair in CatAssetDatabase.GetAllLazyBundleInfo())
+            {
+                //将所有lazyBundleInfo都初始化为BundleRuntimeInfo
+                CatAssetDatabase.GetBundleRuntimeInfo(pair.Key);
+            }
             
             foreach (var pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
             {

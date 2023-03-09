@@ -33,7 +33,15 @@ namespace CatAsset.Runtime
 
             //遍历所有资源包 找出存在于读写区的
             List<BundleManifestInfo> bundleInfos = new List<BundleManifestInfo>();
-            foreach (KeyValuePair<string,BundleRuntimeInfo> pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
+            
+            foreach (var pair in CatAssetDatabase.GetAllLazyBundleInfo())
+            {
+                if (pair.Value.State == BundleRuntimeInfo.State.InReadWrite)
+                {
+                    bundleInfos.Add(pair.Value.Manifest);
+                }
+            }
+            foreach (var pair in CatAssetDatabase.GetAllBundleRuntimeInfo())
             {
                 if (pair.Value.BundleState == BundleRuntimeInfo.State.InReadWrite)
                 {
