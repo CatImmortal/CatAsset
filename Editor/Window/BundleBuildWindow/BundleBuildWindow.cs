@@ -42,7 +42,7 @@ namespace CatAsset.Editor
         private string searchString;
 
         [MenuItem("CatAsset/打开资源包构建窗口", priority = 1)]
-        private static void OpenWindow()
+        public static void OpenWindow()
         {
             BundleBuildWindow window = GetWindow<BundleBuildWindow>(false, "资源包构建窗口");
             window.minSize = new Vector2(1100, 600);

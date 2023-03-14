@@ -15,7 +15,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 是否仅构建原生资源包
         /// </summary>
-        private bool buildRawBundleOnly;
+        private bool isOnlyBuildRaw;
 
         /// <summary>
         /// 可选资源包构建平台
@@ -39,7 +39,7 @@ namespace CatAsset.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("游戏版本号：" + Application.version, GUILayout.Width(200));
+                EditorGUILayout.LabelField("安装包版本号：" + Application.version, GUILayout.Width(200));
 
                 EditorGUILayout.LabelField("资源清单版本号：", GUILayout.Width(100));
                 BundleBuildConfigSO.Instance.ManifestVersion =
@@ -123,9 +123,9 @@ namespace CatAsset.Editor
 
             EditorGUILayout.Space();
             using (EditorGUILayout.ToggleGroupScope toggle =
-                   new EditorGUILayout.ToggleGroupScope("仅构建原生资源包", buildRawBundleOnly))
+                   new EditorGUILayout.ToggleGroupScope("仅构建原生资源包", isOnlyBuildRaw))
             {
-                buildRawBundleOnly = toggle.enabled;
+                isOnlyBuildRaw = toggle.enabled;
             }
             
 
@@ -212,16 +212,7 @@ namespace CatAsset.Editor
                     //处理多个平台
                     foreach (BuildTarget targetPlatform in BundleBuildConfigSO.Instance.TargetPlatforms)
                     {
-                        if (!buildRawBundleOnly)
-                        {
-                            BuildPipeline.BuildBundles(BundleBuildConfigSO.Instance, targetPlatform);
-                        }
-                        else
-                        {
-                            //仅构建原生资源包
-                            BuildPipeline.BuildRawBundles(BundleBuildConfigSO.Instance,targetPlatform);
-                        }
-                       
+                        BuildPipeline.BuildBundles(targetPlatform, isOnlyBuildRaw);
                     }
 
                     BundleBuildConfigSO.Instance.ManifestVersion++;
