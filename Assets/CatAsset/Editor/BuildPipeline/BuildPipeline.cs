@@ -18,12 +18,14 @@ namespace CatAsset.Editor
     /// </summary>
     public static class BuildPipeline
     {
-
         /// <summary>
         /// 构建资源包
         /// </summary>
-        public static ReturnCode BuildBundles(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        public static ReturnCode BuildBundles(BuildTarget targetPlatform,bool isOnlyBuildRaw)
         {
+            BundleBuildConfigSO bundleBuildConfig = BundleBuildConfigSO.Instance;
+            
+            //预处理
             var preData = new BundleBuildPreProcessData
             {
                 Config = bundleBuildConfig,
@@ -32,16 +34,73 @@ namespace CatAsset.Editor
             OnBundleBuildPreProcess(preData);
             
             string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
-
+            
             //准备参数
             BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, fullOutputPath);
-            BundleBuildInfoParam infoParam = new BundleBuildInfoParam(bundleBuildConfig.GetAssetBundleBuilds(),
-                bundleBuildConfig.GetNormalBundleBuilds(), bundleBuildConfig.GetRawBundleBuilds());
+            List<AssetBundleBuild> assetBundleBuilds = null;
+            List<BundleBuildInfo> normalBundleBuilds = null;
+            if (!isOnlyBuildRaw)
+            {
+                assetBundleBuilds = bundleBuildConfig.GetAssetBundleBuilds();
+                normalBundleBuilds = bundleBuildConfig.GetNormalBundleBuilds();
+            }
+            else
+            {
+                assetBundleBuilds = new List<AssetBundleBuild>();
+                normalBundleBuilds = new List<BundleBuildInfo>();
+            }
+            BundleBuildInfoParam infoParam = new BundleBuildInfoParam(assetBundleBuilds,
+                normalBundleBuilds, bundleBuildConfig.GetRawBundleBuilds());
             BundleBuildConfigParam configParam =
                 new BundleBuildConfigParam(bundleBuildConfig, targetPlatform);
 
-            BundleBuildContent content = new BundleBuildContent(infoParam.AssetBundleBuilds);
+            //开始构建资源包
+            IBundleBuildResults result = null;
+            ReturnCode returnCode;
+            Stopwatch sw = Stopwatch.StartNew();
+            if (!isOnlyBuildRaw)
+            {
+                returnCode = BuildBundles(buildParam, infoParam, configParam,out result);
+            }
+            else
+            {
+                returnCode = BuildRawBundles(buildParam, infoParam, configParam);
+            }
+            sw.Stop();
+            
+            //检查结果
+            if (returnCode == ReturnCode.Success)
+            {
+                Debug.Log($"资源包构建成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+            }
+            else
+            {
+                Debug.LogError($"资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
+            }
+        
+            //后处理
+            var postData = new BundleBuildPostProcessData
+            {
+                Config = bundleBuildConfig,
+                TargetPlatform = targetPlatform,
+                OutputFolder = fullOutputPath,
+                ReturnCode = returnCode,
+                Result = result,
+            };
+            OnBundleBuildPostProcess(postData);
+            
+            return returnCode;
+            
+        }
 
+        /// <summary>
+        /// 构建资源包
+        /// </summary>
+        private static ReturnCode BuildBundles(BundleBuildParameters buildParam,BundleBuildInfoParam infoParam,BundleBuildConfigParam configParam,out IBundleBuildResults result)
+        {
+            BundleBuildConfigSO bundleBuildConfig = BundleBuildConfigSO.Instance;
+            BundleBuildContent content = new BundleBuildContent(infoParam.AssetBundleBuilds);
+            
             //添加构建任务
             List<IBuildTask> taskList = GetSBPInternalBuildTask();
             taskList.Add(new BuildRawBundles());
@@ -56,60 +115,23 @@ namespace CatAsset.Editor
                 taskList.Add(new CopyToReadOnlyDirectory());
                 taskList.Add(new WriteManifestFile());
             }
-
-            Stopwatch sw = Stopwatch.StartNew();
+            
             //调用SBP的构建管线
             ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
-                out IBundleBuildResults result, taskList, infoParam,configParam);
-            sw.Stop();
+                out result, taskList, infoParam,configParam);
 
-            if (returnCode == ReturnCode.Success)
-            {
-                Debug.Log($"资源包构建成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
-            }
-            else
-            {
-                Debug.LogError($"资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
-            }
-
-            var postData = new BundleBuildPostProcessData
-            {
-                Config = bundleBuildConfig,
-                TargetPlatform = targetPlatform,
-                OutputFolder = fullOutputPath,
-                ReturnCode = returnCode,
-                Result = result,
-            };
-            OnBundleBuildPostProcess(postData);
-            
             return returnCode;
         }
 
         /// <summary>
-        /// 构建原生资源包
+        /// 仅构建原生资源包
         /// </summary>
-        public static ReturnCode BuildRawBundles(BundleBuildConfigSO bundleBuildConfig,
-            BuildTarget targetPlatform)
+        private static ReturnCode BuildRawBundles(BundleBuildParameters buildParam,BundleBuildInfoParam infoParam,BundleBuildConfigParam configParam)
         {
-            var preData = new BundleBuildPreProcessData
-            {
-                Config = bundleBuildConfig,
-                TargetPlatform = targetPlatform
-            };
-            OnBundleBuildPreProcess(preData);
-            
-            string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
-
-            //准备参数
-            BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, fullOutputPath);
-            BundleBuildInfoParam infoParam = new BundleBuildInfoParam(new List<AssetBundleBuild>(),
-                new List<BundleBuildInfo>(), bundleBuildConfig.GetRawBundleBuilds());
-            BundleBuildConfigParam configParam =
-                new BundleBuildConfigParam(bundleBuildConfig, targetPlatform);
-            BundleBuildResults results = new BundleBuildResults();  //这里给个空参数，不然会报错
-
+            BundleBuildConfigSO bundleBuildConfig = BundleBuildConfigSO.Instance;
+            BundleBuildResults results = new BundleBuildResults();
             BuildContext buildContext = new BuildContext(buildParam,infoParam,configParam,results);
-
+            
             //添加构建任务
             IList<IBuildTask> taskList = new List<IBuildTask>();
             taskList.Add(new BuildRawBundles());
@@ -125,30 +147,10 @@ namespace CatAsset.Editor
                 taskList.Add(new CopyToReadOnlyDirectory());
                 taskList.Add(new WriteManifestFile());
             }
-
-            Stopwatch sw = Stopwatch.StartNew();
+            
             //运行构建任务
             ReturnCode returnCode = BuildTasksRunner.Run(taskList, buildContext);
 
-            if (returnCode == ReturnCode.Success)
-            {
-                Debug.Log($"原生资源包构建成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
-            }
-            else
-            {
-                Debug.LogError($"原生资源包构建未成功:{returnCode},耗时:{sw.Elapsed.Hours}时{sw.Elapsed.Minutes}分{sw.Elapsed.Seconds}秒");
-            }
-            
-            var postData = new BundleBuildPostProcessData
-            {
-                Config = bundleBuildConfig,
-                TargetPlatform = targetPlatform,
-                OutputFolder = fullOutputPath,
-                ReturnCode = returnCode,
-                Result = null,
-            };
-            OnBundleBuildPostProcess(postData);
-            
             return returnCode;
         }
 
