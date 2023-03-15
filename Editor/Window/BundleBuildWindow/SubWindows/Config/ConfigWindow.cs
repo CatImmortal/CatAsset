@@ -37,6 +37,30 @@ namespace CatAsset.Editor
         {
             EditorGUI.BeginChangeCheck();
 
+            DrawVersion();
+
+            DrawTargetPlatforms();
+
+            DrawOptions();
+
+            DrawOnlyBuildRaw();
+
+            DrawCopyGroup();
+
+            DrawButtons();
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(BundleBuildConfigSO.Instance);
+                AssetDatabase.SaveAssets();
+            }
+        }
+
+        /// <summary>
+        /// 绘制版本号
+        /// </summary>
+        private static void DrawVersion()
+        {
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.LabelField("安装包版本号：" + Application.version, GUILayout.Width(200));
@@ -46,7 +70,14 @@ namespace CatAsset.Editor
                     EditorGUILayout.IntField(BundleBuildConfigSO.Instance.ManifestVersion, GUILayout.Width(50));
             }
 
-            EditorGUILayout.Space();
+            EditorGUILayout.Separator();
+        }
+
+        /// <summary>
+        /// 绘制构建平台
+        /// </summary>
+        private void DrawTargetPlatforms()
+        {
             EditorGUILayout.LabelField("选择资源包构建平台：");
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -73,18 +104,24 @@ namespace CatAsset.Editor
                 }
             }
 
-            EditorGUILayout.Space();
+            EditorGUILayout.Separator();
+        }
 
+        /// <summary>
+        /// 绘制选项
+        /// </summary>
+        private static void DrawOptions()
+        {
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("资源包构建设置：",GUILayout.Width(100));
+                EditorGUILayout.LabelField("资源包构建设置：", GUILayout.Width(100));
                 BundleBuildConfigSO.Instance.Options =
                     (BundleBuildOptions)EditorGUILayout.EnumFlagsField(BundleBuildConfigSO.Instance.Options,
                         GUILayout.Width(200));
-                
-                EditorGUILayout.Space();
-                
-                EditorGUILayout.LabelField("资源包全局压缩设置：",GUILayout.Width(120));
+
+                EditorGUILayout.Separator();
+
+                EditorGUILayout.LabelField("资源包全局压缩设置：", GUILayout.Width(120));
                 BundleCompressOptions compressOptions =
                     (BundleCompressOptions)EditorGUILayout.EnumPopup(BundleBuildConfigSO.Instance.GlobalCompress,
                         GUILayout.Width(100));
@@ -92,10 +129,10 @@ namespace CatAsset.Editor
                 {
                     BundleBuildConfigSO.Instance.GlobalCompress = compressOptions;
                 }
-                
-                EditorGUILayout.Space();
-                
-                EditorGUILayout.LabelField("资源包全局加密设置：",GUILayout.Width(120));
+
+                EditorGUILayout.Separator();
+
+                EditorGUILayout.LabelField("资源包全局加密设置：", GUILayout.Width(120));
                 BundleEncryptOptions encryptOption =
                     (BundleEncryptOptions)EditorGUILayout.EnumPopup(BundleBuildConfigSO.Instance.GlobalEncrypt,
                         GUILayout.Width(100));
@@ -103,11 +140,12 @@ namespace CatAsset.Editor
                 {
                     BundleBuildConfigSO.Instance.GlobalEncrypt = encryptOption;
                 }
-                
-                EditorGUILayout.Space();
-                
+
+                EditorGUILayout.Separator();
+
                 GUILayout.Label("资源包构建输出根目录：", GUILayout.Width(150));
-                BundleBuildConfigSO.Instance.OutputPath = GUILayout.TextField(BundleBuildConfigSO.Instance.OutputPath,GUILayout.Width(300));
+                BundleBuildConfigSO.Instance.OutputPath =
+                    GUILayout.TextField(BundleBuildConfigSO.Instance.OutputPath, GUILayout.Width(300));
                 if (GUILayout.Button("选择目录", GUILayout.Width(100)))
                 {
                     string folder = EditorUtility.OpenFolderPanel("选择资源包构建输出根目录", BundleBuildConfigSO.Instance.OutputPath, "");
@@ -117,20 +155,31 @@ namespace CatAsset.Editor
                     }
                 }
             }
-            EditorGUILayout.Space();
-            
 
+            EditorGUILayout.Separator();
+        }
 
-            EditorGUILayout.Space();
+        /// <summary>
+        /// 绘制仅构建原生资源包
+        /// </summary>
+        private void DrawOnlyBuildRaw()
+        {
+            EditorGUILayout.Separator();
             using (EditorGUILayout.ToggleGroupScope toggle =
                    new EditorGUILayout.ToggleGroupScope("仅构建原生资源包", isOnlyBuildRaw))
             {
                 isOnlyBuildRaw = toggle.enabled;
             }
-            
 
-            EditorGUILayout.Space();
 
+            EditorGUILayout.Separator();
+        }
+
+        /// <summary>
+        /// 绘制复制到包体内的资源组
+        /// </summary>
+        private static void DrawCopyGroup()
+        {
             using (EditorGUILayout.ToggleGroupScope toggle =
                    new EditorGUILayout.ToggleGroupScope("资源包构建目标平台只有1个时，在构建完成后将其复制到StreamingAssets目录下",
                        BundleBuildConfigSO.Instance.IsCopyToReadOnlyDirectory))
@@ -142,14 +191,21 @@ namespace CatAsset.Editor
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：",GUILayout.Width(300));
-                    BundleBuildConfigSO.Instance.CopyGroup = EditorGUILayout.TextField(BundleBuildConfigSO.Instance.CopyGroup,GUILayout.Width(600));
+                    EditorGUILayout.LabelField("要复制的资源组（以分号分隔，为空则全部复制）：", GUILayout.Width(300));
+                    BundleBuildConfigSO.Instance.CopyGroup =
+                        EditorGUILayout.TextField(BundleBuildConfigSO.Instance.CopyGroup, GUILayout.Width(600));
                 }
             }
-            
-            EditorGUILayout.Space();
-            
-            var oldColor = GUI.color;
+
+            EditorGUILayout.Separator();
+        }
+
+        /// <summary>
+        /// 绘制按钮
+        /// </summary>
+        private void DrawButtons()
+        {
+              var oldColor = GUI.color;
             using (new EditorGUILayout.HorizontalScope())
             {
                 GUI.color = Color.red;
@@ -223,12 +279,6 @@ namespace CatAsset.Editor
                     return;
                 }
                 GUI.color = oldColor;
-            }
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(BundleBuildConfigSO.Instance);
-                AssetDatabase.SaveAssets();
             }
         }
     }

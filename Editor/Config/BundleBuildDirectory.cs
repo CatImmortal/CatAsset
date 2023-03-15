@@ -14,6 +14,12 @@ namespace CatAsset.Editor
     public class BundleBuildDirectory : IComparable<BundleBuildDirectory>
     {
         /// <summary>
+        /// 目录名
+        /// </summary>
+        [SerializeField]
+        private string directoryName;
+        
+        /// <summary>
         /// 目录对象
         /// </summary>
         public Object DirectoryObj;
@@ -48,12 +54,23 @@ namespace CatAsset.Editor
         /// 资源包加密设置
         /// </summary>
         [SerializeField]
-        public BundleEncryptOptions EncryptOption; 
-        
+        public BundleEncryptOptions EncryptOption;
+
         /// <summary>
         /// 目录名
         /// </summary>
-        public string DirectoryName => AssetDatabase.GetAssetPath(DirectoryObj);
+        public string DirectoryName
+        {
+            get
+            {
+                if (DirectoryObj != null)
+                {
+                    directoryName = AssetDatabase.GetAssetPath(DirectoryObj);
+                }
+
+                return directoryName;
+            }
+        }
 
         public BundleBuildDirectory(string directoryName, string buildRuleName = nameof(NAssetToOneBundle),
             string regex = null, string group = GroupInfo.DefaultGroup,
@@ -61,6 +78,7 @@ namespace CatAsset.Editor
             BundleEncryptOptions encryptOption = BundleEncryptOptions.UseGlobal
             )
         {
+            this.directoryName = directoryName;
             DirectoryObj = AssetDatabase.LoadAssetAtPath<Object>(directoryName);
             BuildRuleName = buildRuleName;
             Regex = regex;
