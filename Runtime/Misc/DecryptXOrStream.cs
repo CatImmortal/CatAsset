@@ -12,56 +12,8 @@ namespace CatAsset.Runtime
     {
         public override bool CanRead => true;
         public override bool CanSeek => true;
-
-        public DecryptXOrStream([NotNull] SafeFileHandle handle, FileAccess access) : base(handle, access)
-        {
-        }
-
-        public DecryptXOrStream([NotNull] SafeFileHandle handle, FileAccess access, int bufferSize) : base(handle, access, bufferSize)
-        {
-        }
-
-        public DecryptXOrStream([NotNull] SafeFileHandle handle, FileAccess access, int bufferSize, bool isAsync) : base(handle, access, bufferSize, isAsync)
-        {
-        }
-
-        public DecryptXOrStream(IntPtr handle, FileAccess access) : base(handle, access)
-        {
-        }
-
-        public DecryptXOrStream(IntPtr handle, FileAccess access, bool ownsHandle) : base(handle, access, ownsHandle)
-        {
-        }
-
-        public DecryptXOrStream(IntPtr handle, FileAccess access, bool ownsHandle, int bufferSize) : base(handle, access, ownsHandle, bufferSize)
-        {
-        }
-
-        public DecryptXOrStream(IntPtr handle, FileAccess access, bool ownsHandle, int bufferSize, bool isAsync) : base(handle, access, ownsHandle, bufferSize, isAsync)
-        {
-        }
-
-        public DecryptXOrStream([NotNull] string path, FileMode mode) : base(path, mode)
-        {
-        }
-
+        
         public DecryptXOrStream([NotNull] string path, FileMode mode, FileAccess access) : base(path, mode, access)
-        {
-        }
-
-        public DecryptXOrStream([NotNull] string path, FileMode mode, FileAccess access, FileShare share) : base(path, mode, access, share)
-        {
-        }
-
-        public DecryptXOrStream([NotNull] string path, FileMode mode, FileAccess access, FileShare share, int bufferSize) : base(path, mode, access, share, bufferSize)
-        {
-        }
-
-        public DecryptXOrStream([NotNull] string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, bool useAsync) : base(path, mode, access, share, bufferSize, useAsync)
-        {
-        }
-
-        public DecryptXOrStream(string path, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options) : base(path, mode, access, share, bufferSize, options)
         {
         }
         
@@ -96,5 +48,8 @@ namespace CatAsset.Runtime
             
             return byteCount;
         }
+
+
+
     }
 }

@@ -90,7 +90,7 @@ namespace CatAsset.Runtime
                 //轮询任务
                 task.Update();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //任务出现异常 视为任务结束处理
                 task.State = TaskState.Finished;
