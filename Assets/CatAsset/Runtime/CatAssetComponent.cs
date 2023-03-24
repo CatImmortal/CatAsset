@@ -21,7 +21,7 @@ namespace CatAsset.Runtime
         [Header("资源卸载延迟")]
         public float UnloadAssetDelayTime = 60f;
 
-        [Header("每帧最大任务运行数量")]
+        [Header("最大任务同时运行数量")]
         public int MaxTaskRunCount = 30;
 
         private void Awake()

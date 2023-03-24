@@ -16,6 +16,7 @@ namespace CatAsset.Editor
                 "名称",
                 "状态",
                 "Object",
+                "加载耗时",
                 "资源组",
                 "长度",
                 "引用中资源数",

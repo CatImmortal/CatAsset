@@ -106,11 +106,6 @@ namespace CatAsset.Editor
                 {
                     List<string> dependencies = EditorUtil.GetDependencies(assetBuildInfo.Name, false);
 
-                    if (dependencies == null)
-                    {
-                        continue;
-                    }
-                    
                     foreach (string dependency in dependencies)
                     {
                         BundleBuildInfo dependencyBundle = assetToBundle[dependency];

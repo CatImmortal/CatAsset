@@ -35,6 +35,11 @@ namespace CatAsset.Editor
             Object,
 
             /// <summary>
+            /// 加载耗时
+            /// </summary>
+            LoadTime,
+            
+            /// <summary>
             /// 资源类型
             /// </summary>
             Type,
@@ -103,6 +108,10 @@ namespace CatAsset.Editor
                 case ColumnType.Name:
                 case ColumnType.Object:
                     assetOrdered = TreeViewData.AssetInfoList.Order(info => info.Name, ascending);
+                    break;
+                
+                case ColumnType.LoadTime:
+                    assetOrdered = TreeViewData.AssetInfoList.Order(info => info.LoadTime, ascending);
                     break;
 
                 case ColumnType.Type:
@@ -205,6 +214,10 @@ namespace CatAsset.Editor
                     EditorGUI.BeginDisabledGroup(true);
                     EditorGUI.ObjectField(cellRect, obj,typeof(Object),false);
                     EditorGUI.EndDisabledGroup();
+                    break;
+                
+                case ColumnType.LoadTime:
+                    EditorGUI.LabelField(cellRect,$"{assetItem.Data.LoadTime:0.000}秒",centerStyle);
                     break;
 
                 case ColumnType.Type:

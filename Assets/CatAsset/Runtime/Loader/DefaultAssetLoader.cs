@@ -31,7 +31,7 @@ namespace CatAsset.Runtime
             AssetCategory category;
 
             category = RuntimeUtil.GetAssetCategory(assetName);
-            handler = AssetHandler<T>.Create(assetName,token, category);
+            handler = AssetHandler<T>.Create(assetName, category);
 
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);
             if (assetRuntimeInfo == null)
@@ -60,14 +60,14 @@ namespace CatAsset.Runtime
 
                 case AssetCategory.InternalBundledAsset:
                     //加载内置资源包资源
-                    CatAssetManager.AddLoadBundledAssetTask(assetName,assetType,handler,priority);
+                    CatAssetManager.AddLoadAssetTask(assetName,assetType,handler,token,priority);
                     break;
 
 
                 case AssetCategory.InternalRawAsset:
                 case AssetCategory.ExternalRawAsset:
                     //加载原生资源
-                   CatAssetManager.AddLoadRawAssetTask(assetName,category,handler,priority);
+                   CatAssetManager.AddLoadRawAssetTask(assetName,category,handler,token,priority);
                     break;
             }
 
@@ -76,7 +76,7 @@ namespace CatAsset.Runtime
 
 
         /// <inheritdoc />
-        internal override void InternalLoadSceneAsync(string sceneName, SceneHandler handler, TaskPriority priority = TaskPriority.Low)
+        internal override void InternalLoadSceneAsync(string sceneName, SceneHandler handler,CancellationToken token, TaskPriority priority)
         {
             AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(sceneName);
             if (info == null)
@@ -86,7 +86,7 @@ namespace CatAsset.Runtime
                 return;
             }
 
-            CatAssetManager.AddLoadSceneTask(sceneName,handler,priority);
+            CatAssetManager.AddLoadSceneTask(sceneName,handler,token,priority);
         }
 
         /// <inheritdoc />

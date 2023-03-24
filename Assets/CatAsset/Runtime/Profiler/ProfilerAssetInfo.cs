@@ -7,7 +7,7 @@ namespace CatAsset.Runtime
     /// 分析器资源信息
     /// </summary>
     [Serializable]
-    public class ProfilerAssetInfo : IReference,IDependencyChainOwner<ProfilerAssetInfo>
+    public class ProfilerAssetInfo : IReference, IDependencyChainOwner<ProfilerAssetInfo>
     {
         /// <summary>
         /// 资源名
@@ -15,17 +15,10 @@ namespace CatAsset.Runtime
         public string Name;
 
         /// <summary>
-        /// 资源组
+        /// 加载耗时
         /// </summary>
-        [NonSerialized]
-        public string Group;
-
-        /// <summary>
-        /// 资源包
-        /// </summary>
-        [NonSerialized]
-        public string Bundle;
-
+        public float LoadTime;
+        
         /// <summary>
         /// 资源类型
         /// </summary>
@@ -35,6 +28,18 @@ namespace CatAsset.Runtime
         /// 内存大小
         /// </summary>
         public ulong MemorySize;
+
+        /// <summary>
+        /// 资源包
+        /// </summary>
+        [NonSerialized]
+        public string Bundle;
+        
+        /// <summary>
+        /// 资源组
+        /// </summary>
+        [NonSerialized]
+        public string Group;
 
         /// <summary>
         /// 引用计数
@@ -61,10 +66,11 @@ namespace CatAsset.Runtime
             return Name;
         }
 
-        public static ProfilerAssetInfo Create(string name,string type,ulong memorySize,int refCount)
+        public static ProfilerAssetInfo Create(string name,float loadTime, string type,ulong memorySize,int refCount)
         {
             ProfilerAssetInfo info = ReferencePool.Get<ProfilerAssetInfo>();
             info.Name = name;
+            info.LoadTime = loadTime;
             info.Type = type;
             info.MemorySize = memorySize;
             info.RefCount = refCount;
@@ -74,10 +80,11 @@ namespace CatAsset.Runtime
         public void Clear()
         {
             Name = default;
-            Group = default;
-            Bundle = default;
+            LoadTime = default;
             Type = default;
             MemorySize = default;
+            Bundle = default;
+            Group = default;
             RefCount = default;
 
             UpStreamIndexes.Clear();

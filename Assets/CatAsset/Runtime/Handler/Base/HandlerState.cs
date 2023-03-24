@@ -9,19 +9,19 @@
         /// 无效
         /// </summary>
         InValid,
-        
+
         /// <summary>
-        /// 加载中
+        /// 执行中
         /// </summary>
         Doing,
         
         /// <summary>
-        /// 加载成功
+        /// 执行成功
         /// </summary>
         Success,
         
         /// <summary>
-        /// 加载失败
+        /// 执行失败
         /// </summary>
         Failed,
     }

@@ -49,7 +49,7 @@ namespace CatAsset.Runtime
 
             if (asset != null)
             {
-                handler = AssetHandler<T>.Create(assetName,token, category);
+                handler = AssetHandler<T>.Create(assetName, category);
                 handler.SetAsset(asset);
                 return handler;
             }

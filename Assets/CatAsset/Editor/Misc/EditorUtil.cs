@@ -49,37 +49,20 @@ namespace CatAsset.Editor
         [MenuItem("CatAsset/打开目录/资源包构建输出根目录", priority = 3)]
         private static void OpenAssetBundleOutputPath()
         {
-            Open(BundleBuildConfigSO.Instance.OutputPath);
+            OpenDirectory(BundleBuildConfigSO.Instance.OutputRootDirectory);
         }
         
 
         [MenuItem("CatAsset/打开目录/只读区", priority = 3)]
         private static void OpenReadOnlyPath()
         {
-            Open(Application.streamingAssetsPath);
+            OpenDirectory(Application.streamingAssetsPath);
         }
 
         [MenuItem("CatAsset/打开目录/读写区", priority = 3)]
         private static void OpenReadWritePath()
         {
-            Open(Application.persistentDataPath);
-        }
-
-        /// <summary>
-        /// 打开指定目录
-        /// </summary>
-        private static void Open(string directory)
-        {
-            directory = string.Format("\"{0}\"", directory);
-
-            if (Application.platform == RuntimePlatform.WindowsEditor)
-            {
-                Process.Start("Explorer.exe", directory.Replace('/', '\\'));
-            }
-            else if (Application.platform == RuntimePlatform.OSXEditor)
-            {
-                Process.Start("open", directory);
-            }
+            OpenDirectory(Application.persistentDataPath);
         }
 
         [MenuItem("Assets/刷新资源包构建信息")]
@@ -199,7 +182,7 @@ namespace CatAsset.Editor
         /// </summary>
         public static string GetFullOutputPath(string outputPath, BuildTarget targetPlatform, int manifestVersion)
         {
-            string dir = Application.version + "_" + manifestVersion;
+            string dir = manifestVersion.ToString();
             string result = Path.Combine(outputPath, targetPlatform.ToString(), dir);
             return result;
         }
@@ -218,6 +201,23 @@ namespace CatAsset.Editor
             
             //创建目录
             Directory.CreateDirectory(directory);
+        }
+        
+        /// <summary>
+        /// 打开指定目录
+        /// </summary>
+        public static void OpenDirectory(string directory)
+        {
+            directory = string.Format("\"{0}\"", directory);
+
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                Process.Start("Explorer.exe", directory.Replace('/', '\\'));
+            }
+            else if (Application.platform == RuntimePlatform.OSXEditor)
+            {
+                Process.Start("open", directory);
+            }
         }
         
         /// <summary>
@@ -241,7 +241,56 @@ namespace CatAsset.Editor
             dirInfo.Delete();
         }
         
-       
+        /// <summary>
+        /// 复制文件夹
+        /// </summary>
+        public static void CopyDirectory(string sourceDir, string destDir)
+        {
+            if (!Directory.Exists(destDir)) // 如果目标文件夹不存在，则创建一个
+            {
+                Directory.CreateDirectory(destDir);
+            }
+            string[] files = Directory.GetFiles(sourceDir); // 获取源文件夹中的所有文件
+            foreach (string file in files) // 遍历所有文件，并将其复制到目标文件夹中
+            {
+                string fileName = Path.GetFileName(file);
+                string destFile = Path.Combine(destDir, fileName);
+                File.Copy(file, destFile, true);
+            }
+            string[] dirs = Directory.GetDirectories(sourceDir); // 获取源文件夹中的所有子文件夹
+            foreach (string dir in dirs) // 递归遍历所有子文件夹，并将其复制到目标文件夹中
+            {
+                string dirName = Path.GetFileName(dir);
+                string destSubDir = Path.Combine(destDir, dirName);
+                CopyDirectory(dir, destSubDir);
+            }
+        }
+        
+        /// <summary>
+        /// 重命名文件
+        /// </summary>
+        public static void RenameFile(string filePath, string newFileName)
+        {
+            string directory = Path.GetDirectoryName(filePath);
+            string newFilePath = Path.Combine(directory, newFileName);
+            File.Move(filePath, newFilePath);
+        }
 
+        /// <summary>
+        /// 获取指定时间的格式字符串
+        /// </summary>
+        public static string GetDateTimeStr(DateTime dateTime)
+        {
+            string year = dateTime.Year.ToString();
+            string month = dateTime.Month.ToString();
+            string day = dateTime.Day.ToString();
+
+            string hour = dateTime.Hour.ToString();
+            string minute = dateTime.Minute.ToString();
+            string second = dateTime.Second.ToString();
+            
+            string dateTimeStr = $"{year}.{month}.{day}-{hour}.{minute}.{second}";
+            return dateTimeStr;
+        }
     }
 }

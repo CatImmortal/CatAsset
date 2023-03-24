@@ -61,7 +61,7 @@ namespace CatAsset.Editor
         /// </summary>
         protected virtual void ProcessColumns(MultiColumnHeaderState.Column[] columns)
         {
-            columns[0].minWidth = 400;
+            columns[0].minWidth = 400;  //名称
         }
         
         /// <summary>

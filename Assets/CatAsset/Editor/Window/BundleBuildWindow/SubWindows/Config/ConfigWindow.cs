@@ -63,8 +63,6 @@ namespace CatAsset.Editor
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField("安装包版本号：" + Application.version, GUILayout.Width(200));
-
                 EditorGUILayout.LabelField("资源清单版本号：", GUILayout.Width(100));
                 BundleBuildConfigSO.Instance.ManifestVersion =
                     EditorGUILayout.IntField(BundleBuildConfigSO.Instance.ManifestVersion, GUILayout.Width(50));
@@ -144,14 +142,14 @@ namespace CatAsset.Editor
                 EditorGUILayout.Separator();
 
                 GUILayout.Label("资源包构建输出根目录：", GUILayout.Width(150));
-                BundleBuildConfigSO.Instance.OutputPath =
-                    GUILayout.TextField(BundleBuildConfigSO.Instance.OutputPath, GUILayout.Width(300));
+                BundleBuildConfigSO.Instance.OutputRootDirectory =
+                    GUILayout.TextField(BundleBuildConfigSO.Instance.OutputRootDirectory, GUILayout.Width(300));
                 if (GUILayout.Button("选择目录", GUILayout.Width(100)))
                 {
-                    string folder = EditorUtility.OpenFolderPanel("选择资源包构建输出根目录", BundleBuildConfigSO.Instance.OutputPath, "");
+                    string folder = EditorUtility.OpenFolderPanel("选择资源包构建输出根目录", BundleBuildConfigSO.Instance.OutputRootDirectory, "");
                     if (folder != string.Empty)
                     {
-                        BundleBuildConfigSO.Instance.OutputPath = folder;
+                        BundleBuildConfigSO.Instance.OutputRootDirectory = folder;
                     }
                 }
             }
@@ -212,7 +210,7 @@ namespace CatAsset.Editor
 
                 if (GUILayout.Button("清理资源包目录",GUILayout.Width(200)))
                 {
-                    if (!Directory.Exists(BundleBuildConfigSO.Instance.OutputPath))
+                    if (!Directory.Exists(BundleBuildConfigSO.Instance.OutputRootDirectory))
                     {
                         Debug.Log("资源包目录不存在");
                         return;
@@ -221,7 +219,7 @@ namespace CatAsset.Editor
                     if (EditorUtility.DisplayDialog("提示","是否确定清理资源包目录？","是","否"))
                     {
                         BundleBuildConfigSO.Instance.ManifestVersion = 1;
-                        Directory.Delete(BundleBuildConfigSO.Instance.OutputPath, true);
+                        Directory.Delete(BundleBuildConfigSO.Instance.OutputRootDirectory, true);
                         Debug.Log("资源包目录已清理");
                     }
                 }

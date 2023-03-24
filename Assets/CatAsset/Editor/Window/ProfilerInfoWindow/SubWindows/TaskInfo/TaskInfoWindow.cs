@@ -15,6 +15,7 @@ namespace CatAsset.Editor
             {
                 "名称",
                 "类型",
+                "优先级",
                 "状态",
                 "进度",
                 "已合并任务数"

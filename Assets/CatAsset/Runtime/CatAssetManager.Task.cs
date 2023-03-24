@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace CatAsset.Runtime
 {
@@ -8,41 +9,57 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 添加Web请求任务
         /// </summary>
-        public static void AddWebRequestTask(string name, string uri, WebRequestedCallback callback,TaskPriority priority)
+        public static void AddWebRequestTask(string name, string uri, WebRequestedCallback callback,
+            TaskPriority priority)
         {
             WebRequestTask task = WebRequestTask.Create(loadTaskRunner, name, uri, callback);
             loadTaskRunner.AddTask(task, priority);
         }
-        
+
         /// <summary>
         /// 添加加载内置资源包资源的任务
         /// </summary>
-        public static void AddLoadBundledAssetTask(string assetName,Type assetType,AssetHandler handler,TaskPriority priority)
+        internal static void AddLoadAssetTask(string assetName, Type assetType, AssetHandler handler,
+            CancellationToken token, TaskPriority priority)
         {
-            LoadBundledAssetTask loadBundledAssetTask =
-                LoadBundledAssetTask.Create(loadTaskRunner, assetName, assetType, handler);
-            loadTaskRunner.AddTask(loadBundledAssetTask, priority);
+            LoadAssetTask loadAssetTask =
+                LoadAssetTask.Create(loadTaskRunner, assetName, assetType, handler, token);
+            loadTaskRunner.AddTask(loadAssetTask, priority);
 
-            handler.Task = loadBundledAssetTask;
+            handler.Task = loadAssetTask;
         }
-        
+
+        /// <summary>
+        /// 添加加载场景的任务
+        /// </summary>
+        public static void AddLoadSceneTask(string sceneName, SceneHandler handler, CancellationToken token,
+            TaskPriority priority)
+        {
+            LoadSceneTask task = LoadSceneTask.Create(loadTaskRunner, sceneName, handler, token);
+            loadTaskRunner.AddTask(task, priority);
+
+            handler.Task = task;
+        }
+
         /// <summary>
         /// 添加加载原生资源的任务
         /// </summary>
-        public static void AddLoadRawAssetTask(string assetName,AssetCategory category,AssetHandler handler,TaskPriority priority)
+        internal static void AddLoadRawAssetTask(string assetName, AssetCategory category, AssetHandler handler,
+            CancellationToken token, TaskPriority priority)
         {
             LoadRawAssetTask loadRawAssetTask =
-                LoadRawAssetTask.Create(loadTaskRunner, assetName, category, handler);
+                LoadRawAssetTask.Create(loadTaskRunner, assetName, category, handler, token);
             loadTaskRunner.AddTask(loadRawAssetTask, priority);
-            
+
             handler.Task = loadRawAssetTask;
         }
-        
+
         /// <summary>
         /// 添加资源包下载任务
         /// </summary>
         internal static void AddDownLoadBundleTask(GroupUpdater updater, UpdateInfo updateInfo,
-            BundleDownloadedCallback onBundleDownloadedCallback, DownloadBundleRefreshCallback onDownloadRefreshCallback,
+            BundleDownloadedCallback onBundleDownloadedCallback,
+            DownloadBundleRefreshCallback onDownloadRefreshCallback,
             TaskPriority priority = TaskPriority.Middle)
         {
             string localFilePath = RuntimeUtil.GetReadWritePath(updateInfo.Info.RelativePath);

@@ -19,6 +19,11 @@ namespace CatAsset.Runtime
         public string Type;
 
         /// <summary>
+        /// 优先级
+        /// </summary>
+        public TaskPriority Priority;
+        
+        /// <summary>
         /// 状态
         /// </summary>
         public TaskState State;
@@ -43,11 +48,12 @@ namespace CatAsset.Runtime
             return Name.CompareTo(other.Name);
         }
 
-        public static ProfilerTaskInfo Create(string name,string type,TaskState state,float progress,int mergedTaskCount)
+        public static ProfilerTaskInfo Create(string name,string type,TaskPriority priority,TaskState state,float progress,int mergedTaskCount)
         {
             ProfilerTaskInfo info = ReferencePool.Get<ProfilerTaskInfo>();
             info.Name = name;
             info.Type = type;
+            info.Priority = priority;
             info.State = state;
             info.Progress = progress;
             info.MergedTaskCount = mergedTaskCount;
@@ -58,6 +64,7 @@ namespace CatAsset.Runtime
         {
             Name = default;
             Type = default;
+            Priority = default;
             State = default;
             Progress = default;
             MergedTaskCount = default;

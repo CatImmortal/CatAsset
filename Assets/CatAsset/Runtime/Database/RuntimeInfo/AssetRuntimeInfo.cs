@@ -33,8 +33,13 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 引用计数
         /// </summary>
-        public int RefCount { get; internal set; }
+        public int RefCount { get; private set; }
 
+        /// <summary>
+        /// 加载耗时(包含加载依赖的时间)
+        /// </summary>
+        public float LoadTime;
+        
         /// <summary>
         /// 资源依赖链
         /// </summary>

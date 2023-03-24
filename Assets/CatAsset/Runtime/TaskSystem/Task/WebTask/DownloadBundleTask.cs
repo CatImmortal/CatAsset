@@ -86,6 +86,7 @@ namespace CatAsset.Runtime
             }
             uwr.downloadHandler = new DownloadHandlerFile(localTempFilePath, oldFileLength > 0);
             op = uwr.SendWebRequest();
+            op.priority = (int)Group.Priority;
         }
 
         /// <inheritdoc />
@@ -165,6 +166,15 @@ namespace CatAsset.Runtime
             }
             File.Move(localTempFilePath, localFilePath);
             onBundleDownloadedCallback?.Invoke(updateInfo,true);
+        }
+
+        /// <inheritdoc />
+        public override void OnPriorityChanged()
+        {
+            if (op != null)
+            {
+                op.priority = (int)Group.Priority;
+            }
         }
 
         /// <summary>

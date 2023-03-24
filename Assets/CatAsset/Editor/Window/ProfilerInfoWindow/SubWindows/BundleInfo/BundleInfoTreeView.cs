@@ -38,6 +38,11 @@ namespace CatAsset.Editor
             /// 对象引用
             /// </summary>
             Object,
+            
+            /// <summary>
+            /// 加载耗时
+            /// </summary>
+            LoadTime,
 
             /// <summary>
             /// 资源组
@@ -120,6 +125,9 @@ namespace CatAsset.Editor
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.State, ascending);
                     break;
                 
+                case ColumnType.LoadTime:
+                    bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.LoadTime, ascending);
+                    break;
 
                 case ColumnType.Group:
                     bundleOrdered = TreeViewData.BundleInfoList.Order(info => info.Group, ascending);
@@ -269,6 +277,17 @@ namespace CatAsset.Editor
                         EditorGUI.BeginDisabledGroup(true);
                         EditorGUI.ObjectField(cellRect, obj,typeof(Object),false);
                         EditorGUI.EndDisabledGroup();
+                    }
+                    break;
+                
+                case ColumnType.LoadTime:
+                    if (bundleItem != null)
+                    {
+                        EditorGUI.LabelField(cellRect,$"{bundleItem.Data.LoadTime:0.000}秒",centerStyle);
+                    }
+                    else
+                    {
+                        EditorGUI.LabelField(cellRect,$"{assetItem.Data.LoadTime:0.000}秒",centerStyle);
                     }
                     break;
 

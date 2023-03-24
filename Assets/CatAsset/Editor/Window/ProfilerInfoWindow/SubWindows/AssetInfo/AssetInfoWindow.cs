@@ -17,6 +17,7 @@ namespace CatAsset.Editor
             {
                 "名称",
                 "Object",
+                "加载耗时",
                 "类型",
                 "内存大小",
                 "资源包",
@@ -34,8 +35,8 @@ namespace CatAsset.Editor
         {
             base.ProcessColumns(columns);
 
-            columns[2].minWidth = 150;
-            columns[4].minWidth = 400;
+            columns[3].minWidth = 150;  //类型
+            columns[5].minWidth = 400;  //资源包
         }
 
         protected override void CreateTreeView()
