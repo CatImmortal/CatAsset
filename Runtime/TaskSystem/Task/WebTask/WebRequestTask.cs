@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -8,7 +9,7 @@ namespace CatAsset.Runtime
     /// <summary>
     /// Web请求任务完成回调的原型
     /// </summary>
-    public delegate void WebRequestedCallback(bool success,UnityWebRequest uwr);
+    public delegate void WebRequestedCallback(bool success, UnityWebRequest uwr);
 
     /// <summary>
     /// Web请求任务
@@ -31,6 +32,7 @@ namespace CatAsset.Runtime
                 {
                     return 0;
                 }
+
                 return op.progress;
             }
         }
@@ -66,7 +68,6 @@ namespace CatAsset.Runtime
                     //重试次数达到上限 通知失败
                     Debug.LogWarning($"Web请求失败重试次数达到上限：{Name},错误信息：{op.webRequest.error}，当前重试次数：{retriedCount}");
                     State = TaskState.Finished;
-                    onWebRequestedCallback?.Invoke(false, op.webRequest);
                     foreach (WebRequestTask task in MergedTasks)
                     {
                         task.onWebRequestedCallback?.Invoke(false, op.webRequest);
@@ -75,10 +76,9 @@ namespace CatAsset.Runtime
             }
             else
             {
-                onWebRequestedCallback?.Invoke(true, op.webRequest);
                 foreach (WebRequestTask task in MergedTasks)
                 {
-                    task.onWebRequestedCallback?.Invoke(true,op.webRequest);
+                    task.onWebRequestedCallback?.Invoke(true, op.webRequest);
                 }
             }
         }
@@ -102,10 +102,11 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建Web请求任务的对象
         /// </summary>
-        public static WebRequestTask Create(TaskRunner owner, string name,string uri, WebRequestedCallback callback)
+        public static WebRequestTask Create(TaskRunner owner, string name, string uri, WebRequestedCallback callback,
+            CancellationToken token = default)
         {
             WebRequestTask task = ReferencePool.Get<WebRequestTask>();
-            task.CreateBase(owner,name);
+            task.CreateBase(owner, name, token);
 
             task.uri = uri;
             task.onWebRequestedCallback = callback;

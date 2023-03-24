@@ -72,7 +72,7 @@ namespace CatAsset.Runtime
         public virtual SceneHandler LoadSceneAsync(string sceneName, CancellationToken token = default,
             TaskPriority priority = TaskPriority.Low)
         {
-            SceneHandler handler = SceneHandler.Create(sceneName,token);
+            SceneHandler handler = SceneHandler.Create(sceneName);
 
             if (string.IsNullOrEmpty(sceneName))
             {
@@ -81,15 +81,15 @@ namespace CatAsset.Runtime
                 return handler;
             }
 
-            InternalLoadSceneAsync(sceneName,handler,priority);
+            InternalLoadSceneAsync(sceneName,handler,token,priority);
             return handler;
         }
 
         /// <summary>
         /// 加载场景，使用已有的SceneHandler
         /// </summary>
-        internal abstract void InternalLoadSceneAsync(string sceneName, SceneHandler handler,
-            TaskPriority priority = TaskPriority.Low);
+        internal abstract void InternalLoadSceneAsync(string sceneName, SceneHandler handler, CancellationToken token,
+            TaskPriority priority);
 
         /// <summary>
         /// 卸载资源

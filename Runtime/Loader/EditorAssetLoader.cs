@@ -36,7 +36,7 @@ namespace CatAsset.Runtime
             Type assetType = typeof(T);
 
             AssetCategory category = RuntimeUtil.GetAssetCategoryInEditorMode(assetName, assetType);
-            handler = AssetHandler<T>.Create(assetName,token, category);
+            handler = AssetHandler<T>.Create(assetName, category);
 
             object asset;
 
@@ -67,7 +67,7 @@ namespace CatAsset.Runtime
 
 
         /// <inheritdoc />
-        internal override void InternalLoadSceneAsync(string sceneName, SceneHandler handler, TaskPriority priority = TaskPriority.Low)
+        internal override void InternalLoadSceneAsync(string sceneName, SceneHandler handler,CancellationToken token, TaskPriority priority)
         {
             LoadSceneParameters param = new LoadSceneParameters
             {

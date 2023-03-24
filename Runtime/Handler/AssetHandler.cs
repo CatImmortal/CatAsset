@@ -169,15 +169,8 @@ namespace CatAsset.Runtime
             AssetObj = loadedAsset;
             State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
 
-            if (CheckTokenCanceled())
-            {
-                //走到这里 表示是被token取消的 而不是handler.Cancel取消的
-                return;
-            }
-            
             Asset = AssetAs<T>();
             
-            //未被token取消 检查错误信息 调用回调
             CheckError();
             onLoadedCallback?.Invoke(this);
             AsyncStateMachineMoveNext?.Invoke();
@@ -197,10 +190,10 @@ namespace CatAsset.Runtime
             return new HandlerAwaiter<AssetHandler<T>>(this);
         }
         
-        public static AssetHandler<T> Create(string name = null,CancellationToken token = default,AssetCategory category = AssetCategory.None)
+        public static AssetHandler<T> Create(string name = null,AssetCategory category = AssetCategory.None)
         {
             AssetHandler<T> handler = ReferencePool.Get<AssetHandler<T>>();
-            handler.CreateBase(name,token);
+            handler.CreateBase(name);
             handler.Category = category;
             return handler;
         }

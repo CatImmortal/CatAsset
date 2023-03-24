@@ -73,7 +73,6 @@ namespace CatAsset.Runtime
         /// </summary>
         public bool Run()
         {
-
             int index = curTaskIndex;
             curTaskIndex++;
 
@@ -86,15 +85,23 @@ namespace CatAsset.Runtime
                     //运行空闲状态的任务
                     task.Run();
                 }
-
+                
                 //轮询任务
                 task.Update();
+                
+                switch (task.State)
+                {
+                    case TaskState.Running:
+                    case TaskState.Finished:
+                        return true;
+                }
+                return false;
             }
             catch (Exception)
             {
                 //任务出现异常 视为任务结束处理
                 task.State = TaskState.Finished;
-                Debug.LogError($"任务：{task.Name}，类型：{task.GetType().Name}，出现异常");
+                Debug.LogError($"任务：{task.Name}，类型：{task.GetType().Name}出现异常");
                 throw;
             }
             finally
@@ -102,23 +109,13 @@ namespace CatAsset.Runtime
                 switch (task.State)
                 {
                     case TaskState.Finished:
-                        //任务运行结束 需要删除
+                        //任务结束了 可能是正常结束 也可能是出现异常 都需要删除
                         RemoveTask(task);
                         TaskRunner.MainTaskDict[task.Owner][task.GetType()].Remove(task.Name);
                         ReferencePool.Release(task);
                         break;
                 };
             }
-
-            switch (task.State)
-            {
-                case TaskState.Running:
-                case TaskState.Finished:
-                    return true;
-            }
-
-            return false;
-
         }
 
 

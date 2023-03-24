@@ -191,7 +191,7 @@ namespace CatAsset.Editor
         /// </summary>
         private static string CreateFullOutputPath(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
-            string fullOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputPath, targetPlatform,
+            string fullOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputRootDirectory, targetPlatform,
                 bundleBuildConfig.ManifestVersion);
             EditorUtil.CreateEmptyDirectory(fullOutputPath);
             return fullOutputPath;
@@ -266,7 +266,8 @@ namespace CatAsset.Editor
             buildTasks.Add(new FixSpriteAtlasBug());  //这里插入一个修复SBP图集Bug的任务
             buildTasks.Add(new UpdateBundleObjectLayout());
             buildTasks.Add(new GenerateBundleCommands());
-            buildTasks.Add(new GenerateSubAssetPathMaps());
+            //buildTasks.Add(new GenerateSubAssetPathMaps());
+            buildTasks.Add(new MyGenerateSubAssetPathMaps());
             buildTasks.Add(new GenerateBundleMaps());
             buildTasks.Add(new PostPackingCallback());
 

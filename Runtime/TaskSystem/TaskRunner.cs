@@ -43,7 +43,7 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
-        /// 单帧最大任务运行数量
+        /// 同时最大任务运行数量
         /// </summary>
         public int MaxRunCount { get; set; } = 30;
 
@@ -52,50 +52,75 @@ namespace CatAsset.Runtime
         /// </summary>
         public void AddTask(BaseTask task, TaskPriority priority)
         {
-            if (!MainTaskDict.TryGetValue(task.Owner,out var typeDict))
-            {
-                typeDict = new Dictionary<Type, Dictionary<string, BaseTask>>();
-                MainTaskDict.Add(task.Owner,typeDict);
-            }
+            Type taskType = task.GetType();
 
-            Type type = task.GetType();
-            if (!typeDict.TryGetValue(type,out var NameDict))
+            BaseTask mainTask = GetMainTask(taskType, task.Name);
+            if (mainTask == null)
             {
-                NameDict = new Dictionary<string, BaseTask>();
-                typeDict.Add(type,NameDict);
-            }
-
-            if (NameDict.TryGetValue(task.Name,out BaseTask mainTask))
-            {
-                //合并同类型同名任务到主任务里
-                mainTask.MergeTask(task);
-
-                if ((int)priority > (int)mainTask.Group.Priority)
-                {
-                    //新合并的同名任务比主任务优先级更高 则将主任务转移到更高优先级的任务组中
-                    ChangePriority(mainTask,priority);
-                }
+                //没有重复的同名任务 直接作为主任务添加
+                var nameDict = MainTaskDict[this][taskType];
+                nameDict.Add(task.Name,task);
+                taskGroups[(int)priority].AddTask(task);
+                
+                //将主任务作为已合并任务列表中的第一个
+                task.MergeTask(task);
             }
             else
             {
-                NameDict.Add(task.Name,task);
-                taskGroups[(int)priority].AddTask(task);
+                //合并同类型同名任务到主任务里
+                mainTask.MergeTask(task);
+                if ((int)priority > (int)mainTask.Group.Priority)
+                {
+                    //新合并的同名任务比主任务原本的优先级更高 则将主任务转移到更高优先级的任务组中
+                    ChangePriority(mainTask,priority);
+                }
             }
         }
 
         /// <summary>
-        /// 变更优先级
+        /// 变更主任务优先级
         /// </summary>
-        private void ChangePriority(BaseTask task, TaskPriority newPriority)
+        public void ChangePriority(BaseTask mainTask,TaskPriority newPriority)
         {
-            if (task.Group.Priority == newPriority)
+            if (mainTask.Group.Priority == newPriority)
             {
                 return;
             }
+            
+            mainTask.Group.RemoveTask(mainTask);
+            taskGroups[(int)newPriority].AddTask(mainTask);
+            mainTask.OnPriorityChanged();
+            Debug.Log($"任务{mainTask.Name}变更优先级：{mainTask.Group.Priority}->{newPriority}");
+        }
 
-            Debug.Log($"任务{task.Name}变更优先级：{task.Group.Priority}->{newPriority}");
-            task.Group.RemoveTask(task);
-            taskGroups[(int)newPriority].AddTask(task);
+        /// <summary>
+        /// 获取指定任务类型的主任务字典
+        /// </summary>
+        private Dictionary<string, BaseTask> GetMainTaskDict(Type taskType)
+        {
+            if (!MainTaskDict.TryGetValue(this,out var typeDict))
+            {
+                typeDict = new Dictionary<Type, Dictionary<string, BaseTask>>();
+                MainTaskDict.Add(this,typeDict);
+            }
+            
+            if (!typeDict.TryGetValue(taskType,out var nameDict))
+            {
+                nameDict = new Dictionary<string, BaseTask>();
+                typeDict.Add(taskType,nameDict);
+            }
+            
+            return nameDict;
+        }
+
+        /// <summary>
+        /// 获取指定类型与名称的主任务
+        /// </summary>
+        public BaseTask GetMainTask(Type taskType, string name)
+        {
+            var nameDict = GetMainTaskDict(taskType);
+            nameDict.TryGetValue(name, out var task);
+            return task;
         }
 
         /// <summary>

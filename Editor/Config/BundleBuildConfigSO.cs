@@ -86,9 +86,9 @@ namespace CatAsset.Editor
         public BundleEncryptOptions GlobalEncrypt = BundleEncryptOptions.NotEncrypt; 
         
         /// <summary>
-        /// 资源包构建输出目录
+        /// 资源包构建输出根目录
         /// </summary>
-        public string OutputPath = "./Library/AssetBundles";
+        public string OutputRootDirectory = "./Library/AssetBundlesOutput";
 
         /// <summary>
         /// 资源包构建目标平台只有1个时，在资源包构建完成后是否将其复制到只读目录下

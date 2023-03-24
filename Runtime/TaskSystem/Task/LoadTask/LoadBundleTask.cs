@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -13,12 +14,12 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 资源包加载任务
     /// </summary>
-    public class LoadBundleTask : BaseTask
+    public partial class LoadBundleTask : BaseTask
     {
         /// <summary>
         /// 资源包加载状态
         /// </summary>
-        private enum LoadBundleState
+        protected enum LoadBundleState
         {
             None,
 
@@ -75,11 +76,12 @@ namespace CatAsset.Runtime
         private readonly BundleUpdatedCallback onBundleUpdatedCallback;
         private readonly BundleLoadedCallback onBuiltInShaderBundleLoadedCallback;
 
-        private LoadBundleState loadState;
+        protected LoadBundleState LoadState;
         private AssetBundleCreateRequest request;
 
         private WebRequestedCallback onBundleBinaryLoadedCallback;
-       
+        
+        private float startLoadTime;
         
         /// <inheritdoc />
         public override float Progress
@@ -101,80 +103,136 @@ namespace CatAsset.Runtime
             onBuiltInShaderBundleLoadedCallback = OnBuiltInShaderBundleLoadedCallback;
             onBundleBinaryLoadedCallback = OnBundleBinaryLoadedCallback;
         }
-
-       
-
+        
 
         /// <inheritdoc />
         public override void Run()
         {
+            startLoadTime = Time.realtimeSinceStartup;
+            
             if (BundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InRemote)
             {
                 //不在本地 需要先下载
-                loadState = LoadBundleState.BundleNotExist;
+                LoadState = LoadBundleState.BundleNotExist;
             }
             else
             {
-                //在本地了
-                loadState = LoadBundleState.BundleDownloaded;
+                //在本地了 直接加载
+                LoadState = LoadBundleState.BundleNotLoad;
             }
         }
 
         /// <inheritdoc />
         public override void Update()
         {
-            if (loadState == LoadBundleState.BundleNotExist)
+            //检查是否已被全部取消
+            CheckAllCanceled();
+            
+            if (LoadState == LoadBundleState.BundleNotExist)
             {
                 //资源包不存在于本地
                 CheckStateWhileBundleNotExist();
             }
 
-            if (loadState == LoadBundleState.BundleDownloading)
+            if (LoadState == LoadBundleState.BundleDownloading)
             {
                 //资源包下载中
                 CheckStateWhileBundleDownloading();
             }
 
-            if (loadState == LoadBundleState.BundleDownloaded)
+            if (LoadState == LoadBundleState.BundleDownloaded)
             {
                 //资源包下载结束
                 CheckStateWhileBundleDownloaded();
             }
 
-            if (loadState == LoadBundleState.BundleNotLoad)
+            if (LoadState == LoadBundleState.BundleNotLoad)
             {
                 //资源包未加载
                 CheckStateWhileBundleNotLoad();
             }
 
-            if (loadState == LoadBundleState.BundleLoading)
+            if (LoadState == LoadBundleState.BundleLoading)
             {
                 //资源包加载中
                 CheckStateWhileBundleLoading();
             }
 
-            if (loadState == LoadBundleState.BundleLoaded)
+            if (LoadState == LoadBundleState.BundleLoaded)
             {
                 //资源包加载结束
                 CheckStateWhileBundleLoaded();
             }
             
-            if (loadState == LoadBundleState.BuiltInShaderBundleNotLoad)
+            if (LoadState == LoadBundleState.BuiltInShaderBundleNotLoad)
             {
                 //内置Shader资源包未加载
                 CheckStateWhileBuiltInShaderBundleNotLoad();
             }
 
-            if (loadState == LoadBundleState.BuiltInShaderBundleLoading)
+            if (LoadState == LoadBundleState.BuiltInShaderBundleLoading)
             {
                 //内置Shader资源包加载中
                 CheckStateWhileBuiltInShaderBundleLoading();
             }
 
-            if (loadState == LoadBundleState.BuiltInShaderBundleLoaded)
+            if (LoadState == LoadBundleState.BuiltInShaderBundleLoaded)
             {
                 //内置Shader资源包加载结束
                 CheckStateWhileBuiltInShaderBundleLoaded();
+            }
+        }
+
+        public override void Cancel()
+        {
+            base.Cancel();
+            if (IsAllCanceled)
+            {
+                switch (LoadState)
+                {
+                    case LoadBundleState.BundleNotExist:
+                        State = TaskState.Finished;
+                        LoadState = LoadBundleState.None;
+                        break;
+                    
+                    case LoadBundleState.BundleDownloading:
+                        break;
+                    
+                    case LoadBundleState.BundleDownloaded:
+                        break;
+                    
+                    case LoadBundleState.BundleNotLoad:
+                        State = TaskState.Finished;
+                        LoadState = LoadBundleState.None;
+                        break;
+                    
+                    case LoadBundleState.BundleLoading:
+                        break;
+                    
+                    case LoadBundleState.BundleLoaded:
+                        break;
+                    
+                    case LoadBundleState.BuiltInShaderBundleNotLoad:
+                        break;
+                    
+                    case LoadBundleState.BuiltInShaderBundleLoading:
+                        break;
+                    
+                    case LoadBundleState.BuiltInShaderBundleLoaded:
+                        break;
+                    
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public override void OnPriorityChanged()
+        {
+            if (request != null)
+            {
+                request.priority = (int)Group.Priority;
             }
         }
 
@@ -186,13 +244,13 @@ namespace CatAsset.Runtime
             if (!result.Success)
             {
                 //下载失败
-                loadState = LoadBundleState.BundleLoaded;
+                LoadState = LoadBundleState.BundleLoaded;
                 return;
             }
 
             //下载成功 检测是否需要加载内置Shader资源包
             Debug.Log($"下载成功：{result.UpdateInfo.Info}");
-            loadState = LoadBundleState.BundleDownloaded;
+            LoadState = LoadBundleState.BundleDownloaded;
         }
 
         /// <summary>
@@ -200,7 +258,7 @@ namespace CatAsset.Runtime
         /// </summary>
         private void OnBuiltInShaderBundleLoadedCallback(bool success)
         {
-            loadState = LoadBundleState.BuiltInShaderBundleLoaded;
+            LoadState = LoadBundleState.BuiltInShaderBundleLoaded;
         }
         
         /// <summary>
@@ -210,7 +268,7 @@ namespace CatAsset.Runtime
         {
             if (!success)
             {
-                loadState = LoadBundleState.BundleLoaded;
+                LoadState = LoadBundleState.BundleLoaded;
                 return;
             }
 
@@ -218,128 +276,7 @@ namespace CatAsset.Runtime
             EncryptUtil.EncryptXOr(bytes);
             request = AssetBundle.LoadFromMemoryAsync(bytes);
         }
-
-        private void CheckStateWhileBundleNotExist()
-        {
-            State = TaskState.Waiting;
-            loadState = LoadBundleState.BundleDownloading;
-
-            //下载本地不存在的资源包
-            Debug.Log($"开始下载：{BundleRuntimeInfo.Manifest.RelativePath}");
-            CatAssetManager.UpdateBundle(BundleRuntimeInfo.Manifest.Group,BundleRuntimeInfo.Manifest,onBundleUpdatedCallback);
-        }
-
-        private void CheckStateWhileBundleDownloading()
-        {
-            State = TaskState.Waiting;
-        }
-
-        private void CheckStateWhileBundleDownloaded()
-        {
-            State = TaskState.Waiting;
-            loadState = LoadBundleState.BundleNotLoad;
-        }
-
-
-        private void CheckStateWhileBundleNotLoad()
-        {
-            State = TaskState.Running;
-            loadState = LoadBundleState.BundleLoading;
-
-            LoadAsync();
-        }
-
-        private void CheckStateWhileBundleLoading()
-        {
-            State = TaskState.Running;
-
-            if (IsLoadDone())
-            {
-                loadState = LoadBundleState.BundleLoaded;
-                LoadDone();
-            }
-        }
-
-        private void CheckStateWhileBundleLoaded()
-        {
-            if (BundleRuntimeInfo.Bundle == null)
-            {
-                //加载失败
-                State = TaskState.Finished;
-                CallFinished(false);
-            }
-            else
-            {
-                //加载成功
-                
-                if (!BundleRuntimeInfo.Manifest.IsDependencyBuiltInShaderBundle)
-                {
-                    //不依赖内置Shader资源包 直接结束
-                    State = TaskState.Finished;
-                    CallFinished(true);
-                }
-                else
-                {
-                    State = TaskState.Waiting;
-                    
-                    BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
-                    if (builtInShaderBundleRuntimeInfo.Bundle != null)
-                    {
-                        //依赖内置Shader资源包 但其已加载过了 直接添加依赖链记录
-                        loadState = LoadBundleState.BuiltInShaderBundleLoaded;
-                    }
-                    else
-                    {
-                        //加载内置Shader资源包
-                        loadState = LoadBundleState.BuiltInShaderBundleNotLoad;
-                    }
-                }
-                
-            }
-        }
-
-        private void CheckStateWhileBuiltInShaderBundleNotLoad()
-        {
-            State = TaskState.Waiting;
-            loadState = LoadBundleState.BuiltInShaderBundleLoading;
-
-            BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
-            BaseTask task;
-            if (Application.platform == RuntimePlatform.WebGLPlayer)
-            {
-                task = LoadWebBundleTask.Create(Owner, builtInShaderBundleRuntimeInfo.LoadPath,
-                    BundleRuntimeInfo.Manifest,
-                    onBuiltInShaderBundleLoadedCallback);
-            }
-            else
-            {
-                task = Create(Owner, builtInShaderBundleRuntimeInfo.LoadPath,
-                    builtInShaderBundleRuntimeInfo.Manifest,
-                    onBuiltInShaderBundleLoadedCallback);
-            }
-            Owner.AddTask(task, TaskPriority.Middle);
-        }
-
-        private void CheckStateWhileBuiltInShaderBundleLoading()
-        {
-            State = TaskState.Waiting;
-        }
-
-        private void CheckStateWhileBuiltInShaderBundleLoaded()
-        {
-            State = TaskState.Finished;
-
-            BundleRuntimeInfo builtInShaderBundleRuntimeInfo = CatAssetDatabase.GetBundleRuntimeInfo(RuntimeUtil.BuiltInShaderBundleName);
-            if (builtInShaderBundleRuntimeInfo.Bundle != null)
-            {
-                //加载成功 添加依赖链记录
-                builtInShaderBundleRuntimeInfo.DependencyChain.DownStream.Add(BundleRuntimeInfo);
-                BundleRuntimeInfo.DependencyChain.UpStream.Add(builtInShaderBundleRuntimeInfo);
-            }
-            
-            //通知主资源包加载结束
-            CallFinished(true);
-        }
+        
         
         /// <summary>
         /// 发起异步加载
@@ -371,15 +308,15 @@ namespace CatAsset.Runtime
                     {
                         //安卓平台下 存在于只读区 使用二进制数据解密
                         CatAssetManager.AddWebRequestTask(BundleRuntimeInfo.LoadPath, BundleRuntimeInfo.LoadPath,
-                            onBundleBinaryLoadedCallback, TaskPriority.Middle);
+                            onBundleBinaryLoadedCallback, Group.Priority);
                     }
                     break;
                 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
-            
+
+            request.priority = (int)Group.Priority;
         }
 
         /// <summary>
@@ -407,12 +344,18 @@ namespace CatAsset.Runtime
             {
                 Debug.LogError($"资源包加载失败：{BundleRuntimeInfo.Manifest}");
             }
-
             
-            OnFinishedCallback?.Invoke(success);
             foreach (LoadBundleTask task in MergedTasks)
             {
-                task.OnFinishedCallback?.Invoke(success);
+                if (!task.IsCanceled)
+                {
+                    task.OnFinishedCallback?.Invoke(success);
+                }
+            }
+            
+            if (IsAllCanceled)
+            {
+                CatAssetManager.TryUnloadBundle(BundleRuntimeInfo);
             }
         }
 
@@ -437,8 +380,9 @@ namespace CatAsset.Runtime
 
             OnFinishedCallback = default;
             BundleRuntimeInfo = default;
-            loadState = default;
+            LoadState = default;
             request = default;
+            startLoadTime = default;
         }
     }
 }

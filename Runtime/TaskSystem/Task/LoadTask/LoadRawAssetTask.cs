@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -8,24 +9,29 @@ namespace CatAsset.Runtime
     /// <summary>
     /// 原生资源加载任务
     /// </summary>
-    public class LoadRawAssetTask : BaseTask
+    public partial class LoadRawAssetTask : BaseTask
     {
         /// <summary>
         /// 原生资源加载状态
         /// </summary>
         private enum LoadRawAssetState
         {
-            None = 0,
+            None,
+            
+            /// <summary>
+            /// 资源未加载
+            /// </summary>
+            NotLoad,
             
             /// <summary>
             /// 资源加载中
             /// </summary>
-            Loading = 1,
+            Loading,
 
             /// <summary>
             /// 资源加载结束
             /// </summary>
-            Loaded = 2,
+            Loaded,
         }
 
         private AssetCategory category;
@@ -34,8 +40,12 @@ namespace CatAsset.Runtime
         private AssetRuntimeInfo assetRuntimeInfo;
         private BundleRuntimeInfo bundleRuntimeInfo;
         private LoadRawAssetState loadState;
+
+        private WebRequestTask webReqeustTask;
         private readonly WebRequestedCallback onWebRequestedCallback;
 
+        private float startLoadTime;
+        
         /// <summary>
         /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
         /// </summary>
@@ -50,44 +60,51 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Run()
         {
-            if (assetRuntimeInfo.Asset != null)
+            if (assetRuntimeInfo.Asset == null)
             {
-                //虽然引用计数为0 但是已加载好了
-                loadState = LoadRawAssetState.Loaded;
-                return;
+                //未加载
+                loadState = LoadRawAssetState.NotLoad;
             }
-            
-            //未加载过
-            WebRequestTask task = WebRequestTask.Create(Owner,bundleRuntimeInfo.LoadPath,bundleRuntimeInfo.LoadPath,onWebRequestedCallback);
-            Owner.AddTask(task,TaskPriority.Low);
-            loadState = LoadRawAssetState.Loading;
-            
+            else
+            {
+                //已加载好
+                loadState = LoadRawAssetState.Loaded;
+            }
         }
 
         /// <inheritdoc />
         public override void Update()
         {
-            switch (loadState)
+            CheckAllCanceled();
+            
+            if (loadState == LoadRawAssetState.NotLoad)
             {
-
-                case LoadRawAssetState.Loading:
-                    //加载中
-                    CheckStateWhileLoading();
-                    break;
-                
-                case LoadRawAssetState.Loaded:
-                    //加载结束
-                    CheckStateWhileLoaded();
-                    break;
-
+                //未加载
+                CheckStateWhileNotLoad();
             }
 
+            if (loadState == LoadRawAssetState.Loading)
+            {
+                //加载中
+                CheckStateWhileLoading();
+            }
+
+            if (loadState == LoadRawAssetState.Loaded)
+            {
+                //加载结束
+                CheckStateWhileLoaded();
+            }
+            
         }
+        
 
         /// <inheritdoc />
-        public override void Cancel()
+        public override void OnPriorityChanged()
         {
-            handler = null;
+            if (webReqeustTask != null)
+            {
+                webReqeustTask.Owner.ChangePriority(webReqeustTask.MainTask,Group.Priority);
+            }
         }
 
         /// <summary>
@@ -114,83 +131,45 @@ namespace CatAsset.Runtime
             }
         }
         
-        private void CheckStateWhileLoading()
-        {
-            State = TaskState.Waiting;
-        }
-        
-        private void CheckStateWhileLoaded()
-        {
-            State = TaskState.Finished;
-
-            if (assetRuntimeInfo == null)
-            {
-                Debug.LogError($"原生资源加载失败:{bundleRuntimeInfo.LoadPath}");
-                
-                //资源加载失败
-                if (!IsCanceled)
-                {
-                    handler.SetAsset(null);
-                }
-                
-                foreach (LoadRawAssetTask task in MergedTasks)
-                {
-                    if (!task.IsCanceled)
-                    {
-                        task.handler.SetAsset(null);
-                    }
-                }
-            }
-            else
-            {
-                if (IsAllCancel())
-                {
-                    //所有任务都被取消了 这个资源没人要了 直接卸载吧
-                    assetRuntimeInfo.AddRefCount();  //注意这里要先计数+1 才能正确执行后续的卸载流程
-                    CatAssetManager.UnloadAsset(assetRuntimeInfo.Asset);
-                    return;
-                }
-
-                //加载成功 通知所有未取消的加载任务
-                if (!IsCanceled)
-                {
-                    assetRuntimeInfo.AddRefCount();
-                    handler.SetAsset(assetRuntimeInfo.Asset);
-                }
-                foreach (LoadRawAssetTask task in MergedTasks)
-                {
-                    if (!task.IsCanceled)
-                    {
-                        assetRuntimeInfo.AddRefCount();
-                        task.handler.SetAsset(assetRuntimeInfo.Asset);
-                    }
-                }
-            }
-        }
-        
         /// <summary>
-        /// 是否全部加载任务都被取消了
+        /// 调用加载完毕回调
         /// </summary>
-        private bool IsAllCancel()
+        protected virtual void CallFinished(bool success)
         {
+            if (!success)
+            {
+                handler.Error = "原生资源加载失败";
+            }
+            
             foreach (LoadRawAssetTask task in MergedTasks)
             {
                 if (!task.IsCanceled)
                 {
-                    return false;
+                    if (success)
+                    {
+                        assetRuntimeInfo.AddRefCount();
+                        task.handler.SetAsset(assetRuntimeInfo.Asset);
+                    }
+                    else
+                    {
+                        task.handler.SetAsset(null);
+                    }
+                }
+                else
+                {
+                    //已取消
+                    task.handler.NotifyCanceled(CancelToken);
                 }
             }
-
-            return IsCanceled;
         }
-        
+
         /// <summary>
         /// 创建原生资源加载任务的对象
         /// </summary>
-        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,AssetHandler handler)
+        public static LoadRawAssetTask Create(TaskRunner owner, string name,AssetCategory category,AssetHandler handler,CancellationToken token)
         {
             LoadRawAssetTask task = ReferencePool.Get<LoadRawAssetTask>();
-            task.CreateBase(owner,name);
+            task.CreateBase(owner,name,token);
             
             task.category = category;
             task.handler = handler;
@@ -212,6 +191,10 @@ namespace CatAsset.Runtime
             assetRuntimeInfo = default;
             bundleRuntimeInfo = default;
             loadState = default;
+
+            webReqeustTask = default;
+            
+            startLoadTime = default;
         }
     }
 }

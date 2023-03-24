@@ -106,6 +106,11 @@ namespace CatAsset.Runtime
         }
 
         /// <summary>
+        /// 加载耗时(包含加载时的下载时间)
+        /// </summary>
+        public float LoadTime;
+        
+        /// <summary>
         /// 当前被引用中的资源集合，这里面的资源的引用计数都大于0
         /// </summary>
         public HashSet<AssetRuntimeInfo> ReferencingAssets { get; } = new HashSet<AssetRuntimeInfo>();

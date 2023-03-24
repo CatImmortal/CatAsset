@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -22,7 +23,7 @@ namespace CatAsset.Runtime
         /// 持有者
         /// </summary>
         public TaskRunner Owner { get; private set; }
-        
+
         /// <summary>
         /// 任务组
         /// </summary>
@@ -39,6 +40,11 @@ namespace CatAsset.Runtime
         public virtual float Progress { get; }
         
         /// <summary>
+        /// 主任务
+        /// </summary>
+        public BaseTask MainTask => Owner.GetMainTask(GetType(), Name);
+        
+        /// <summary>
         /// 已合并的任务列表（同名的任务）
         /// </summary>
         protected readonly List<BaseTask> MergedTasks = new List<BaseTask>();
@@ -47,6 +53,41 @@ namespace CatAsset.Runtime
         /// 已合并任务数量
         /// </summary>
         public int MergedTaskCount => MergedTasks.Count;
+
+        /// <summary>
+        /// 是否被调用过取消方法
+        /// </summary>
+        private bool isCancelFuncCalled;
+        
+        /// <summary>
+        /// 取消token
+        /// </summary>
+        protected CancellationToken CancelToken { get; private set; }
+        
+        /// <summary>
+        /// 此任务是否被取消
+        /// (被调用过取消方法 或者 被token取消了 就认为任务被取消了)
+        /// </summary>
+        public bool IsCanceled => isCancelFuncCalled || (CancelToken != default && CancelToken.IsCancellationRequested);
+
+        /// <summary>
+        /// 所有同名任务是否被全部取消
+        /// </summary>
+        public bool IsAllCanceled
+        {
+            get
+            {
+                foreach (BaseTask mergedTask in MainTask.MergedTasks)
+                {
+                    if (!mergedTask.IsCanceled)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
         
         /// <summary>
         /// 合并任务
@@ -71,7 +112,14 @@ namespace CatAsset.Runtime
         /// </summary>
         public virtual void Cancel()
         {
-            Debug.LogError($"此任务类型未支持取消操作:{GetType().Name}");
+            isCancelFuncCalled = true;
+        }
+
+        /// <summary>
+        /// 优先级发生改变时的回调
+        /// </summary>
+        public virtual void OnPriorityChanged()
+        {
         }
 
         public override string ToString()
@@ -82,11 +130,12 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 创建基类部分
         /// </summary>
-        protected void CreateBase(TaskRunner owner,string name)
+        protected void CreateBase(TaskRunner owner,string name,CancellationToken token = default)
         {
             Owner = owner;
             ID = ++TaskRunner.TaskIDFactory;
             Name = name;
+            CancelToken = token;
         }
         
         /// <inheritdoc />
@@ -99,6 +148,10 @@ namespace CatAsset.Runtime
             State = default;
             foreach (BaseTask task in MergedTasks)
             {
+                if (task == this)
+                {
+                    continue;
+                }
                 ReferencePool.Release(task);
             }
             MergedTasks.Clear();

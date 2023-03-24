@@ -97,12 +97,6 @@ namespace CatAsset.Runtime
         /// </summary>
         internal void CheckLoaded()
         {
-            if (CheckTokenCanceled())
-            {
-                //走到这里 表示是被token取消的 而不是handler.Cancel取消的
-                return;
-            }
-            
             if (loadedCount == assetCount)
             {
                 Task = null;
@@ -158,7 +152,7 @@ namespace CatAsset.Runtime
         public static BatchAssetHandler Create(int assetCount = 0,CancellationToken token = default)
         {
             BatchAssetHandler handler = ReferencePool.Get<BatchAssetHandler>();
-            handler.CreateBase(nameof(BatchAssetHandler),token);
+            handler.CreateBase(nameof(BatchAssetHandler));
             handler.assetCount = assetCount;
             
             handler.CheckLoaded();

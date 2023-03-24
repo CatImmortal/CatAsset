@@ -24,6 +24,7 @@ namespace CatAsset.Editor
             Name,
 
             Type,
+            Priority,
             State,
             Progress,
             MergedTaskCount,
@@ -61,6 +62,10 @@ namespace CatAsset.Editor
 
                 case ColumnType.Type:
                     taskOrdered = TreeViewData.TaskInfoList.Order(info => info.Type, ascending);
+                    break;
+                
+                case ColumnType.Priority:
+                    taskOrdered = TreeViewData.TaskInfoList.Order(info => info.Priority, ascending);
                     break;
 
                 case ColumnType.State:
@@ -131,18 +136,27 @@ namespace CatAsset.Editor
                     args.label = taskItem.Data.Name;
                     base.RowGUI(args);
                     break;
+                
                 case ColumnType.Type:
                     EditorGUI.LabelField(cellRect,taskItem.Data.Type,centerStyle);
                     break;
+                
+                case ColumnType.Priority:
+                    EditorGUI.LabelField(cellRect,((int)taskItem.Data.Priority).ToString(),centerStyle);
+                    break;
+                
                 case ColumnType.State:
                     EditorGUI.LabelField(cellRect,taskItem.Data.State.ToString(),centerStyle);
                     break;
+                
                 case ColumnType.Progress:
                     EditorGUI.LabelField(cellRect,$"{(taskItem.Data.Progress * 100):0.00}%",centerStyle);
                     break;
+                
                 case ColumnType.MergedTaskCount:
                     EditorGUI.LabelField(cellRect,taskItem.Data.MergedTaskCount.ToString(),centerStyle);
                     break;
+                
                 default:
                     throw new ArgumentOutOfRangeException(nameof(column), column, null);
             }

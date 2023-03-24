@@ -29,6 +29,16 @@ namespace CatAsset.Runtime
         public GameObject Instance{ get; private set; }
 
         /// <summary>
+        /// 取消token
+        /// </summary>
+        private CancellationToken token;
+        
+        /// <summary>
+        /// 是否已被Token取消
+        /// </summary>
+        internal bool IsTokenCanceled => token != default && token.IsCancellationRequested;
+        
+        /// <summary>
         /// 实例化完毕回调
         /// </summary>
         private InstantiateCallback onInstantiateCallback;
@@ -75,6 +85,23 @@ namespace CatAsset.Runtime
         }
         
         /// <summary>
+        /// 检查是否已被Token取消
+        /// </summary>
+        private bool CheckTokenCanceled()
+        {
+            if (IsTokenCanceled)
+            {
+                var callback = OnCanceledCallback;
+                Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
+                Unload();
+                callback?.Invoke(token);
+                return true;
+            }
+
+            return false;
+        }
+        
+        /// <summary>
         /// 获取可等待对象
         /// </summary>
         public HandlerAwaiter<InstantiateHandler> GetAwaiter()
@@ -98,10 +125,11 @@ namespace CatAsset.Runtime
             Transform parent)
         {
             InstantiateHandler handler = ReferencePool.Get<InstantiateHandler>();
-            handler.CreateBase(name,token);
-
+            handler.CreateBase(name);
+            
             handler.Template = template;
             handler.Parent = parent;
+            handler.token = token;
             
             return handler;
         }
@@ -111,6 +139,7 @@ namespace CatAsset.Runtime
             base.Clear();
             Template = default;
             Parent = default;
+            token = default;
             onInstantiateCallback = default;
         }
     }

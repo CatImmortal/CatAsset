@@ -67,8 +67,8 @@ namespace CatAsset.Runtime
                 }
 
                 ProfilerBundleInfo pbi = ProfilerBundleInfo.Create(bri.Manifest.BundleIdentifyName, bri.BundleState,
-                    bri.Manifest.Group,
-                    bri.Manifest.IsRaw, bri.Manifest.Length, bri.ReferencingAssets.Count, bri.Manifest.Assets.Count);
+                    bri.LoadTime, bri.Manifest.Group, bri.Manifest.IsRaw, bri.Manifest.Length,
+                    bri.ReferencingAssets.Count, bri.Manifest.Assets.Count);
 
                 int pbiIndex = info.BundleInfoList.Count;
                 info.BundleInfoList.Add(pbi);
@@ -96,8 +96,8 @@ namespace CatAsset.Runtime
 
                     string type = bri.Manifest.IsScene ? "Scene" : ari.Asset.GetType().Name;
 
-                    ProfilerAssetInfo pai = ProfilerAssetInfo.Create(ari.AssetManifest.Name,type, ari.MemorySize,
-                        ari.RefCount);
+                    ProfilerAssetInfo pai = ProfilerAssetInfo.Create(ari.AssetManifest.Name, ari.LoadTime, type,
+                        ari.MemorySize, ari.RefCount);
                     int paiIndex = info.AssetInfoList.Count;
                     tempPaiDict.Add(pai.Name, paiIndex);
                     tempPaiIndex2PbiIndexDict.Add(paiIndex,pbiIndex);
@@ -170,7 +170,7 @@ namespace CatAsset.Runtime
                     {
                         var task = pair3.Value;
 
-                        ProfilerTaskInfo pti = ProfilerTaskInfo.Create(task.Name,task.GetType().Name,task.State,task.Progress,task.MergedTaskCount);
+                        ProfilerTaskInfo pti = ProfilerTaskInfo.Create(task.Name,task.GetType().Name,task.Group.Priority,task.State,task.Progress,task.MergedTaskCount);
                         info.TaskInfoList.Add(pti);
                     }
                 }

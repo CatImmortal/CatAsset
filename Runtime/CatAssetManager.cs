@@ -61,13 +61,14 @@ namespace CatAsset.Runtime
         public static float UnloadAssetDelayTime { get; set; }
         
         /// <summary>
-        /// 每帧最大任务运行数量
+        /// 同时最大任务运行数量
         /// </summary>
         public static int MaxTaskRunCount
         {
             set
             {
                 loadTaskRunner.MaxRunCount = value;
+                unloadTaskRunner.MaxRunCount = value;
                 downloadTaskRunner.MaxRunCount = value;
             }
         }
@@ -116,8 +117,8 @@ namespace CatAsset.Runtime
             unloadTaskRunner.PreUpdate();
             downloadTaskRunner.PreUpdate();
                 
-            //按优先级轮询任务组
-            for (int i = 0; i < priorityNum; i++)
+            //按优先级从高到低轮询任务组
+            for (int i = priorityNum - 1; i >= 0; i--)
             {
                 loadTaskRunner.Update(i);
                 unloadTaskRunner.Update(i);
