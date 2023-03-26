@@ -5,7 +5,6 @@ using UnityEngine.Networking;
 
 namespace CatAsset.Runtime
 {
-    
     /// <summary>
     /// 原生资源加载任务
     /// </summary>
@@ -41,15 +40,11 @@ namespace CatAsset.Runtime
         private BundleRuntimeInfo bundleRuntimeInfo;
         private LoadRawAssetState loadState;
 
-        private WebRequestTask webReqeustTask;
+        private WebRequestTask webRequestTask;
         private readonly WebRequestedCallback onWebRequestedCallback;
 
         private float startLoadTime;
         
-        /// <summary>
-        /// 是否被取消，handler为空 或者 handler被token取消 就认为此任务被取消了
-        /// </summary>
-        private bool IsCanceled => handler == null;
         
         public LoadRawAssetTask()
         {
@@ -101,9 +96,9 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void OnPriorityChanged()
         {
-            if (webReqeustTask != null)
+            if (webRequestTask != null)
             {
-                webReqeustTask.Owner.ChangePriority(webReqeustTask.MainTask,Group.Priority);
+                webRequestTask.Owner.ChangePriority(webRequestTask.MainTask,Group.Priority);
             }
         }
 
@@ -134,7 +129,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 调用加载完毕回调
         /// </summary>
-        protected virtual void CallFinished(bool success)
+        private void CallFinished(bool success)
         {
             if (!success)
             {
@@ -192,7 +187,7 @@ namespace CatAsset.Runtime
             bundleRuntimeInfo = default;
             loadState = default;
 
-            webReqeustTask = default;
+            webRequestTask = default;
             
             startLoadTime = default;
         }

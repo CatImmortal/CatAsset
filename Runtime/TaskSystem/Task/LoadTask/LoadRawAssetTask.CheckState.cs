@@ -36,9 +36,9 @@ namespace CatAsset.Runtime
             State = TaskState.Waiting;
 
             startLoadTime = Time.realtimeSinceStartup;
-            webReqeustTask = WebRequestTask.Create(Owner, bundleRuntimeInfo.LoadPath, bundleRuntimeInfo.LoadPath,
+            webRequestTask = WebRequestTask.Create(Owner, bundleRuntimeInfo.LoadPath, bundleRuntimeInfo.LoadPath,
                 onWebRequestedCallback);
-            Owner.AddTask(webReqeustTask, Group.Priority);
+            Owner.AddTask(webRequestTask, Group.Priority);
         }
 
         private void CheckStateWhileLoading()
