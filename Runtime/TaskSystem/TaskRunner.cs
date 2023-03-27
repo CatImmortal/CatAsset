@@ -37,7 +37,7 @@ namespace CatAsset.Runtime
 
             for (int i = 0; i < priorityNum; i++)
             {
-                //按优先级创建任务组
+                //每个优先级创建一个对应任务组
                 taskGroups.Add(new TaskGroup((TaskPriority)i));
             }
         }
@@ -86,11 +86,11 @@ namespace CatAsset.Runtime
             {
                 return;
             }
-            
+            Debug.Log($"任务{mainTask.Name}变更优先级：{mainTask.Group.Priority}->{newPriority}");
             mainTask.Group.RemoveTask(mainTask);
             taskGroups[(int)newPriority].AddTask(mainTask);
             mainTask.OnPriorityChanged();
-            Debug.Log($"任务{mainTask.Name}变更优先级：{mainTask.Group.Priority}->{newPriority}");
+         
         }
 
         /// <summary>

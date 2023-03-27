@@ -28,9 +28,8 @@ namespace CatAsset.Runtime
             }
 
             Type assetType = typeof(T);
-            AssetCategory category;
 
-            category = RuntimeUtil.GetAssetCategory(assetName);
+            AssetCategory category = RuntimeUtil.GetAssetCategory(assetName);
             handler = AssetHandler<T>.Create(assetName, category);
 
             AssetRuntimeInfo assetRuntimeInfo = CatAssetDatabase.GetAssetRuntimeInfo(assetName);

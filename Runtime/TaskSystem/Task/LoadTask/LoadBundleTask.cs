@@ -183,50 +183,6 @@ namespace CatAsset.Runtime
             }
         }
 
-        public override void Cancel()
-        {
-            base.Cancel();
-            if (IsAllCanceled)
-            {
-                switch (LoadState)
-                {
-                    case LoadBundleState.BundleNotExist:
-                        State = TaskState.Finished;
-                        LoadState = LoadBundleState.None;
-                        break;
-                    
-                    case LoadBundleState.BundleDownloading:
-                        break;
-                    
-                    case LoadBundleState.BundleDownloaded:
-                        break;
-                    
-                    case LoadBundleState.BundleNotLoad:
-                        State = TaskState.Finished;
-                        LoadState = LoadBundleState.None;
-                        break;
-                    
-                    case LoadBundleState.BundleLoading:
-                        break;
-                    
-                    case LoadBundleState.BundleLoaded:
-                        break;
-                    
-                    case LoadBundleState.BuiltInShaderBundleNotLoad:
-                        break;
-                    
-                    case LoadBundleState.BuiltInShaderBundleLoading:
-                        break;
-                    
-                    case LoadBundleState.BuiltInShaderBundleLoaded:
-                        break;
-                    
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-
         /// <inheritdoc />
         public override void OnPriorityChanged()
         {
