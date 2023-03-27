@@ -27,7 +27,6 @@ namespace CatAsset.Runtime
             //创建 CatAssetManifest
             CatAssetManifest manifest = new CatAssetManifest
             {
-                GameVersion = Application.version,
                 Platform = Application.platform.ToString()
             };
 

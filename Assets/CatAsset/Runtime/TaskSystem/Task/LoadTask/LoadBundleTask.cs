@@ -340,15 +340,15 @@ namespace CatAsset.Runtime
         /// </summary>
         private void CallFinished(bool success)
         {
-            if (!success)
-            {
-                Debug.LogError($"资源包加载失败：{BundleRuntimeInfo.Manifest}");
-            }
-            
             foreach (LoadBundleTask task in MergedTasks)
             {
                 if (!task.IsCanceled)
                 {
+                    if (!success)
+                    {
+                        Debug.LogError($"资源包加载失败：{BundleRuntimeInfo.Manifest}");
+                    }
+                    
                     task.OnFinishedCallback?.Invoke(success);
                 }
             }
