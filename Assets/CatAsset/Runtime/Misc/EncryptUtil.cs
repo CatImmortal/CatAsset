@@ -31,18 +31,19 @@ namespace CatAsset.Runtime
         
         private static byte[] GetCachedBytes(int length)
         {
-
-            if (!cachedBytesQueue.TryDequeue(out var bytes))
+            if (cachedBytesQueue.Count == 0)
             {
                 return new byte[length];
             }
+
+            byte[] bytes = cachedBytesQueue.Peek();
 
             if (bytes.Length < length)
             {
                 return new byte[length];
             }
 
-            return bytes;
+            return cachedBytesQueue.Dequeue();
         }
 
         private static void ReleaseCachedBytes(byte[] bytes)

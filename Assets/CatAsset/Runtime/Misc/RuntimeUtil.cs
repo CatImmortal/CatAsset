@@ -1,15 +1,9 @@
-﻿
-using System;
-using System.Buffers;
-using System.Collections.Concurrent;
+﻿using System;
 using System.IO;
 using UnityEngine;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine.Networking;
-using UnityEngine.Profiling;
-using Random = UnityEngine.Random;
 
 namespace CatAsset.Runtime
 {
