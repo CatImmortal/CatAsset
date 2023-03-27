@@ -25,12 +25,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 序列化版本
         /// </summary>
-        public const int SerializeVersion = 0;
-        
-        /// <summary>
-        /// 游戏版本号
-        /// </summary>
-        public string GameVersion;
+        private const int serializeVersion = 0;
 
         /// <summary>
         /// 清单版本号
@@ -77,8 +72,7 @@ namespace CatAsset.Runtime
             {
                 using (BinaryWriter writer = new BinaryWriter(ms,Encoding.UTF8))
                 {
-                    writer.Write(SerializeVersion);
-                    writer.Write(GameVersion);
+                    writer.Write(serializeVersion);
                     writer.Write(ManifestVersion);
                     writer.Write(Platform);
 
@@ -109,7 +103,6 @@ namespace CatAsset.Runtime
                     CatAssetManifest manifest = new CatAssetManifest();
             
                     int serializeVersion = reader.ReadInt32();
-                    manifest.GameVersion = reader.ReadString();
                     manifest.ManifestVersion = reader.ReadInt32();
                     manifest.Platform = reader.ReadString();
 

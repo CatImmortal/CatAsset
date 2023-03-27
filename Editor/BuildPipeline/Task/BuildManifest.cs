@@ -62,18 +62,16 @@ namespace CatAsset.Editor
             //创建资源清单
             CatAssetManifest manifest = new CatAssetManifest
             {
-                GameVersion = Application.version,
                 ManifestVersion = configParam.Config.ManifestVersion,
                 Platform = configParam.TargetPlatform.ToString(),
                 Bundles = new List<BundleManifestInfo>(),
             };
 
             //增加内置Shader资源包的构建信息
-            string builtInShadersBundleName = "UnityBuiltInShaders.bundle";
-            if (results.BundleInfos.ContainsKey(builtInShadersBundleName))
+            if (results.BundleInfos.ContainsKey(RuntimeUtil.BuiltInShaderBundleName))
             {
                 BundleBuildInfo bundleBuildInfo =
-                    new BundleBuildInfo(string.Empty, builtInShadersBundleName, GroupInfo.DefaultGroup, false,
+                    new BundleBuildInfo(string.Empty, RuntimeUtil.BuiltInShaderBundleName, GroupInfo.DefaultGroup, false,
                         configParam.Config.GlobalCompress,configParam.Config.GlobalEncrypt);
                 infoParam.NormalBundleBuilds.Add(bundleBuildInfo);
             }
@@ -98,7 +96,7 @@ namespace CatAsset.Editor
                     bundleManifestInfo.IsScene = bundleBuildInfo.Assets[0].Name.EndsWith(".unity");
                 }
                 BundleDetails details = results.BundleInfos[bundleManifestInfo.BundleIdentifyName];
-                if (details.Dependencies.Contains(builtInShadersBundleName))
+                if (details.Dependencies.Contains(RuntimeUtil.BuiltInShaderBundleName))
                 {
                     //依赖内置Shader资源包
                     bundleManifestInfo.IsDependencyBuiltInShaderBundle = true;
