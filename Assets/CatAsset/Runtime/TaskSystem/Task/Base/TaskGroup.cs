@@ -9,18 +9,16 @@ namespace CatAsset.Runtime
     /// </summary>
     public class TaskGroup
     {
-        private static List<BaseTask> tempTaskList = new List<BaseTask>();
-
         /// <summary>
         /// 任务列表
         /// </summary>
         private List<BaseTask> mainTaskList = new List<BaseTask>();
 
         /// <summary>
-        /// 当前任务索引
+        /// 当前帧待处理的任务队列
         /// </summary>
-        private int curTaskIndex;
-
+        private Queue<BaseTask> pendingTasks = new Queue<BaseTask>();
+        
         /// <summary>
         /// 此任务组的优先级
         /// </summary>
@@ -29,7 +27,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 任务组是否能运行
         /// </summary>
-        public bool CanRun => curTaskIndex < tempTaskList.Count;
+        public bool CanRun => pendingTasks.Count > 0;
 
         public TaskGroup(TaskPriority priority)
         {
@@ -53,18 +51,16 @@ namespace CatAsset.Runtime
             mainTaskList.Remove(task);
             task.Group = null;
         }
-
+        
         /// <summary>
         /// 任务组运行前
         /// </summary>
         public void PreRun()
         {
-            tempTaskList.Clear();
-            curTaskIndex = 0;
-            
+            pendingTasks.Clear();
             foreach (BaseTask task in mainTaskList)
             {
-                tempTaskList.Add(task);
+                pendingTasks.Enqueue(task);
             }
         }
 
@@ -73,10 +69,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public bool Run()
         {
-            int index = curTaskIndex;
-            curTaskIndex++;
-
-            BaseTask task = tempTaskList[index];
+            BaseTask task = pendingTasks.Dequeue();
 
             try
             {

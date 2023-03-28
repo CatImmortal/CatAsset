@@ -142,6 +142,12 @@ namespace CatAsset.Editor
         /// </summary>
         public static bool IsValidAsset(string assetName)
         {
+            if (AssetDatabase.IsValidFolder(assetName))
+            {
+                //文件夹
+                return false;
+            }
+            
             string fileExtension = Path.GetExtension(assetName);
             if (string.IsNullOrEmpty(fileExtension))
             {
