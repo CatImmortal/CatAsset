@@ -129,6 +129,10 @@ namespace CatAsset.Runtime
         public void PreUpdate()
         {
             curRunCounter = 0;
+            foreach (TaskGroup group in taskGroups)
+            {
+                group.PreRun();
+            }
         }
         
         /// <summary>
@@ -138,8 +142,6 @@ namespace CatAsset.Runtime
         {
             //当前运行任务计数器
             TaskGroup group = taskGroups[priority];
-            
-            group.PreRun();
 
             while (curRunCounter < MaxRunCount && group.CanRun)
             {
