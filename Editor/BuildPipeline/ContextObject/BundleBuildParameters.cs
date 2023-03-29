@@ -18,7 +18,12 @@ namespace CatAsset.Editor
 
         public BundleBuildParameters(BuildTarget target, BuildTargetGroup group, string outputFolder) : base(target, group, outputFolder)
         {
-            foreach (BundleBuildInfo bundleBuildInfo in BundleBuildConfigSO.Instance.Bundles)
+
+        }
+
+        public void SetBundleBuilds(List<BundleBuildInfo> bundleBuilds)
+        {
+            foreach (BundleBuildInfo bundleBuildInfo in bundleBuilds)
             {
                 bundleBuildInfos.Add(bundleBuildInfo.BundleIdentifyName,bundleBuildInfo);
             }

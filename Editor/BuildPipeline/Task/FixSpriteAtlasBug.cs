@@ -19,7 +19,7 @@ namespace CatAsset.Editor
         public int Version => 1;
         
         [InjectContext]
-        IBundleWriteData writeDataParam;
+        private IBundleWriteData writeDataParam;
         
         /// <inheritdoc />
         public ReturnCode Run()

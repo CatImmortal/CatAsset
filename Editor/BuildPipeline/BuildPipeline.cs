@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using CatAsset.Runtime;
 using UnityEditor;
-using UnityEditor.Build.Content;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEditor.Build.Pipeline.Tasks;
@@ -18,10 +16,7 @@ namespace CatAsset.Editor
     /// </summary>
     public static class BuildPipeline
     {
-        /// <summary>
-        /// 构建资源包
-        /// </summary>
-        public static ReturnCode BuildBundles(BuildTarget targetPlatform,bool isOnlyBuildRaw)
+        public static ReturnCode BuildBundles(BuildTarget targetPlatform,bool isBuildPatch)
         {
             BundleBuildConfigSO bundleBuildConfig = BundleBuildConfigSO.Instance;
             
@@ -36,38 +31,36 @@ namespace CatAsset.Editor
             string outputFolder = CreateFullOutputFolder(bundleBuildConfig, targetPlatform);
             
             //准备参数
-            BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, outputFolder);
-            List<AssetBundleBuild> assetBundleBuilds = null;
-            List<BundleBuildInfo> normalBundleBuilds = null;
-            if (!isOnlyBuildRaw)
-            {
-                assetBundleBuilds = bundleBuildConfig.GetAssetBundleBuilds();
-                normalBundleBuilds = bundleBuildConfig.GetNormalBundleBuilds();
-            }
-            else
-            {
-                assetBundleBuilds = new List<AssetBundleBuild>();
-                normalBundleBuilds = new List<BundleBuildInfo>();
-            }
-            BundleBuildInfoParam infoParam = new BundleBuildInfoParam(assetBundleBuilds,
-                normalBundleBuilds, bundleBuildConfig.GetRawBundleBuilds());
-            BundleBuildConfigParam configParam =
-                new BundleBuildConfigParam(bundleBuildConfig, targetPlatform);
-
-            //开始构建资源包
-            IBundleBuildResults result = null;
-            ReturnCode returnCode;
-            Stopwatch sw = Stopwatch.StartNew();
-            if (!isOnlyBuildRaw)
-            {
-                returnCode = BuildBundles(buildParam, infoParam, configParam,out result);
-            }
-            else
-            {
-                returnCode = BuildRawBundles(buildParam, infoParam, configParam);
-            }
-            sw.Stop();
+            BundleBuildInfoParam buildInfoParam = new BundleBuildInfoParam();
+            BundleBuildConfigParam configParam = new BundleBuildConfigParam(bundleBuildConfig, targetPlatform,isBuildPatch);
+            BundleBuildParameters buildParam = GetSBPParameters(bundleBuildConfig, targetPlatform, outputFolder);
+            BundleBuildContent content = new BundleBuildContent();
             
+            //开始构建资源包
+            Stopwatch sw = Stopwatch.StartNew();
+            
+            //添加构建任务
+            List<IBuildTask> taskList = GetSBPInternalBuildTask();
+            taskList.Insert(0,new FillBuildInfoParam());
+            taskList.Add(new BuildRawBundles());
+            taskList.Add(new BuildManifest());
+            taskList.Add(new EncryptBundles());
+            taskList.Add(new CalculateVerifyInfo());
+            taskList.Add(new AppendMD5());
+            taskList.Add(new WriteManifestFile());
+            taskList.Add(new WriteManifestFileToCache());
+            taskList.Add(new WriteManifestFile());
+            if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
+            {
+                //需要复制资源包到只读目录下
+                taskList.Add(new CopyToReadOnlyDirectory());
+                taskList.Add(new WriteManifestFile());
+            }
+
+            //调用SBP的构建管线
+            ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
+                out IBundleBuildResults result, taskList, buildInfoParam,configParam);
+
             //检查结果
             if (returnCode == ReturnCode.Success)
             {
@@ -90,71 +83,8 @@ namespace CatAsset.Editor
             OnBundleBuildPostProcess(postData);
             
             return returnCode;
-            
         }
-
-        /// <summary>
-        /// 构建资源包
-        /// </summary>
-        private static ReturnCode BuildBundles(BundleBuildParameters buildParam,BundleBuildInfoParam infoParam,BundleBuildConfigParam configParam,out IBundleBuildResults result)
-        {
-            BundleBuildConfigSO bundleBuildConfig = BundleBuildConfigSO.Instance;
-            BundleBuildContent content = new BundleBuildContent(infoParam.AssetBundleBuilds);
-            
-            //添加构建任务
-            List<IBuildTask> taskList = GetSBPInternalBuildTask();
-            taskList.Add(new BuildRawBundles());
-            taskList.Add(new BuildManifest());
-            taskList.Add(new EncryptBundles());
-            taskList.Add(new CalculateVerifyInfo());
-            taskList.Add(new AppendMD5());
-            taskList.Add(new WriteManifestFile());
-            taskList.Add(new WriteManifestFileToCache());
-            taskList.Add(new WriteManifestFile());
-            if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
-            {
-                //需要复制资源包到只读目录下
-                taskList.Add(new CopyToReadOnlyDirectory());
-                taskList.Add(new WriteManifestFile());
-            }
-            
-            //调用SBP的构建管线
-            ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
-                out result, taskList, infoParam,configParam);
-
-            return returnCode;
-        }
-
-        /// <summary>
-        /// 仅构建原生资源包
-        /// </summary>
-        private static ReturnCode BuildRawBundles(BundleBuildParameters buildParam,BundleBuildInfoParam infoParam,BundleBuildConfigParam configParam)
-        {
-            BundleBuildConfigSO bundleBuildConfig = BundleBuildConfigSO.Instance;
-            BundleBuildResults results = new BundleBuildResults();
-            BuildContext buildContext = new BuildContext(buildParam,infoParam,configParam,results);
-            
-            //添加构建任务
-            IList<IBuildTask> taskList = new List<IBuildTask>();
-            taskList.Add(new BuildRawBundles());
-            taskList.Add(new BuildManifest());
-            taskList.Add(new EncryptBundles());
-            taskList.Add(new CalculateVerifyInfo());
-            taskList.Add(new AppendMD5());
-            taskList.Add(new MergeManifestAndBundles());
-            taskList.Add(new WriteManifestFile());
-            if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
-            {
-                //需要复制资源包到只读目录下
-                taskList.Add(new CopyToReadOnlyDirectory());
-                taskList.Add(new WriteManifestFile());
-            }
-            
-            //运行构建任务
-            ReturnCode returnCode = BuildTasksRunner.Run(taskList, buildContext);
-
-            return returnCode;
-        }
+        
 
         /// <summary>
         /// 构建资源包前调用
@@ -198,12 +128,11 @@ namespace CatAsset.Editor
             EditorUtil.CreateEmptyDirectory(fullOutputFolder);
             return fullOutputFolder;
         }
-        
 
         /// <summary>
         /// 获取SBP用到的构建参数
         /// </summary>
-        private static BundleBuildParameters GetParameters(BundleBuildConfigSO bundleBuildConfig,
+        private static BundleBuildParameters GetSBPParameters(BundleBuildConfigSO bundleBuildConfig,
             BuildTarget targetPlatform, string outputFolder)
         {
             BuildTargetGroup group = UnityEditor.BuildPipeline.GetBuildTargetGroup(targetPlatform);

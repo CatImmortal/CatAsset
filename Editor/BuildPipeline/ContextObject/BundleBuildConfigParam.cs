@@ -10,11 +10,15 @@ namespace CatAsset.Editor
         
         /// <inheritdoc />
         public BuildTarget TargetPlatform { get; }
+        
+        /// <inheritdoc />
+        public bool IsBuildPatch { get; }
 
-        public BundleBuildConfigParam(BundleBuildConfigSO config,BuildTarget targetPlatform)
+        public BundleBuildConfigParam(BundleBuildConfigSO config,BuildTarget targetPlatform,bool isBuildPatch)
         {
             Config = config;
             TargetPlatform = targetPlatform;
+            IsBuildPatch = isBuildPatch;
         }
     }
 }

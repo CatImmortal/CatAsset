@@ -192,6 +192,17 @@ namespace CatAsset.Editor
             string result = Path.Combine(outputPath, targetPlatform.ToString(), dir);
             return result;
         }
+        
+        /// <summary>
+        /// 获取资源清单缓存目录
+        /// </summary>
+        public static string GetManifestCacheFolder(string outputPath, BuildTarget targetPlatform)
+        {
+      
+            string result = Path.Combine(outputPath, targetPlatform.ToString(),"Cache");
+            result = RuntimeUtil.GetRegularPath(result);
+            return result;
+        }
 
         /// <summary>
         /// 创建空目录（若存在则清空）
