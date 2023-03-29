@@ -21,8 +21,8 @@ namespace CatAsset.Editor
         
         public ReturnCode Run()
         {
-            string folder = Path.Combine( configParam.Config.OutputRootDirectory, configParam.TargetPlatform.ToString(),"Cache");
-            folder = RuntimeUtil.GetRegularPath(folder);
+            string folder = EditorUtil.GetManifestCacheFolder(configParam.Config.OutputRootDirectory,
+                configParam.TargetPlatform);
             EditorUtil.CreateEmptyDirectory(folder);
             manifestParam = new ManifestParam(manifestParam.Manifest, folder);
             return ReturnCode.Success;

@@ -16,6 +16,11 @@ namespace CatAsset.Editor
         /// <inheritdoc />
         public List<BundleBuildInfo> RawBundleBuilds { get; }
 
+        public BundleBuildInfoParam()
+        {
+            
+        }
+        
         public BundleBuildInfoParam(List<AssetBundleBuild> assetBundleBuilds, List<BundleBuildInfo> normalBundleBuilds, List<BundleBuildInfo> rawBundleBuilds)
         {
             AssetBundleBuilds = assetBundleBuilds;

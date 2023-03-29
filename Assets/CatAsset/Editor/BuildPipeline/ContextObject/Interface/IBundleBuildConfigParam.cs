@@ -17,5 +17,10 @@ namespace CatAsset.Editor
         /// 目标平台
         /// </summary>
         BuildTarget TargetPlatform { get; }
+        
+        /// <summary>
+        /// 是否构建补丁包
+        /// </summary>
+        bool IsBuildPatch { get; }
     }
 }

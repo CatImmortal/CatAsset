@@ -13,9 +13,9 @@ namespace CatAsset.Editor
     public class ConfigWindow : BaseSubWindow
     {
         /// <summary>
-        /// 是否仅构建原生资源包
+        /// 是否构建补丁资源包
         /// </summary>
-        private bool isOnlyBuildRaw;
+        private bool isBuildPatch;
 
         /// <summary>
         /// 可选资源包构建平台
@@ -43,7 +43,7 @@ namespace CatAsset.Editor
 
             DrawOptions();
 
-            DrawOnlyBuildRaw();
+            DrawBuildPatch();
 
             DrawCopyGroup();
 
@@ -158,15 +158,15 @@ namespace CatAsset.Editor
         }
 
         /// <summary>
-        /// 绘制仅构建原生资源包
+        /// 绘制构建补丁资源包
         /// </summary>
-        private void DrawOnlyBuildRaw()
+        private void DrawBuildPatch()
         {
             EditorGUILayout.Separator();
             using (EditorGUILayout.ToggleGroupScope toggle =
-                   new EditorGUILayout.ToggleGroupScope("仅构建原生资源包", isOnlyBuildRaw))
+                   new EditorGUILayout.ToggleGroupScope("构建补丁资源包", isBuildPatch))
             {
-                isOnlyBuildRaw = toggle.enabled;
+                isBuildPatch = toggle.enabled;
             }
 
 
@@ -266,7 +266,7 @@ namespace CatAsset.Editor
                     //处理多个平台
                     foreach (BuildTarget targetPlatform in BundleBuildConfigSO.Instance.TargetPlatforms)
                     {
-                        BuildPipeline.BuildBundles(targetPlatform, isOnlyBuildRaw);
+                        BuildPipeline.BuildBundles(targetPlatform, isBuildPatch);
                     }
 
                     BundleBuildConfigSO.Instance.ManifestVersion++;
