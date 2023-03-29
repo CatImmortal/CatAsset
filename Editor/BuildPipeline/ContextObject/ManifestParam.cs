@@ -9,12 +9,12 @@ namespace CatAsset.Editor
         public CatAssetManifest Manifest { get; }
         
         /// <inheritdoc />
-        public string WritePath { get; }
+        public string WriteFolder { get; }
 
-        public ManifestParam(CatAssetManifest manifest, string writePath)
+        public ManifestParam(CatAssetManifest manifest, string writeFolder)
         {
             Manifest = manifest;
-            WritePath = writePath;
+            WriteFolder = writeFolder;
         }
         
     }

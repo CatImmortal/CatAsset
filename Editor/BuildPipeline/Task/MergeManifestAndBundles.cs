@@ -42,7 +42,7 @@ namespace CatAsset.Editor
                     //尝试获取前一个版本的主资源清单
                     //将清单版本号不断-1 直到0
                     mainManifestVersion--;
-                    mainOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputRootDirectory, targetPlatform,
+                    mainOutputPath = EditorUtil.GetFullOutputFolder(bundleBuildConfig.OutputRootDirectory, targetPlatform,
                         bundleBuildConfig.ManifestVersion - 1);
                     string mainManifestPath = Path.Combine(mainOutputPath,CatAssetManifest.ManifestBinaryFileName);
 

@@ -16,6 +16,6 @@ namespace CatAsset.Editor
         /// <summary>
         /// 写入资源清单的路径
         /// </summary>
-        string WritePath { get;}
+        string WriteFolder { get;}
     }
 }
