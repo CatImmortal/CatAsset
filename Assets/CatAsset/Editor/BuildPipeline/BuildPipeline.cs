@@ -33,10 +33,10 @@ namespace CatAsset.Editor
             };
             OnBundleBuildPreProcess(preData);
             
-            string fullOutputPath = CreateFullOutputPath(bundleBuildConfig, targetPlatform);
+            string outputFolder = CreateFullOutputFolder(bundleBuildConfig, targetPlatform);
             
             //准备参数
-            BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, fullOutputPath);
+            BundleBuildParameters buildParam = GetParameters(bundleBuildConfig, targetPlatform, outputFolder);
             List<AssetBundleBuild> assetBundleBuilds = null;
             List<BundleBuildInfo> normalBundleBuilds = null;
             if (!isOnlyBuildRaw)
@@ -83,7 +83,7 @@ namespace CatAsset.Editor
             {
                 Config = bundleBuildConfig,
                 TargetPlatform = targetPlatform,
-                OutputFolder = fullOutputPath,
+                OutputFolder = outputFolder,
                 ReturnCode = returnCode,
                 Result = result,
             };
@@ -108,6 +108,8 @@ namespace CatAsset.Editor
             taskList.Add(new EncryptBundles());
             taskList.Add(new CalculateVerifyInfo());
             taskList.Add(new AppendMD5());
+            taskList.Add(new WriteManifestFile());
+            taskList.Add(new WriteManifestFileToCache());
             taskList.Add(new WriteManifestFile());
             if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
             {
@@ -189,23 +191,24 @@ namespace CatAsset.Editor
         /// <summary>
         /// 创建完整资源包构建输出目录
         /// </summary>
-        private static string CreateFullOutputPath(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
+        private static string CreateFullOutputFolder(BundleBuildConfigSO bundleBuildConfig, BuildTarget targetPlatform)
         {
-            string fullOutputPath = EditorUtil.GetFullOutputPath(bundleBuildConfig.OutputRootDirectory, targetPlatform,
+            string fullOutputFolder = EditorUtil.GetFullOutputFolder(bundleBuildConfig.OutputRootDirectory, targetPlatform,
                 bundleBuildConfig.ManifestVersion);
-            EditorUtil.CreateEmptyDirectory(fullOutputPath);
-            return fullOutputPath;
+            EditorUtil.CreateEmptyDirectory(fullOutputFolder);
+            return fullOutputFolder;
         }
+        
 
         /// <summary>
         /// 获取SBP用到的构建参数
         /// </summary>
         private static BundleBuildParameters GetParameters(BundleBuildConfigSO bundleBuildConfig,
-            BuildTarget targetPlatform, string fullOutputPath)
+            BuildTarget targetPlatform, string outputFolder)
         {
             BuildTargetGroup group = UnityEditor.BuildPipeline.GetBuildTargetGroup(targetPlatform);
 
-            BundleBuildParameters parameters = new BundleBuildParameters(targetPlatform, group, fullOutputPath);
+            BundleBuildParameters parameters = new BundleBuildParameters(targetPlatform, group, outputFolder);
 
             //是否生成LinkXML
             parameters.WriteLinkXML = HasOption(bundleBuildConfig.Options,BundleBuildOptions.WriteLinkXML);

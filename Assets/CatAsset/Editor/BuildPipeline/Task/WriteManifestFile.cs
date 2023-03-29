@@ -20,11 +20,11 @@ namespace CatAsset.Editor
 
         public ReturnCode Run()
         {
-            string writePath = manifestParam.WritePath;
+            string writeFolder = manifestParam.WriteFolder;
             CatAssetManifest manifest = manifestParam.Manifest;
 
-            manifest.WriteFile(writePath,false);
-            manifest.WriteFile(writePath,true);
+            manifest.WriteFile(writeFolder,false);
+            manifest.WriteFile(writeFolder,true);
 
             return ReturnCode.Success;
         }
