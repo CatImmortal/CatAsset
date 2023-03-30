@@ -55,11 +55,6 @@ namespace CatAsset.Editor
             //添加构建任务
             List<IBuildTask> taskList = GetSBPInternalBuildTask(!isBuildPatch);
             taskList.Insert(0,new FillBuildInfoParam());
-            if (isBuildPatch)
-            {
-                //补丁包需要移除临时的依赖冗余包
-                taskList.Add(new RemoveRedundancyDepBundle());
-            }
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
