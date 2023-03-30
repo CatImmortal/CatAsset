@@ -55,7 +55,10 @@ namespace CatAsset.Editor
                 //双向依赖记录
                 Dictionary<string, List<string>> upStreamDict = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> downStreamDict = new Dictionary<string, List<string>>();
+                
+                //资源名 -> 本次构建时所属的资源包名
                 Dictionary<string, string> assetToBundle = new Dictionary<string, string>();
+                
                 foreach (var bundle in config.Bundles)
                 {
                     foreach (var asset in bundle.Assets)
@@ -83,7 +86,10 @@ namespace CatAsset.Editor
                 string folder = EditorUtil.GetBundleCacheFolder(config.OutputRootDirectory, configParam.TargetPlatform);
                 string path = RuntimeUtil.GetRegularPath(Path.Combine(folder, CatAssetManifest.ManifestJsonFileName));
                 CatAssetManifest cachedManifest = CatAssetManifest.DeserializeFromJson(File.ReadAllText(path));
+                
+                //资源名 -> 上次完整构建时所属的资源包名
                 Dictionary<string, string> cacheAssetToBundle = new Dictionary<string, string>();
+                
                 foreach (var bundle in cachedManifest.Bundles)
                 {
                     foreach (var asset in bundle.Assets)
@@ -93,26 +99,31 @@ namespace CatAsset.Editor
                 }
                 
                 //计算补丁包
-                //读取上次完整构建时的资源文件AssetCache信息
+                //读取上次完整构建时的资源缓存清单
                 folder = EditorUtil.GetAssetCacheManifestFolder(config.OutputRootDirectory);
                 path = RuntimeUtil.GetRegularPath(Path.Combine(folder, AssetCacheManifest.ManifestJsonFileName));
                 string json = File.ReadAllText(path);
                 AssetCacheManifest assetCacheManifest = JsonUtility.FromJson<AssetCacheManifest>(json);
+                
+                //资源名 -> 上次完整构建时的资源缓存信息
                 Dictionary<string, AssetCacheManifest.AssetCacheInfo> assetCacheDict = assetCacheManifest.GetCacheDict();
                 
-                //当前资源文件的AssetCache字典
+                //资源名 -> 当前资源缓存信息
                 Dictionary<string, AssetCacheManifest.AssetCacheInfo> curAssetCacheDict = new Dictionary<string, AssetCacheManifest.AssetCacheInfo>();
                 
                 //资源名 -> 是否已变化
                 Dictionary<string, bool> assetChangeStateDict = new Dictionary<string, bool>();
 
                 //深拷贝一份构建配置进行操作
-                BundleBuildConfigSO clonedConfig = Object.Instantiate(config);  
-                
+                BundleBuildConfigSO clonedConfig = Object.Instantiate(config);
+
                 for (int i = clonedConfig.Bundles.Count - 1; i >= 0; i--)
                 {
                     var bundle = clonedConfig.Bundles[i];
 
+                    //此资源包是否全部资源都变化了
+                    bool isAllChanged = true;
+                    
                     for (int j = bundle.Assets.Count - 1; j >= 0; j--)
                     {
                         var asset = bundle.Assets[j];
@@ -163,16 +174,21 @@ namespace CatAsset.Editor
                         {
                             //移除非补丁资源
                             bundle.Assets.RemoveAt(j);
+                            isAllChanged = false;
                         }
                     }
 
                     if (bundle.Assets.Count > 0)
                     {
-                        //是补丁包 需要改名
-                        var part = bundle.BundleName.Split('.');
-                        bundle.BundleName = $"{part[0]}_patch.{part[1]}";
-                        bundle.BundleIdentifyName =
-                            BundleBuildInfo.GetBundleIdentifyName(bundle.DirectoryName, bundle.BundleName);
+                        //是补丁包
+                        if (!isAllChanged)
+                        {
+                            //有部分资源不是补丁资源 需要改名 否则直接用本体包的名字转正
+                            var part = bundle.BundleName.Split('.');
+                            bundle.BundleName = $"{part[0]}_patch.{part[1]}";
+                            bundle.BundleIdentifyName =
+                                BundleBuildInfo.GetBundleIdentifyName(bundle.DirectoryName, bundle.BundleName);
+                        }
                     }
                     else
                     {
