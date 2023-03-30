@@ -49,159 +49,140 @@ namespace CatAsset.Editor
             }
             else
             {
+
+                //构建补丁资源包
+                
+                //双向依赖记录
+                Dictionary<string, List<string>> upStreamDict = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> downStreamDict = new Dictionary<string, List<string>>();
+                Dictionary<string, string> assetToBundle = new Dictionary<string, string>();
+                foreach (var bundle in config.Bundles)
+                {
+                    foreach (var asset in bundle.Assets)
+                    {
+                        //上游依赖
+                        var deps = EditorUtil.GetDependencies(asset.Name);
+                        upStreamDict.Add(asset.Name,deps);
+
+                        //下游依赖
+                        foreach (string dep in deps)
+                        {
+                            if (!downStreamDict.TryGetValue(dep,out List<string> list))
+                            {
+                                list = new List<string>();
+                                downStreamDict.Add(dep,list);
+                            }
+                            list.Add(asset.Name);
+                        }
+                        
+                        assetToBundle.Add(asset.Name,bundle.BundleIdentifyName);
+                    }
+                }
+
                 //读取上次完整构建时的资源包信息
                 string folder = EditorUtil.GetBundleCacheFolder(config.OutputRootDirectory, configParam.TargetPlatform);
                 string path = RuntimeUtil.GetRegularPath(Path.Combine(folder, CatAssetManifest.ManifestJsonFileName));
                 CatAssetManifest cachedManifest = CatAssetManifest.DeserializeFromJson(File.ReadAllText(path));
-                HashSet<string> cachedBundles = new HashSet<string>();
-                foreach (var bundleManifestInfo in cachedManifest.Bundles)
+                Dictionary<string, string> cacheAssetToBundle = new Dictionary<string, string>();
+                foreach (var bundle in cachedManifest.Bundles)
                 {
-                    cachedBundles.Add(bundleManifestInfo.BundleIdentifyName);
+                    foreach (var asset in bundle.Assets)
+                    {
+                        cacheAssetToBundle.Add(asset.Name,bundle.BundleIdentifyName);
+                    }
                 }
                 
+                //计算补丁包
                 //读取上次完整构建时的资源文件MD5信息
                 folder = EditorUtil.GetAssetCacheManifestFolder(config.OutputRootDirectory);
                 path = RuntimeUtil.GetRegularPath(Path.Combine(folder, AssetCacheManifest.ManifestJsonFileName));
                 string json = File.ReadAllText(path);
                 AssetCacheManifest assetCacheManifest = JsonUtility.FromJson<AssetCacheManifest>(json);
                 Dictionary<string, string> cacheMD5Dict = assetCacheManifest.GetCacheDict();
+                
+                //当前资源文件的md5字典
+                Dictionary<string, string> curMD5Dict = new Dictionary<string, string>();
+                
+                //资源名 -> 是否已变化
+                Dictionary<string, bool> assetChangeStateDict = new Dictionary<string, bool>();
 
                 //深拷贝一份构建配置进行操作
                 BundleBuildConfigSO clonedConfig = Object.Instantiate(config);  
-
-                //计算补丁包前将要构建的所有非原生资源的字典
-                Dictionary<string, AssetBuildInfo> allAssetDict = new Dictionary<string, AssetBuildInfo>();
-                foreach (BundleBuildInfo bundleBuildInfo in clonedConfig.Bundles)
-                {
-                    if (bundleBuildInfo.IsRaw)
-                    {
-                        continue;
-                    }
-                    foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
-                    {
-                        allAssetDict.Add(assetBuildInfo.Name,assetBuildInfo);
-                    }
-                }
-
-                //补丁包
-                HashSet<BundleBuildInfo> patchBundles = new HashSet<BundleBuildInfo>();
-                //计算补丁包
+                
                 for (int i = clonedConfig.Bundles.Count - 1; i >= 0; i--)
                 {
-                    BundleBuildInfo bundleBuildInfo = clonedConfig.Bundles[i];
+                    var bundle = clonedConfig.Bundles[i];
 
-                    //是新资源包 直接跳过处理
-                    if (!cachedBundles.Contains(bundleBuildInfo.BundleIdentifyName))
+                    for (int j = bundle.Assets.Count - 1; j >= 0; j--)
                     {
-                        continue;
-                    }
-                    
-                    //是旧资源包
-                    //那么如果有 新资源 或者 旧资源文件发生了变化 就认为是补丁包
-                    for (int j = bundleBuildInfo.Assets.Count - 1; j >= 0; j--)
-                    {
-                        AssetBuildInfo assetBuildInfo = bundleBuildInfo.Assets[j];
-                        
-                        
-                        bool isNewOrChangedAsset = false;
-                        if (!cacheMD5Dict.TryGetValue(assetBuildInfo.Name,out string cachedMD5))
+                        var asset = bundle.Assets[j];
+
+                        //1.自身是否变化
+                        bool isChanged = IsChangedAsset(asset.Name, assetChangeStateDict, cacheMD5Dict, curMD5Dict,
+                            assetToBundle, cacheAssetToBundle);
+
+                        if (!isChanged)
                         {
-                            //新资源
-                            isNewOrChangedAsset = true;
-                            Debug.Log($"新增了资源:{assetBuildInfo.Name}");
-                        }
-                        else
-                        {
-                            string md5 = RuntimeUtil.GetFileMD5(assetBuildInfo.Name);
-                            if (md5 != cachedMD5)
+                            //2.此资源依赖的资源是否变化
+                            if (upStreamDict.TryGetValue(asset.Name,out var upStreamList))
                             {
-                                //旧资源文件发生了变化
-                                isNewOrChangedAsset = true;
-                                Debug.Log($"{assetBuildInfo.Name}发生了变化:{cachedMD5} -> {md5}");
+                                foreach (string upStream in upStreamList)
+                                {
+                                    isChanged = IsChangedAsset(upStream, assetChangeStateDict, cacheMD5Dict, curMD5Dict,
+                                        assetToBundle, cacheAssetToBundle);
+                                    if (isChanged)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!isChanged)
+                        {
+                            //3.依赖此资源的资源是否变化
+                            if (downStreamDict.TryGetValue(asset.Name,out var downStreamList))
+                            {
+                                foreach (string downStream in downStreamList)
+                                {
+                                    isChanged = IsChangedAsset(downStream, assetChangeStateDict, cacheMD5Dict, curMD5Dict,
+                                        assetToBundle, cacheAssetToBundle);
+                                    if (isChanged)
+                                    {
+                                        break;
+                                    }
+                                }
                             }
                         }
                         
-                        if (isNewOrChangedAsset)
+                        if (isChanged)
                         {
-                            //是补丁包
-                            patchBundles.Add(bundleBuildInfo);
+                            Debug.Log($"发现补丁资源:{asset.Name}");
                         }
                         else
                         {
-                            //源文件没有发生变化 从所属资源包的资源列表中删除
-                            bundleBuildInfo.Assets.RemoveAt(j);
+                            //移除非补丁资源
+                            bundle.Assets.RemoveAt(j);
                         }
                     }
 
-                    if (!patchBundles.Contains(bundleBuildInfo))
+                    if (bundle.Assets.Count > 0)
                     {
-                        //是旧资源包 但没有资源变化或新增资源 不是补丁包 需要移除
+                        //是补丁包 需要改名
+                        var part = bundle.BundleName.Split('.');
+                        bundle.BundleName = $"{part[0]}_patch.{part[1]}";
+                        bundle.BundleIdentifyName =
+                            BundleBuildInfo.GetBundleIdentifyName(bundle.DirectoryName, bundle.BundleName);
+                    }
+                    else
+                    {
+                        //不是补丁包 需要移除
                         clonedConfig.Bundles.RemoveAt(i);
                     }
                 }
                 
-                
-                //计算完补丁包后 将要构建的所有非原生资源的字典
-                Dictionary<string, AssetBuildInfo> patchAssetDict = new Dictionary<string, AssetBuildInfo>();
-                foreach (BundleBuildInfo bundleBuildInfo in clonedConfig.Bundles)
-                {
-                    if (bundleBuildInfo.IsRaw)
-                    {
-                        continue;
-                    }
-                    foreach (AssetBuildInfo assetBuildInfo in bundleBuildInfo.Assets)
-                    {
-                        patchAssetDict.Add(assetBuildInfo.Name,assetBuildInfo);
-                    }
-                }
-                
-                //重命名补丁包
-                foreach (BundleBuildInfo patchBundle in patchBundles)
-                {
-                    if (patchBundle.IsRaw)
-                    {
-                        //原生资源包就不当补丁包处理了 直接构建为新资源包
-                        continue;
-                    }
-                    
-                    //将资源包名设置为对应补丁包的名字
-                    var part = patchBundle.BundleName.Split('.');
-                    patchBundle.BundleName = $"{part[0]}_patch.{part[1]}";
-                    patchBundle.BundleIdentifyName =
-                        BundleBuildInfo.GetBundleIdentifyName(patchBundle.DirectoryName, patchBundle.BundleName);
-                }
-                
-                //处理补丁包资源依赖导致的冗余资源
-                //将冗余资源单独构建到这个一个临时资源包中 但并不使用此资源包
-                BundleBuildInfo redundancyDepBundle = new BundleBuildInfo(string.Empty, EditorUtil.RedundancyDepBundleName,
-                    GroupInfo.DefaultGroup, false, BundleCompressOptions.LZ4, BundleEncryptOptions.NotEncrypt);
-                HashSet<AssetBuildInfo> redundancyDepAssets = new HashSet<AssetBuildInfo>();
-
-                foreach (var pair in patchAssetDict)
-                {
-                    AssetBuildInfo patchAsset = pair.Value;
-                    List<string> deps = EditorUtil.GetDependencies(patchAsset.Name);
-                    foreach (string dep in deps)
-                    {
-                        if (!patchAssetDict.TryGetValue(dep,out var value))
-                        {
-                            //未出现在此次补丁包构建中的依赖资源 是冗余资源
-                            var depAssetBuildInfo = allAssetDict[dep];
-                            redundancyDepAssets.Add(depAssetBuildInfo);
-                            Debug.Log($"剔除冗余的依赖资源:{dep}");
-                        }
-                    }
-                }
-               
-                if (redundancyDepAssets.Count > 0)
-                {
-                    redundancyDepBundle.Assets.AddRange(redundancyDepAssets.ToList());
-                    clonedConfig.Bundles.Add(redundancyDepBundle);
-                }
-                
                 buildInfoParam = new BundleBuildInfoParam(clonedConfig.GetAssetBundleBuilds(),clonedConfig.GetNormalBundleBuilds(),
                     clonedConfig.GetRawBundleBuilds());
-                
             }
 
             ((BundleBuildParameters)buildParam).SetBundleBuilds(buildInfoParam.NormalBundleBuilds);
@@ -209,6 +190,53 @@ namespace CatAsset.Editor
             content2 = content;
             
             return ReturnCode.Success;
+        }
+
+        /// <summary>
+        /// 是否为已变化的资源
+        /// </summary>
+        private bool IsChangedAsset(string assetName, Dictionary<string, bool> assetChangeStateDict,
+            Dictionary<string, string> cacheMD5Dict, Dictionary<string, string> curMD5Dict,
+            Dictionary<string, string> assetToBundle, Dictionary<string, string> cacheAssetToBundle)
+
+        {
+            //0.已经计算过状态了
+            if (assetChangeStateDict.TryGetValue(assetName, out bool isPatch))
+            {
+                return isPatch;
+            }
+
+            //1.新资源 
+            if (!cacheMD5Dict.TryGetValue(assetName, out string cachedMD5))
+            {
+                assetChangeStateDict.Add(assetName, true);
+                return true;
+            }
+
+            //2.变化的旧资源
+            if (!curMD5Dict.TryGetValue(assetName, out string curMD5))
+            {
+                curMD5 = RuntimeUtil.GetFileMD5(assetName);
+                curMD5Dict.Add(assetName, curMD5);
+            }
+            if (curMD5 != cachedMD5)
+            {
+                assetChangeStateDict.Add(assetName, true);
+                return true;
+            }
+
+            //3.被移动到新包的旧资源
+            if (assetToBundle[assetName] != cacheAssetToBundle[assetName])
+            {
+                assetChangeStateDict.Add(assetName, true);
+                return true;
+            }
+
+            
+            
+            //未变化
+            assetChangeStateDict.Add(assetName, false);
+            return false;
         }
     }
 }
