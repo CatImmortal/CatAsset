@@ -241,8 +241,9 @@ namespace CatAsset.Runtime
 
             if (AssetRuntimeInfo.Asset != null)
             {
+                //获取内存占用
                 AssetRuntimeInfo.MemorySize = (ulong)Profiler.GetRuntimeMemorySizeLong((Object)AssetRuntimeInfo.Asset);
-
+                    
                 //添加关联
                 CatAssetDatabase.SetAssetInstance(AssetRuntimeInfo.Asset, AssetRuntimeInfo);
             }

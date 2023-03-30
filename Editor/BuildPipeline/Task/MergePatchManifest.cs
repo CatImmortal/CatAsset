@@ -31,7 +31,7 @@ namespace CatAsset.Editor
         {
             var config = configParam.Config;
             
-            var folder = EditorUtil.GetBundleCacheFolder(config.OutputRootDirectory, configParam.TargetPlatform);
+            var bundleCacheFolder = EditorUtil.GetBundleCacheFolder(config.OutputRootDirectory, configParam.TargetPlatform);
 
             //本次补丁包构建的资源
             HashSet<string> patchAssets = new HashSet<string>();
@@ -44,7 +44,7 @@ namespace CatAsset.Editor
             }
 
             //修改资源清单 移除重复资源
-            string path = RuntimeUtil.GetRegularPath(Path.Combine(folder, CatAssetManifest.ManifestJsonFileName));
+            string path = RuntimeUtil.GetRegularPath(Path.Combine(bundleCacheFolder, CatAssetManifest.ManifestJsonFileName));
             CatAssetManifest cachedManifest = CatAssetManifest.DeserializeFromJson(File.ReadAllText(path));
             for (int i = cachedManifest.Bundles.Count - 1; i >= 0; i--)
             {
@@ -76,9 +76,18 @@ namespace CatAsset.Editor
             string outputFolder = ((BundleBuildParameters)buildParam).OutputFolder;
             foreach (BundleManifestInfo bundleManifestInfo in cachedManifest.Bundles)
             {
-                string sourcePath = Path.Combine(folder, bundleManifestInfo.RelativePath);
-                string destPath =
-                    RuntimeUtil.GetRegularPath(Path.Combine(outputFolder,bundleManifestInfo.RelativePath));
+                string sourcePath = RuntimeUtil.GetRegularPath(Path.Combine(bundleCacheFolder, bundleManifestInfo.RelativePath));
+                string destPath = RuntimeUtil.GetRegularPath(Path.Combine(outputFolder,bundleManifestInfo.RelativePath));
+                
+                if (!string.IsNullOrEmpty(bundleManifestInfo.Directory))
+                {
+                    string fullDirectory = RuntimeUtil.GetRegularPath(Path.Combine(outputFolder,bundleManifestInfo.Directory));
+                    if (!Directory.Exists(fullDirectory))
+                    {
+                        Directory.CreateDirectory(fullDirectory);
+                    }
+                }
+                
                 File.Copy(sourcePath,destPath);
             }
             
