@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CatAsset.Runtime;
 
 namespace CatAsset.Editor
 {
@@ -9,11 +10,52 @@ namespace CatAsset.Editor
     [Serializable]
     public class AssetCacheManifest
     {
+        /// <summary>
+        /// 资源缓存信息
+        /// </summary>
         [Serializable]
-        public class AssetCache
+        public struct AssetCacheInfo : IEquatable<AssetCacheInfo>
         {
             public string Name;
             public string MD5;
+            public string MetaMD5;
+            
+            public bool Equals(AssetCacheInfo other)
+            {
+                return Name == other.Name && MD5 == other.MD5 && MetaMD5 == other.MetaMD5;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is AssetCacheInfo other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Name, MD5, MetaMD5);
+            }
+            
+            public static bool operator ==(AssetCacheInfo a,AssetCacheInfo b)
+            {
+                return Equals(a, b);
+            }
+            
+            public static bool operator !=(AssetCacheInfo a,AssetCacheInfo b)
+            {
+                return !(a == b);
+            }
+
+            public static AssetCacheInfo Create(string assetName)
+            {
+                AssetCacheInfo assetCacheInfo = new AssetCacheInfo
+                {
+                    Name = assetName,
+                    MD5 = RuntimeUtil.GetFileMD5(assetName),
+                    MetaMD5 = RuntimeUtil.GetFileMD5($"{assetName}.meta")
+                };
+                return assetCacheInfo;
+            }
+          
         }
         
         /// <summary>
@@ -22,17 +64,19 @@ namespace CatAsset.Editor
         public const string ManifestJsonFileName = "AssetCacheManifest.json";
 
 
-        public List<AssetCache> Caches = new List<AssetCache>();
+        public List<AssetCacheInfo> Caches = new List<AssetCacheInfo>();
 
-        public Dictionary<string, string> GetCacheDict()
+        public Dictionary<string, AssetCacheInfo> GetCacheDict()
         {
-            Dictionary<string, string> result = new Dictionary<string, string>();
-            foreach (AssetCache assetCache in Caches)
+            Dictionary<string, AssetCacheInfo> result = new Dictionary<string, AssetCacheInfo>();
+            foreach (AssetCacheInfo assetCache in Caches)
             {
-                result.Add(assetCache.Name,assetCache.MD5);
+                result.Add(assetCache.Name,assetCache);
             }
 
             return result;
         }
+        
+        
     }
 }
