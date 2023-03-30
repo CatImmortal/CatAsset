@@ -58,6 +58,11 @@ namespace CatAsset.Editor
         /// </summary>
         public List<AssetBuildInfo> Assets = new List<AssetBuildInfo>();
 
+        public static string GetBundleIdentifyName(string dirName, string bundleName)
+        {
+            return RuntimeUtil.GetRegularPath(Path.Combine(dirName, bundleName));
+        }
+        
         public BundleBuildInfo(string directoryName, string bundleName,string group,bool isRaw,BundleCompressOptions compressOption,BundleEncryptOptions encryptOption)
         {
             DirectoryName = directoryName;
@@ -70,7 +75,8 @@ namespace CatAsset.Editor
             {
                 EncryptOption = BundleEncryptOptions.XOr;
             }
-            BundleIdentifyName = RuntimeUtil.GetRegularPath(Path.Combine(DirectoryName, BundleName));
+
+            BundleIdentifyName = GetBundleIdentifyName(DirectoryName, BundleName);
         }
 
         /// <summary>

@@ -194,12 +194,21 @@ namespace CatAsset.Editor
         }
         
         /// <summary>
-        /// 获取资源清单缓存目录
+        /// 获取资源包缓存目录
         /// </summary>
-        public static string GetManifestCacheFolder(string outputPath, BuildTarget targetPlatform)
+        public static string GetBundleCacheFolder(string outputPath, BuildTarget targetPlatform)
         {
-      
             string result = Path.Combine(outputPath, targetPlatform.ToString(),"Cache");
+            result = RuntimeUtil.GetRegularPath(result);
+            return result;
+        }
+
+        /// <summary>
+        /// 获取资源缓存清单目录
+        /// </summary>
+        public static string GetAssetCacheManifestFolder(string outputPath)
+        {
+            string result = Path.Combine(outputPath,"Cache");
             result = RuntimeUtil.GetRegularPath(result);
             return result;
         }
@@ -261,7 +270,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 复制文件夹
         /// </summary>
-        public static void CopyDirectory(string sourceDir, string destDir)
+        public static void CopyDirectory(string sourceDir, string destDir,bool skipExistsDestFile = true)
         {
             if (!Directory.Exists(destDir)) // 如果目标文件夹不存在，则创建一个
             {
@@ -270,8 +279,14 @@ namespace CatAsset.Editor
             string[] files = Directory.GetFiles(sourceDir); // 获取源文件夹中的所有文件
             foreach (string file in files) // 遍历所有文件，并将其复制到目标文件夹中
             {
+                
                 string fileName = Path.GetFileName(file);
                 string destFile = Path.Combine(destDir, fileName);
+                if (skipExistsDestFile && File.Exists(destFile))
+                {
+                    //跳过已存在的目标文件
+                    continue;
+                }
                 File.Copy(file, destFile, true);
             }
             string[] dirs = Directory.GetDirectories(sourceDir); // 获取源文件夹中的所有子文件夹
@@ -279,7 +294,7 @@ namespace CatAsset.Editor
             {
                 string dirName = Path.GetFileName(dir);
                 string destSubDir = Path.Combine(destDir, dirName);
-                CopyDirectory(dir, destSubDir);
+                CopyDirectory(dir, destSubDir,skipExistsDestFile);
             }
         }
         

@@ -95,7 +95,20 @@ namespace CatAsset.Editor
                 if (treeViewSubWindow is PreviewWindow)
                 {
                     BundleBuildConfigSO.Instance.RefreshBundleBuildInfos();
+                    if (BundleBuildConfigSO.Instance.Bundles.Count == 0)
+                    {
+                        return;
+                    }
                 }
+                else
+                {
+                    if (BundleBuildConfigSO.Instance.Directories.Count == 0)
+                    {
+                        return;
+                    }
+                }
+                
+                
                 
                 ((TreeView)treeViewSubWindow.TreeView).Reload();
             }
