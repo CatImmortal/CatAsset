@@ -24,11 +24,6 @@ namespace CatAsset.Editor
 
         public ReturnCode Run()
         {
-            if ((configParam.Config.Options & BundleBuildOptions.AppendMD5) == 0)
-            {
-                return ReturnCode.SuccessNotRun;
-            }
-            
             CatAssetManifest manifest = manifestParam.Manifest;
             string outputFolder = ((BundleBuildParameters) buildParam).OutputFolder;
 

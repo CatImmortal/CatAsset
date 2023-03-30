@@ -16,11 +16,14 @@ namespace CatAsset.Editor
         /// <inheritdoc />
         public int Version => 1;
 
-        [InjectContext(ContextUsage.In)] private IBundleBuildParameters buildParam;
+        [InjectContext(ContextUsage.In)] 
+        private IBundleBuildParameters buildParam;
 
-        [InjectContext(ContextUsage.In)] private IBundleBuildConfigParam configParam;
+        [InjectContext(ContextUsage.In)] 
+        private IBundleBuildConfigParam configParam;
 
-        [InjectContext(ContextUsage.InOut)] private IManifestParam manifestParam;
+        [InjectContext(ContextUsage.InOut)] 
+        private IManifestParam manifestParam;
 
 
         /// <inheritdoc />

@@ -40,8 +40,7 @@ namespace CatAsset.Editor
         public ReturnCode Run()
         {
             string outputFolder = ((BundleBuildParameters) buildParam).OutputFolder;
-
-
+            
             HashSet<string> atlasPackableSet = new HashSet<string>();
             if (infoParam.NormalBundleBuilds.Count > 0)
             {
@@ -57,8 +56,7 @@ namespace CatAsset.Editor
                     }
                 }
             }
-
-
+            
             //创建资源清单
             CatAssetManifest manifest = new CatAssetManifest
             {
@@ -67,8 +65,8 @@ namespace CatAsset.Editor
                 Bundles = new List<BundleManifestInfo>(),
             };
 
-            //增加内置Shader资源包的构建信息
-            if (results.BundleInfos.ContainsKey(RuntimeUtil.BuiltInShaderBundleName))
+            //非构建补丁包时 增加内置Shader资源包的构建信息
+            if (!configParam.IsBuildPatch && results.BundleInfos.ContainsKey(RuntimeUtil.BuiltInShaderBundleName))
             {
                 BundleBuildInfo bundleBuildInfo =
                     new BundleBuildInfo(string.Empty, RuntimeUtil.BuiltInShaderBundleName, GroupInfo.DefaultGroup, false,

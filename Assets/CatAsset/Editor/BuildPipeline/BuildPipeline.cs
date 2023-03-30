@@ -46,10 +46,21 @@ namespace CatAsset.Editor
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
             taskList.Add(new CalculateVerifyInfo());
-            taskList.Add(new AppendMD5());
+            if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.AppendMD5))
+            {
+                taskList.Add(new AppendMD5());
+            }
+            if (isBuildPatch)
+            {
+                //补丁包需要合并资源清单
+                taskList.Add(new MergePatchManifest());
+            }
             taskList.Add(new WriteManifestFile());
-            taskList.Add(new WriteManifestFileToCache());
-            taskList.Add(new WriteManifestFile());
+            if (!isBuildPatch)
+            {
+                //非补丁包 写入缓存
+                taskList.Add(new WriteCacheFile());
+            }
             if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
             {
                 //需要复制资源包到只读目录下
