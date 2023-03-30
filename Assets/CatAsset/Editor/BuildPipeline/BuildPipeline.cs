@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using CatAsset.Runtime;
 using UnityEditor;
 using UnityEditor.Build.Pipeline;
@@ -16,38 +17,56 @@ namespace CatAsset.Editor
     /// </summary>
     public static class BuildPipeline
     {
+        /// <summary>
+        /// 构建资源包
+        /// </summary>
         public static ReturnCode BuildBundles(BuildTarget targetPlatform,bool isBuildPatch)
         {
-            BundleBuildConfigSO bundleBuildConfig = BundleBuildConfigSO.Instance;
+            BundleBuildConfigSO config = BundleBuildConfigSO.Instance;
             
             //预处理
             var preData = new BundleBuildPreProcessData
             {
-                Config = bundleBuildConfig,
+                Config = config,
                 TargetPlatform = targetPlatform
             };
             OnBundleBuildPreProcess(preData);
             
-            string outputFolder = CreateFullOutputFolder(bundleBuildConfig, targetPlatform);
+           
+            if (isBuildPatch)
+            {
+                //检查构建补丁包的缓存文件是否存在
+                //若不存在就进行完整资源包构建
+                string manifestPath = EditorUtil.GetCacheManifestPath(config.OutputRootDirectory, targetPlatform);
+                string assetCacheManifestPath = EditorUtil.GetAssetCacheManifestPath(config.OutputRootDirectory);
+                if (!File.Exists(manifestPath) || !File.Exists(assetCacheManifestPath))
+                {
+                    isBuildPatch = false;
+                }
+            }
             
             //准备参数
+            string fullOutputFolder = CreateFullOutputFolder(config, targetPlatform);
             BundleBuildInfoParam buildInfoParam = new BundleBuildInfoParam();
-            BundleBuildConfigParam configParam = new BundleBuildConfigParam(bundleBuildConfig, targetPlatform,isBuildPatch);
-            BundleBuildParameters buildParam = GetSBPParameters(bundleBuildConfig, targetPlatform, outputFolder);
+            BundleBuildConfigParam configParam = new BundleBuildConfigParam(config, targetPlatform,isBuildPatch);
+            BundleBuildParameters buildParam = GetSBPParameters(config, targetPlatform, fullOutputFolder);
             BundleBuildContent content = new BundleBuildContent();
-            
-            //开始构建资源包
-            Stopwatch sw = Stopwatch.StartNew();
-            
+
             //添加构建任务
-            List<IBuildTask> taskList = GetSBPInternalBuildTask();
+            List<IBuildTask> taskList = GetSBPInternalBuildTask(!isBuildPatch);
             taskList.Insert(0,new FillBuildInfoParam());
+            if (isBuildPatch)
+            {
+                //补丁包需要移除临时的依赖冗余包
+                taskList.Add(new RemoveRedundancyDepBundle());
+            }
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
             taskList.Add(new CalculateVerifyInfo());
-            if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.AppendMD5))
+            if (HasOption(config.Options,BundleBuildOptions.AppendMD5))
             {
+                //附加MD5到包名中
                 taskList.Add(new AppendMD5());
             }
             if (isBuildPatch)
@@ -61,13 +80,16 @@ namespace CatAsset.Editor
                 //非补丁包 写入缓存
                 taskList.Add(new WriteCacheFile());
             }
-            if (bundleBuildConfig.IsCopyToReadOnlyDirectory && bundleBuildConfig.TargetPlatforms.Count == 1)
+            if (config.IsCopyToReadOnlyDirectory && config.TargetPlatforms.Count == 1)
             {
                 //需要复制资源包到只读目录下
                 taskList.Add(new CopyToReadOnlyDirectory());
                 taskList.Add(new WriteManifestFile());
             }
 
+            //开始构建资源包
+            Stopwatch sw = Stopwatch.StartNew();
+            
             //调用SBP的构建管线
             ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
                 out IBundleBuildResults result, taskList, buildInfoParam,configParam);
@@ -85,9 +107,9 @@ namespace CatAsset.Editor
             //后处理
             var postData = new BundleBuildPostProcessData
             {
-                Config = bundleBuildConfig,
+                Config = config,
                 TargetPlatform = targetPlatform,
-                OutputFolder = outputFolder,
+                OutputFolder = fullOutputFolder,
                 ReturnCode = returnCode,
                 Result = result,
             };
@@ -182,7 +204,7 @@ namespace CatAsset.Editor
         /// <summary>
         /// 获取SBP内置的构建任务
         /// </summary>
-        private static List<IBuildTask> GetSBPInternalBuildTask()
+        private static List<IBuildTask> GetSBPInternalBuildTask(bool isBuildBuiltInShaderBundle)
         {
             var buildTasks = new List<IBuildTask>();
 
@@ -201,7 +223,11 @@ namespace CatAsset.Editor
 #endif
             buildTasks.Add(new CalculateAssetDependencyData());
             buildTasks.Add(new StripUnusedSpriteSources());
-            buildTasks.Add(new CreateBuiltInShadersBundle(RuntimeUtil.BuiltInShaderBundleName));
+            if (isBuildBuiltInShaderBundle)
+            {
+                //构建补丁包时 不构建内置Shader资源包 因为无法准备生成内置Shader资源包的补丁包
+                buildTasks.Add(new CreateBuiltInShadersBundle(RuntimeUtil.BuiltInShaderBundleName));
+            }
             buildTasks.Add(new PostDependencyCallback());
 
             // Packing

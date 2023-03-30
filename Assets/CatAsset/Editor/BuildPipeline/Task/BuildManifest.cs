@@ -65,8 +65,8 @@ namespace CatAsset.Editor
                 Bundles = new List<BundleManifestInfo>(),
             };
 
-            //非构建补丁包时 增加内置Shader资源包的构建信息
-            if (!configParam.IsBuildPatch && results.BundleInfos.ContainsKey(RuntimeUtil.BuiltInShaderBundleName))
+            //增加内置Shader资源包的构建信息
+            if (results.BundleInfos.ContainsKey(RuntimeUtil.BuiltInShaderBundleName))
             {
                 BundleBuildInfo bundleBuildInfo =
                     new BundleBuildInfo(string.Empty, RuntimeUtil.BuiltInShaderBundleName, GroupInfo.DefaultGroup, false,
