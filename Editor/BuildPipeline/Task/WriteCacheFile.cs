@@ -40,12 +40,8 @@ namespace CatAsset.Editor
             {
                 foreach (AssetManifestInfo assetManifestInfo in bundleManifestInfo.Assets)
                 {
-                    string md5 = RuntimeUtil.GetFileMD5(assetManifestInfo.Name);
-                    assetCacheManifest.Caches.Add(new AssetCacheManifest.AssetCache()
-                    {
-                        Name = assetManifestInfo.Name,
-                        MD5 =  md5,
-                    });
+                    AssetCacheManifest.AssetCacheInfo cacheInfo = AssetCacheManifest.AssetCacheInfo.Create(assetManifestInfo.Name);
+                    assetCacheManifest.Caches.Add(cacheInfo);
                 }
             }
             string json = EditorJsonUtility.ToJson(assetCacheManifest,true);

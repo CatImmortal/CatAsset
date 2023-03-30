@@ -93,15 +93,15 @@ namespace CatAsset.Editor
                 }
                 
                 //计算补丁包
-                //读取上次完整构建时的资源文件MD5信息
+                //读取上次完整构建时的资源文件AssetCache信息
                 folder = EditorUtil.GetAssetCacheManifestFolder(config.OutputRootDirectory);
                 path = RuntimeUtil.GetRegularPath(Path.Combine(folder, AssetCacheManifest.ManifestJsonFileName));
                 string json = File.ReadAllText(path);
                 AssetCacheManifest assetCacheManifest = JsonUtility.FromJson<AssetCacheManifest>(json);
-                Dictionary<string, string> cacheMD5Dict = assetCacheManifest.GetCacheDict();
+                Dictionary<string, AssetCacheManifest.AssetCacheInfo> assetCacheDict = assetCacheManifest.GetCacheDict();
                 
-                //当前资源文件的md5字典
-                Dictionary<string, string> curMD5Dict = new Dictionary<string, string>();
+                //当前资源文件的AssetCache字典
+                Dictionary<string, AssetCacheManifest.AssetCacheInfo> curAssetCacheDict = new Dictionary<string, AssetCacheManifest.AssetCacheInfo>();
                 
                 //资源名 -> 是否已变化
                 Dictionary<string, bool> assetChangeStateDict = new Dictionary<string, bool>();
@@ -118,7 +118,7 @@ namespace CatAsset.Editor
                         var asset = bundle.Assets[j];
 
                         //1.自身是否变化
-                        bool isChanged = IsChangedAsset(asset.Name, assetChangeStateDict, cacheMD5Dict, curMD5Dict,
+                        bool isChanged = IsChangedAsset(asset.Name, assetChangeStateDict, assetCacheDict, curAssetCacheDict,
                             assetToBundle, cacheAssetToBundle);
 
                         if (!isChanged)
@@ -128,7 +128,7 @@ namespace CatAsset.Editor
                             {
                                 foreach (string upStream in upStreamList)
                                 {
-                                    isChanged = IsChangedAsset(upStream, assetChangeStateDict, cacheMD5Dict, curMD5Dict,
+                                    isChanged = IsChangedAsset(upStream, assetChangeStateDict, assetCacheDict, curAssetCacheDict,
                                         assetToBundle, cacheAssetToBundle);
                                     if (isChanged)
                                     {
@@ -145,7 +145,7 @@ namespace CatAsset.Editor
                             {
                                 foreach (string downStream in downStreamList)
                                 {
-                                    isChanged = IsChangedAsset(downStream, assetChangeStateDict, cacheMD5Dict, curMD5Dict,
+                                    isChanged = IsChangedAsset(downStream, assetChangeStateDict, assetCacheDict, curAssetCacheDict,
                                         assetToBundle, cacheAssetToBundle);
                                     if (isChanged)
                                     {
@@ -196,7 +196,7 @@ namespace CatAsset.Editor
         /// 是否为已变化的资源
         /// </summary>
         private bool IsChangedAsset(string assetName, Dictionary<string, bool> assetChangeStateDict,
-            Dictionary<string, string> cacheMD5Dict, Dictionary<string, string> curMD5Dict,
+            Dictionary<string, AssetCacheManifest.AssetCacheInfo> assetCacheDict, Dictionary<string, AssetCacheManifest.AssetCacheInfo> curAssetCacheDict,
             Dictionary<string, string> assetToBundle, Dictionary<string, string> cacheAssetToBundle)
 
         {
@@ -207,19 +207,19 @@ namespace CatAsset.Editor
             }
 
             //1.新资源 
-            if (!cacheMD5Dict.TryGetValue(assetName, out string cachedMD5))
+            if (!assetCacheDict.TryGetValue(assetName, out var assetCache))
             {
                 assetChangeStateDict.Add(assetName, true);
                 return true;
             }
 
             //2.变化的旧资源
-            if (!curMD5Dict.TryGetValue(assetName, out string curMD5))
+            if (!curAssetCacheDict.TryGetValue(assetName, out var curAssetCache))
             {
-                curMD5 = RuntimeUtil.GetFileMD5(assetName);
-                curMD5Dict.Add(assetName, curMD5);
+                curAssetCache = AssetCacheManifest.AssetCacheInfo.Create(assetName);
+                curAssetCacheDict.Add(assetName, curAssetCache);
             }
-            if (curMD5 != cachedMD5)
+            if (curAssetCache != assetCache)
             {
                 assetChangeStateDict.Add(assetName, true);
                 return true;
@@ -231,8 +231,6 @@ namespace CatAsset.Editor
                 assetChangeStateDict.Add(assetName, true);
                 return true;
             }
-
-            
             
             //未变化
             assetChangeStateDict.Add(assetName, false);
