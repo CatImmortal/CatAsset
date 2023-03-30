@@ -32,11 +32,8 @@ namespace CatAsset.Editor
             var config = configParam.Config;
             
             var folder = EditorUtil.GetBundleCacheFolder(config.OutputRootDirectory, configParam.TargetPlatform);
-          
-            
-            //修改资源清单 移除重复资源
-            string path = RuntimeUtil.GetRegularPath(Path.Combine(folder, CatAssetManifest.ManifestJsonFileName));
-            CatAssetManifest cachedManifest = CatAssetManifest.DeserializeFromJson(File.ReadAllText(path));
+
+            //本次补丁包构建的资源
             HashSet<string> patchAssets = new HashSet<string>();
             foreach (BundleManifestInfo bundleManifestInfo in manifestParam.Manifest.Bundles)
             {
@@ -46,9 +43,17 @@ namespace CatAsset.Editor
                 }
             }
 
+            //修改资源清单 移除重复资源
+            string path = RuntimeUtil.GetRegularPath(Path.Combine(folder, CatAssetManifest.ManifestJsonFileName));
+            CatAssetManifest cachedManifest = CatAssetManifest.DeserializeFromJson(File.ReadAllText(path));
             for (int i = cachedManifest.Bundles.Count - 1; i >= 0; i--)
             {
                 BundleManifestInfo bundleManifestInfo = cachedManifest.Bundles[i];
+                if (bundleManifestInfo.BundleName == RuntimeUtil.BuiltInShaderBundleName)
+                {
+                    //跳过内置Shader资源包
+                    continue;
+                }
                 
                 for (int j = bundleManifestInfo.Assets.Count - 1; j >= 0; j--)
                 {
@@ -76,7 +81,6 @@ namespace CatAsset.Editor
                     RuntimeUtil.GetRegularPath(Path.Combine(outputFolder,bundleManifestInfo.RelativePath));
                 File.Copy(sourcePath,destPath);
             }
-            
             
             //合并补丁包资源清单与缓存资源清单
             cachedManifest.Bundles.AddRange(manifestParam.Manifest.Bundles);

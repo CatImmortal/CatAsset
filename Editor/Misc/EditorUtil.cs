@@ -18,6 +18,11 @@ namespace CatAsset.Editor
     public static class EditorUtil
     {
         /// <summary>
+        /// 构建补丁包时产生的临时依赖冗余包名
+        /// </summary>
+        public const string RedundancyDepBundleName = "RedundancyDepBundle.bundle";
+        
+        /// <summary>
         /// 要排除的文件后缀名集合
         /// </summary>
         public static readonly HashSet<string> ExcludeSet = new HashSet<string>()
@@ -186,31 +191,51 @@ namespace CatAsset.Editor
         /// <summary>
         /// 获取完整资源包构建输出目录
         /// </summary>
-        public static string GetFullOutputFolder(string outputPath, BuildTarget targetPlatform, int manifestVersion)
+        public static string GetFullOutputFolder(string outputDir, BuildTarget targetPlatform, int manifestVersion)
         {
             string dir = manifestVersion.ToString();
-            string result = Path.Combine(outputPath, targetPlatform.ToString(), dir);
+            string result = Path.Combine(outputDir, targetPlatform.ToString(), dir);
             return result;
         }
         
         /// <summary>
         /// 获取资源包缓存目录
         /// </summary>
-        public static string GetBundleCacheFolder(string outputPath, BuildTarget targetPlatform)
+        public static string GetBundleCacheFolder(string outputDir, BuildTarget targetPlatform)
         {
-            string result = Path.Combine(outputPath, targetPlatform.ToString(),"Cache");
+            string result = Path.Combine(outputDir, targetPlatform.ToString(),"Cache");
             result = RuntimeUtil.GetRegularPath(result);
             return result;
         }
 
         /// <summary>
+        /// 获取缓存的资源清单路径
+        /// </summary>
+        public static string GetCacheManifestPath(string outputDir, BuildTarget targetPlatform)
+        {
+            string bundleCacheFolder = GetBundleCacheFolder(outputDir,targetPlatform);
+            string manifestPath = RuntimeUtil.GetRegularPath(Path.Combine(bundleCacheFolder, CatAssetManifest.ManifestJsonFileName));
+            return manifestPath;
+        }
+
+        /// <summary>
         /// 获取资源缓存清单目录
         /// </summary>
-        public static string GetAssetCacheManifestFolder(string outputPath)
+        public static string GetAssetCacheManifestFolder(string outputDir)
         {
-            string result = Path.Combine(outputPath,"Cache");
+            string result = Path.Combine(outputDir,"Cache");
             result = RuntimeUtil.GetRegularPath(result);
             return result;
+        }
+
+        /// <summary>
+        /// 获取资源缓存清单路径
+        /// </summary>
+        public static string GetAssetCacheManifestPath(string outputDir)
+        {
+            string assetCacheManifestFolder = EditorUtil.GetAssetCacheManifestFolder(outputDir);
+            string assetCacheManifestPath = RuntimeUtil.GetRegularPath(Path.Combine(assetCacheManifestFolder, AssetCacheManifest.ManifestJsonFileName));
+            return assetCacheManifestPath;
         }
 
         /// <summary>
