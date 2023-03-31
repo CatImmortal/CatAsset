@@ -54,7 +54,7 @@ namespace CatAsset.Editor
 
             //添加构建任务
             List<IBuildTask> taskList = GetSBPInternalBuildTask(!isBuildPatch);
-            taskList.Insert(0,new FillBuildInfoParam());
+            taskList.Insert(0,new CalculateBundleBuilds());
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
