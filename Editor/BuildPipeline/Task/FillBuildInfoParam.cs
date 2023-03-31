@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using CatAsset.Runtime;
@@ -8,6 +9,7 @@ using UnityEditor.Build.Pipeline.Injector;
 using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEditor.Build.Pipeline.Utilities;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace CatAsset.Editor
 {
@@ -116,7 +118,9 @@ namespace CatAsset.Editor
 
                 //深拷贝一份构建配置进行操作
                 BundleBuildConfigSO clonedConfig = Object.Instantiate(config);
-
+                
+                Stopwatch sw = Stopwatch.StartNew();
+                int index = 0;
                 for (int i = clonedConfig.Bundles.Count - 1; i >= 0; i--)
                 {
                     var bundle = clonedConfig.Bundles[i];
@@ -127,7 +131,9 @@ namespace CatAsset.Editor
                     for (int j = bundle.Assets.Count - 1; j >= 0; j--)
                     {
                         var asset = bundle.Assets[j];
-
+                        index++;
+                        EditorUtility.DisplayProgressBar($"计算补丁资源", $"{asset.Name}", index / (config.AssetCount * 1.0f));
+                        
                         //1.自身是否变化
                         bool isChanged = IsChangedAsset(asset.Name, assetChangeStateDict, assetCacheDict, curAssetCacheDict,
                             assetToBundle, cacheAssetToBundle);
@@ -196,6 +202,11 @@ namespace CatAsset.Editor
                         clonedConfig.Bundles.RemoveAt(i);
                     }
                 }
+                
+                EditorUtility.ClearProgressBar();
+                
+                sw.Stop();
+                Debug.Log($"计算补丁资源耗时:{sw.Elapsed.TotalSeconds:0.00}秒");
                 
                 buildInfoParam = new BundleBuildInfoParam(clonedConfig.GetAssetBundleBuilds(),clonedConfig.GetNormalBundleBuilds(),
                     clonedConfig.GetRawBundleBuilds());
