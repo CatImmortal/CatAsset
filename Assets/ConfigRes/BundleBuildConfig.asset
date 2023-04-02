@@ -16,46 +16,59 @@ MonoBehaviour:
   TargetPlatforms: 13000000
   Options: 9
   GlobalCompress: 2
-  OutputPath: ./AssetBundles
+  GlobalEncrypt: 1
+  OutputRootDirectory: ./Library/AssetBundlesOutput
   IsCopyToReadOnlyDirectory: 1
   CopyGroup: Base
   Directories:
-  - DirectoryObj: {fileID: 102900000, guid: 30fa06d01ac125747a7588bc1cbcd1c8, type: 3}
+  - directoryName: Assets/BundleRes/Chapter1
+    DirectoryObj: {fileID: 102900000, guid: 30fa06d01ac125747a7588bc1cbcd1c8, type: 3}
     BuildRuleName: NAssetToOneBundle
     Filter: 
     Regex: 
     Group: Chapter1
     CompressOption: 0
-  - DirectoryObj: {fileID: 102900000, guid: 6eb4a8b392a514541a05bf070f7287f4, type: 3}
+    EncryptOption: 0
+  - directoryName: Assets/BundleRes/Chpater2
+    DirectoryObj: {fileID: 102900000, guid: 6eb4a8b392a514541a05bf070f7287f4, type: 3}
     BuildRuleName: NAssetToOneBundle
     Filter: 
     Regex: 
     Group: Chapter2
     CompressOption: 0
-  - DirectoryObj: {fileID: 102900000, guid: 1cec1ff63c363df46904108f5ec5e3aa, type: 3}
+    EncryptOption: 0
+  - directoryName: Assets/BundleRes/PrefabA
+    DirectoryObj: {fileID: 102900000, guid: 1cec1ff63c363df46904108f5ec5e3aa, type: 3}
     BuildRuleName: NAssetToOneBundle
     Filter: 
     Regex: 
     Group: Base
     CompressOption: 0
-  - DirectoryObj: {fileID: 102900000, guid: e4acd43a91815634797bdbb510ca081c, type: 3}
+    EncryptOption: 0
+  - directoryName: Assets/BundleRes/PrefabB
+    DirectoryObj: {fileID: 102900000, guid: e4acd43a91815634797bdbb510ca081c, type: 3}
     BuildRuleName: NAssetToOneBundle
     Filter: 
     Regex: 
     Group: Base
     CompressOption: 0
-  - DirectoryObj: {fileID: 102900000, guid: 2121d2e301b5b414789785d52758288c, type: 3}
+    EncryptOption: 0
+  - directoryName: Assets/BundleRes/RawText
+    DirectoryObj: {fileID: 102900000, guid: 2121d2e301b5b414789785d52758288c, type: 3}
     BuildRuleName: NAssetToNRawBundle
     Filter: 
     Regex: 
     Group: Base
     CompressOption: 0
-  - DirectoryObj: {fileID: 102900000, guid: c4d1233b78447df4b846e8d135deebd3, type: 3}
+    EncryptOption: 0
+  - directoryName: Assets/BundleRes/Scene
+    DirectoryObj: {fileID: 102900000, guid: c4d1233b78447df4b846e8d135deebd3, type: 3}
     BuildRuleName: NAssetToNBundle
     Filter: 
     Regex: 
     Group: Base
     CompressOption: 0
+    EncryptOption: 0
   Bundles:
   - DirectoryName: BundleRes
     BundleName: Chapter1.bundle
@@ -64,6 +77,7 @@ MonoBehaviour:
     IsRaw: 0
     AssetsLength: 3704
     CompressOption: 2
+    EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/Chapter1/B1.prefab
       Length: 926
@@ -80,6 +94,7 @@ MonoBehaviour:
     IsRaw: 0
     AssetsLength: 3704
     CompressOption: 2
+    EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/Chpater2/B1.prefab
       Length: 926
@@ -96,6 +111,7 @@ MonoBehaviour:
     IsRaw: 0
     AssetsLength: 5830
     CompressOption: 2
+    EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/PrefabA/A1.prefab
       Length: 1457
@@ -112,6 +128,7 @@ MonoBehaviour:
     IsRaw: 0
     AssetsLength: 3704
     CompressOption: 2
+    EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/PrefabB/B1.prefab
       Length: 926
@@ -128,6 +145,7 @@ MonoBehaviour:
     IsRaw: 1
     AssetsLength: 17
     CompressOption: 2
+    EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/RawText/rawText1.txt
       Length: 17
@@ -138,6 +156,7 @@ MonoBehaviour:
     IsRaw: 0
     AssetsLength: 5801
     CompressOption: 2
+    EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
       Length: 5801
@@ -148,6 +167,7 @@ MonoBehaviour:
     IsRaw: 0
     AssetsLength: 5801
     CompressOption: 2
+    EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene2.unity
       Length: 5801
