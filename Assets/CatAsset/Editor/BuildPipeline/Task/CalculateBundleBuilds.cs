@@ -21,17 +21,23 @@ namespace CatAsset.Editor
         public int Version { get; }
 
 
-        [InjectContext(ContextUsage.In)] private IBundleBuildParameters buildParam;
+        [InjectContext(ContextUsage.In)] 
+        private IBundleBuildParameters buildParam;
 
-        [InjectContext(ContextUsage.InOut)] private IBundleBuildInfoParam buildInfoParam;
+        [InjectContext(ContextUsage.InOut)] 
+        private IBundleBuildInfoParam buildInfoParam;
 
-        [InjectContext(ContextUsage.In)] private IBundleBuildConfigParam configParam;
+        [InjectContext(ContextUsage.In)] 
+        private IBundleBuildConfigParam configParam;
 
-        [InjectContext(ContextUsage.In)] private IBuildCache buildCache;
+        [InjectContext(ContextUsage.In)] 
+        private IBuildCache buildCache;
 
-        [InjectContext(ContextUsage.InOut)] private IBundleBuildContent content;
+        [InjectContext(ContextUsage.InOut)] 
+        private IBundleBuildContent content;
 
-        [InjectContext(ContextUsage.InOut)] private IBuildContent content2;
+        [InjectContext(ContextUsage.InOut)] 
+        private IBuildContent content2;
 
         public ReturnCode Run()
         {
@@ -46,7 +52,8 @@ namespace CatAsset.Editor
             else
             {
                 //构建补丁资源包
-
+                Stopwatch sw = Stopwatch.StartNew();
+                
                 //双向依赖记录
                 Dictionary<string, List<string>> upStreamDict = new Dictionary<string, List<string>>();
                 Dictionary<string, List<string>> downStreamDict = new Dictionary<string, List<string>>();
@@ -84,6 +91,9 @@ namespace CatAsset.Editor
                 CalPatchAsset(config, clonedConfig, upStreamDict, downStreamDict, assetToBundle, cacheAssetToBundle,
                     assetCacheDict, curAssetCacheDict, assetChangeStateDict);
 
+                sw.Stop();
+                Debug.Log($"计算补丁资源耗时:{sw.Elapsed.TotalSeconds:0.00}秒");
+                
                 buildInfoParam = new BundleBuildInfoParam(clonedConfig.GetAssetBundleBuilds(),
                     clonedConfig.GetNormalBundleBuilds(),
                     clonedConfig.GetRawBundleBuilds());
@@ -103,10 +113,14 @@ namespace CatAsset.Editor
             Dictionary<string, List<string>> downStreamDict,
             Dictionary<string, string> assetToBundle)
         {
+            int index = 0;
             foreach (var bundle in config.Bundles)
             {
                 foreach (var asset in bundle.Assets)
                 {
+                    index++;
+                    EditorUtility.DisplayProgressBar($"获取依赖信息", $"{asset.Name}", index / (config.AssetCount * 1.0f));
+                    
                     //上游依赖
                     var deps = EditorUtil.GetDependencies(asset.Name);
                     upStreamDict.Add(asset.Name, deps);
@@ -126,6 +140,8 @@ namespace CatAsset.Editor
                     assetToBundle.Add(asset.Name, bundle.BundleIdentifyName);
                 }
             }
+            
+            EditorUtility.ClearProgressBar();
         }
 
         /// <summary>
@@ -167,7 +183,7 @@ namespace CatAsset.Editor
             Dictionary<string, AssetCacheManifest.AssetCacheInfo> curAssetCacheDict,
             Dictionary<string, bool> assetChangeStateDict)
         {
-            Stopwatch sw = Stopwatch.StartNew();
+         
             int index = 0;
             for (int i = clonedConfig.Bundles.Count - 1; i >= 0; i--)
             {
@@ -254,9 +270,6 @@ namespace CatAsset.Editor
             }
 
             EditorUtility.ClearProgressBar();
-
-            sw.Stop();
-            Debug.Log($"计算补丁资源耗时:{sw.Elapsed.TotalSeconds:0.00}秒");
         }
 
         /// <summary>
