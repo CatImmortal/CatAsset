@@ -80,6 +80,14 @@ namespace CatAsset.Runtime
             }
 
             CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
+            
+            if (manifest == null)
+            {
+                string error = "只读区资源清单校验失败";
+                ManifestVerifyFailed(error);
+                return;
+            }
+            
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
@@ -107,6 +115,14 @@ namespace CatAsset.Runtime
             }
 
             CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
+            
+            if (manifest == null)
+            {
+                string error = "读写区资源清单校验失败";
+                ManifestVerifyFailed(error);
+                return;
+            }
+            
             foreach (BundleManifestInfo info in manifest.Bundles)
             {
                 string path = RuntimeUtil.GetReadWritePath(info.RelativePath);
@@ -141,6 +157,14 @@ namespace CatAsset.Runtime
             }
 
             CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
+            
+            if (manifest == null)
+            {
+                string error = "远端资源清单校验失败";
+                ManifestVerifyFailed(error);
+                return;
+            }
+            
             foreach (BundleManifestInfo item in manifest.Bundles)
             {
                 CheckInfo checkInfo = GetOrAddCheckInfo(item.BundleIdentifyName);
@@ -151,6 +175,17 @@ namespace CatAsset.Runtime
             RefreshCheckInfos();
         }
 
+        /// <summary>
+        /// 清单校验失败时调用
+        /// </summary>
+        private static void ManifestVerifyFailed(string error)
+        {
+            Debug.LogError(error);
+            VersionCheckResult result = new VersionCheckResult(false, error,0,0);
+            onVersionChecked?.Invoke(result);
+            Clear();
+        }
+        
         /// <summary>
         /// 获取资源检查信息，若不存在则添加
         /// </summary>

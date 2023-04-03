@@ -81,9 +81,16 @@ namespace CatAsset.Runtime
                     {
                         bundleManifestInfo.Serialize(writer);
                     }
+                    
+                    byte[] bytes = ms.ToArray();  //数据部分
+                    string md5 = RuntimeUtil.GetBytesMD5(bytes, 0, bytes.Length);  //MD5部分
 
-                    byte[] bytes = ms.ToArray();
-            
+                    //先写入MD5部分然后才是数据部分
+                    ms.SetLength(0);
+                    writer.Write(md5);
+                    writer.Write(bytes);
+
+                    bytes = ms.ToArray();
                     return bytes;
                 }
             }
@@ -95,14 +102,21 @@ namespace CatAsset.Runtime
         /// </summary>
         public static CatAssetManifest DeserializeFromBinary(byte[] bytes)
         {
-
             using (MemoryStream ms = new MemoryStream(bytes))
             {
                 using (BinaryReader reader = new BinaryReader(ms,Encoding.UTF8))
                 {
+                    //先校验数据部分的md5是否与文件头记录的一致
+                    string verifyMD5 = reader.ReadString();
+                    string calMD5 = RuntimeUtil.GetBytesMD5(bytes, (int)ms.Position, bytes.Length - (int)ms.Position);
+                    if (verifyMD5 != calMD5)
+                    {
+                        Debug.LogError($"资源清单反序列化时MD5自校验失败,当前MD5：{calMD5},目标MD5:{verifyMD5}");
+                        return null;
+                    }
+                    
                     CatAssetManifest manifest = new CatAssetManifest();
-            
-                    int serializeVersion = reader.ReadInt32();
+                    int version = reader.ReadInt32();
                     manifest.ManifestVersion = reader.ReadInt32();
                     manifest.Platform = reader.ReadString();
 
@@ -110,7 +124,7 @@ namespace CatAsset.Runtime
                     manifest.Bundles = new List<BundleManifestInfo>(count);
                     for (int i = 0; i < count; i++)
                     {
-                        BundleManifestInfo bundleManifestInfo = BundleManifestInfo.Deserialize(reader,serializeVersion);
+                        BundleManifestInfo bundleManifestInfo = BundleManifestInfo.Deserialize(reader,version);
                         manifest.Bundles.Add(bundleManifestInfo);
                     }
 
