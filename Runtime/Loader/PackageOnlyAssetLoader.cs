@@ -15,21 +15,33 @@ namespace CatAsset.Runtime
 
             CatAssetManager.AddWebRequestTask(path,path,((success, uwr) =>
             {
-                VersionCheckResult result = default;
-                if (!success)
+                string error = null;
+                if (success)
                 {
-                    Debug.LogError($"单机模式资源清单检查失败:{uwr.error}");
-                    result = new VersionCheckResult(false, uwr.error, 0, 0);
+                    CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
+                    if (manifest != null)
+                    {
+                        CatAssetDatabase.InitRuntimeInfoByManifest(manifest);
+                        Debug.Log("单机模式资源清单检查完毕");
+                    }
+                    else
+                    {
+                        success = false;
+                        error = "资源清单校验失败";
+                        Debug.LogError($"单机模式资源清单检查失败:{error}");
+                    }
                 }
                 else
                 {
-                    CatAssetManifest manifest = CatAssetManifest.DeserializeFromBinary(uwr.downloadHandler.data);
-                    CatAssetDatabase.InitRuntimeInfoByManifest(manifest);
-                    Debug.Log("单机模式资源清单检查完毕");
-                    result = new VersionCheckResult(true, null, 0, 0);
+                    error = uwr.error;
+                    Debug.LogError($"单机模式资源清单检查失败:{error}");
                 }
-
+                
+                var result = new VersionCheckResult(success, error, 0, 0);
                 onVersionChecked?.Invoke(result);
+                
+                
+                
             } ),TaskPriority.VeryLow);
         }
     }

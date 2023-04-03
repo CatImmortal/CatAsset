@@ -155,16 +155,38 @@ namespace CatAsset.Runtime
                 using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
                 {
                    byte[] bytes = md5.ComputeHash(fs);
-                   foreach (byte b in bytes)
-                   {
-                       CachedSB.Append(b.ToString("x2"));
-                   }
-                   string result = CachedSB.ToString();
-                   CachedSB.Clear();
+                   string result = MD5BytesToString(bytes);
                    return result;
                 }
             }
+        }
+        
 
+        /// <summary>
+        /// 获取字节数组MD5
+        /// </summary>
+        public static string GetBytesMD5(byte[] buffer,int offset,int count)
+        {
+            using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
+            {
+                byte[] bytes = md5.ComputeHash(buffer,offset,count);
+                string result = MD5BytesToString(bytes);
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// MD5字节数组转换为字符串
+        /// </summary>
+        private static string MD5BytesToString(byte[] bytes)
+        {
+            foreach (byte b in bytes)
+            {
+                CachedSB.Append(b.ToString("x2"));
+            }
+            string result = CachedSB.ToString();
+            CachedSB.Clear();
+            return result;
         }
 
         /// <summary>
