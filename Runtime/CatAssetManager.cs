@@ -84,6 +84,10 @@ namespace CatAsset.Runtime
 
         static CatAssetManager()
         {
+#if UNITY_EDITOR
+            SetAssetLoader<EditorAssetLoader>();
+#endif
+            
             RegisterCustomRawAssetConverter(typeof(Texture2D), (bytes =>
             {
                 Texture2D texture2D = new Texture2D(0, 0);
