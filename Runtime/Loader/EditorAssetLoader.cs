@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine.SceneManagement;
 
@@ -61,10 +62,20 @@ namespace CatAsset.Runtime
                 handler.Error = "资源加载失败";
             }
 
-            handler.SetAsset(asset);
+            //编辑器下模拟异步加载 方便把某些同步逻辑导致的问题暴露出来
+            DelayCall((() =>
+            {
+                handler.SetAsset(asset);
+            }));
+            
             return handler;
         }
 
+        private async void DelayCall(Action action)
+        {
+            await Task.Delay(10);
+            action?.Invoke();
+        }
 
         /// <inheritdoc />
         internal override void InternalLoadSceneAsync(string sceneName, SceneHandler handler,CancellationToken token, TaskPriority priority)
@@ -89,6 +100,8 @@ namespace CatAsset.Runtime
             };
         }
 
+        
+        
         /// <inheritdoc />
         public override void UnloadAsset(object asset)
         {
