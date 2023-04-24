@@ -32,12 +32,6 @@ namespace CatAsset.Editor
             TreeView = new BuildDirectoryTreeView(State, Header);
         }
 
-        protected override void ProcessColumns(MultiColumnHeaderState.Column[] columns)
-        {
-            base.ProcessColumns(columns);
-            columns[2].minWidth = 300;  //构建规则
-        }
-
         /// <inheritdoc/>
         public override void DrawSubWindow(Rect position)
         {

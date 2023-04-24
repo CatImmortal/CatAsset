@@ -230,8 +230,7 @@ namespace CatAsset.Editor
             buildTasks.Add(new FixSpriteAtlasBug());  //这里插入一个修复SBP图集Bug的任务
             buildTasks.Add(new UpdateBundleObjectLayout());
             buildTasks.Add(new GenerateBundleCommands());
-            //buildTasks.Add(new GenerateSubAssetPathMaps());
-            buildTasks.Add(new MyGenerateSubAssetPathMaps());
+            buildTasks.Add(new GenerateSubAssetPathMaps());
             buildTasks.Add(new GenerateBundleMaps());
             buildTasks.Add(new PostPackingCallback());
 

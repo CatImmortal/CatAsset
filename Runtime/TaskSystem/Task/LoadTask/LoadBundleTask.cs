@@ -256,7 +256,7 @@ namespace CatAsset.Runtime
                         Application.platform != RuntimePlatform.Android) 
                     {
                         //存在于读写区 或 非安卓平台 可以进行IO操作 使用Stream进行解密
-                        //这里不考虑WebGL平台，因为WebGL平台不允许加密
+                        //这里不考虑WebGL平台，因为WebGL平台不会进行加密
                         BundleRuntimeInfo.Stream = new DecryptXOrStream(BundleRuntimeInfo.LoadPath, FileMode.Open, FileAccess.Read);
                         request = AssetBundle.LoadFromStreamAsync(BundleRuntimeInfo.Stream,0,1024*1024);
                     }
@@ -309,8 +309,9 @@ namespace CatAsset.Runtime
                 }
             }
             
-            if (IsAllCanceled)
+            if (success && IsAllCanceled)
             {
+                //加载资源包成功后所有任务都被取消了 这个资源包没人要了 直接走卸载流程吧
                 CatAssetManager.TryUnloadBundle(BundleRuntimeInfo);
             }
         }

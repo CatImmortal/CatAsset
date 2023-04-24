@@ -90,9 +90,9 @@ namespace CatAsset.Runtime
                 
                 //加载成功后 无论主任务是否被取消 都要对剩余已合并任务调用InternalLoadSceneAsync重新走加载场景流程
                 //因为每次加载场景都是在实例化一个新场景 无法复用
-                MergedTasks.RemoveAt(0);
-                foreach (LoadSceneTask task in MergedTasks)
+                for (int i = 1; i < MergedTasks.Count; i++)
                 {
+                    LoadSceneTask task = (LoadSceneTask)MergedTasks[i];
                     if (!task.IsCanceled)
                     {
                         CatAssetManager.InternalLoadSceneAsync(task.Name,task.handler,CancelToken,Group.Priority);
