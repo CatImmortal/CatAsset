@@ -60,6 +60,11 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void UnloadAsset(object asset)
         {
+            if (asset == null)
+            {
+                return;
+            }
+            
             AssetRuntimeInfo info = CatAssetDatabase.GetAssetRuntimeInfo(asset);
             if (info == null)
             {

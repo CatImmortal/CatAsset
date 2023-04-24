@@ -225,7 +225,7 @@ namespace CatAsset.Editor
                         }
                         else
                         {
-                            EditorGUI.LabelField(cellRect,"Byte[]",centerStyle);
+                            EditorGUI.LabelField(cellRect,"Bytes",centerStyle);
                         }
                        
                     }

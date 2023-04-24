@@ -156,6 +156,13 @@ namespace CatAsset.Runtime
                     task.handler.NotifyCanceled(CancelToken);
                 }
             }
+            
+            if (success && IsAllCanceled)
+            {
+                //加载成功后所有任务都被取消了 这个资源没人要了 直接走卸载流程吧
+                assetRuntimeInfo.AddRefCount();  //注意这里要先计数+1 才能正确执行后续的卸载流程
+                CatAssetManager.UnloadAsset(assetRuntimeInfo.Asset);
+            }
         }
 
         /// <summary>
