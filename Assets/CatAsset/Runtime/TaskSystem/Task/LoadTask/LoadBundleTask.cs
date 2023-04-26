@@ -205,7 +205,7 @@ namespace CatAsset.Runtime
             }
 
             //下载成功 检测是否需要加载内置Shader资源包
-            Debug.Log($"下载成功：{result.UpdateInfo.Info}");
+            //Debug.Log($"下载成功：{result.UpdateInfo.Info}");
             LoadState = LoadBundleState.BundleDownloaded;
         }
 

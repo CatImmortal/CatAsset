@@ -18,6 +18,21 @@ namespace CatAsset.Runtime
             None,
             
             /// <summary>
+            /// 不存在于本地
+            /// </summary>
+            NotExist,
+
+            /// <summary>
+            /// 下载中
+            /// </summary>
+            Downloading,
+
+            /// <summary>
+            /// 下载结束
+            /// </summary>
+            Downloaded,
+
+            /// <summary>
             /// 资源未加载
             /// </summary>
             NotLoad,
@@ -40,6 +55,8 @@ namespace CatAsset.Runtime
         private BundleRuntimeInfo bundleRuntimeInfo;
         private LoadRawAssetState loadState;
 
+        private readonly BundleUpdatedCallback onRawAssetUpdatedCallback;
+        
         private WebRequestTask webRequestTask;
         private readonly WebRequestedCallback onWebRequestedCallback;
 
@@ -48,6 +65,7 @@ namespace CatAsset.Runtime
         
         public LoadRawAssetTask()
         {
+            onRawAssetUpdatedCallback = OnRawAssetUpdated;
             onWebRequestedCallback = OnWebRequested;
         }
         
@@ -55,15 +73,25 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Run()
         {
-            if (assetRuntimeInfo.Asset == null)
+            startLoadTime = Time.realtimeSinceStartup;
+            if (bundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InRemote)
             {
-                //未加载
-                loadState = LoadRawAssetState.NotLoad;
+                //不在本地 需要先下载
+                loadState = LoadRawAssetState.NotExist;
             }
             else
             {
-                //已加载好
-                loadState = LoadRawAssetState.Loaded;
+                //在本地了
+                if (assetRuntimeInfo.Asset == null)
+                {
+                    //未加载
+                    loadState = LoadRawAssetState.NotLoad;
+                }
+                else
+                {
+                    //已加载好
+                    loadState = LoadRawAssetState.Loaded;
+                }
             }
         }
 
@@ -71,6 +99,24 @@ namespace CatAsset.Runtime
         public override void Update()
         {
             CheckAllCanceled();
+
+            if (loadState == LoadRawAssetState.NotExist)
+            {
+                //不存在本地
+                CheckStateWhileNotExist();
+            }
+            
+            if (loadState == LoadRawAssetState.Downloading)
+            {
+                //下载中
+                CheckStateWhileDownloading();
+            }
+            
+            if (loadState == LoadRawAssetState.Downloaded)
+            {
+                //下载结束
+                CheckStateWhileDownloaded();
+            }
             
             if (loadState == LoadRawAssetState.NotLoad)
             {
@@ -102,6 +148,23 @@ namespace CatAsset.Runtime
             }
         }
 
+        /// <summary>
+        /// 原生资源更新完毕回调
+        /// </summary>
+        private void OnRawAssetUpdated(BundleUpdateResult result)
+        {
+            if (!result.Success)
+            {
+                //下载失败
+                loadState = LoadRawAssetState.Loaded;
+                return;
+            }
+
+            //下载成功
+            //Debug.Log($"下载成功：{result.UpdateInfo.Info}");
+            loadState = LoadRawAssetState.Downloaded;
+        }
+        
         /// <summary>
         /// Web请求结束回调
         /// </summary>
