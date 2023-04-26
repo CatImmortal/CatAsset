@@ -16,6 +16,7 @@ namespace CatAsset.Runtime
 
                 switch (loadState)
                 {
+                    case LoadRawAssetState.NotExist:
                     case LoadRawAssetState.NotLoad:
                         flag = true;
                         break;
@@ -31,11 +32,32 @@ namespace CatAsset.Runtime
             }
         }
         
+        private void CheckStateWhileNotExist()
+        {
+            State = TaskState.Waiting;
+            loadState = LoadRawAssetState.Downloading;
+                
+            //下载本地不存在的原生资源
+            //Debug.Log($"开始下载：{bundleRuntimeInfo.Manifest.RelativePath}");
+            CatAssetManager.UpdateBundle(bundleRuntimeInfo.Manifest.Group, bundleRuntimeInfo.Manifest,
+                onRawAssetUpdatedCallback);
+        }
+
+        private void CheckStateWhileDownloading()
+        {
+            State = TaskState.Waiting;
+        }
+
+        private void CheckStateWhileDownloaded()
+        {
+            State = TaskState.Waiting;
+            loadState = LoadRawAssetState.NotLoad;
+        }
+        
         private void CheckStateWhileNotLoad()
         {
             State = TaskState.Waiting;
-
-            startLoadTime = Time.realtimeSinceStartup;
+            
             webRequestTask = WebRequestTask.Create(Owner, bundleRuntimeInfo.LoadPath, bundleRuntimeInfo.LoadPath,
                 onWebRequestedCallback);
             Owner.AddTask(webRequestTask, Group.Priority);
