@@ -66,7 +66,7 @@ namespace CatAsset.Runtime
                     {
                         if (type == typeof(Sprite) && AssetObj is Texture2D tex)
                         {
-                            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+                            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f,0.5f));
                             return (T) (object) sprite;
                         }
                         else if (type == typeof(Texture2D) && AssetObj is Sprite sprite)

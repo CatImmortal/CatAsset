@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace CatAsset.Editor
@@ -20,38 +21,45 @@ namespace CatAsset.Editor
         private static void OnGUI(string guid, Rect selectionRect)
         {
 
-            if (BundleBuildConfigSO.Instance == null || BundleBuildConfigSO.Instance.Directories == null)
+            try
             {
-                return;
-            }
-
-            if (BundleBuildConfigSO.Instance.Directories.Count > 0 && BundleBuildConfigSO.Instance.DirectoryDict.Count == 0)
-            {
-                BundleBuildConfigSO.Instance.RefreshDict();
-            }
-
-
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            if (AssetDatabase.IsValidFolder(path))
-            {
-                //是目录
-                if (BundleBuildConfigSO.Instance.DirectoryDict.TryGetValue(path,out BundleBuildDirectory bbd))
+                if (BundleBuildConfigSO.Instance == null || BundleBuildConfigSO.Instance.Directories == null)
                 {
-                    //绘制资源组在文件夹后面
-                    //string desc = $"{bbd.Group}|{bbd.BuildRuleName}";
-                    string desc = bbd.Group;
-                    DrawDesc(desc,selectionRect,dirColor);
+                    return;
                 }
 
-            }
-            else
-            {
-                if (BundleBuildConfigSO.Instance.AssetToBundleDict.TryGetValue(path,out BundleBuildInfo bbi))
+                if (BundleBuildConfigSO.Instance.Directories.Count > 0 && BundleBuildConfigSO.Instance.DirectoryDict.Count == 0)
                 {
-                    //绘制资源包标识名在文件后面
-                    string desc = bbi.BundleIdentifyName;
-                    DrawDesc(desc,selectionRect,assetColor);
+                    BundleBuildConfigSO.Instance.RefreshDict();
                 }
+
+
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (AssetDatabase.IsValidFolder(path))
+                {
+                    //是目录
+                    if (BundleBuildConfigSO.Instance.DirectoryDict.TryGetValue(path,out BundleBuildDirectory bbd))
+                    {
+                        //绘制资源组在文件夹后面
+                        //string desc = $"{bbd.Group}|{bbd.BuildRuleName}";
+                        string desc = bbd.Group;
+                        DrawDesc(desc,selectionRect,dirColor);
+                    }
+
+                }
+                else
+                {
+                    if (BundleBuildConfigSO.Instance.AssetToBundleDict.TryGetValue(path,out BundleBuildInfo bbi))
+                    {
+                        //绘制资源包标识名在文件后面
+                        string desc = bbi.BundleIdentifyName;
+                        DrawDesc(desc,selectionRect,assetColor);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
             }
         }
 
