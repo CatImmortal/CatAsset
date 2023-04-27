@@ -32,7 +32,13 @@ namespace CatAsset.Editor
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(Name, MD5, MetaMD5);
+                unchecked
+                {
+                    var hashCode = (Name != null ? Name.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (MD5 != null ? MD5.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (MetaMD5 != null ? MetaMD5.GetHashCode() : 0);
+                    return hashCode;
+                }
             }
             
             public static bool operator ==(AssetCacheInfo a,AssetCacheInfo b)
