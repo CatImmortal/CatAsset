@@ -63,15 +63,25 @@ namespace CatAsset.Editor
 
         private void OnGUI()
         {
-            selectedTab = GUILayout.Toolbar(selectedTab, tabs);
-
-            curSubWindow = subWindows[selectedTab];
-            if (curSubWindow is BaseTreeViewSubWindow treeViewSubWindow)
+            using (var check = new EditorGUI.ChangeCheckScope())
             {
-                DrawTreeViewToolBar(treeViewSubWindow);
+                selectedTab = GUILayout.Toolbar(selectedTab, tabs);
+
+                curSubWindow = subWindows[selectedTab];
+                if (curSubWindow is BaseTreeViewSubWindow treeViewSubWindow)
+                {
+                    DrawTreeViewToolBar(treeViewSubWindow);
                 
+                }
+                curSubWindow.DrawSubWindow(position);
+                
+                //保存修改
+                if (check.changed)
+                {
+                    EditorUtility.SetDirty(BundleBuildConfigSO.Instance);
+                    AssetDatabase.SaveAssets();
+                }
             }
-            curSubWindow.DrawSubWindow(position);
         }
 
 
@@ -107,9 +117,6 @@ namespace CatAsset.Editor
                         return;
                     }
                 }
-                
-                
-                
                 ((TreeView)treeViewSubWindow.TreeView).Reload();
             }
 
@@ -146,11 +153,16 @@ namespace CatAsset.Editor
                 {
                     LoopDependencyAnalyzer.AnalyzeBundle(BundleBuildConfigSO.Instance.Bundles);
                 }
-                
+
                 x += width;
                 x += 10;
                 width = 150;
                 BundleBuildConfigSO.Instance.IsExactTextureSize = GUI.Toggle(new Rect(x,y,width,height),BundleBuildConfigSO.Instance.IsExactTextureSize,"准确预估贴图大小");
+                
+                x += width;
+                x += 10;
+                width = 150;
+                BundleBuildConfigSO.Instance.IsDrawDesc = GUI.Toggle(new Rect(x,y,width,height),BundleBuildConfigSO.Instance.IsDrawDesc,"绘制文件后描述信息");
                 
                 x += width;
                 x += 10;

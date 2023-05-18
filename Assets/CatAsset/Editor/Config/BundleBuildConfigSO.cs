@@ -139,6 +139,11 @@ namespace CatAsset.Editor
         /// 是否记录精准的贴图长度
         /// </summary>
         public bool IsExactTextureSize;
+
+        /// <summary>
+        /// 是否绘制Project窗口下，文件/文件夹描述信息的工具类
+        /// </summary>
+        public bool IsDrawDesc;
         
         /// <summary>
         /// 刷新资源包构建信息
@@ -481,6 +486,10 @@ namespace CatAsset.Editor
             DirectoryDict.Clear();
             foreach (BundleBuildDirectory item in Directories)
             {
+                if (string.IsNullOrEmpty(item.DirectoryName))
+                {
+                    continue;
+                }
                 DirectoryDict[item.DirectoryName] = item;
             }
         }
