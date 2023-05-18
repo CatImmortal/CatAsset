@@ -35,8 +35,6 @@ namespace CatAsset.Editor
 
         public override void DrawSubWindow(Rect position)
         {
-            EditorGUI.BeginChangeCheck();
-
             DrawVersion();
 
             DrawTargetPlatforms();
@@ -48,12 +46,6 @@ namespace CatAsset.Editor
             DrawCopyGroup();
 
             DrawButtons();
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(BundleBuildConfigSO.Instance);
-                AssetDatabase.SaveAssets();
-            }
         }
 
         /// <summary>
