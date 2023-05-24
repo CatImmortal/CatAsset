@@ -7,9 +7,9 @@ using UnityEditor.Build.Pipeline.Interfaces;
 namespace CatAsset.Editor
 {
     /// <summary>
-    /// 附加MD5到资源包名中
+    /// 附加Hash到资源包名中
     /// </summary>
-    public class AppendMD5 : IBuildTask
+    public class AppendHash : IBuildTask
     {
         [InjectContext(ContextUsage.In)]
         private IManifestParam manifestParam;
@@ -29,7 +29,7 @@ namespace CatAsset.Editor
 
             foreach (BundleManifestInfo bundleManifestInfo in manifest.Bundles)
             {
-                bundleManifestInfo.IsAppendMD5 = true;
+                bundleManifestInfo.IsAppendHash = true;
 
                 string oldPath = Path.Combine(outputFolder,  bundleManifestInfo.BundleIdentifyName);
                 string newPath = Path.Combine(outputFolder,  bundleManifestInfo.RelativePath);

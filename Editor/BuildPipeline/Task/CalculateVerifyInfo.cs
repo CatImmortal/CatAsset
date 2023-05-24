@@ -41,11 +41,16 @@ namespace CatAsset.Editor
                 bundleManifestInfo.Length = (ulong)fi.Length;
                 bundleManifestInfo.MD5 = RuntimeUtil.GetFileMD5(path);
                 
-                if (configParam.TargetPlatform == BuildTarget.WebGL && !bundleManifestInfo.IsRaw)
+                if (!bundleManifestInfo.IsRaw)
                 {
-                    //WebGL平台 且不是原生资源包 记录Hash128用于缓存系统
+                    //不是原生资源 记录Hash
                     BundleDetails details = results.BundleInfos[bundleManifestInfo.BundleIdentifyName];
                     bundleManifestInfo.Hash = details.Hash.ToString();
+                }
+                else
+                {
+                    //原生资源就将MD5视为Hash处理
+                    bundleManifestInfo.Hash = bundleManifestInfo.MD5;
                 }
             }
 
