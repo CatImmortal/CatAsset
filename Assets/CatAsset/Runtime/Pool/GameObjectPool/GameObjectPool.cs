@@ -172,7 +172,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public InstantiateHandler GetAsync(Transform parent,CancellationToken token)
         {
-            InstantiateHandler handler = InstantiateHandler.Create(string.Empty,token, template,parent);
+            InstantiateHandler handler = InstantiateHandler.Create(template.name,token, template,parent);
 
             if (unusedPoolObjectList.Count == 0)
             {
