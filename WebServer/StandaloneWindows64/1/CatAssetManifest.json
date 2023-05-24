@@ -4,6 +4,76 @@
     "Bundles": [
         {
             "Directory": "BundleRes",
+            "BundleName": "Chapter1.bundle",
+            "Group": "Chapter1",
+            "IsRaw": false,
+            "IsScene": false,
+            "Length": 1871,
+            "MD5": "47076a59fe504637ab91a19b1f030f76",
+            "Hash": "87eb330b4163be5c9f0cdb2b4d581602",
+            "IsAppendHash": false,
+            "IsDependencyBuiltInShaderBundle": false,
+            "EncryptOption": 1,
+            "Assets": [
+                {
+                    "Name": "Assets/BundleRes/Chapter1/B1.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                },
+                {
+                    "Name": "Assets/BundleRes/Chapter1/B2.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                },
+                {
+                    "Name": "Assets/BundleRes/Chapter1/B3.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                },
+                {
+                    "Name": "Assets/BundleRes/Chapter1/B4.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                }
+            ]
+        },
+        {
+            "Directory": "BundleRes",
+            "BundleName": "Chpater2.bundle",
+            "Group": "Chapter2",
+            "IsRaw": false,
+            "IsScene": false,
+            "Length": 1880,
+            "MD5": "7e450c98fb85bf3521dd5c79f8b6941b",
+            "Hash": "8d59a27eb03c0a9bb6c775733c10e3ce",
+            "IsAppendHash": false,
+            "IsDependencyBuiltInShaderBundle": false,
+            "EncryptOption": 1,
+            "Assets": [
+                {
+                    "Name": "Assets/BundleRes/Chpater2/B1.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                },
+                {
+                    "Name": "Assets/BundleRes/Chpater2/B2.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                },
+                {
+                    "Name": "Assets/BundleRes/Chpater2/B3.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                },
+                {
+                    "Name": "Assets/BundleRes/Chpater2/B4.prefab",
+                    "IsAtlasPackable": false,
+                    "Dependencies": []
+                }
+            ]
+        },
+        {
+            "Directory": "BundleRes",
             "BundleName": "PrefabA.bundle",
             "Group": "Base",
             "IsRaw": false,

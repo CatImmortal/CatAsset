@@ -1,4 +1,3 @@
 {
-  "GameVersion" : "0.1",
-  "ManifestVersion" : 2
+  "ManifestVersion" : 1
 }

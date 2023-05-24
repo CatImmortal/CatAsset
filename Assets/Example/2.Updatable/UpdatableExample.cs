@@ -7,7 +7,6 @@ using UnityEngine.Networking;
 
 public class WebVersion
 {
-    public string GameVersion;
     public int ManifestVersion;
 }
 
@@ -48,7 +47,7 @@ public class UpdatableExample : MonoBehaviour
             int manifestVersion = webVersion.ManifestVersion;
 
             //根据平台，整包版本和资源版本设置资源更新uri的前缀
-            string uriPrefix = $"{AssetServerIP}/StandaloneWindows/{Application.version}_{manifestVersion}";
+            string uriPrefix = $"{AssetServerIP}/StandaloneWindows64/{manifestVersion}";
             CatAssetManager.UpdateUriPrefix = uriPrefix;
             Debug.Log($"读取远端最新版本号成功，资源更新地址为：{uriPrefix}");
 

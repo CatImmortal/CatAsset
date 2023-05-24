@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ce91b17c92145649aa4ffff367f9ade, type: 3}
   m_Name: BundleBuildConfig
   m_EditorClassIdentifier: 
-  ManifestVersion: 3
+  ManifestVersion: 2
   TargetPlatforms: 13000000
-  Options: 9
+  Options: 1
   GlobalCompress: 2
   GlobalEncrypt: 1
   OutputRootDirectory: ./Library/AssetBundlesOutput
@@ -63,7 +63,7 @@ MonoBehaviour:
     EncryptOption: 0
   - directoryName: Assets/BundleRes/Scene
     DirectoryObj: {fileID: 102900000, guid: c4d1233b78447df4b846e8d135deebd3, type: 3}
-    BuildRuleName: NAssetToNBundle
+    BuildRuleName: NAssetToOneBundle
     Filter: 
     Regex: 
     Group: Base
@@ -149,28 +149,20 @@ MonoBehaviour:
     Assets:
     - Name: Assets/BundleRes/RawText/rawText1.txt
       Length: 17
-  - DirectoryName: BundleRes/Scene
-    BundleName: New Scene_unity.bundle
-    BundleIdentifyName: BundleRes/Scene/New Scene_unity.bundle
+  - DirectoryName: BundleRes
+    BundleName: Scene.bundle
+    BundleIdentifyName: BundleRes/Scene.bundle
     Group: Base
     IsRaw: 0
-    AssetsLength: 5801
+    AssetsLength: 11602
     CompressOption: 2
     EncryptOption: 1
     Assets:
     - Name: Assets/BundleRes/Scene/New Scene.unity
       Length: 5801
-  - DirectoryName: BundleRes/Scene
-    BundleName: New Scene2_unity.bundle
-    BundleIdentifyName: BundleRes/Scene/New Scene2_unity.bundle
-    Group: Base
-    IsRaw: 0
-    AssetsLength: 5801
-    CompressOption: 2
-    EncryptOption: 1
-    Assets:
     - Name: Assets/BundleRes/Scene/New Scene2.unity
       Length: 5801
-  BundleCount: 7
+  BundleCount: 6
   AssetCount: 19
   IsExactTextureSize: 0
+  IsDrawDesc: 0
