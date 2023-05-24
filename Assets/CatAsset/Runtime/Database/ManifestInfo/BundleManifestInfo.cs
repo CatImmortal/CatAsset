@@ -22,12 +22,12 @@ namespace CatAsset.Runtime
             {
                 if (relativePath == null)
                 {
-                    if (IsAppendMD5)
+                    if (IsAppendHash)
                     {
-                        //附加了MD5值到资源包文件名中
+                        //附加了Hash值到资源包文件名中
                         string[] nameArray = BundleName.Split('.');
-                        string md5BundleName =   $"{nameArray[0]}_{MD5}.{nameArray[1]}";
-                        relativePath = RuntimeUtil.GetRegularPath(Path.Combine(Directory,md5BundleName));
+                        string hashBundleName =   $"{nameArray[0]}_{Hash}.{nameArray[1]}";
+                        relativePath = RuntimeUtil.GetRegularPath(Path.Combine(Directory,hashBundleName));
                     }
                     else
                     {
@@ -87,19 +87,19 @@ namespace CatAsset.Runtime
         public ulong Length;
 
         /// <summary>
-        /// 文件MD5
+        /// 文件MD5（用于文件校验）
         /// </summary>
         public string MD5;
 
         /// <summary>
-        /// 是否附加MD5值到资源包名中
+        /// 文件Hash值（用于判断是否需要更新）
         /// </summary>
-        public bool IsAppendMD5;
-
+        public string Hash;
+        
         /// <summary>
-        /// 文件Hash值
+        /// 是否附加Hash值到资源包名中
         /// </summary>
-        public string Hash = string.Empty;
+        public bool IsAppendHash;
 
         /// <summary>
         /// 是否依赖内置Shader资源包
@@ -130,7 +130,7 @@ namespace CatAsset.Runtime
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return BundleIdentifyName == other.BundleIdentifyName && Length == other.Length && MD5 == other.MD5;
+            return BundleIdentifyName == other.BundleIdentifyName && Length == other.Length && Hash == other.Hash;
         }
 
         public override bool Equals(object obj)
@@ -143,13 +143,7 @@ namespace CatAsset.Runtime
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = (BundleIdentifyName != null ? BundleIdentifyName.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ Length.GetHashCode();
-                hashCode = (hashCode * 397) ^ (MD5 != null ? MD5.GetHashCode() : 0);
-                return hashCode;
-            }
+            return (Hash != null ? Hash.GetHashCode() : 0);
         }
 
         /// <summary>
@@ -164,8 +158,8 @@ namespace CatAsset.Runtime
             writer.Write(IsScene);
             writer.Write(Length);
             writer.Write(MD5);
-            writer.Write(IsAppendMD5);
             writer.Write(Hash);
+            writer.Write(IsAppendHash);
             writer.Write(IsDependencyBuiltInShaderBundle);
             writer.Write((byte)EncryptOption);
             writer.Write(Assets.Count);
@@ -188,8 +182,8 @@ namespace CatAsset.Runtime
             info.IsScene = reader.ReadBoolean();
             info.Length = reader.ReadUInt64();
             info.MD5 = reader.ReadString();
-            info.IsAppendMD5 = reader.ReadBoolean();
             info.Hash = reader.ReadString();
+            info.IsAppendHash = reader.ReadBoolean();
             info.IsDependencyBuiltInShaderBundle = reader.ReadBoolean();
             info.EncryptOption = (BundleEncryptOptions)reader.ReadByte();
             

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using CatAsset.Runtime;
 using UnityEditor;
+using UnityEditor.Build.Content;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.Build.Pipeline.Interfaces;
 using UnityEditor.Build.Pipeline.Tasks;
@@ -59,10 +60,10 @@ namespace CatAsset.Editor
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
             taskList.Add(new CalculateVerifyInfo());
-            if (HasOption(config.Options,BundleBuildOptions.AppendMD5))
+            if (HasOption(config.Options,BundleBuildOptions.AppendHash))
             {
-                //附加MD5到包名中
-                taskList.Add(new AppendMD5());
+                //附加Hash到包名中
+                taskList.Add(new AppendHash());
             }
             if (isBuildPatch)
             {
@@ -172,6 +173,12 @@ namespace CatAsset.Editor
 
             //是否增量构建
             parameters.UseCache = !HasOption(bundleBuildConfig.Options,BundleBuildOptions.ForceRebuild);
+
+            //关闭TypeTree
+            if (HasOption(bundleBuildConfig.Options,BundleBuildOptions.DisableTypeTree))
+            {
+                parameters.ContentBuildFlags |= ContentBuildFlags.DisableWriteTypeTree;
+            }
 
             //全局压缩格式
             switch (bundleBuildConfig.GlobalCompress)
