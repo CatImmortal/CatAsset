@@ -20,7 +20,8 @@ namespace CatAsset.Runtime
         private WebRequestedCallback onWebRequestedCallback;
 
         private UnityWebRequestAsyncOperation op;
-        private const int maxRetryCount = 3;
+
+        private int maxRetryCount = 3;
         private int retriedCount;
 
         /// <inheritdoc />

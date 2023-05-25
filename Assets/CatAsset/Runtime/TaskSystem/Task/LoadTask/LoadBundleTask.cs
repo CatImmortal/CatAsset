@@ -286,7 +286,7 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 异步加载结束
         /// </summary>
-        protected virtual void LoadDone()
+        protected virtual void OnLoadDone()
         {
             BundleRuntimeInfo.Bundle = request.assetBundle;
         }
