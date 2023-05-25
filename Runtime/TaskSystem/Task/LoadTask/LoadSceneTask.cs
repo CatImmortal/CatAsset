@@ -69,7 +69,7 @@ namespace CatAsset.Runtime
                     }
                     else
                     {
-                        task.handler.NotifyCanceled(CancelToken);
+                        task.handler.NotifyCanceled(task.CancelToken);
                     }
                 }
             }
@@ -95,11 +95,11 @@ namespace CatAsset.Runtime
                     LoadSceneTask task = (LoadSceneTask)MergedTasks[i];
                     if (!task.IsCanceled)
                     {
-                        CatAssetManager.InternalLoadSceneAsync(task.Name,task.handler,CancelToken,Group.Priority);
+                        CatAssetManager.InternalLoadSceneAsync(task.Name,task.handler,task.CancelToken,Group.Priority);
                     }
                     else
                     {
-                        handler.NotifyCanceled(CancelToken);
+                        handler.NotifyCanceled(task.CancelToken);
                     }
                 }
             }
