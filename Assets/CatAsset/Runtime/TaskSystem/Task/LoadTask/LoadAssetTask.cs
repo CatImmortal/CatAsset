@@ -273,18 +273,20 @@ namespace CatAsset.Runtime
                 {
                     if (success)
                     {
+                        //成功
                         AssetRuntimeInfo.AddRefCount();
                         task.handler.SetAsset(AssetRuntimeInfo.Asset);
                     }
                     else
                     {
+                        //失败
                         task.handler.SetAsset(null);
                     }
                 }
                 else
                 {
                     //已取消
-                    task.handler.NotifyCanceled(CancelToken);
+                    task.handler.NotifyCanceled(task.CancelToken);
                 }
             }
             
