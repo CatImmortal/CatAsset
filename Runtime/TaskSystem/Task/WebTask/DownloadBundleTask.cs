@@ -27,15 +27,16 @@ namespace CatAsset.Runtime
         private string localFilePath;
         private BundleDownloadedCallback onBundleDownloadedCallback;
         private DownloadBundleRefreshCallback onDownloadRefreshCallback;
-        
 
         private string localTempFilePath;
         private UnityWebRequestAsyncOperation op;
         
         private ulong downloadedBytes;
 
+        private float timeout = 30;
+        private float timeoutTimer;
 
-        private const int maxRetryCount = 3;
+        private int maxRetryCount = 3;
         private int retriedCount;
 
         /// <inheritdoc />
@@ -102,10 +103,24 @@ namespace CatAsset.Runtime
             ulong newDownloadedBytes = op.webRequest.downloadedBytes;
             if (downloadedBytes != newDownloadedBytes)
             {
+                //已下载字节数发生变化
+                timeoutTimer = 0;
                 ulong deltaDownloadedBytes = newDownloadedBytes - downloadedBytes;
                 updateInfo.DownloadedBytesLength = newDownloadedBytes;
                 onDownloadRefreshCallback?.Invoke(updateInfo,deltaDownloadedBytes,newDownloadedBytes);
                 downloadedBytes = newDownloadedBytes;
+            }
+            else
+            {
+                timeoutTimer += Time.unscaledDeltaTime;
+                if (timeoutTimer >= timeout)
+                {
+                    //超时了
+                    Debug.LogError($"下载超时:{Name}");
+                    State = TaskState.Finished;
+                    onBundleDownloadedCallback?.Invoke(updateInfo,false);
+                    return;
+                }
             }
             
             if (!op.webRequest.isDone)
@@ -226,6 +241,7 @@ namespace CatAsset.Runtime
             
             downloadedBytes = default;
 
+            timeoutTimer = default;
             retriedCount = default;
         }
     }

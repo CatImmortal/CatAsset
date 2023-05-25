@@ -51,7 +51,7 @@ namespace CatAsset.Runtime
 
                 if (flag)
                 {
-                    Debug.LogWarning($"{Name}被在{LoadState}阶段被全部取消了");
+                    Debug.LogWarning($"{GetType().Name}:{Name}在{LoadState}阶段被全部取消了");
                     State = TaskState.Finished;
                     LoadState = LoadBundledAssetState.None;
                     CallFinished(false);

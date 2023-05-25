@@ -58,7 +58,7 @@ namespace CatAsset.Runtime
         }
 
         /// <inheritdoc />
-        protected override void LoadDone()
+        protected override void OnLoadDone()
         {
             if (!RuntimeUtil.HasWebRequestError(op.webRequest))
             {
