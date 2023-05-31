@@ -202,6 +202,11 @@ namespace CatAsset.Editor
 
                 case ColumnType.Object:
                     EditorGUI.BeginDisabledGroup(true);
+                    if (directoryItem.Data.DirectoryObj == null && !string.IsNullOrEmpty(directoryItem.Data.DirectoryName))
+                    {
+                        directoryItem.Data.DirectoryObj =
+                            AssetDatabase.LoadAssetAtPath<Object>(directoryItem.Data.DirectoryName);
+                    }
                     EditorGUI.ObjectField(cellRect, directoryItem.Data.DirectoryObj, typeof(Object), false);
                     EditorGUI.EndDisabledGroup();
                     break;
