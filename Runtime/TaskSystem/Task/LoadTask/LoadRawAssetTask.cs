@@ -62,6 +62,22 @@ namespace CatAsset.Runtime
 
         private float startLoadTime;
         
+        /// <inheritdoc />
+        public override string SubState => loadState.ToString();
+        
+        /// <inheritdoc />
+        public override float Progress
+        {
+            get
+            {
+                if (webRequestTask == null)
+                {
+                    return 0;
+                }
+
+                return webRequestTask.Progress;
+            }
+        }
         
         public LoadRawAssetTask()
         {

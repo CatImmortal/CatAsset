@@ -170,7 +170,7 @@ namespace CatAsset.Runtime
                     {
                         var task = pair3.Value;
 
-                        ProfilerTaskInfo pti = ProfilerTaskInfo.Create(task.Name,task.GetType().Name,task.Group.Priority,task.State,task.Progress,task.MergedTaskCount);
+                        ProfilerTaskInfo pti = ProfilerTaskInfo.Create(task.Name,task.GetType().Name,task.Group.Priority,task.State,task.SubState,task.Progress,task.MergedTaskCount);
                         info.TaskInfoList.Add(pti);
                     }
                 }

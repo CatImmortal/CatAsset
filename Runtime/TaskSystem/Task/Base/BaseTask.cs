@@ -33,6 +33,11 @@ namespace CatAsset.Runtime
         /// 状态
         /// </summary>
         public TaskState State { get; set; }
+
+        /// <summary>
+        /// 子状态
+        /// </summary>
+        public virtual string SubState { get; } = string.Empty;
         
         /// <summary>
         /// 进度

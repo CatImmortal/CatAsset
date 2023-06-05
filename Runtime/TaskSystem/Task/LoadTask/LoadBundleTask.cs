@@ -84,6 +84,9 @@ namespace CatAsset.Runtime
         private float startLoadTime;
         
         /// <inheritdoc />
+        public override string SubState => LoadState.ToString();
+        
+        /// <inheritdoc />
         public override float Progress
         {
             get
