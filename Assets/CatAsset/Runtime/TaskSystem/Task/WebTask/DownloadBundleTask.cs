@@ -100,6 +100,25 @@ namespace CatAsset.Runtime
                 return;
             }
 
+            bool isDone = DownLoading();
+            if (!isDone)
+            {
+               return;
+            }
+            Downloaded();
+        }
+
+        /// <inheritdoc />
+        public override void OnPriorityChanged()
+        {
+            if (op != null)
+            {
+                op.priority = (int)Group.Priority;
+            }
+        }
+
+        private bool DownLoading()
+        {
             ulong newDownloadedBytes = op.webRequest.downloadedBytes;
             if (downloadedBytes != newDownloadedBytes)
             {
@@ -119,7 +138,7 @@ namespace CatAsset.Runtime
                     Debug.LogError($"下载超时:{Name}");
                     State = TaskState.Finished;
                     onBundleDownloadedCallback?.Invoke(updateInfo,false);
-                    return;
+                    return false;
                 }
             }
             
@@ -127,9 +146,14 @@ namespace CatAsset.Runtime
             {
                 //下载中
                 State = TaskState.Running;
-                return;
+                return false;
             }
 
+            return true;
+        }
+        
+        private void Downloaded()
+        {
             if (RuntimeUtil.HasWebRequestError(op.webRequest))
             {
                 //下载失败 重试
@@ -183,15 +207,6 @@ namespace CatAsset.Runtime
             onBundleDownloadedCallback?.Invoke(updateInfo,true);
         }
 
-        /// <inheritdoc />
-        public override void OnPriorityChanged()
-        {
-            if (op != null)
-            {
-                op.priority = (int)Group.Priority;
-            }
-        }
-
         /// <summary>
         /// 尝试重新下载
         /// </summary>
@@ -201,7 +216,7 @@ namespace CatAsset.Runtime
             {
                 //重试
                 retriedCount++;
-                State = TaskState.Free;
+                State = TaskState.Free;  //状态改为Free 会被上层再次调用Run
                 return true;
             }
 

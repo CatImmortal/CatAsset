@@ -26,6 +26,7 @@ namespace CatAsset.Editor
             Type,
             Priority,
             State,
+            SubState,
             Progress,
             MergedTaskCount,
         }
@@ -70,6 +71,10 @@ namespace CatAsset.Editor
 
                 case ColumnType.State:
                     taskOrdered = TreeViewData.TaskInfoList.Order(info => info.State, ascending);
+                    break;
+                
+                case ColumnType.SubState:
+                    taskOrdered = TreeViewData.TaskInfoList.Order(info => info.SubState, ascending);
                     break;
 
                 case ColumnType.Progress:
@@ -147,6 +152,10 @@ namespace CatAsset.Editor
                 
                 case ColumnType.State:
                     EditorGUI.LabelField(cellRect,taskItem.Data.State.ToString(),centerStyle);
+                    break;
+                
+                case ColumnType.SubState:
+                    EditorGUI.LabelField(cellRect,taskItem.Data.SubState,centerStyle);
                     break;
                 
                 case ColumnType.Progress:
