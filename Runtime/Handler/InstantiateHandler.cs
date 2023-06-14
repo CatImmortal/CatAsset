@@ -92,7 +92,7 @@ namespace CatAsset.Runtime
             if (IsTokenCanceled)
             {
                 var callback = OnCanceledCallback;
-                Debug.LogWarning($"{GetType().Name}：{Name}被取消了");
+                Debug.Log($"{GetType().Name}：{Name}被取消了");
                 Unload();
                 callback?.Invoke(token);
                 return true;
