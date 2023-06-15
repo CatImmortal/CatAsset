@@ -68,6 +68,7 @@ namespace CatAsset.Editor
             if (isBuildPatch)
             {
                 //补丁包需要合并资源清单
+                taskList.Add(new RemoveNonPatchDependency());
                 taskList.Add(new MergePatchManifest());
             }
             taskList.Add(new WriteManifestFile());
