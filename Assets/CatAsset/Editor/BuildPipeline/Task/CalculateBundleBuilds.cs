@@ -53,8 +53,7 @@ namespace CatAsset.Editor
             {
                 //构建补丁资源包
                 Stopwatch sw = Stopwatch.StartNew();
-
-
+                
                 var clonedConfig = new PatchAssetCalculateHelper().Calculate(config, configParam.TargetPlatform);
 
                 sw.Stop();
