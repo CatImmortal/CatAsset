@@ -11,10 +11,9 @@ namespace CatAsset.Editor
     /// </summary>
     public class PatchAssetCalculateHelper
     {
-        //双向依赖记录
+        //上游依赖记录
         private Dictionary<string, List<string>> upStreamDict = new Dictionary<string, List<string>>();
-        private Dictionary<string, List<string>> downStreamDict = new Dictionary<string, List<string>>();
-        
+
         //资源名 -> 本次构建时所属的资源包名
         private Dictionary<string, string> assetToBundle = new Dictionary<string, string>();
 
@@ -47,7 +46,7 @@ namespace CatAsset.Editor
             //深拷贝一份构建配置进行操作
             BundleBuildConfigSO clonedConfig = Object.Instantiate(config);
             
-            //获取双向依赖
+            //获取依赖
             GetDependencyChain(config);
                 
             //读取上次完整构建时的资源包信息
@@ -72,11 +71,12 @@ namespace CatAsset.Editor
         }
         
         /// <summary>
-        /// 获取双向依赖
+        /// 获取依赖
         /// </summary>
         private void GetDependencyChain(BundleBuildConfigSO config)
         {
             int index = 0;
+
             foreach (var bundle in config.Bundles)
             {
                 foreach (var asset in bundle.Assets)
@@ -84,23 +84,16 @@ namespace CatAsset.Editor
                     index++;
                     EditorUtility.DisplayProgressBar($"获取依赖信息", $"{asset.Name}", index / (config.AssetCount * 1.0f));
                     
-                    //上游依赖
+                    assetToBundle.Add(asset.Name, bundle.BundleIdentifyName);
+                    if (EditorUtil.NotDependencyAssetType.Contains(asset.Type))
+                    {
+                        //跳过不会依赖其他资源的资源类型
+                        continue;
+                    }
+                    
+                    //获取上游依赖
                     var deps = EditorUtil.GetDependencies(asset.Name);
                     upStreamDict.Add(asset.Name, deps);
-
-                    //下游依赖
-                    foreach (string dep in deps)
-                    {
-                        if (!downStreamDict.TryGetValue(dep, out List<string> list))
-                        {
-                            list = new List<string>();
-                            downStreamDict.Add(dep, list);
-                        }
-
-                        list.Add(asset.Name);
-                    }
-
-                    assetToBundle.Add(asset.Name, bundle.BundleIdentifyName);
                 }
             }
             
@@ -200,7 +193,7 @@ namespace CatAsset.Editor
             }
             
             //2.此资源依赖的上游资源是否为补丁资源
-            //补丁资源会传染给依赖链下游的所有资源
+            //位于上游的补丁资源，其补丁性会传染给依赖链下游的所有资源
             if (upStreamDict.TryGetValue(assetName, out var upStreamList))
             {
                 foreach (string upStream in upStreamList)
@@ -214,12 +207,12 @@ namespace CatAsset.Editor
                 }
             }
             
-            //补丁资源不传染给依赖链上游资源
+            //补丁性不传染给依赖链上游资源
             //而是通过隐式依赖自动包含机制 故意冗余一份 使得补丁资源的依赖和它本身在一个资源包内
             //以防止正式包的资源 依赖到 补丁包依赖的资源 时 丢失依赖
             //这样就会在正式包和补丁包里各包含一份相同的依赖资源 保证正式包依赖不丢失
             
-            //假设有D -> C -> B ->A 和 D -> E 的依赖链，且C为变化的资源
+            //假设有D -> C -> B -> A 和 D -> E 的依赖链，且C为变化的资源
             //那么最终会将C以及依赖C的B和A作为补丁资源，D作为C的隐式依赖包含进C的补丁包里
             //运行时 E依赖的D 和 C依赖的D 会分别在不同的包里 保证E依赖不丢失
             

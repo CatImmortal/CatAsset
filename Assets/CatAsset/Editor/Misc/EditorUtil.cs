@@ -18,11 +18,6 @@ namespace CatAsset.Editor
     public static class EditorUtil
     {
         /// <summary>
-        /// 构建补丁包时产生的临时依赖冗余包名
-        /// </summary>
-        public const string RedundancyDepBundleName = "RedundancyDepBundle.bundle";
-        
-        /// <summary>
         /// 要排除的文件后缀名集合
         /// </summary>
         public static readonly HashSet<string> ExcludeSet = new HashSet<string>()
