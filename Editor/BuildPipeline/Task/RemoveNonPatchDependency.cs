@@ -8,7 +8,7 @@ using UnityEngine;
 namespace CatAsset.Editor
 {
     /// <summary>
-    /// 移除非补丁资源的依赖，以防止资源内存冗余
+    /// 移除补丁资源依赖列表中的非补丁资源，以防止资源内存冗余
     /// </summary>
     public class RemoveNonPatchDependency : IBuildTask
     {

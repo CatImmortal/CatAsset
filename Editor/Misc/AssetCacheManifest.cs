@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using CatAsset.Runtime;
 
 namespace CatAsset.Editor
@@ -17,12 +18,33 @@ namespace CatAsset.Editor
         public struct AssetCacheInfo : IEquatable<AssetCacheInfo>
         {
             public string Name;
-            public string MD5;
-            public string MetaMD5;
+            public long LastWriteTime;
+            public long MetaLastWriteTime;
+            
+            public static AssetCacheInfo Create(string assetName)
+            {
+                AssetCacheInfo assetCacheInfo = new AssetCacheInfo
+                {
+                    Name = assetName,
+                    LastWriteTime = File.GetLastWriteTime(assetName).Ticks,
+                    MetaLastWriteTime =  File.GetLastWriteTime($"{assetName}.meta").Ticks,
+                };
+                return assetCacheInfo;
+            }
+
+            public static bool operator ==(AssetCacheInfo a,AssetCacheInfo b)
+            {
+                return Equals(a, b);
+            }
+            
+            public static bool operator !=(AssetCacheInfo a,AssetCacheInfo b)
+            {
+                return !(a == b);
+            }
             
             public bool Equals(AssetCacheInfo other)
             {
-                return Name == other.Name && MD5 == other.MD5 && MetaMD5 == other.MetaMD5;
+                return Name == other.Name && LastWriteTime == other.LastWriteTime && MetaLastWriteTime == other.MetaLastWriteTime;
             }
 
             public override bool Equals(object obj)
@@ -35,33 +57,11 @@ namespace CatAsset.Editor
                 unchecked
                 {
                     var hashCode = (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (MD5 != null ? MD5.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (MetaMD5 != null ? MetaMD5.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ LastWriteTime.GetHashCode();
+                    hashCode = (hashCode * 397) ^ MetaLastWriteTime.GetHashCode();
                     return hashCode;
                 }
             }
-            
-            public static bool operator ==(AssetCacheInfo a,AssetCacheInfo b)
-            {
-                return Equals(a, b);
-            }
-            
-            public static bool operator !=(AssetCacheInfo a,AssetCacheInfo b)
-            {
-                return !(a == b);
-            }
-
-            public static AssetCacheInfo Create(string assetName)
-            {
-                AssetCacheInfo assetCacheInfo = new AssetCacheInfo
-                {
-                    Name = assetName,
-                    MD5 = RuntimeUtil.GetFileMD5(assetName),
-                    MetaMD5 = RuntimeUtil.GetFileMD5($"{assetName}.meta")
-                };
-                return assetCacheInfo;
-            }
-          
         }
         
         /// <summary>
@@ -79,7 +79,7 @@ namespace CatAsset.Editor
             {
                 result.Add(assetCache.Name,assetCache);
             }
-
+            
             return result;
         }
         
