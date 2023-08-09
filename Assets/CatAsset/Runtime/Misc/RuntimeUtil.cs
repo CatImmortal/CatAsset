@@ -152,12 +152,20 @@ namespace CatAsset.Runtime
         {
             using (FileStream fs = new FileStream(filePath,FileMode.Open))
             {
-                using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
-                {
-                   byte[] bytes = md5.ComputeHash(fs);
-                   string result = MD5BytesToString(bytes);
-                   return result;
-                }
+                return GetFileMD5(fs);
+            }
+        }
+        
+        /// <summary>
+        /// 获取文件MD5
+        /// </summary>
+        public static string GetFileMD5(FileStream fs)
+        {
+            using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
+            {
+                byte[] bytes = md5.ComputeHash(fs);
+                string result = MD5BytesToString(bytes);
+                return result;
             }
         }
         
