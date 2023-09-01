@@ -30,6 +30,8 @@ namespace CatAsset.Editor
             ".so",
             ".dll",
             ".cginc",
+            ".shadergraph",
+            ".shadersubgraph",
         };
 
         /// <summary>
