@@ -48,14 +48,13 @@ namespace CatAsset.Editor
             
             //准备参数
             string fullOutputFolder = CreateFullOutputFolder(config, targetPlatform);
-            BundleBuildInfoParam buildInfoParam = new BundleBuildInfoParam();
+            BundleBuildInfoParam infoParam = CalculateBundleBuilds(config, isBuildPatch, targetPlatform);
             BundleBuildConfigParam configParam = new BundleBuildConfigParam(config, targetPlatform,isBuildPatch);
             BundleBuildParameters buildParam = GetSBPParameters(config, targetPlatform, fullOutputFolder);
-            BundleBuildContent content = new BundleBuildContent();
+            BundleBuildContent buildContent = new BundleBuildContent(infoParam.AssetBundleBuilds);
 
             //添加构建任务
             List<IBuildTask> taskList = GetSBPInternalBuildTask(!isBuildPatch);
-            taskList.Insert(0,new CalculateBundleBuilds());
             taskList.Add(new BuildRawBundles());
             taskList.Add(new BuildManifest());
             taskList.Add(new EncryptBundles());
@@ -88,8 +87,8 @@ namespace CatAsset.Editor
             Stopwatch sw = Stopwatch.StartNew();
             
             //调用SBP的构建管线
-            ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, content,
-                out IBundleBuildResults result, taskList, buildInfoParam,configParam);
+            ReturnCode returnCode = ContentPipeline.BuildAssetBundles(buildParam, buildContent,
+                out IBundleBuildResults result, taskList, infoParam,configParam);
 
             //检查结果
             if (returnCode == ReturnCode.Success)
@@ -250,6 +249,34 @@ namespace CatAsset.Editor
             buildTasks.Add(new PostWritingCallback());
 
             return buildTasks;
+        }
+
+        /// <summary>
+        /// 计算BundleBuildInfoParam参数
+        /// </summary>
+        private static BundleBuildInfoParam CalculateBundleBuilds(BundleBuildConfigSO config,bool isBuildPatch,BuildTarget targetPlatform)
+        {
+            BundleBuildInfoParam buildInfoParam;
+            if (!isBuildPatch)
+            {
+                //构建完整资源包
+                buildInfoParam = new BundleBuildInfoParam(config.GetAssetBundleBuilds(), config.GetNormalBundleBuilds(),
+                    config.GetRawBundleBuilds());
+            }
+            else
+            {
+                //构建补丁资源包
+                Stopwatch sw = Stopwatch.StartNew();
+                var clonedConfig = new PatchAssetCalculateHelper().Calculate(config, targetPlatform);
+                sw.Stop();
+                Debug.Log($"计算补丁资源耗时:{sw.Elapsed.TotalSeconds:0.00}秒");
+                
+                buildInfoParam = new BundleBuildInfoParam(clonedConfig.GetAssetBundleBuilds(),
+                    clonedConfig.GetNormalBundleBuilds(),
+                    clonedConfig.GetRawBundleBuilds());
+            }
+
+            return buildInfoParam;
         }
     }
 }
