@@ -114,6 +114,9 @@ namespace CatAsset.Runtime
                 //未加载过 就在加载依赖前开始记录时间
                 startLoadTime = Time.realtimeSinceStartup;
             }
+            
+            //这里引用计数先额外+1 防止加载资源过程中 资源包被意外卸载了 
+            AssetRuntimeInfo.AddRefCount(); 
 
             //加载依赖
             if (AssetRuntimeInfo.AssetManifest.Dependencies == null)

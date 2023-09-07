@@ -270,6 +270,16 @@ namespace CatAsset.Runtime
                 handler.Error = "资源加载失败";
             }
 
+            if (success && IsAllCanceled)
+            {
+                //加载资源成功后所有任务都被取消了 这个资源没人要了 直接走卸载流程吧
+                CatAssetManager.UnloadAsset(AssetRuntimeInfo.Asset);
+                return;
+            }
+
+            //加载失败 或者 加载成功且没有全部取消 就把之前额外增加的引用计数减掉
+            AssetRuntimeInfo.SubRefCount();
+
             foreach (LoadAssetTask task in MergedTasks)
             {
                 if (!task.IsCanceled)
@@ -293,12 +303,7 @@ namespace CatAsset.Runtime
                 }
             }
             
-            if (success && IsAllCanceled)
-            {
-                //加载资源成功后所有任务都被取消了 这个资源没人要了 直接走卸载流程吧
-                AssetRuntimeInfo.AddRefCount(); //注意这里要先计数+1 才能正确执行后续的卸载流程
-                CatAssetManager.UnloadAsset(AssetRuntimeInfo.Asset);
-            }
+
         }
 
 
