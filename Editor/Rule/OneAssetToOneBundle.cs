@@ -44,8 +44,17 @@ namespace CatAsset.Editor
             FileInfo fi = new FileInfo(path);
             string assetDir = EditorUtil.FullNameToAssetName(fi.Directory.FullName);//由Assets/开头的目录
             string directoryName = assetDir.Substring(assetDir.IndexOf('/') + 1);//去掉Assets/的目录
-            string bundleName = fi.Name.Replace('.','_') + ".bundle";
-
+            string bundleName;
+              
+            if (!IsRaw)
+            { 
+                bundleName = fi.Name.Replace('.','_') + ".bundle"; 
+            }
+            else
+            {
+                //直接以文件名作为原生资源包名
+                bundleName = fi.Name;
+            }
             BundleBuildInfo bundleBuildInfo =
                 new BundleBuildInfo(directoryName, bundleName, bundleBuildDirectory.Group, IsRaw,
                     bundleBuildDirectory.GetCompressOption(), bundleBuildDirectory.GetEncryptOption());
