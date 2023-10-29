@@ -123,6 +123,7 @@ namespace CatAsset.Runtime
             uri = default;
             onWebRequestedCallback = default;
             op = default;
+            retriedCount = default;
         }
     }
 }
