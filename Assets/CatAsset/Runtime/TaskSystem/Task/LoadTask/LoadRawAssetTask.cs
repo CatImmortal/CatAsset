@@ -89,7 +89,6 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Run()
         {
-            startLoadTime = Time.realtimeSinceStartup;
             if (bundleRuntimeInfo.BundleState == BundleRuntimeInfo.State.InRemote)
             {
                 //不在本地 需要先下载
@@ -101,6 +100,7 @@ namespace CatAsset.Runtime
                 if (assetRuntimeInfo.Asset == null)
                 {
                     //未加载
+                    startLoadTime = Time.realtimeSinceStartup;
                     loadState = LoadRawAssetState.NotLoad;
                 }
                 else

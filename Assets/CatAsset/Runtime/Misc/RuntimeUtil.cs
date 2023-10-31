@@ -51,9 +51,9 @@ namespace CatAsset.Runtime
         {
             string result = GetRegularPath(Path.Combine(Application.persistentDataPath, path));
 
-            if (isUwrPath && Application.platform == RuntimePlatform.Android)
+            if (isUwrPath && !path.Contains("file://"))
             {
-                //使用UnityWebRequest访问安卓下的Persistent路径 需要加file://头才行
+                //使用UnityWebRequest访问Persistent路径 统一加file://头
                 result = "file://" + result;
             }
 
