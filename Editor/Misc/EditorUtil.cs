@@ -180,7 +180,12 @@ namespace CatAsset.Editor
         /// </summary>
         public static string FullNameToAssetName(string fullName)
         {
-            int assetsIndex = fullName.IndexOf("Assets\\");
+            int assetsIndex = -1;
+#if UNITY_EDITOR_WIN
+            assetsIndex = fullName.IndexOf("Assets\\");
+#else
+            assetsIndex = fullName.IndexOf("Assets/");
+#endif
             string assetsDir = RuntimeUtil.GetRegularPath(fullName.Substring(assetsIndex));
             return assetsDir;
         }

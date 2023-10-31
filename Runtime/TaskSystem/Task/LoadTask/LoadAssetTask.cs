@@ -111,6 +111,9 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void Run()
         {
+            //这里引用计数先额外+1 防止加载资源过程中 资源包被意外卸载了 
+            AssetRuntimeInfo.AddRefCount(); 
+            
             if (BundleRuntimeInfo.Bundle == null)
             {
                 //资源包未加载
