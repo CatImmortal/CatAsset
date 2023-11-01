@@ -89,7 +89,7 @@ namespace CatAsset.Runtime
                     switch (BundleState)
                     {
                         case State.InReadOnly:
-                            loadPath = RuntimeUtil.GetReadOnlyPath(Manifest.RelativePath);
+                            loadPath = RuntimeUtil.GetReadOnlyPath(Manifest.RelativePath,Manifest.IsRaw);
                             break;
                         case State.InReadWrite:
                         case State.InRemote:

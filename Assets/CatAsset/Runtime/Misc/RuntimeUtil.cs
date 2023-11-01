@@ -37,9 +37,16 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 获取在只读区下的完整路径
         /// </summary>
-        public static string GetReadOnlyPath(string path)
+        public static string GetReadOnlyPath(string path,bool isUwrPath = false)
         {
             string result = GetRegularPath(Path.Combine(Application.streamingAssetsPath, path));
+            
+            if (isUwrPath && !path.Contains("file://"))
+            {
+                //使用UnityWebRequest访问 统一加file://头
+                result = "file://" + result;
+            }
+            
             return result;
         }
 
@@ -53,7 +60,7 @@ namespace CatAsset.Runtime
 
             if (isUwrPath && !path.Contains("file://"))
             {
-                //使用UnityWebRequest访问Persistent路径 统一加file://头
+                //使用UnityWebRequest访问 统一加file://头
                 result = "file://" + result;
             }
 
