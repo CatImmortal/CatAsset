@@ -52,7 +52,7 @@ namespace CatAsset.Runtime
             onVersionChecked = callback;
 
             //进行只读区 读写区 远端三方的资源清单检查
-            string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestBinaryFileName);
+            string readOnlyManifestPath = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestBinaryFileName,true);
             string readWriteManifestPath = RuntimeUtil.GetReadWritePath(CatAssetManifest.ManifestBinaryFileName, true);
             string remoteManifestPath = RuntimeUtil.GetRemotePath(CatAssetManifest.ManifestBinaryFileName);
 

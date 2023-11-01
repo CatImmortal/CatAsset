@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         public override void CheckVersion(OnVersionChecked onVersionChecked)
         {
-            string path = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestBinaryFileName);
+            string path = RuntimeUtil.GetReadOnlyPath(CatAssetManifest.ManifestBinaryFileName,true);
 
             CatAssetManager.AddWebRequestTask(path,path,((success, uwr) =>
             {
