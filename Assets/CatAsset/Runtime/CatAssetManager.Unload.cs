@@ -11,7 +11,7 @@ namespace CatAsset.Runtime
         /// </summary>
         public static void UnloadAsset(AssetHandler handler)
         {
-            assetLoader.UnloadAsset(handler.AssetObj);
+            handler.Unload();
         }
 
         /// <summary>

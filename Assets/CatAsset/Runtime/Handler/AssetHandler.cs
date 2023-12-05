@@ -38,7 +38,7 @@ namespace CatAsset.Runtime
         /// <inheritdoc />
         protected override void InternalUnload()
         {
-            CatAssetManager.UnloadAsset(this);
+            CatAssetManager.UnloadAsset(AssetObj);
             Release();
         }
 
