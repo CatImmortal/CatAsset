@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace CatAsset.Runtime
@@ -11,9 +12,9 @@ namespace CatAsset.Runtime
     public delegate void AssetLoadedCallback<T>(AssetHandler<T> handler);
 
     /// <summary>
-    /// 自定义原生资源转换方法的原型
+    /// 资源转换完毕回调方法的原型
     /// </summary>
-    public delegate object CustomRawAssetConverter(byte[] bytes);
+    public delegate void AssetConvertedCallback<T>(T asset);
 
     /// <summary>
     /// 资源句柄
@@ -45,18 +46,26 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 转换原始资源对象为指定类型的资源对象
         /// </summary>
-        public T AssetAs<T>()
+        public void AssetAs<T>(AssetConvertedCallback<T> onCompleted)
         {
+            if (onCompleted == null)
+            {
+                Debug.LogError("AssetAs的onCompleted回调不应该为null");
+                return;
+            }
+
             if (AssetObj == null)
             {
-                return default;
+                onCompleted.Invoke(default);
+                return;
             }
 
             Type type = typeof(T);
 
             if (type == typeof(object))
             {
-                return (T)AssetObj;
+                onCompleted.Invoke((T)AssetObj);
+                return;
             }
 
             switch (Category)
@@ -67,42 +76,65 @@ namespace CatAsset.Runtime
                         if (type == typeof(Sprite) && AssetObj is Texture2D tex)
                         {
                             Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f,0.5f));
-                            return (T) (object) sprite;
+                            onCompleted.Invoke((T) (object) sprite);
                         }
                         else if (type == typeof(Texture2D) && AssetObj is Sprite sprite)
                         {
-                            return (T) (object) sprite.texture;
+                            onCompleted.Invoke((T) (object) sprite.texture);
                         }
                         else
                         {
-                            return (T)AssetObj;
+                            onCompleted.Invoke((T)AssetObj);
                         }
+
+                        return;
                     }
 
                     Debug.LogError($"AssetHandler.AssetAs获取失败，资源类别为{Category}，但是T为{type}");
-                    return default;
+                    onCompleted.Invoke(default);
+                    return;
 
                 case AssetCategory.InternalRawAsset:
                 case AssetCategory.ExternalRawAsset:
 
                     if (type == typeof(byte[]))
                     {
-                        return (T)AssetObj;
+                        onCompleted.Invoke((T)AssetObj);
+                        return;
                     }
 
-                    CustomRawAssetConverter converter = CatAssetManager.GetCustomRawAssetConverter(type);
+                    ICustomRawAssetConverter converter = CatAssetManager.GetCustomRawAssetConverter(type);
                     if (converter == null)
                     {
                         Debug.LogError($"AssetHandler.AssetAs获取失败，没有注册类型{type}的CustomRawAssetConverter");
-                        return default;
+                        onCompleted.Invoke(default);
+                        return;
                     }
 
-                    object convertedAsset = converter((byte[]) AssetObj);
-                    return (T) convertedAsset;
-
+                    var task = converter.Convert((byte[]) AssetObj);
+                    if (task.IsCompleted)
+                    {
+                        HandleCustomRawAssetConvertTask(task);
+                    }
+                    else
+                    {
+                        task.ContinueWith(HandleCustomRawAssetConvertTask, TaskScheduler.FromCurrentSynchronizationContext());
+                    }
+                    return;
             }
 
-            return default;
+            void HandleCustomRawAssetConvertTask(Task<object> task)
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    onCompleted.Invoke((T) task.Result);
+                }
+                else
+                {
+                    onCompleted.Invoke(default);
+                }
+            }
+
         }
 
         public override void Clear()
@@ -169,11 +201,13 @@ namespace CatAsset.Runtime
             AssetObj = loadedAsset;
             State = AssetObj != null ? HandlerState.Success : HandlerState.Failed;
 
-            Asset = AssetAs<T>();
-            
-            CheckError();
-            onLoadedCallback?.Invoke(this);
-            AsyncStateMachineMoveNext?.Invoke();
+            AssetAs<T>(asset =>
+            {
+                Asset = asset;
+                CheckError();
+                onLoadedCallback?.Invoke(this);
+                AsyncStateMachineMoveNext?.Invoke(); 
+            });
         }
 
         /// <summary>
