@@ -41,7 +41,7 @@ namespace CatAsset.Runtime
         {
             string result = GetRegularPath(Path.Combine(Application.streamingAssetsPath, path));
             
-            if (isUwrPath && !path.Contains("file://"))
+            if (isUwrPath && !result.Contains("file://"))
             {
                 //使用UnityWebRequest访问 统一加file://头
                 result = "file://" + result;
@@ -58,7 +58,7 @@ namespace CatAsset.Runtime
         {
             string result = GetRegularPath(Path.Combine(Application.persistentDataPath, path));
 
-            if (isUwrPath && !path.Contains("file://"))
+            if (isUwrPath && !result.Contains("file://"))
             {
                 //使用UnityWebRequest访问 统一加file://头
                 result = "file://" + result;
