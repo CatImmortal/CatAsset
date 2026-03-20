@@ -36,8 +36,8 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 资源类型->自定义原生资源转换方法
         /// </summary>
-        private static Dictionary<Type, CustomRawAssetConverter> converterDict =
-            new Dictionary<Type, CustomRawAssetConverter>();
+        private static Dictionary<Type, ICustomRawAssetConverter> converterDict =
+            new Dictionary<Type, ICustomRawAssetConverter>();
 
         /// <summary>
         /// 资源加载器类型 -> 资源加载器实例
@@ -84,27 +84,27 @@ namespace CatAsset.Runtime
 
         static CatAssetManager()
         {
-            RegisterCustomRawAssetConverter(typeof(Texture2D), (bytes =>
+            RegisterCustomRawAssetConverter(bytes =>
             {
                 Texture2D texture2D = new Texture2D(0, 0);
                 texture2D.LoadImage(bytes);
                 return texture2D;
-            }));
+            });
 
-            RegisterCustomRawAssetConverter(typeof(Sprite), (bytes =>
+            RegisterCustomRawAssetConverter(bytes =>
             {
                 Texture2D texture2D = new Texture2D(0, 0);
                 texture2D.LoadImage(bytes);
                 Sprite sp = Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), new Vector2(0.5f,0.5f));
                 return sp;
-            }));
+            });
 
-            RegisterCustomRawAssetConverter(typeof(TextAsset), (bytes =>
+            RegisterCustomRawAssetConverter(bytes =>
             {
                 string text = Encoding.UTF8.GetString(bytes);
                 TextAsset textAsset = new TextAsset(text);
                 return textAsset;
-            }));
+            });
         }
 
         /// <summary>
@@ -159,17 +159,33 @@ namespace CatAsset.Runtime
         /// <summary>
         /// 注册自定义原生资源转换方法
         /// </summary>
-        public static void RegisterCustomRawAssetConverter(Type type, CustomRawAssetConverter converter)
+        public static void RegisterCustomRawAssetConverter(Type type, ICustomRawAssetConverter converter)
         {
             converterDict[type] = converter;
         }
 
         /// <summary>
+        /// 注册匿名同步自定义原生资源转换方法
+        /// </summary>
+        public static void RegisterCustomRawAssetConverter<T>(CustomRawAssetConverterFunc<T> converter)
+        {
+            RegisterCustomRawAssetConverter(typeof(T), CustomRawAssetConverter.Create(converter));
+        }
+
+        /// <summary>
+        /// 注册匿名异步自定义原生资源转换方法
+        /// </summary>
+        public static void RegisterAsyncCustomRawAssetConverter<T>(AsyncCustomRawAssetConverterFunc<T> converter)
+        {
+            RegisterCustomRawAssetConverter(typeof(T), CustomRawAssetConverter.CreateAsync(converter));
+        }
+
+        /// <summary>
         /// 获取自定义原生资源转换方法
         /// </summary>
-        internal static CustomRawAssetConverter GetCustomRawAssetConverter(Type type)
+        internal static ICustomRawAssetConverter GetCustomRawAssetConverter(Type type)
         {
-            converterDict.TryGetValue(type, out CustomRawAssetConverter converter);
+            converterDict.TryGetValue(type, out ICustomRawAssetConverter converter);
             return converter;
         }
         
